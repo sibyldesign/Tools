@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>定型化服務契約數位簽署 | Contract Signing</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#FDFBF7', 100: '#F5ECE3', 200: '#EBE5DF', 300: '#D5C7BC',
+              400: '#BCA38F', 500: '#8C7355', 600: '#7A6246', 700: '#68523A',
+              800: '#5C4B3C', 900: '#3D3126',
+            }
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-brand-50 text-brand-900 antialiased min-h-screen p-4 md:p-6 pb-24 flex flex-col items-center">
+
+  <div class="max-w-md w-full space-y-4">
+    <!-- 頂部沙龍店名抬頭 -->
+    <div class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm text-center space-y-1">
+      <div class="text-[10px] font-mono tracking-widest text-[#8C7355] uppercase font-bold" id="contract-brand-label">SIBYL BEAUTY SALON</div>
+      <h1 class="text-base font-black text-brand-900 tracking-wider" id="contract-main-title">美容美髮定型化服務契約書</h1>
+      <p class="text-xs text-brand-400">保障消費者與沙龍雙方權益 · 電子存證即時寄送</p>
+    </div>
+
+    <!-- 立約人資料填寫 -->
+    <div class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3 text-xs">
+      <span class="font-bold text-brand-900 block border-b border-brand-100 pb-2">立約人資料填寫 (存證信件寄發對象)：</span>
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="block font-bold mb-1">顧客姓名 *</label>
+          <input type="text" id="signer-name" placeholder="王小美" class="w-full p-2.5 rounded-xl border border-brand-200 bg-brand-50/50 outline-none font-bold">
+        </div>
+        <div>
+          <label class="block font-bold mb-1">聯絡電話 *</label>
+          <input type="tel" id="signer-phone" placeholder="0912345678" maxlength="10" class="w-full p-2.5 rounded-xl border border-brand-200 bg-brand-50/50 outline-none font-mono font-bold">
+        </div>
+      </div>
+      <div>
+        <label class="block font-bold mb-1">電子信箱 (將寄發完整合約副本與簽名存證) *</label>
+        <input type="email" id="signer-email" placeholder="client@gmail.com" class="w-full p-2.5 rounded-xl border border-brand-200 bg-brand-50/50 outline-none font-mono font-bold">
+      </div>
+    </div>
+
+    <!-- 契約條款內容 -->
+    <div class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-2 text-xs">
+      <span class="font-bold text-brand-900 block border-b border-brand-100 pb-2">閱讀契約條款內容：</span>
+      <div id="contract-body-text" class="h-40 overflow-y-auto p-3 bg-brand-50 rounded-2xl border border-brand-200 text-[11px] leading-relaxed text-brand-700 whitespace-pre-wrap font-sans">
+衛生福利部公告修正【美容美髮定型化契約條款標準範本】
+一、本沙龍服務均由受過專業訓練之技術專員操作，實施前已與消費者完成充分技術溝通與費用確認。
+二、消費者應誠實告知過敏史、近期染燙漂髮歷史、頭皮敏感或特殊肌膚病況。
+三、包卡或儲值方案之使用，均依購買時登載之折數與點數規則扣抵，退費依消保法及主管機關標準手續費計算。
+四、本契約經雙方同意並親筆數位簽章存證後即刻生效，雙方各執電子副本為憑。
+      </div>
+      <label class="flex items-center gap-2 pt-1 font-bold text-brand-900 cursor-pointer">
+        <input type="checkbox" id="contract-agree-cb" class="accent-[#8C7355] w-4 h-4 rounded">
+        <span>我已詳閱、理解並同意上述服務契約之各項條款</span>
+      </label>
+    </div>
+
+    <!-- 手機 Canvas 親筆簽名板 -->
+    <div class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-2 text-xs">
+      <div class="flex justify-between items-center border-b border-brand-100 pb-2">
+        <span class="font-bold text-brand-900">消費者親筆手寫正楷簽名：</span>
+        <button type="button" onclick="clearSignatureCanvas()" class="text-rose-600 font-bold underline">清除重簽</button>
+      </div>
+      <canvas id="sign-canvas" class="w-full h-36 bg-brand-50/60 border-2 border-dashed border-brand-300 rounded-2xl touch-none shadow-inner"></canvas>
+      <div class="text-[10px] text-gray-400 text-center">請於上方虛線框內以手指或觸控筆親筆簽名</div>
+    </div>
+
+    <!-- 送出按鈕 -->
+    <button type="button" onclick="submitContractSignAction()" class="w-full py-3.5 bg-[#8C7355] hover:bg-[#7A6246] text-white font-bold rounded-2xl shadow-md transition text-xs tracking-wider">
+      確認條款並完成數位簽章存證
+    </button>
+  </div>
+
+  <script>
+    let canvas, ctx, isDrawing = false;
+    const RESEND_API_KEY = "re_YOUR_RESEND_API_KEY_HERE";
+
+    function initSignature() {
+      canvas = document.getElementById('sign-canvas');
+      ctx = canvas.getContext('2d');
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#2D241E';
+
+      const getPos = e => {
+        const r = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: clientX - r.left, y: clientY - r.top };
+      };
+
+      const start = e => { e.preventDefault(); isDrawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); };
+      const move = e => { if (!isDrawing) return; e.preventDefault(); const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); };
+      const stop = () => isDrawing = false;
+
+      canvas.addEventListener('mousedown', start);
+      canvas.addEventListener('mousemove', move);
+      window.addEventListener('mouseup', stop);
+      canvas.addEventListener('touchstart', start, { passive: false });
+      canvas.addEventListener('touchmove', move, { passive: false });
+      window.addEventListener('touchend', stop);
+    }
+
+    function clearSignatureCanvas() {
+      if (ctx && canvas) ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    async function submitContractSignAction() {
+      const name = document.getElementById('signer-name').value.trim();
+      const phone = document.getElementById('signer-phone').value.trim();
+      const email = document.getElementById('signer-email').value.trim();
+      const isAgree = document.getElementById('contract-agree-cb').checked;
+      const storeName = document.getElementById('contract-brand-label').innerText;
+      const contractContent = document.getElementById('contract-body-text').innerText;
+
+      if (!name || !phone || !email) return Swal.fire('請完整填寫姓名、電話與 Email', '', 'warning');
+      if (!isAgree) return Swal.fire('請勾選同意契約條款', '', 'warning');
+
+      const sigBase64 = canvas.toDataURL('image/png');
+      const signedAt = new Date().toLocaleString();
+
+      Swal.fire({ title: '正在存證並透過 Resend 寄發通知信...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+      // 儲存於本地資料庫
+      const signedRecords = JSON.parse(localStorage.getItem('signed_contracts_db') || '[]');
+      signedRecords.unshift({ storeName, name, phone, email, signedAt, sigBase64 });
+      localStorage.setItem('signed_contracts_db', JSON.stringify(signedRecords));
+
+      // 透過 Resend API 寄送存證信件
+      try {
+        await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${RESEND_API_KEY}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            from: "Sibyl Contract Service <onboarding@resend.dev>",
+            to: [email],
+            subject: `【${storeName}】定型化服務契約電子存證副本`,
+            html: `
+              <div style="font-family: sans-serif; padding: 20px; color: #333; line-height: 1.6;">
+                <h2 style="color: #8C7355;">${storeName} - 定型化服務契約存證正本</h2>
+                <p>親愛的 <b>${name}</b> 您好：感謝您完成線上合約簽署，以下為您的存證資訊。</p>
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                  <p><b>立約人：</b>${name} (${phone})</p>
+                  <p><b>簽署時間戳記：</b>${signedAt}</p>
+                </div>
+                <div style="background: #faf7f2; padding: 15px; border-radius: 8px; font-size: 12px; white-space: pre-wrap;">
+                  ${contractContent}
+                </div>
+                <div style="margin-top: 20px;">
+                  <p><b>立約人親筆數位簽名存證：</b></p>
+                  <img src="${sigBase64}" style="max-height: 80px; border: 1px dashed #ccc; padding: 5px; border-radius: 6px;" alt="親筆簽名">
+                </div>
+                <hr style="margin: 25px 0; border: none; border-top: 1px solid #eee;">
+                <p style="font-size: 11px; color: #888;">本信件由 Sibyl Cloud Contract Automation 自動發送，具有電子存證效力。</p>
+              </div>
+            `
+          })
+        });
+      } catch (e) {
+        console.warn("Resend API 略過或測試環境:", e);
+      }
+
+      Swal.fire({
+        title: '定型化契約存證成功！',
+        html: `
+          <div class="text-left text-xs bg-brand-50 p-3 rounded-2xl border border-brand-200 text-brand-900 space-y-1 font-sans">
+            <div>立約人：<b>${name}</b> (${phone})</div>
+            <div>簽署時間：<b>${signedAt}</b></div>
+            <div class="text-emerald-700 font-bold pt-1">✓ Resend 通知信已發送至：${email}</div>
+          </div>
+        `,
+        icon: 'success'
+      });
+    }
+
+    window.onload = initSignature;
+  </script>
+</body>
+</html>

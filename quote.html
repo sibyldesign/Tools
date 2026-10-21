@@ -1,1 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>服務報價與試算器</title>
+  <style>
+    :root { --primary: #9d8189; --bg: #f4f3ee; --card: #ffffff; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
+    body { background: var(--bg); padding: 20px 15px; color: #4a4e69; }
+    .quote-box { max-width: 500px; margin: 0 auto; background: var(--card); padding: 24px; border-radius: 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+    h2 { text-align: center; font-size: 1.35rem; margin-bottom: 4px; }
+    p.sub { text-align: center; font-size: 0.85rem; color: #8d99ae; margin-bottom: 18px; }
+    .section-title { font-size: 0.92rem; font-weight: 700; margin: 14px 0 8px; border-left: 4px solid var(--primary); padding-left: 8px; }
+    .item-group { display: flex; flex-direction: column; gap: 8px; }
+    .item-row { display: flex; align-items: center; justify-content: space-between; padding: 12px; border: 1px solid #edf2f4; border-radius: 10px; cursor: pointer; }
+    .item-info { display: flex; align-items: center; gap: 10px; font-size: 0.93rem; }
+    .price-tag { font-weight: 700; color: var(--primary); }
+    .counter-box { display: flex; align-items: center; gap: 8px; }
+    .counter-btn { width: 28px; height: 28px; border: 1px solid #ccc; background: #fff; border-radius: 50%; cursor: pointer; font-weight: bold; }
+    .total-bar { margin-top: 20px; padding-top: 14px; border-top: 1px dashed #ddd; display: flex; justify-content: space-between; align-items: baseline; }
+    .total-amount { font-size: 1.7rem; font-weight: 800; color: #22223b; }
+    .btn-submit { width: 100%; padding: 14px; background: var(--primary); color: #fff; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; margin-top: 15px; cursor: pointer; }
+  </style>
+</head>
+<body>
 
+<div class="quote-box">
+  <h2>希貝兒美學館</h2>
+  <p class="sub">服務項目試算與預約登記</p>
+
+  <div class="section-title">1. 手部基礎項目</div>
+  <div class="item-group">
+    <label class="item-row"><div class="item-info"><input type="radio" name="base" value="單色凝膠" data-price="999" onchange="calc()"><span>單色凝膠光療</span></div><div class="price-tag">$999</div></label>
+    <label class="item-row"><div class="item-info"><input type="radio" name="base" value="法式 / 漸層" data-price="1299" onchange="calc()"><span>經典法式 / 璀璨漸層</span></div><div class="price-tag">$1,299</div></label>
+    <label class="item-row"><div class="item-info"><input type="radio" name="base" value="本月造型款" data-price="1499" checked onchange="calc()"><span>本月特選造型款</span></div><div class="price-tag">$1,499</div></label>
+  </div>
+
+  <div class="section-title">2. 卸甲與附加保養</div>
+  <div class="item-group">
+    <label class="item-row"><div class="item-info"><input type="checkbox" name="extra" value="本店續作卸甲" data-price="200" onchange="calc()"><span>本店續作卸甲</span></div><div class="price-tag">+$200</div></label>
+    <label class="item-row"><div class="item-info"><input type="checkbox" name="extra" value="他店卸甲" data-price="400" onchange="calc()"><span>他店凝膠卸甲</span></div><div class="price-tag">+$400</div></label>
+  </div>
+
+  <div class="section-title">3. 造型指頭數（每指 +$100）</div>
+  <div class="item-row">
+    <span>客製造型指</span>
+    <div class="counter-box">
+      <button class="counter-btn" onclick="changeArt(-1)">-</button>
+      <span id="artCount" style="font-weight:700; min-width:20px; text-align:center;">0</span>
+      <button class="counter-btn" onclick="changeArt(1)">+</button>
+    </div>
+  </div>
+
+  <div class="total-bar">
+    <span>預估總金額</span>
+    <div class="total-amount">$<span id="totalDisplay">1499</span></div>
+  </div>
+
+  <button class="btn-submit" onclick="copyAndBook()">📋 複製報價明細，前往 LINE 預約</button>
+</div>
+
+<script>
+  let artCount = 0;
+  function changeArt(delta) {
+    artCount = Math.max(0, Math.min(10, artCount + delta));
+    document.getElementById('artCount').innerText = artCount;
+    calc();
+  }
+  function calc() {
+    let total = 0;
+    const base = document.querySelector('input[name="base"]:checked');
+    if (base) total += parseInt(base.dataset.price);
+    document.querySelectorAll('input[name="extra"]:checked').forEach(cb => total += parseInt(cb.dataset.price));
+    total += artCount * 100;
+    document.getElementById('totalDisplay').innerText = total;
+  }
+  function copyAndBook() {
+    const base = document.querySelector('input[name="base"]:checked')?.value || '無';
+    const extras = Array.from(document.querySelectorAll('input[name="extra"]:checked')).map(cb => cb.value);
+    const total = document.getElementById('totalDisplay').innerText;
+    let summary = `【預約報價明細】\n主項目：${base}\n加選：${extras.join('、') || '無'}\n造型指數：${artCount}指\n預估金額：$${total}`;
+    navigator.clipboard.writeText(summary).then(() => {
+      alert("已複製報價清單！將為您開啟 LINE 傳送。");
+      window.location.href = "https://line.me/R/nv/recommendOA/@your_line_id";
+    });
+  }
+</script>
+</body>
+</html>

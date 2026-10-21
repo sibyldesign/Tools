@@ -1,0 +1,195 @@
+// ====== LINE 預約防放鳥自動推播腳本 (reminder.gs) ======
+
+const LINE_CHANNEL_ACCESS_TOKEN = "請填入你的LINE_Channel_Access_Token";
+const SHEET_NAME = "預約名冊"; // 你的 Google 試算表工作表名稱
+
+function dailyReminderScheduler() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+  if (!sheet) return;
+
+  const data = sheet.getDataRange().getValues();
+  // 假設欄位對應：[0]姓名, [1]預約日期(YYYY-MM-DD), [2]預約時間, [3]服務項目, [4]客人LINE_UserID, [5]發送狀態
+  
+  const tomorrowStr = Utilities.formatDate(new Date(Date.now() + 86400000), "GMT+8", "yyyy-MM-dd");
+
+  for (let i = 1; i < data.length; i++) {
+    const [name, dateVal, time, service, userId, status] = data[i];
+    const dateFormatted = Utilities.formatDate(new Date(dateVal), "GMT+8", "yyyy-MM-dd");
+
+    if (dateFormatted === tomorrowStr && status !== "已發送" && userId) {
+      const message = `親愛的 ${name} 妳好🌸\n\n貼心提醒您預約了明天：\n📅 日期：${dateFormatted} ${time}\n💅 項目：${service}\n\n如需更改時間或取消，請提前告知唷！`;
+      
+      const success = sendLinePush(userId, message);
+      if (success) {
+        sheet.getRange(i + 1, 6).setValue("已發送");
+      }
+    }
+  }
+}
+
+function sendLinePush(userId, textMessage) {
+  const url = "https://api.line.me/v2/bot/message/push";
+  const payload = {
+    to: userId,
+    messages: [{ type: "text", text: textMessage }]
+  };
+
+  const options = {
+    method: "post",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + LINE_CHANNEL_ACCESS_TOKEN
+    },
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  };
+
+  try {
+    const res = UrlFetchApp.fetch(url, options);
+    return res.getResponseCode() === 200;
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
+ * GAS: LINE Messaging Webhook & LIFF API 處理中心
+ */
+function doPost(e) {
+  try {
+    const json = JSON.parse(e.postData.contents);
+    
+    // 1. 處理 LINE 官方聊天室 Postback 事件 (業主在 LINE 點擊按鈕)
+    if (json.events && json.events.length > 0) {
+      json.events.forEach(function(event) {
+        if (event.type === 'postback') {
+          handleLinePostbackAction(event);
+        } else if (event.type === 'message' && event.message.type === 'text') {
+          handleLineTextQuery(event);
+        }
+      });
+      return ContentService.createTextOutput(JSON.stringify({ status: "EVENT_PROCESSED" }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // 2. 處理外部預約送單與通知發送 (由前端網頁或後台 API 呼叫)
+    const action = json.action;
+
+    if (action === "submitBooking") {
+      // 處理預約進單：寫入資料庫並向業主個人 LINE 發送 Flex 接單卡片
+      sendOwnerBookingAuditCard(json);
+      return ContentService.createTextOutput(JSON.stringify({ status: "SUCCESS" }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({ status: "ERROR", message: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/**
+ * 處理業主在 LINE 點擊【接單】或【婉拒】
+ */
+function handleLinePostbackAction(event) {
+  const replyToken = event.replyToken;
+  const postbackData = event.postback.data; // 例: action=acceptBooking&id=123&staff=Solo
+  const params = parseQuery(postbackData);
+
+  const token = getStoreLineChannelToken(params.store_id);
+
+  if (params.action === "acceptBooking") {
+    // 1. 呼叫 Supabase 更新預約狀態為「已確認」
+    updateSupabaseBookingStatus(params.id, "已確認");
+
+    // 2. 即時回覆業主 LINE 訊息
+    replyTextMessage(replyToken, token, `✅ 已確認接單！\n單號：${params.id}\n預約已排入行程，時段已鎖定。`);
+
+    // 3. 同步發送 LINE 推播給預約顧客
+    notifyCustomerBookingConfirmed(params.id);
+
+  } else if (params.action === "rejectBooking") {
+    updateSupabaseBookingStatus(params.id, "婉拒");
+    replyTextMessage(replyToken, token, `❌ 已婉拒該筆預約。\n單號：${params.id}\n系統已釋出該時段。`);
+  }
+}
+
+/**
+ * 發送 Flex 卡片至業主個人 LINE (附帶一鍵接單按鈕)
+ */
+function sendOwnerBookingAuditCard(data) {
+  const token = data.line_channel_token;
+  const ownerUid = data.owner_line_uid;
+  if (!token || !ownerUid) return;
+
+  const flexMessage = {
+    type: "flex",
+    altText: `📢 新預約進單：${data.customer_name} (${data.service_name})`,
+    contents: {
+      type: "bubble",
+      header: {
+        type: "box",
+        layout: "vertical",
+        backgroundColor: "#8C7355",
+        contents: [
+          { type: "text", text: "📢 門市新進預約通知", color: "#FFFFFF", weight: "bold", size: "sm" }
+        ]
+      },
+      body: {
+        type: "box",
+        layout: "vertical",
+        spacing: "md",
+        contents: [
+          { type: "text", text: data.customer_name, weight: "bold", size: "xl", color: "#3D3126" },
+          {
+            type: "box",
+            layout: "vertical",
+            spacing: "xs",
+            contents: [
+              { type: "text", text: `📅 時間：${data.date} ${data.time}`, size: "sm", color: "#666666" },
+              { type: "text", text: `✂️ 項目：${data.service_name}`, size: "sm", color: "#666666", wrap: true },
+              { type: "text", text: `👤 設計師：${data.staff_name}`, size: "sm", color: "#666666" },
+              { type: "text", text: `💰 預算：${data.price_range || data.price}`, size: "sm", color: "#8C7355", weight: "bold" }
+            ]
+          }
+        ]
+      },
+      footer: {
+        type: "box",
+        layout: "horizontal",
+        spacing: "sm",
+        contents: [
+          {
+            type: "button",
+            style: "primary",
+            color: "#10B981",
+            action: {
+              type: "postback",
+              label: "✓ 確認接單",
+              data: `action=acceptBooking&id=${data.id}&store_id=${data.store_id}`
+            }
+          },
+          {
+            type: "button",
+            style: "secondary",
+            action: {
+              type: "postback",
+              label: "✕ 婉拒",
+              data: `action=rejectBooking&id=${data.id}&store_id=${data.store_id}`
+            }
+          }
+        ]
+      }
+    }
+  };
+
+  pushLineMessage(ownerUid, token, [flexMessage]);
+}
+
+function parseQuery(str) {
+  return str.split('&').reduce((acc, cur) => {
+    const pair = cur.split('=');
+    acc[pair[0]] = decodeURIComponent(pair[1] || '');
+    return acc;
+  }, {});
+}

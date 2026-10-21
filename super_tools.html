@@ -481,27 +481,56 @@
     }
 
     // 寄發開通信件 (包含後台網址與密碼)
+    // 真實發送開通信件 (呼叫 GAS 寄出)
     async function sendWelcomeActivationEmail(id) {
       const s = allToolStores.find(item => item.id === id);
       if (!s.owner_email || !s.owner_email.includes('@')) {
         return Swal.fire('該店家未填寫有效電子信箱！', '', 'warning');
       }
 
-      Swal.fire({ title: '正在寄發開通信件...', didOpen: () => Swal.showLoading() });
+      Swal.fire({
+        title: '正在寄發開通信件...',
+        text: '透過雲端郵件伺服器寄發開通指南',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
 
-      setTimeout(() => {
+      const secureAdminUrl = `https://Tools.heysibyl.com/tools-admin.html?token=${s.admin_token || s.id}`;
+      const purchasedNames = (s.purchased_tools || []).map(tKey => {
+        const found = TOOLS_CATALOG.find(tc => tc.id === tKey);
+        return found ? found.name : tKey;
+      }).join('、');
+
+      try {
+        await fetch(API_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "sendToolStoreWelcomeEmail",
+            toEmail: s.owner_email.trim(),
+            storeName: s.store_name,
+            adminUrl: secureAdminUrl,
+            pin: s.admin_pin || '8888',
+            purchasedToolsText: purchasedNames
+          })
+        });
+
         Swal.fire({
           title: '開通信件已成功寄出！',
           html: `
             <div class="text-left text-xs bg-brand-50 p-3 rounded-2xl border border-brand-200 text-brand-900 space-y-1 font-sans">
-              <div>收件者：<b>${s.owner_email}</b></div>
-              <div>信件主旨：<b>【希貝兒微工具】服務開通通知與專屬管理入口</b></div>
-              <div class="pt-1 text-gray-500">已附帶管理入口網址、預設 PIN 碼 (${s.admin_pin || '8888'}) 及線上操作指南，店家永不遺失！</div>
+              <div>收件信箱：<b>${s.owner_email}</b></div>
+              <div>店家名稱：<b>${s.store_name}</b></div>
+              <div>後台 PIN 碼：<b>${s.admin_pin || '8888'}</b></div>
+              <div class="pt-1 text-emerald-700 font-bold">✓ 信件已包含專屬防盜後台網址與教學指南！</div>
             </div>
           `,
           icon: 'success'
         });
-      }, 800);
+      } catch (err) {
+        Swal.fire('寄信失敗', err.message, 'error');
+      }
     }
 
     // 模組授權配置彈窗

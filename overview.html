@@ -1,1 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>全日排程總覽 | 甘特圖</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style> body { font-family: 'Noto Sans TC', sans-serif; background: #faf7f2; } </style>
+</head>
+<body class="p-4 text-stone-800">
 
+  <div class="max-w-4xl mx-auto bg-white p-5 rounded-2xl shadow-sm border border-stone-200">
+    <div class="flex justify-between items-center pb-3 border-b border-stone-100 mb-4">
+      <h1 class="font-bold text-base text-stone-900 flex items-center gap-2">
+        📊 全日排程與插單總覽 (Gantt View)
+      </h1>
+      <input type="date" id="ganttDate" class="p-2 border rounded-xl text-xs bg-stone-50 font-mono" onchange="loadGanttData()">
+    </div>
+
+    <!-- 類 Excel 甘特圖畫布 -->
+    <div class="overflow-x-auto">
+      <div class="min-w-[600px] grid grid-cols-4 gap-3 text-xs" id="ganttCanvas">
+        <div class="col-span-full text-center py-10 text-stone-400">正在載入今日各專員排程與空檔...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('ganttDate').value = new Date().toISOString().split('T')[0];
+
+    function loadGanttData() {
+      const selectedDate = document.getElementById('ganttDate').value;
+      const canvas = document.getElementById('ganttCanvas');
+      
+      // 模擬從 Supabase 或 API 載入當日各專員預約
+      canvas.innerHTML = `
+        <div class="p-3 bg-stone-50 rounded-xl border border-stone-200 space-y-2">
+          <div class="font-bold text-stone-900 text-sm border-b pb-1">👩 莫莉 (Molly)</div>
+          <div class="p-2 bg-amber-100 text-amber-900 rounded-lg font-bold">11:00 - 12:30 | 單色凝膠 ($800)</div>
+          <div class="p-2 bg-emerald-100 text-emerald-900 rounded-lg font-bold">14:00 - 16:00 | 造型款 ($1,300)</div>
+        </div>
+        <div class="p-3 bg-stone-50 rounded-xl border border-stone-200 space-y-2">
+          <div class="font-bold text-stone-900 text-sm border-b pb-1">👩 岑岑 (CenCen)</div>
+          <div class="p-2 bg-purple-100 text-purple-900 rounded-lg font-bold">13:00 - 14:30 | 足部凝膠 ($1,100)</div>
+        </div>
+        <div class="p-3 bg-stone-50 rounded-xl border border-stone-200 space-y-2">
+          <div class="font-bold text-stone-900 text-sm border-b pb-1">👩 娜娜 (Nana)</div>
+          <div class="p-2 text-stone-400 text-center py-6 font-medium">今日尚無預約 (全日空檔)</div>
+        </div>
+        <div class="p-3 bg-stone-50 rounded-2xl border border-stone-200 space-y-2">
+          <div class="font-bold text-stone-900 text-sm border-b pb-1">👩 琪琪 (Kiki)</div>
+          <div class="p-2 bg-rose-100 text-rose-900 rounded-lg font-bold">10:30 - 11:30 | 卸甲保養 ($400)</div>
+        </div>
+      `;
+    }
+
+    loadGanttData();
+  </script>
+</body>
+</html>

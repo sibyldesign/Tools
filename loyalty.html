@@ -1,87 +1,164 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>會員數位集點卡</title>
-  <style>
-    * { box-sizing: border-box; font-family: -apple-system, sans-serif; }
-    body { background: #fdfbf7; padding: 20px; display: flex; justify-content: center; }
-    .card-wrap { width: 100%; max-width: 400px; }
-    .loyalty-card { background: linear-gradient(135deg, #3a3d40 0%, #181719 100%); color: #e2c07d; border-radius: 16px; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); margin-bottom: 20px; }
-    .card-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
-    .card-brand { font-size: 1.05rem; font-weight: 700; letter-spacing: 1px; }
-    .card-phone { font-size: 0.88rem; opacity: 0.8; }
-    .points-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 15px; }
-    .point-dot { aspect-ratio: 1; border: 2px dashed #e2c07d; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; }
-    .point-dot.filled { background: #e2c07d; color: #181719; border-style: solid; }
-    .action-panel { background: #fff; padding: 20px; border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-    .form-group { margin-bottom: 12px; }
-    .form-group label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 5px; }
-    input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem; }
-    .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; }
-    .btn-search { background: #3a3d40; color: #fff; }
-    .btn-manage { background: #e2c07d; color: #222; margin-top: 8px; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>VIP 數位會員存摺 | Digital Loyalty & Pass</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body>
+<body class="bg-[#121212] text-stone-100 antialiased min-h-screen p-4 md:p-6 pb-24 flex flex-col items-center">
 
-<div class="card-wrap">
-  <div class="loyalty-card">
-    <div class="card-header">
-      <div class="card-brand">VIP CLUB</div>
-      <div class="card-phone" id="displayPhone">請輸入電話查詢</div>
+  <div class="max-w-md w-full space-y-4">
+    <!-- 頂部查詢列 -->
+    <div class="bg-[#1E1E1E] p-4 rounded-3xl border border-stone-800 shadow-md space-y-2 text-xs">
+      <label class="block font-bold text-stone-300">輸入手機查詢您的 VIP 會員存摺：</label>
+      <div class="flex gap-2">
+        <input type="tel" id="lookup-phone" placeholder="0912345678" maxlength="10" class="flex-1 p-2.5 rounded-xl border border-stone-700 bg-stone-900 font-mono font-bold text-amber-400 text-sm outline-none">
+        <button type="button" onclick="searchMemberAccount()" class="px-4 py-2 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-xl font-bold">查詢</button>
+      </div>
     </div>
-    <div class="points-grid" id="stampGrid"></div>
-    <div style="font-size:0.78rem; text-align:right;">集滿 10 點折抵 $500</div>
+
+    <!-- 原版黑灰燙金擬真 VIP 卡體 -->
+    <div id="member-card-box" class="w-full rounded-3xl p-6 shadow-2xl relative overflow-hidden transition-all duration-300 border border-amber-500/30" style="background: linear-gradient(135deg, #2A2A2A 0%, #151515 100%);">
+      <!-- 燙金反光飾紋 -->
+      <div class="absolute -right-16 -top-16 w-44 h-44 rounded-full bg-amber-500/10 blur-3xl pointer-events-none"></div>
+
+      <!-- 卡面標頭 -->
+      <div class="flex justify-between items-start border-b border-white/10 pb-4">
+        <div>
+          <div class="text-[9px] font-mono tracking-[0.3em] uppercase text-amber-400 font-bold">Official Membership</div>
+          <div class="text-xl font-serif font-black text-amber-200" id="card-holder-name">VIP 尊榮會員</div>
+        </div>
+        <div class="text-right font-mono text-[11px] text-stone-400" id="card-holder-phone">09•• ••• •••</div>
+      </div>
+
+      <!-- 資產矩陣 (儲值金與包卡) -->
+      <div class="grid grid-cols-2 gap-3 my-4 font-mono">
+        <div class="p-3 rounded-2xl bg-black/40 border border-white/5 text-center">
+          <div class="text-[10px] text-stone-400 font-sans">儲值金餘額</div>
+          <div class="text-lg font-black text-amber-300 mt-0.5" id="card-wallet-bal">NT$ 0</div>
+        </div>
+        <div class="p-3 rounded-2xl bg-black/40 border border-white/5 text-center">
+          <div class="text-[10px] text-stone-400 font-sans">包卡剩餘堂數</div>
+          <div class="text-lg font-black text-amber-300 mt-0.5" id="card-package-times">0 堂</div>
+        </div>
+      </div>
+
+      <!-- 10 格金色印章盤面 -->
+      <div class="space-y-1.5 pt-1">
+        <div class="flex justify-between items-center text-[11px] text-amber-200 font-bold">
+          <span>集點里程碑 (滿 10 點可折抵 NT$ 300)</span>
+          <span class="font-mono" id="disp-points-num">0 / 10</span>
+        </div>
+        <div class="grid grid-cols-5 gap-2" id="gold-stamp-grid">
+          <!-- JS 動態生成 10 格印章 -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 店長核銷專區 (PIN 碼保護) -->
+    <div class="bg-[#1E1E1E] p-4 rounded-3xl border border-stone-800 shadow-md space-y-3 text-xs">
+      <div class="flex justify-between items-center border-b border-stone-800 pb-2">
+        <span class="font-bold text-amber-400">店長現場蓋章與資產核銷：</span>
+        <button type="button" onclick="changeManagerPinPrompt()" class="text-[10px] text-stone-400 underline">改 PIN 碼</button>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2">
+        <button type="button" onclick="managerAction('stamp')" class="py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow-xs transition">
+          +1 點蓋章
+        </button>
+        <button type="button" onclick="managerAction('deduct_pkg')" class="py-2.5 bg-stone-700 hover:bg-stone-600 text-white font-bold rounded-xl shadow-xs transition">
+          扣包卡 1 堂
+        </button>
+        <button type="button" onclick="managerAction('redeem_stamp')" class="py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-xs transition">
+          滿額折抵
+        </button>
+      </div>
+    </div>
   </div>
 
-  <div class="action-panel">
-    <div class="form-group">
-      <label>顧客手機號碼查詢</label>
-      <input type="tel" id="inputPhone" placeholder="0912345678">
-    </div>
-    <button class="btn btn-search" onclick="searchPoints()">查詢集點進度</button>
+  <script>
+    let MANAGER_PIN = localStorage.getItem('loyalty_pin') || '8888';
+    let currentAccount = { name: "林小姐", phone: "0912345678", points: 4, wallet: 3500, packageTimes: 2 };
 
-    <details style="margin-top: 18px;">
-      <summary style="font-size: 0.82rem; color: #888; cursor: pointer;">店家專用給點操作</summary>
-      <div class="form-group" style="margin-top: 8px;">
-        <label>店家 PIN 碼 (預設 8888)</label>
-        <input type="password" id="storePin" placeholder="PIN 碼">
-      </div>
-      <div style="display:flex; gap:8px;">
-        <button class="btn btn-manage" onclick="modPoint(1)">+1 點 (蓋章)</button>
-        <button class="btn btn-manage" style="background:#f0e2e2;" onclick="modPoint(-1)">-1 點 (核銷)</button>
-      </div>
-    </details>
-  </div>
-</div>
+    function renderCardUI() {
+      document.getElementById('card-holder-name').innerText = currentAccount.name;
+      document.getElementById('card-holder-phone').innerText = currentAccount.phone;
+      document.getElementById('card-wallet-bal').innerText = `NT$ ${currentAccount.wallet.toLocaleString()}`;
+      document.getElementById('card-package-times').innerText = `${currentAccount.packageTimes} 堂`;
+      document.getElementById('disp-points-num').innerText = `${currentAccount.points} / 10`;
 
-<script>
-  let pts = 3;
-  function render(p) {
-    const grid = document.getElementById('stampGrid');
-    grid.innerHTML = '';
-    for (let i = 1; i <= 10; i++) {
-      const dot = document.createElement('div');
-      dot.className = `point-dot ${i <= p ? 'filled' : ''}`;
-      dot.innerText = i <= p ? '✓' : i;
-      grid.appendChild(dot);
+      const grid = document.getElementById('gold-stamp-grid');
+      let html = '';
+      for (let i = 1; i <= 10; i++) {
+        const isFilled = i <= currentAccount.points;
+        html += `
+          <div class="aspect-square rounded-xl border flex flex-col items-center justify-center transition-all ${isFilled ? 'border-amber-400 bg-amber-400/20 text-amber-300 shadow-lg' : 'border-dashed border-stone-700 text-stone-600'}">
+            <i class="fa-solid ${isFilled ? 'fa-crown text-base' : 'fa-circle text-[8px]'}"></i>
+            <span class="text-[8px] font-mono mt-0.5">${i}</span>
+          </div>
+        `;
+      }
+      grid.innerHTML = html;
     }
-  }
-  function searchPoints() {
-    const ph = document.getElementById('inputPhone').value;
-    if(!ph) return alert("請輸入電話");
-    document.getElementById('displayPhone').innerText = ph;
-    render(pts);
-  }
-  function modPoint(delta) {
-    if(document.getElementById('storePin').value !== "8888") return alert("PIN 碼錯誤！");
-    pts = Math.max(0, Math.min(10, pts + delta));
-    render(pts);
-    alert(`操作成功！目前累計 ${pts} 點`);
-  }
-  render(0);
-</script>
+
+    function searchMemberAccount() {
+      const ph = document.getElementById('lookup-phone').value.trim();
+      if (ph.length < 8) return Swal.fire('請輸入手機號碼', '', 'warning');
+      currentAccount.phone = ph;
+      renderCardUI();
+      Swal.fire({ title: '已載入 VIP 存摺！', icon: 'success', timer: 800, showConfirmButton: false });
+    }
+
+    function managerAction(type) {
+      Swal.fire({
+        title: '請輸入店長 PIN 碼',
+        input: 'password',
+        inputPlaceholder: '預設 8888',
+        showCancelButton: true,
+        confirmButtonText: '確認操作',
+        confirmButtonColor: '#D97706',
+        inputValidator: v => (v !== MANAGER_PIN ? 'PIN 碼錯誤！' : null)
+      }).then(r => {
+        if (!r.isConfirmed) return;
+
+        if (type === 'stamp') {
+          currentAccount.points = Math.min(10, currentAccount.points + 1);
+          Swal.fire('蓋章成功！', `目前累積 ${currentAccount.points} 點`, 'success');
+        } else if (type === 'deduct_pkg') {
+          if (currentAccount.packageTimes <= 0) return Swal.fire('包卡堂數已用罄', '', 'warning');
+          currentAccount.packageTimes--;
+          Swal.fire('核銷成功！', `已扣除 1 堂，剩餘 ${currentAccount.packageTimes} 堂`, 'success');
+        } else if (type === 'redeem_stamp') {
+          if (currentAccount.points < 10) return Swal.fire('集點未滿 10 點', '', 'warning');
+          currentAccount.points -= 10;
+          Swal.fire('滿額折抵成功！', '已兌換折抵 NT$ 300', 'success');
+        }
+        renderCardUI();
+      });
+    }
+
+    function changeManagerPinPrompt() {
+      Swal.fire({
+        title: '修改管理 PIN 碼',
+        input: 'password',
+        inputPlaceholder: '請輸入 4~6 碼新密碼',
+        showCancelButton: true,
+        confirmButtonText: '確認修改',
+        confirmButtonColor: '#D97706'
+      }).then(r => {
+        if (r.isConfirmed && r.value) {
+          MANAGER_PIN = r.value.trim();
+          localStorage.setItem('loyalty_pin', MANAGER_PIN);
+          Swal.fire('PIN 碼修改成功！', '', 'success');
+        }
+      });
+    }
+
+    window.onload = renderCardUI;
+  </script>
 </body>
 </html>

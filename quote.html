@@ -1,90 +1,208 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>服務報價與試算器</title>
-  <style>
-    :root { --primary: #9d8189; --bg: #f4f3ee; --card: #ffffff; }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
-    body { background: var(--bg); padding: 20px 15px; color: #4a4e69; }
-    .quote-box { max-width: 500px; margin: 0 auto; background: var(--card); padding: 24px; border-radius: 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-    h2 { text-align: center; font-size: 1.35rem; margin-bottom: 4px; }
-    p.sub { text-align: center; font-size: 0.85rem; color: #8d99ae; margin-bottom: 18px; }
-    .section-title { font-size: 0.92rem; font-weight: 700; margin: 14px 0 8px; border-left: 4px solid var(--primary); padding-left: 8px; }
-    .item-group { display: flex; flex-direction: column; gap: 8px; }
-    .item-row { display: flex; align-items: center; justify-content: space-between; padding: 12px; border: 1px solid #edf2f4; border-radius: 10px; cursor: pointer; }
-    .item-info { display: flex; align-items: center; gap: 10px; font-size: 0.93rem; }
-    .price-tag { font-weight: 700; color: var(--primary); }
-    .counter-box { display: flex; align-items: center; gap: 8px; }
-    .counter-btn { width: 28px; height: 28px; border: 1px solid #ccc; background: #fff; border-radius: 50%; cursor: pointer; font-weight: bold; }
-    .total-bar { margin-top: 20px; padding-top: 14px; border-top: 1px dashed #ddd; display: flex; justify-content: space-between; align-items: baseline; }
-    .total-amount { font-size: 1.7rem; font-weight: 800; color: #22223b; }
-    .btn-submit { width: 100%; padding: 14px; background: var(--primary); color: #fff; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; margin-top: 15px; cursor: pointer; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>美業通用報價與試算清單 | Service Quote Calculator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#FDFBF7', 100: '#F7EDE8', 200: '#EBE5DF', 300: '#D5C7BC',
+              400: '#BCA38F', 500: '#8C7355', 600: '#7A6246', 700: '#68523A',
+              800: '#5C4B3C', 900: '#3D3126',
+            }
+          }
+        }
+      }
+    };
+  </script>
 </head>
-<body>
+<body class="bg-brand-50 text-brand-900 antialiased min-h-screen p-4 md:p-6 pb-24 flex flex-col items-center">
 
-<div class="quote-box">
-  <h2>希貝兒美學館</h2>
-  <p class="sub">服務項目試算與預約登記</p>
+  <div class="max-w-md w-full space-y-4">
+    
+    <!-- 頂部 9:16 輪播說明圖 (含高斯模糊背景防破版與圓點指示器) -->
+    <div class="relative w-full aspect-[9/16] max-h-[480px] rounded-3xl overflow-hidden shadow-md border border-brand-200 bg-stone-900">
+      <!-- 模糊底圖 -->
+      <div id="carousel-bg-blur" class="absolute inset-0 bg-cover bg-center filter blur-xl opacity-60 scale-110 transition-all duration-500"></div>
+      
+      <!-- 主體圖片 -->
+      <img id="carousel-main-img" class="relative z-10 w-full h-full object-contain mx-auto transition-all duration-500" src="" alt="活動說明圖">
 
-  <div class="section-title">1. 手部基礎項目</div>
-  <div class="item-group">
-    <label class="item-row"><div class="item-info"><input type="radio" name="base" value="單色凝膠" data-price="999" onchange="calc()"><span>單色凝膠光療</span></div><div class="price-tag">$999</div></label>
-    <label class="item-row"><div class="item-info"><input type="radio" name="base" value="法式 / 漸層" data-price="1299" onchange="calc()"><span>經典法式 / 璀璨漸層</span></div><div class="price-tag">$1,299</div></label>
-    <label class="item-row"><div class="item-info"><input type="radio" name="base" value="本月造型款" data-price="1499" checked onchange="calc()"><span>本月特選造型款</span></div><div class="price-tag">$1,499</div></label>
-  </div>
+      <!-- 下方白色進度圓點 -->
+      <div class="absolute bottom-3 left-0 right-0 z-20 flex justify-center gap-1.5" id="carousel-dots">
+        <!-- JS 動態生成圓點 -->
+      </div>
+    </div>
 
-  <div class="section-title">2. 卸甲與附加保養</div>
-  <div class="item-group">
-    <label class="item-row"><div class="item-info"><input type="checkbox" name="extra" value="本店續作卸甲" data-price="200" onchange="calc()"><span>本店續作卸甲</span></div><div class="price-tag">+$200</div></label>
-    <label class="item-row"><div class="item-info"><input type="checkbox" name="extra" value="他店卸甲" data-price="400" onchange="calc()"><span>他店凝膠卸甲</span></div><div class="price-tag">+$400</div></label>
-  </div>
+    <!-- 步驟 1：主項目自訂勾選 -->
+    <div class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3 text-xs">
+      <div class="flex justify-between items-center border-b pb-2">
+        <span class="font-bold text-brand-900 text-sm">1. 選擇基礎服務項目：</span>
+        <button type="button" onclick="openAddQuoteItemModal()" class="text-[10px] text-blue-600 underline font-bold">+ 自訂項目</button>
+      </div>
+      <div class="space-y-2" id="quote-base-items-list">
+        <!-- 動態渲染項目 -->
+      </div>
+    </div>
 
-  <div class="section-title">3. 造型指頭數（每指 +$100）</div>
-  <div class="item-row">
-    <span>客製造型指</span>
-    <div class="counter-box">
-      <button class="counter-btn" onclick="changeArt(-1)">-</button>
-      <span id="artCount" style="font-weight:700; min-width:20px; text-align:center;">0</span>
-      <button class="counter-btn" onclick="changeArt(1)">+</button>
+    <!-- 步驟 2：加購與設計指数 -->
+    <div class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3 text-xs">
+      <span class="font-bold text-brand-900 block border-b pb-2 text-sm">2. 附加升級與設計指数：</span>
+      <div class="space-y-2">
+        <label class="flex justify-between items-center p-3 rounded-2xl border border-brand-200 bg-brand-50/50 cursor-pointer">
+          <div class="flex items-center gap-2">
+            <input type="checkbox" id="quote-extra-care" data-price="350" value="深層養護精華導入" onchange="calculateTotalQuote()" class="accent-[#8C7355] rounded">
+            <span class="font-bold">升級深層養護精華導入</span>
+          </div>
+          <span class="font-mono font-bold text-brand-500">+NT$ 350</span>
+        </label>
+      </div>
+
+      <div class="pt-2">
+        <div class="flex justify-between items-center mb-1">
+          <label class="font-bold text-brand-800">客製設計 / 彩繪指數：</label>
+          <span class="font-mono font-bold text-brand-500 text-sm" id="disp-design-qty">0 單位</span>
+        </div>
+        <input type="range" id="design-range" min="0" max="10" value="0" step="1" oninput="calculateTotalQuote()" class="w-full accent-brand-500">
+      </div>
+    </div>
+
+    <!-- 試算結果與一鍵回傳 LINE -->
+    <div class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3 text-xs">
+      <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 space-y-1.5 font-mono">
+        <div class="font-sans font-bold text-brand-900">預估報價清單：</div>
+        <div id="quote-text-summary" class="text-[11px] leading-relaxed text-brand-700 whitespace-pre-wrap font-sans"></div>
+        <div class="border-t border-brand-200 pt-2 flex justify-between items-baseline font-sans">
+          <span class="font-bold text-brand-900">預估總額：</span>
+          <span class="text-2xl text-brand-500 font-mono font-black" id="quote-final-amount">NT$ 0</span>
+        </div>
+      </div>
+
+      <button type="button" onclick="copyAndOpenLine()" class="w-full py-3.5 bg-[#06C755] hover:bg-[#05b34c] text-white font-bold rounded-2xl shadow-md transition flex items-center justify-center gap-2 text-xs">
+        <i class="fa-brands fa-line text-sm"></i>
+        <span>複製報價明細，前往 LINE 預約</span>
+      </button>
     </div>
   </div>
 
-  <div class="total-bar">
-    <span>預估總金額</span>
-    <div class="total-amount">$<span id="totalDisplay">1499</span></div>
-  </div>
+  <script>
+    let carouselImages = [
+      "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80"
+    ];
+    let currentImgIdx = 0;
 
-  <button class="btn-submit" onclick="copyAndBook()">📋 複製報價明細，前往 LINE 預約</button>
-</div>
+    let baseItems = [
+      { name: "手部精緻凝膠設計", price: 1200 },
+      { name: "質感染髮技術設計", price: 2200 },
+      { name: "寵物精緻洗護美容", price: 1000 }
+    ];
 
-<script>
-  let artCount = 0;
-  function changeArt(delta) {
-    artCount = Math.max(0, Math.min(10, artCount + delta));
-    document.getElementById('artCount').innerText = artCount;
-    calc();
-  }
-  function calc() {
-    let total = 0;
-    const base = document.querySelector('input[name="base"]:checked');
-    if (base) total += parseInt(base.dataset.price);
-    document.querySelectorAll('input[name="extra"]:checked').forEach(cb => total += parseInt(cb.dataset.price));
-    total += artCount * 100;
-    document.getElementById('totalDisplay').innerText = total;
-  }
-  function copyAndBook() {
-    const base = document.querySelector('input[name="base"]:checked')?.value || '無';
-    const extras = Array.from(document.querySelectorAll('input[name="extra"]:checked')).map(cb => cb.value);
-    const total = document.getElementById('totalDisplay').innerText;
-    let summary = `【預約報價明細】\n主項目：${base}\n加選：${extras.join('、') || '無'}\n造型指數：${artCount}指\n預估金額：$${total}`;
-    navigator.clipboard.writeText(summary).then(() => {
-      alert("已複製報價清單！將為您開啟 LINE 傳送。");
-      window.location.href = "https://line.me/R/nv/recommendOA/@your_line_id";
-    });
-  }
-</script>
+    function updateCarousel() {
+      if (carouselImages.length === 0) return;
+      const imgUrl = carouselImages[currentImgIdx];
+      document.getElementById('carousel-bg-blur').style.backgroundImage = `url('${imgUrl}')`;
+      document.getElementById('carousel-main-img').src = imgUrl;
+
+      const dots = document.getElementById('carousel-dots');
+      dots.innerHTML = carouselImages.map((_, i) => `
+        <span class="w-2 h-2 rounded-full transition-all ${i === currentImgIdx ? 'bg-white scale-125' : 'bg-white/40'}"></span>
+      `).join('');
+    }
+
+    function renderBaseItems() {
+      const container = document.getElementById('quote-base-items-list');
+      container.innerHTML = baseItems.map((it, idx) => `
+        <label class="flex justify-between items-center p-3 rounded-2xl border border-brand-200 bg-brand-50/40 cursor-pointer">
+          <div class="flex items-center gap-2">
+            <input type="radio" name="base-quote" value="${it.name}" data-price="${it.price}" onchange="calculateTotalQuote()" class="accent-brand-500" ${idx === 0 ? 'checked' : ''}>
+            <span class="font-bold">${it.name}</span>
+          </div>
+          <span class="font-mono font-bold text-brand-500">NT$ ${it.price.toLocaleString()}</span>
+        </label>
+      `).join('');
+    }
+
+    function calculateTotalQuote() {
+      const selected = document.querySelector('input[name="base-quote"]:checked');
+      const baseName = selected ? selected.value : '';
+      const basePrice = selected ? Number(selected.getAttribute('data-price')) : 0;
+
+      const extraCare = document.getElementById('quote-extra-care');
+      const extraPrice = (extraCare && extraCare.checked) ? Number(extraCare.getAttribute('data-price')) : 0;
+
+      const designQty = Number(document.getElementById('design-range').value);
+      document.getElementById('disp-design-qty').innerText = `${designQty} 單位`;
+      const designPrice = designQty * 100;
+
+      const total = basePrice + extraPrice + designPrice;
+      document.getElementById('quote-final-amount').innerText = `NT$ ${total.toLocaleString()}`;
+
+      let msg = `【線上預約報價單】\n• 基礎項目：${baseName} (NT$ ${basePrice.toLocaleString()})\n`;
+      if (extraPrice > 0) msg += `• 升級項目：深層養護精華導入 (+NT$ 350)\n`;
+      if (designPrice > 0) msg += `• 設計指数：${designQty} 單位 (+NT$ ${designPrice.toLocaleString()})\n`;
+      msg += `--------------------------\n預估總金額：NT$ ${total.toLocaleString()}`;
+      document.getElementById('quote-text-summary').innerText = msg;
+      return msg;
+    }
+
+    function copyAndOpenLine() {
+      const summary = calculateTotalQuote();
+      navigator.clipboard.writeText(summary).then(() => {
+        Swal.fire({
+          title: '已複製預估報價清單！',
+          text: '即將開啟 LINE，請貼上訊息與設計師確認預約。',
+          icon: 'success',
+          confirmButtonColor: '#06C755',
+          confirmButtonText: '前往官方 LINE'
+        }).then(() => {
+          window.location.href = "https://line.me/R/ti/p/@your_line";
+        });
+      });
+    }
+
+    function openAddQuoteItemModal() {
+      Swal.fire({
+        title: '新增報價項目',
+        html: `
+          <div class="text-left text-xs space-y-2">
+            <div><label class="font-bold">項目名稱：</label><input id="q-new-name" class="swal2-input text-xs" placeholder="例: 睫毛角蛋白塑型"></div>
+            <div><label class="font-bold">基準價格 (NT$)：</label><input id="q-new-price" type="number" class="swal2-input text-xs font-mono" placeholder="例: 1400"></div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '加入項目',
+        confirmButtonColor: '#8C7355',
+        preConfirm: () => ({
+          name: document.getElementById('q-new-name').value.trim(),
+          price: Number(document.getElementById('q-new-price').value || 0)
+        })
+      }).then(r => {
+        if (r.isConfirmed && r.value.name) {
+          baseItems.push(r.value);
+          renderBaseItems();
+          calculateTotalQuote();
+        }
+      });
+    }
+
+    window.onload = () => {
+      renderBaseItems();
+      calculateTotalQuote();
+      updateCarousel();
+      setInterval(() => {
+        currentImgIdx = (currentImgIdx + 1) % carouselImages.length;
+        updateCarousel();
+      }, 4000);
+    };
+  </script>
 </body>
 </html>

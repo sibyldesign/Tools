@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>美業通用報價與試算清單 | Service Quote Calculator</title>
+  <title>美業通用報價試算器 | Service Quote Calculator</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -28,8 +28,8 @@
 
   <div class="max-w-md w-full space-y-4">
     
-    <!-- 頂部 9:16 輪播說明圖 (含高斯模糊背景防破版與圓點指示器) -->
-    <div class="relative w-full aspect-[9/16] max-h-[480px] rounded-3xl overflow-hidden shadow-md border border-brand-200 bg-stone-900">
+    <!-- 頂部 9:16 直式活動說明圖輪播 (含高斯模糊補底防破版與圓點進度) -->
+    <div class="relative w-full aspect-[9/16] max-h-[460px] rounded-3xl overflow-hidden shadow-md border border-brand-200 bg-stone-900">
       <!-- 模糊底圖 -->
       <div id="carousel-bg-blur" class="absolute inset-0 bg-cover bg-center filter blur-xl opacity-60 scale-110 transition-all duration-500"></div>
       
@@ -53,9 +53,9 @@
       </div>
     </div>
 
-    <!-- 步驟 2：加購與設計指数 -->
+    <!-- 步驟 2：加購與設計指數 -->
     <div class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3 text-xs">
-      <span class="font-bold text-brand-900 block border-b pb-2 text-sm">2. 附加升級與設計指数：</span>
+      <span class="font-bold text-brand-900 block border-b pb-2 text-sm">2. 附加升級與設計指數：</span>
       <div class="space-y-2">
         <label class="flex justify-between items-center p-3 rounded-2xl border border-brand-200 bg-brand-50/50 cursor-pointer">
           <div class="flex items-center gap-2">
@@ -71,7 +71,7 @@
           <label class="font-bold text-brand-800">客製設計 / 彩繪指數：</label>
           <span class="font-mono font-bold text-brand-500 text-sm" id="disp-design-qty">0 單位</span>
         </div>
-        <input type="range" id="design-range" min="0" max="10" value="0" step="1" oninput="calculateTotalQuote()" class="w-full accent-brand-500">
+        <input type="range" id="design-range" min="0" max="10" value="0" step="1" oninput="calculateTotalQuote()" class="w-full accent-brand-500 cursor-pointer">
       </div>
     </div>
 
@@ -148,7 +148,7 @@
 
       let msg = `【線上預約報價單】\n• 基礎項目：${baseName} (NT$ ${basePrice.toLocaleString()})\n`;
       if (extraPrice > 0) msg += `• 升級項目：深層養護精華導入 (+NT$ 350)\n`;
-      if (designPrice > 0) msg += `• 設計指数：${designQty} 單位 (+NT$ ${designPrice.toLocaleString()})\n`;
+      if (designPrice > 0) msg += `• 設計指數：${designQty} 單位 (+NT$ ${designPrice.toLocaleString()})\n`;
       msg += `--------------------------\n預估總金額：NT$ ${total.toLocaleString()}`;
       document.getElementById('quote-text-summary').innerText = msg;
       return msg;

@@ -29,19 +29,19 @@
 <body class="bg-brand-50 text-brand-900 antialiased min-h-screen p-4 md:p-6 pb-20 flex flex-col items-center">
 
   <div class="max-w-md w-full space-y-4">
-    <!-- 頂部切換列 -->
+    <!-- 頂部視角切換 -->
     <div class="flex justify-between items-center bg-white px-4 py-3 rounded-2xl border border-brand-200 shadow-2xs">
       <div>
         <h1 class="text-xs font-black text-brand-900" id="store-title-header">沙龍工作室</h1>
-        <p class="text-[10px] text-brand-400">即時釋出空檔告示</p>
+        <p class="text-[10px] text-brand-400">即時空檔查詢與限動告示</p>
       </div>
       <button type="button" onclick="toggleManagerMode()" class="px-3 py-1.5 bg-brand-100 hover:bg-brand-200 text-brand-800 rounded-xl font-bold text-xs transition flex items-center gap-1">
         <i class="fa-solid fa-lock text-[10px]"></i>
-        <span id="btn-mode-label">店長生圖管理</span>
+        <span id="btn-mode-label">店長管理</span>
       </button>
     </div>
 
-    <!-- 客人端視角：即時可約清單 -->
+    <!-- 客人端視角：即時可約清單 (預設展示) -->
     <div id="client-view" class="space-y-4">
       <div class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm text-center space-y-1">
         <div class="text-[10px] uppercase font-mono tracking-widest text-brand-400">Available Slots</div>
@@ -50,7 +50,7 @@
       </div>
 
       <div class="space-y-2.5" id="client-slots-list">
-        <!-- 動態渲染時段 -->
+        <!-- 動態時段由 JS 產生 -->
       </div>
 
       <div class="text-center pt-2">
@@ -61,7 +61,7 @@
       </div>
     </div>
 
-    <!-- 店長端視角：生圖設定與畫布 (預設隱藏，驗證 PIN 碼展開) -->
+    <!-- 店長端視角：生圖設定與 9:16 畫布 (輸入 PIN 碼展開) -->
     <div id="manager-view" class="space-y-4 hidden">
       <div class="bg-white p-4 rounded-3xl border border-brand-200 shadow-sm space-y-3 text-xs">
         <div class="flex justify-between items-center border-b border-brand-100 pb-2">
@@ -71,38 +71,53 @@
           <button type="button" onclick="changeAdminPinPrompt()" class="text-[10px] text-blue-600 underline font-bold">改管理 PIN</button>
         </div>
 
-        <!-- 基礎營業設定 -->
+        <!-- 基礎營業資訊 -->
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="block font-bold mb-1">店名：</label>
-            <input type="text" id="cfg-store-name" value="SIBYL STUDIO" class="w-full p-2 border rounded-xl bg-brand-50/50" oninput="syncPreview()">
+            <input type="text" id="cfg-store-name" value="SIBYL STUDIO" class="w-full p-2 border rounded-xl bg-brand-50/50 font-bold" oninput="syncPreview()">
           </div>
           <div>
             <label class="block font-bold mb-1">官方 LINE 連結：</label>
-            <input type="text" id="cfg-line-link" value="https://line.me/R/ti/p/@your_line" class="w-full p-2 border rounded-xl bg-brand-50/50" oninput="syncPreview()">
+            <input type="text" id="cfg-line-link" value="https://line.me/R/ti/p/@your_line" class="w-full p-2 border rounded-xl bg-brand-50/50 font-mono" oninput="syncPreview()">
           </div>
         </div>
 
+        <!-- 營業時間與切割區間 -->
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="block font-bold mb-1">時段切割間隔：</label>
-            <select id="cfg-interval" class="w-full p-2 border rounded-xl bg-brand-50/50 font-bold" onchange="generateAvailableTimes()">
+            <select id="cfg-interval" class="w-full p-2 border rounded-xl bg-brand-50/50 font-bold" onchange="generateTimeSlotsForDates()">
               <option value="15">每 15 分鐘</option>
               <option value="30" selected>每 30 分鐘</option>
               <option value="60">每 60 分鐘</option>
             </select>
           </div>
           <div>
-            <label class="block font-bold mb-1">營業時間：</label>
+            <label class="block font-bold mb-1">每日營業時段：</label>
             <div class="flex items-center gap-1">
-              <input type="number" id="cfg-start-hour" value="10" min="6" max="23" class="w-1/2 p-2 border rounded-xl font-mono text-center font-bold" onchange="generateAvailableTimes()">
+              <input type="number" id="cfg-start-hour" value="10" min="6" max="23" class="w-1/2 p-2 border rounded-xl font-mono text-center font-bold" onchange="generateTimeSlotsForDates()">
               <span>~</span>
-              <input type="number" id="cfg-end-hour" value="20" min="6" max="23" class="w-1/2 p-2 border rounded-xl font-mono text-center font-bold" onchange="generateAvailableTimes()">
+              <input type="number" id="cfg-end-hour" value="20" min="6" max="23" class="w-1/2 p-2 border rounded-xl font-mono text-center font-bold" onchange="generateTimeSlotsForDates()">
             </div>
           </div>
         </div>
 
-        <!-- 4 款風格色系切換 -->
+        <!-- 每週固定公休日 -->
+        <div class="p-2.5 bg-brand-50 rounded-xl border border-brand-200">
+          <label class="block font-bold mb-1 text-[11px]">每週固定公休日 (勾選後自動隱藏時段)：</label>
+          <div class="grid grid-cols-7 gap-1 text-center font-bold">
+            <label class="flex flex-col items-center bg-white p-1 rounded-lg border text-[10px] cursor-pointer"><input type="checkbox" value="0" class="weekly-off-cb accent-brand-500" onchange="generateTimeSlotsForDates()">日</label>
+            <label class="flex flex-col items-center bg-white p-1 rounded-lg border text-[10px] cursor-pointer"><input type="checkbox" value="1" class="weekly-off-cb accent-brand-500" onchange="generateTimeSlotsForDates()">一</label>
+            <label class="flex flex-col items-center bg-white p-1 rounded-lg border text-[10px] cursor-pointer"><input type="checkbox" value="2" class="weekly-off-cb accent-brand-500" onchange="generateTimeSlotsForDates()">二</label>
+            <label class="flex flex-col items-center bg-white p-1 rounded-lg border text-[10px] cursor-pointer"><input type="checkbox" value="3" class="weekly-off-cb accent-brand-500" onchange="generateTimeSlotsForDates()">三</label>
+            <label class="flex flex-col items-center bg-white p-1 rounded-lg border text-[10px] cursor-pointer"><input type="checkbox" value="4" class="weekly-off-cb accent-brand-500" onchange="generateTimeSlotsForDates()">四</label>
+            <label class="flex flex-col items-center bg-white p-1 rounded-lg border text-[10px] cursor-pointer"><input type="checkbox" value="5" class="weekly-off-cb accent-brand-500" onchange="generateTimeSlotsForDates()">五</label>
+            <label class="flex flex-col items-center bg-white p-1 rounded-lg border text-[10px] cursor-pointer"><input type="checkbox" value="6" class="weekly-off-cb accent-brand-500" onchange="generateTimeSlotsForDates()">六</label>
+          </div>
+        </div>
+
+        <!-- 4 款視覺風格主題切換 -->
         <div>
           <label class="block font-bold mb-1">限動風格色票切換：</label>
           <div class="grid grid-cols-4 gap-1.5 text-center font-bold">
@@ -117,19 +132,19 @@
         <div class="grid grid-cols-2 gap-2 pt-1 border-t border-brand-100">
           <div>
             <label class="block font-bold mb-1">開始日期：</label>
-            <input type="date" id="slot-range-start" class="w-full p-2 border rounded-xl font-mono" onchange="buildDateRangeButtons()">
+            <input type="date" id="slot-range-start" class="w-full p-2 border rounded-xl font-mono text-xs" onchange="generateTimeSlotsForDates()">
           </div>
           <div>
             <label class="block font-bold mb-1">結束日期：</label>
-            <input type="date" id="slot-range-end" class="w-full p-2 border rounded-xl font-mono" onchange="buildDateRangeButtons()">
+            <input type="date" id="slot-range-end" class="w-full p-2 border rounded-xl font-mono text-xs" onchange="generateTimeSlotsForDates()">
           </div>
         </div>
 
-        <!-- 點擊挑選時段按鈕矩陣 -->
+        <!-- 依日期區間展開的時段按鈕網格 -->
         <div>
-          <label class="block font-bold mb-1">點擊切換開放時段 (綠色代表開放客約)：</label>
-          <div id="time-chips-container" class="grid grid-cols-4 gap-1.5 max-h-36 overflow-y-auto p-1 bg-brand-50 rounded-xl border">
-            <!-- 動態生成時段按鈕 -->
+          <label class="block font-bold mb-1">點擊切換可預約空檔 (綠底代表已釋出可約)：</label>
+          <div id="dynamic-slots-grid" class="space-y-2 max-h-48 overflow-y-auto p-1 bg-brand-50 rounded-xl border">
+            <!-- 動態生成日期時段按鈕 -->
           </div>
         </div>
 
@@ -145,11 +160,11 @@
           <div class="text-center space-y-1 pt-3">
             <div class="text-[9px] tracking-[0.3em] uppercase opacity-60 font-mono">Official Open Slots</div>
             <h2 class="text-xl font-black font-serif" id="canvas-store-name">SIBYL STUDIO</h2>
-            <div class="text-xs font-medium opacity-80" id="canvas-date-range">近期精選釋出空檔</div>
+            <div class="text-xs font-medium opacity-80" id="canvas-date-range">本週精選釋出空檔</div>
           </div>
 
           <div class="space-y-2 my-auto" id="canvas-slots-list">
-            <!-- 畫布時段標籤 -->
+            <!-- 畫布時段清單 -->
           </div>
 
           <div class="text-center space-y-1.5 pb-2">
@@ -166,8 +181,13 @@
   <script>
     let STORE_PIN = localStorage.getItem('slot_tool_pin') || '8888';
     let isManager = false;
-    let selectedSlots = ["10/24 13:00", "10/24 16:30", "10/25 11:00", "10/25 15:30"];
-    
+    let releasedSlots = JSON.parse(localStorage.getItem('released_slots_data') || 'null') || [
+      { date: "10/24 (六)", time: "13:00" },
+      { date: "10/24 (六)", time: "16:30" },
+      { date: "10/25 (日)", time: "11:00" },
+      { date: "10/25 (日)", time: "15:30" }
+    ];
+
     const THEME_STYLES = {
       latte: { bg: '#FDFBF7', text: '#3A3026', border: '#E9DFD5' },
       noir:  { bg: '#1A1A1A', text: '#FFFFFF', border: '#333333' },
@@ -197,7 +217,8 @@
             document.getElementById('client-view').classList.add('hidden');
             document.getElementById('manager-view').classList.remove('hidden');
             document.getElementById('btn-mode-label').innerText = '切換顧客視角';
-            generateAvailableTimes();
+            initDefaultDateRange();
+            generateTimeSlotsForDates();
             syncPreview();
           }
         });
@@ -222,34 +243,70 @@
       });
     }
 
-    function generateAvailableTimes() {
-      const container = document.getElementById('time-chips-container');
+    function initDefaultDateRange() {
+      const today = new Date();
+      const nextWeek = new Date();
+      nextWeek.setDate(today.getDate() + 3);
+      document.getElementById('slot-range-start').value = today.toISOString().split('T')[0];
+      document.getElementById('slot-range-end').value = nextWeek.toISOString().split('T')[0];
+    }
+
+    function generateTimeSlotsForDates() {
+      const container = document.getElementById('dynamic-slots-grid');
+      const sVal = document.getElementById('slot-range-start').value;
+      const eVal = document.getElementById('slot-range-end').value;
+      if (!sVal || !eVal) return;
+
       const startH = parseInt(document.getElementById('cfg-start-hour').value);
       const endH = parseInt(document.getElementById('cfg-end-hour').value);
       const interval = parseInt(document.getElementById('cfg-interval').value);
-      container.innerHTML = '';
+      const offDays = Array.from(document.querySelectorAll('.weekly-off-cb:checked')).map(cb => parseInt(cb.value));
+      const weekStrs = ['日', '一', '二', '三', '四', '五', '六'];
 
-      for (let h = startH; h < endH; h++) {
-        for (let m = 0; m < 60; m += interval) {
-          const tStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-          const isSelected = selectedSlots.some(s => s.includes(tStr));
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = `py-1.5 rounded-lg font-mono font-bold text-xs transition ${isSelected ? 'bg-emerald-600 text-white' : 'bg-white border text-gray-700'}`;
-          btn.innerText = tStr;
-          btn.onclick = () => {
-            const sampleTag = `時段 ${tStr}`;
-            if (selectedSlots.includes(sampleTag)) {
-              selectedSlots = selectedSlots.filter(s => s !== sampleTag);
-              btn.className = 'py-1.5 rounded-lg font-mono font-bold text-xs bg-white border text-gray-700';
-            } else {
-              selectedSlots.push(sampleTag);
-              btn.className = 'py-1.5 rounded-lg font-mono font-bold text-xs bg-emerald-600 text-white';
+      container.innerHTML = '';
+      let cur = new Date(sVal);
+      const end = new Date(eVal);
+
+      while (cur <= end) {
+        const dayOfWeek = cur.getDay();
+        const dateStr = `${cur.getMonth() + 1}/${cur.getDate()} (${weekStrs[dayOfWeek]})`;
+
+        if (!offDays.includes(dayOfWeek)) {
+          const dayBox = document.createElement('div');
+          dayBox.className = 'p-2 bg-white rounded-xl border border-brand-200 space-y-1.5';
+          dayBox.innerHTML = `<div class="font-bold text-brand-900">${dateStr}</div>`;
+
+          const chipGrid = document.createElement('div');
+          chipGrid.className = 'grid grid-cols-4 gap-1';
+
+          for (let h = startH; h < endH; h++) {
+            for (let m = 0; m < 60; m += interval) {
+              const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+              const isChecked = releasedSlots.some(item => item.date === dateStr && item.time === timeStr);
+
+              const btn = document.createElement('button');
+              btn.type = 'button';
+              btn.className = `py-1 rounded font-mono text-[11px] font-bold border transition ${isChecked ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-brand-50 border-gray-200 text-gray-700'}`;
+              btn.innerText = timeStr;
+              btn.onclick = () => {
+                const existsIdx = releasedSlots.findIndex(item => item.date === dateStr && item.time === timeStr);
+                if (existsIdx > -1) {
+                  releasedSlots.splice(existsIdx, 1);
+                  btn.className = 'py-1 rounded font-mono text-[11px] font-bold border bg-brand-50 border-gray-200 text-gray-700';
+                } else {
+                  releasedSlots.push({ date: dateStr, time: timeStr });
+                  btn.className = 'py-1 rounded font-mono text-[11px] font-bold border bg-emerald-600 text-white border-emerald-600';
+                }
+                localStorage.setItem('released_slots_data', JSON.stringify(releasedSlots));
+                syncPreview();
+              };
+              chipGrid.appendChild(btn);
             }
-            syncPreview();
-          };
-          container.appendChild(btn);
+          }
+          dayBox.appendChild(chipGrid);
+          container.appendChild(dayBox);
         }
+        cur.setDate(cur.getDate() + 1);
       }
     }
 
@@ -272,9 +329,10 @@
       document.getElementById('btn-line-direct').href = lineLink;
 
       const canvasList = document.getElementById('canvas-slots-list');
-      canvasList.innerHTML = selectedSlots.slice(0, 5).map(s => `
+      canvasList.innerHTML = releasedSlots.slice(0, 6).map(s => `
         <div class="p-2.5 bg-white/80 rounded-xl border border-black/5 flex justify-between items-center text-xs">
-          <span class="font-bold">${s}</span>
+          <span class="font-bold">${s.date}</span>
+          <span class="font-mono font-black text-sm">${s.time}</span>
           <span class="px-2 py-0.5 rounded-md font-bold text-[10px] bg-black/10">可約</span>
         </div>
       `).join('') || '<div class="text-center opacity-40 text-xs py-4">無選取空檔</div>';
@@ -283,18 +341,24 @@
     function renderClientSlots() {
       const list = document.getElementById('client-slots-list');
       const lineLink = document.getElementById('cfg-line-link').value;
-      if (selectedSlots.length === 0) {
+      if (releasedSlots.length === 0) {
         list.innerHTML = '<div class="text-center py-8 bg-white rounded-2xl border text-brand-400 text-xs">本週預約已額滿，歡迎直接洽詢！</div>';
         return;
       }
-      list.innerHTML = selectedSlots.map(s => `
-        <div class="p-3.5 bg-white rounded-2xl border border-brand-200 shadow-2xs flex justify-between items-center text-xs">
-          <div class="font-black text-brand-900 font-mono text-sm">${s}</div>
-          <a href="${lineLink}" target="_blank" class="px-3.5 py-1.5 bg-[#8C7355] text-white rounded-xl font-bold hover:bg-[#7A6246] transition">
-            預約此時段
-          </a>
-        </div>
-      `).join('');
+      list.innerHTML = releasedSlots.map(s => {
+        const lineMsg = encodeURIComponent(`您好！我想預約【${s.date} ${s.time}】，請問還可以預約嗎？`);
+        return `
+          <div class="p-3.5 bg-white rounded-2xl border border-brand-200 shadow-2xs flex justify-between items-center text-xs">
+            <div>
+              <div class="font-bold text-gray-500 text-[10.5px]">${s.date}</div>
+              <div class="font-black text-brand-900 font-mono text-base">${s.time}</div>
+            </div>
+            <a href="${lineLink}${lineLink.includes('?') ? '&' : '?'}text=${lineMsg}" target="_blank" class="px-3.5 py-2 bg-[#8C7355] text-white rounded-xl font-bold hover:bg-[#7A6246] transition shadow-xs">
+              預約此時段
+            </a>
+          </div>
+        `;
+      }).join('');
     }
 
     function downloadIGStory() {

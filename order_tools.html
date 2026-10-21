@@ -1,242 +1,808 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>希貝兒美業數位小工具 | 專為美甲、美睫、美容打造的營運省時神器</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>希貝兒美業微工具系列 | 專為美業現場打造的營運利器</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#FAF8F5', 100: '#F5EFE6', 200: '#EBE3D5', 300: '#D5C7B5',
+              400: '#B5A08A', 500: '#8C7355', 600: '#735C43', 700: '#5C4834',
+              800: '#473626', 900: '#2E2217'
+            }
+          },
+          fontFamily: {
+            sans: ['Noto Sans TC', 'sans-serif'],
+            serif: ['Playfair Display', 'serif']
+          }
+        }
+      }
+    };
+  </script>
   <style>
-    :root {
-      --primary: #c49a6c;
-      --primary-dark: #9f7547;
-      --bg: #faf7f2;
-      --card-bg: #ffffff;
-      --text-main: #332d29;
-      --text-muted: #7d7571;
-      --accent-badge: #d97706;
-      --border-color: #ece5dc;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Noto Sans TC', sans-serif; }
-    body { background-color: var(--bg); color: var(--text-main); line-height: 1.6; }
-    header { text-align: center; padding: 60px 20px 40px; max-width: 800px; margin: 0 auto; }
-    .brand-tag { font-family: 'Playfair Display', serif; letter-spacing: 2px; font-size: 0.95rem; color: var(--primary-dark); margin-bottom: 12px; text-transform: uppercase; font-weight: 600; }
-    h1 { font-size: 2.2rem; font-weight: 700; line-height: 1.35; margin-bottom: 16px; color: #2b2520; }
-    p.hero-desc { font-size: 1.05rem; color: var(--text-muted); max-width: 600px; margin: 0 auto 30px; }
-    .badge-highlight { display: inline-block; background: #fbf0e4; color: var(--primary-dark); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; margin-bottom: 20px; border: 1px solid #ebd9c8; }
-    .container { max-width: 960px; margin: 0 auto; padding: 0 20px 80px; }
-    .section-title { text-align: center; font-size: 1.5rem; margin: 40px 0 25px; position: relative; }
-    .section-title::after { content: ''; display: block; width: 40px; height: 2px; background: var(--primary); margin: 8px auto 0; }
-    .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 50px; }
-    .tool-card { background: var(--card-bg); border-radius: 16px; padding: 26px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; }
-    .tool-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-    .tool-title { font-size: 1.15rem; font-weight: 700; color: #222; }
-    .tool-price { font-size: 1.3rem; font-weight: 800; color: var(--primary-dark); }
-    .tool-pain { font-size: 0.85rem; background: #f6f5f3; padding: 8px 12px; border-radius: 8px; color: #665f59; margin-bottom: 14px; }
-    .tool-features { list-style: none; font-size: 0.9rem; margin-bottom: 20px; color: #555; }
-    .tool-features li { margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-    .tool-features li::before { content: '✓'; color: var(--primary); font-weight: bold; }
-    .bundles-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 50px; }
-    @media (max-width: 680px) { .bundles-container { grid-template-columns: 1fr; } }
-    .bundle-card { background: linear-gradient(135deg, #fff 0%, #fbf8f5 100%); border: 2px solid var(--primary); border-radius: 16px; padding: 25px; position: relative; cursor: pointer; }
-    .bundle-badge { position: absolute; top: -12px; right: 20px; background: var(--accent-badge); color: #fff; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 12px; }
-    .bundle-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 6px; }
-    .bundle-price-wrap { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
-    .bundle-price { font-size: 1.8rem; font-weight: 800; color: var(--primary-dark); }
-    .bundle-origin-price { text-decoration: line-through; font-size: 0.95rem; color: #a19b96; }
-    .checkout-box { background: #fff; border-radius: 20px; padding: 35px; border: 1px solid var(--border-color); box-shadow: 0 8px 30px rgba(0,0,0,0.05); margin-bottom: 60px; }
-    .checkout-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 20px; }
-    .option-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border: 1px solid #eee; border-radius: 10px; margin-bottom: 10px; cursor: pointer; }
-    .option-item.active { border-color: var(--primary); background: #fdfaf6; }
-    .option-left { display: flex; align-items: center; gap: 12px; font-weight: 500; font-size: 0.95rem; }
-    .option-price { font-weight: 700; color: var(--primary-dark); }
-    .form-group { margin-top: 18px; }
-    .form-group label { display: block; font-size: 0.88rem; font-weight: 600; margin-bottom: 6px; color: #555; }
-    .form-control { width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem; outline: none; }
-    .total-checkout-bar { margin-top: 25px; padding-top: 20px; border-top: 2px dashed #eee; display: flex; justify-content: space-between; align-items: center; }
-    .total-price-num { font-size: 2.2rem; font-weight: 800; color: var(--primary-dark); }
-    .btn-buy { width: 100%; padding: 16px; background: var(--text-main); color: #fff; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 700; cursor: pointer; margin-top: 20px; }
-    .system-banner { background: linear-gradient(135deg, #2d2621 0%, #1f1a17 100%); color: #fff; border-radius: 20px; padding: 40px; position: relative; overflow: hidden; }
-    .banner-badge { display: inline-block; background: var(--primary); color: #fff; padding: 4px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; margin-bottom: 15px; }
-    .system-title { font-size: 1.8rem; font-weight: 700; margin-bottom: 12px; }
-    .system-desc { font-size: 0.95rem; color: #cfc6be; margin-bottom: 20px; max-width: 650px; line-height: 1.6; }
-    .upgrade-guarantee { background: rgba(255,255,255,0.08); border-left: 4px solid var(--primary); padding: 12px 18px; border-radius: 0 8px 8px 0; margin-bottom: 25px; font-size: 0.92rem; color: #f3eae2; }
-    .btn-system-link { display: inline-block; padding: 14px 28px; background: var(--primary); color: #fff; text-decoration: none; font-weight: 700; border-radius: 10px; font-size: 1rem; }
-    footer { text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 30px 20px; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body>
+<body class="bg-brand-50 text-brand-900 antialiased selection:bg-brand-200">
 
-  <header>
-    <div class="brand-tag">Sibyl Design · 希貝兒美業數位管家</div>
-    <div class="badge-highlight">✨ 告別手動排版與重複私訊，買斷免綁約</div>
-    <h1>美業小資專屬營運神器<br>用一杯飲品的預算，換回每天 1 小時</h1>
-    <p class="hero-desc">不需要花大錢租昂貴系統，精準選購你最需要的功能模組。手機隨開隨用、永久買斷零負擔！</p>
-  </header>
-
-  <div class="container">
-    <div class="section-title">熱門單項工具（終身買斷）</div>
-    <div class="tools-grid">
-      <div class="tool-card">
-        <div>
-          <div class="tool-header"><div class="tool-title">📸 IG 限動空檔生圖器</div><div class="tool-price">$490</div></div>
-          <div class="tool-pain">手動用 Canva 慢慢改空檔太花時間</div>
-          <ul class="tool-features"><li>自選 30/60 分鐘時段</li><li>4 款美業熱門風格切換</li><li>一鍵產出 9:16 限動美圖</li></ul>
+  <!-- 頂部導航 -->
+  <nav class="bg-white/95 backdrop-blur-md border-b border-brand-200 sticky top-0 z-40 px-5 py-3.5">
+    <div class="max-w-5xl mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-brand-500 text-white flex items-center justify-center text-sm shadow-xs">
+          <i class="fa-solid fa-gem"></i>
         </div>
-        <button class="btn-buy" style="margin-top:15px; padding:10px; font-size:0.9rem;" onclick="quickSelect('tool_slot')">加入訂購清單</button>
+        <div>
+          <span class="font-serif tracking-wider font-bold text-sm text-brand-900 block leading-tight">SIBYL DESIGN</span>
+          <span class="text-[9.5px] text-brand-400 font-mono tracking-widest uppercase block">Micro-Tools Solution</span>
+        </div>
       </div>
-
-      <div class="tool-card">
-        <div>
-          <div class="tool-header"><div class="tool-title">💰 極簡快速結帳記帳</div><div class="tool-price">$690</div></div>
-          <div class="tool-pain">每天算錢記帳好繁瑣、想看營收狀況</div>
-          <ul class="tool-features"><li>點選手部足部快速開單</li><li>即時顯示今日與本月營收</li><li>打中美業老闆成就感</li></ul>
-        </div>
-        <button class="btn-buy" style="margin-top:15px; padding:10px; font-size:0.9rem;" onclick="quickSelect('tool_pos')">加入訂購清單</button>
-      </div>
-
-      <div class="tool-card">
-        <div>
-          <div class="tool-header"><div class="tool-title">📋 服務報價試算器</div><div class="tool-price">$890</div></div>
-          <div class="tool-pain">客人 IG 私訊狂問價格回覆到心累</div>
-          <ul class="tool-features"><li>客人自主勾選項目與指頭數</li><li>自動即時加總預估金額</li><li>一鍵複製明細回傳 LINE</li></ul>
-        </div>
-        <button class="btn-buy" style="margin-top:15px; padding:10px; font-size:0.9rem;" onclick="quickSelect('tool_quote')">加入訂購清單</button>
-      </div>
-
-      <div class="tool-card">
-        <div>
-          <div class="tool-header"><div class="tool-title">💳 數位會員集點卡</div><div class="tool-price">$1,490</div></div>
-          <div class="tool-pain">紙本集點卡客人老是忘記帶、弄丟</div>
-          <ul class="tool-features"><li>掃 QR Code 輸入手機秒查點數</li><li>店家 PIN 碼一鍵蓋章加點/扣點</li><li>免下載 APP，瀏覽器即用</li></ul>
-        </div>
-        <button class="btn-buy" style="margin-top:15px; padding:10px; font-size:0.9rem;" onclick="quickSelect('tool_loyalty')">加入訂購清單</button>
-      </div>
-
-      <div class="tool-card">
-        <div>
-          <div class="tool-header"><div class="tool-title">⏰ LINE 預約防放鳥</div><div class="tool-price">$1,680</div></div>
-          <div class="tool-pain">客人忘記預約 No-show 損失慘重</div>
-          <ul class="tool-features"><li>預約前一日自動溫馨推播</li><li>連結 Google 試算表排程發送</li><li>救回 1 個客人就立刻回本</li></ul>
-        </div>
-        <button class="btn-buy" style="margin-top:15px; padding:10px; font-size:0.9rem;" onclick="quickSelect('tool_reminder')">加入訂購清單</button>
-      </div>
-
-      <div class="tool-card">
-        <div>
-          <div class="tool-header"><div class="tool-title">📊 全日排程甘特圖</div><div class="tool-price">$1,980</div></div>
-          <div class="tool-pain">多專員排班與插單總是容易撞期</div>
-          <ul class="tool-features"><li>類 Excel 視覺化全日甘特圖</li><li>橫向滑動日期掌握各專員空檔</li><li>點擊色塊即時查看與管理</li></ul>
-        </div>
-        <button class="btn-buy" style="margin-top:15px; padding:10px; font-size:0.9rem;" onclick="quickSelect('tool_overview')">加入訂購清單</button>
-      </div>
-
-      <div class="tool-card">
-        <div>
-          <div class="tool-header"><div class="tool-title">📝 數位定型化契約</div><div class="tool-price">$2,490</div></div>
-          <div class="tool-pain">口頭約定常有糾紛，缺乏法律保障</div>
-          <ul class="tool-features"><li>內建衛福部/美業標準條款</li><li>手機直接進行親筆數位簽名</li><li>自動寄發存證副本至信箱</li></ul>
-        </div>
-        <button class="btn-buy" style="margin-top:15px; padding:10px; font-size:0.9rem;" onclick="quickSelect('tool_contract')">加入訂購清單</button>
+      <div class="flex items-center gap-2">
+        <a href="https://line.me/R/ti/p/@480kqjoj" target="_blank" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition shadow-xs flex items-center gap-1.5 animate-pulse">
+          <i class="fa-brands fa-line text-sm"></i>
+          <span>免費領取試用連結</span>
+        </a>
       </div>
     </div>
+  </nav>
 
-    <!-- 組合包方案 -->
-    <div class="section-title">超值限時組合包</div>
-    <div class="bundles-container">
-      <div class="bundle-card" onclick="applyBundle('bundle_daily')">
-        <div class="bundle-badge">省 $390</div>
-        <div class="bundle-title">☕ 日常營運省時包</div>
-        <div class="bundle-price-wrap"><div class="bundle-price">$990</div><div class="bundle-origin-price">原價 $1,380</div></div>
-        <p style="font-size:0.88rem; color:#666;">包含：<strong>IG 空檔生圖器 + 服務報價試算器</strong>。</p>
-      </div>
-      <div class="bundle-card" onclick="applyBundle('bundle_all')">
-        <div class="bundle-badge">超值大滿貫</div>
-        <div class="bundle-title">👑 小資美業旗艦包</div>
-        <div class="bundle-price-wrap"><div class="bundle-price">$2,990</div><div class="bundle-origin-price">原價 $4,550</div></div>
-        <p style="font-size:0.88rem; color:#666;">精選核心工具一次收齊，全方位提升營運效率。</p>
-      </div>
-    </div>
-
-    <!-- 結帳面板 -->
-    <div class="checkout-box" id="checkoutSection">
-      <div class="checkout-title">🛒 選擇你的訂購項目</div>
-      <div class="option-item" onclick="toggleOption('tool_slot')"><div class="option-left"><input type="checkbox" id="check_tool_slot" value="490"><label>📸 IG 限動空檔生圖器</label></div><div class="option-price">$490</div></div>
-      <div class="option-item" onclick="toggleOption('tool_pos')"><div class="option-left"><input type="checkbox" id="check_tool_pos" value="690"><label>💰 極簡快速結帳小幫手</label></div><div class="option-price">$690</div></div>
-      <div class="option-item" onclick="toggleOption('tool_quote')"><div class="option-left"><input type="checkbox" id="check_tool_quote" value="890"><label>📋 服務報價試算器</label></div><div class="option-price">$890</div></div>
-      <div class="option-item" onclick="toggleOption('tool_loyalty')"><div class="option-left"><input type="checkbox" id="check_tool_loyalty" value="1490"><label>💳 數位會員集點卡</label></div><div class="option-price">$1,490</div></div>
-      <div class="option-item" onclick="toggleOption('tool_reminder')"><div class="option-left"><input type="checkbox" id="check_tool_reminder" value="1680"><label>⏰ LINE 預約防放鳥推播</label></div><div class="option-price">$1,680</div></div>
-      <div class="option-item" onclick="toggleOption('tool_overview')"><div class="option-left"><input type="checkbox" id="check_tool_overview" value="1980"><label>📊 全日排程甘特圖總覽</label></div><div class="option-price">$1,980</div></div>
-      <div class="option-item" onclick="toggleOption('tool_contract')"><div class="option-left"><input type="checkbox" id="check_tool_contract" value="2490"><label>📝 數位定型化契約簽署</label></div><div class="option-price">$2,490</div></div>
-
-      <div style="margin-top:25px;">
-        <div class="form-group"><label>店家 / 品牌名稱 *</label><input type="text" id="orderStore" class="form-control" placeholder="例如：莫莫美甲 MoMo Studio"></div>
-        <div class="form-group"><label>官方 LINE ID 或 聯絡電話 *</label><input type="text" id="orderContact" class="form-control" placeholder="開通工具專屬授權使用"></div>
-      </div>
-
-      <div class="total-checkout-bar">
-        <div><div style="font-size:1.1rem; font-weight:600;">結帳總金額</div><div style="font-size:0.8rem; color:#888;">終身授權 · 附操作教學影片</div></div>
-        <div class="total-price-num">$<span id="displayTotal">0</span></div>
-      </div>
-
-      <button class="btn-buy" onclick="submitOrder()">💬 立即送出訂購（前往官方 LINE 開通）</button>
-    </div>
-
-    <!-- 完整版預約系統引流 -->
-    <div class="system-banner">
-      <div class="banner-badge">希貝兒旗艦解決方案</div>
-      <div class="system-title">需要全自動預約排程與顧客管理？</div>
-      <p class="system-desc">擁有專屬品牌獨立預約網頁、自動防撞期行事曆與完整顧客後台，歡迎了解我們的【希貝兒美業數位管家完整系統】（買斷制 $9,990 / 訂閱制 $680/月）。</p>
-      <div class="upgrade-guarantee">🛡️ <strong>【100% 全額折抵安心保證】</strong>今日購買任何單項工具，未來升級完整版系統時，<strong>您今日所支付的金額將全數 100% 折抵大系統費用</strong>！</div>
-      <a href="https://yourdomain.com/booking-system" class="btn-system-link" target="_blank">了解完整版美業系統介紹 ➔</a>
+  <!-- 醒目浮動條：領取各單品試用連結 -->
+  <div class="bg-emerald-50 border-b border-emerald-200 py-3 px-4 text-center">
+    <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-2 text-xs text-emerald-900">
+      <span class="font-bold flex items-center gap-1.5">
+        <i class="fa-solid fa-circle-exclamation text-emerald-600"></i>
+        <span>想先實測功能？全系列微工具皆支援免付費在線體驗！</span>
+      </span>
+      <a href="https://line.me/R/ti/p/@480kqjoj" target="_blank" class="inline-flex items-center gap-1 font-black text-emerald-700 underline hover:text-emerald-900">
+        <span>點此加入官方 LINE (@480kqjoj) 即刻領取各工具試用</span>
+        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+      </a>
     </div>
   </div>
 
-  <footer>© 2026 希貝兒設計所 Sibyl Design. All rights reserved.</footer>
+  <!-- 首頁 Header -->
+  <header class="py-14 md:py-18 px-5 text-center max-w-4xl mx-auto">
+    <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-brand-100 border border-brand-200 text-brand-700 text-xs font-bold mb-6">
+      <i class="fa-solid fa-check-circle text-[11px]"></i>
+      <span>一次買斷永久持有 · 無綁約壓力 · 免安裝手機隨開即用</span>
+    </div>
+    <h1 class="text-2xl md:text-4xl font-black text-brand-900 tracking-tight leading-snug md:leading-tight mb-5">
+      終身買斷的輕量數位資產<br>
+      精準擊破美業現場最耗時的 7 大痛點
+    </h1>
+    <p class="text-xs md:text-sm text-brand-400 max-w-2xl mx-auto leading-relaxed mb-6">
+      專為美甲、美睫、美容、美髮、寵美現場實戰研發。不需要繁瑣適應期，針對現場最卡關的環節單點升級，徹底終結重複報價、手動排版空檔與客人臨時放鳥。
+    </p>
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+      <a href="https://line.me/R/ti/p/@480kqjoj" target="_blank" class="w-full sm:w-auto px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-xs transition shadow-md flex items-center justify-center gap-2">
+        <i class="fa-brands fa-line text-base"></i>
+        <span>聯繫客服領取各工具試用連結</span>
+      </a>
+      <a href="#single-tools" class="w-full sm:w-auto px-6 py-3 bg-white border border-brand-300 hover:border-brand-500 text-brand-800 font-bold rounded-2xl text-xs transition shadow-xs flex items-center justify-center gap-2">
+        <i class="fa-solid fa-arrow-down text-brand-500"></i>
+        <span>檢視工具功能與實戰解法</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- 1. 獨立單品微工具自由選購專區 (移至上方，直擊痛點) -->
+  <main id="single-tools" class="max-w-5xl mx-auto px-4 md:px-6 space-y-8 mb-16">
+    <div class="border-b border-brand-200 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-2">
+      <div>
+        <h2 class="text-lg font-bold text-brand-900 flex items-center gap-2">
+          <i class="fa-solid fa-screwdriver-wrench text-brand-500"></i>
+          <span>獨立微工具自由選購</span>
+        </h2>
+        <p class="text-xs text-brand-400 mt-0.5">直擊現場痛點，按需單選買斷，完全不強迫綁約</p>
+      </div>
+      <a href="https://line.me/R/ti/p/@480kqjoj" target="_blank" class="px-3.5 py-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 border border-emerald-300 text-xs font-bold rounded-xl transition flex items-center gap-1.5">
+        <i class="fa-brands fa-line text-sm"></i>
+        <span>聯繫客服領取各工具試用</span>
+      </a>
+    </div>
+
+    <div class="space-y-8">
+
+      <!-- 01. studio_slot.html -->
+      <section class="bg-white rounded-3xl border border-brand-200 p-6 md:p-8 shadow-sm">
+        <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 border-b border-brand-100 pb-5 mb-5">
+          <div class="flex items-center gap-3.5">
+            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center text-xl shrink-0">
+              <i class="fa-solid fa-camera-retro"></i>
+            </div>
+            <div>
+              <div class="text-[10px] font-mono text-brand-400 font-bold uppercase tracking-wider">Module 01</div>
+              <h3 class="text-lg font-bold text-brand-900">01. IG 限動空檔生圖與預約前台 </h3>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span class="text-xs text-gray-400 line-through">原價 NT$ 800</span>
+            <span class="text-2xl font-black font-mono text-brand-700">NT$ 490</span>
+            <span class="text-[10px] font-bold text-brand-400">/ 終身買斷</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs mb-5">
+          <div class="bg-rose-50/70 p-4 rounded-2xl border border-rose-200 space-y-1.5">
+            <div class="font-bold text-rose-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
+              <span>美業現場實戰痛點</span>
+            </div>
+            <p class="text-rose-900/80 leading-relaxed">
+              每週釋出空檔都要打開修圖軟體慢慢對齊改時間，繁瑣耗時；發了限動客人又一直在 LINE 逐句問「週六下午還有嗎？」，來回回覆耗盡精力，最後客人還說「那我再看看」。
+            </p>
+          </div>
+
+          <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200 space-y-1.5">
+            <div class="font-bold text-emerald-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-lightbulb text-emerald-600"></i>
+              <span>數位轉型解決方案</span>
+            </div>
+            <p class="text-emerald-900/80 leading-relaxed">
+              店家在後台選好日期區間與間隔，點選格子一秒生成高質感 9:16 IG 限動美圖；前台直接給客人查詢即時空檔，點擊指定時段自動帶入預約訊息跳轉官方 LINE，省去大量溝通時間。
+            </p>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-brand-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div class="flex items-center gap-3 text-xs">
+            <a href="https://line.me/R/ti/p/@480kqjoj" target="_blank" class="text-emerald-700 hover:text-emerald-900 font-bold underline flex items-center gap-1">
+              <i class="fa-brands fa-line text-sm"></i>
+              <span>聯繫客服領取本工具試用</span>
+            </a>
+          </div>
+          <button type="button" onclick="toggleCartTool('slot', 490, 'IG 限動空檔生圖器')" id="btn-add-slot" class="w-full sm:w-auto px-5 py-2.5 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-300 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-plus text-[10px]"></i>
+            <span>加入選購清單 (NT$ 490)</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- 02. pos.html -->
+      <section class="bg-white rounded-3xl border border-brand-200 p-6 md:p-8 shadow-sm">
+        <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 border-b border-brand-100 pb-5 mb-5">
+          <div class="flex items-center gap-3.5">
+            <div class="w-12 h-12 rounded-2xl bg-brand-100 text-brand-700 border border-brand-200 flex items-center justify-center text-xl shrink-0">
+              <i class="fa-solid fa-cash-register"></i>
+            </div>
+            <div>
+              <div class="text-[10px] font-mono text-brand-400 font-bold uppercase tracking-wider">Module 02</div>
+              <h3 class="text-lg font-bold text-brand-900">02. 極簡收銀小幫手與流水帳庫 </h3>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span class="text-xs text-gray-400 line-through">原價 NT$ 1,200</span>
+            <span class="text-2xl font-black font-mono text-brand-700">NT$ 690</span>
+            <span class="text-[10px] font-bold text-brand-400">/ 終身買斷</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs mb-5">
+          <div class="bg-rose-50/70 p-4 rounded-2xl border border-rose-200 space-y-1.5">
+            <div class="font-bold text-rose-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
+              <span>美業現場實戰痛點</span>
+            </div>
+            <p class="text-rose-900/80 leading-relaxed">
+              做完客人手寫便條紙容易弄丟，用計算機敲半天還怕算錯；客人問「我上次做哪款？多少錢？」翻帳本尷尬半天；複雜的大型 POS 系統對於小規模工作室來說功能繁雜且不易上手。
+            </p>
+          </div>
+
+          <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200 space-y-1.5">
+            <div class="font-bold text-emerald-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-lightbulb text-emerald-600"></i>
+              <span>數位轉型解決方案</span>
+            </div>
+            <p class="text-emerald-900/80 leading-relaxed">
+              手機打開就能結帳。自訂分類與現場加購項目，輸入手機 0.5 秒帶入舊客姓名與 LINE 稱呼，結帳自動覆寫最新客戶庫，即時累計今日與本月實收營業額，帳目一目了然。
+            </p>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-brand-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div class="flex items-center gap-3 text-xs">
+            <a href="https://line.me/R/ti/p/@480kqjoj" target="_blank" class="text-emerald-700 hover:text-emerald-900 font-bold underline flex items-center gap-1">
+              <i class="fa-brands fa-line text-sm"></i>
+              <span>聯繫客服領取本工具試用</span>
+            </a>
+          </div>
+          <button type="button" onclick="toggleCartTool('pos', 690, '極簡收銀小幫手')" id="btn-add-pos" class="w-full sm:w-auto px-5 py-2.5 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-300 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-plus text-[10px]"></i>
+            <span>加入選購清單 (NT$ 690)</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- 03. quote.html -->
+      <section class="bg-white rounded-3xl border border-brand-200 p-6 md:p-8 shadow-sm">
+        <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 border-b border-brand-100 pb-5 mb-5">
+          <div class="flex items-center gap-3.5">
+            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center text-xl shrink-0">
+              <i class="fa-solid fa-calculator"></i>
+            </div>
+            <div>
+              <div class="text-[10px] font-mono text-brand-400 font-bold uppercase tracking-wider">Module 03</div>
+              <h3 class="text-lg font-bold text-brand-900">03. 美業通用服務報價試算器 </h3>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span class="text-xs text-gray-400 line-through">原價 NT$ 1,500</span>
+            <span class="text-2xl font-black font-mono text-brand-700">NT$ 890</span>
+            <span class="text-[10px] font-bold text-brand-400">/ 終身買斷</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs mb-5">
+          <div class="bg-rose-50/70 p-4 rounded-2xl border border-rose-200 space-y-1.5">
+            <div class="font-bold text-rose-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
+              <span>美業現場實戰痛點</span>
+            </div>
+            <p class="text-rose-900/80 leading-relaxed">
+              客人傳圖狂問「這款做完多少錢？」，不同長度、卸除、彩繪指頭數與護理加價反覆說明，報完客人常已讀不回；現場結帳時又容易產生「當初沒講清楚」的價格認知落差。
+            </p>
+          </div>
+
+          <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200 space-y-1.5">
+            <div class="font-bold text-emerald-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-lightbulb text-emerald-600"></i>
+              <span>數位轉型解決方案</span>
+            </div>
+            <p class="text-emerald-900/80 leading-relaxed">
+              美髮、美容、美甲、寵美皆通用。頂部輪播 9:16 高清說明圖（自帶高斯模糊補底防破版），客人自主勾選基礎項目、加購護理與設計指數，系統即時加總，一鍵格式化複製跳轉 LINE，公開透明又省心。
+            </p>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-brand-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div class="flex items-center gap-3 text-xs">
+            <a href="https://line.me/R/ti/p/@480kqjoj" target="_blank" class="text-emerald-700 hover:text-emerald-900 font-bold underline flex items-center gap-1">
+              <i class="fa-brands fa-line text-sm"></i>
+              <span>聯繫客服領取本工具試用</span>
+            </a>
+          </div>
+          <button type="button" onclick="toggleCartTool('quote', 890, '美業服務報價試算器')" id="btn-add-quote" class="w-full sm:w-auto px-5 py-2.5 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-300 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-plus text-[10px]"></i>
+            <span>加入選購清單 (NT$ 890)</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- 04. loyalty.html -->
+      <section class="bg-white rounded-3xl border border-brand-200 p-6 md:p-8 shadow-sm">
+        <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 border-b border-brand-100 pb-5 mb-5">
+          <div class="flex items-center gap-3.5">
+            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center text-xl shrink-0">
+              <i class="fa-solid fa-stamp"></i>
+            </div>
+            <div>
+              <div class="text-[10px] font-mono text-brand-400 font-bold uppercase tracking-wider">Module 04</div>
+              <h3 class="text-lg font-bold text-brand-900">04. VIP 數位會員存摺 (集點/儲值/包卡) </h3>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span class="text-xs text-gray-400 line-through">原價 NT$ 2,500</span>
+            <span class="text-2xl font-black font-mono text-brand-700">NT$ 1,490</span>
+            <span class="text-[10px] font-bold text-brand-400">/ 終身買斷</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs mb-5">
+          <div class="bg-rose-50/70 p-4 rounded-2xl border border-rose-200 space-y-1.5">
+            <div class="font-bold text-rose-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
+              <span>美業現場實戰痛點</span>
+            </div>
+            <p class="text-rose-900/80 leading-relaxed">
+              印紙本集點卡客人永遠忘記帶或弄丟，難以發揮回購效果；想推預付儲值金或療程包卡提高客單價，手寫紙卡容易被質疑記錯堂數與金額，店家信任感大打折扣。
+            </p>
+          </div>
+
+          <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200 space-y-1.5">
+            <div class="font-bold text-emerald-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-lightbulb text-emerald-600"></i>
+              <span>數位轉型解決方案</span>
+            </div>
+            <p class="text-emerald-900/80 leading-relaxed">
+              原版經典黑灰燙金奢華卡面（白底清爽外圍），顧客輸入手機秒查「集點進度、儲值金餘額、次數包卡堂數」三大資產；店長專屬 PIN 碼一鍵蓋章、扣款或核銷，免載 APP 即可建立品牌尊榮感。
+            </p>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-brand-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div class="flex items-center gap-3 text-xs">
+            <a href="https://line.me/R/ti/p/@480kqjoj" target="_blank" class="text-emerald-700 hover:text-emerald-900 font-bold underline flex items-center gap-1">
+              <i class="fa-brands fa-line text-sm"></i>
+              <span>聯繫客服領取本工具試用</span>
+            </a>
+          </div>
+          <button type="button" onclick="toggleCartTool('loyalty', 1490, 'VIP 數位會員存摺')" id="btn-add-loyalty" class="w-full sm:w-auto px-5 py-2.5 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-300 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-plus text-[10px]"></i>
+            <span>加入選購清單 (NT$ 1,490)</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- 05. reminder.gs -->
+      <section class="bg-white rounded-3xl border border-brand-200 p-6 md:p-8 shadow-sm">
+        <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 border-b border-brand-100 pb-5 mb-5">
+          <div class="flex items-center gap-3.5">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center text-xl shrink-0">
+              <i class="fa-brands fa-line"></i>
+            </div>
+            <div>
+              <div class="text-[10px] font-mono text-brand-400 font-bold uppercase tracking-wider">Module 05</div>
+              <h3 class="text-lg font-bold text-brand-900">05. LINE 智慧防放鳥自動排程推播 (reminder.gs)</h3>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span class="text-xs text-gray-400 line-through">原價 NT$ 3,000</span>
+            <span class="text-2xl font-black font-mono text-brand-700">NT$ 1,680</span>
+            <span class="text-[10px] font-bold text-brand-400">/ 終身買斷</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs mb-5">
+          <div class="bg-rose-50/70 p-4 rounded-2xl border border-rose-200 space-y-1.5">
+            <div class="font-bold text-rose-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
+              <span>美業現場實戰痛點</span>
+            </div>
+            <p class="text-rose-900/80 leading-relaxed">
+              客人預約後臨時忘記，時段空置直接損失千元營業額；每天下班都要人工逐一傳訊提醒明日客人，下班時間全被雜事吃光，忘記傳又提心吊膽。
+            </p>
+          </div>
+
+          <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200 space-y-1.5">
+            <div class="font-bold text-emerald-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-lightbulb text-emerald-600"></i>
+              <span>數位轉型解決方案</span>
+            </div>
+            <p class="text-emerald-900/80 leading-relaxed">
+              輕量 Google Apps Script 串接試算表與 LINE Messaging API，每晚 20:00 自動背景掃描並推播溫馨提醒卡片至客人 LINE，救回一個客人就立刻回本！
+            </p>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-brand-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div class="flex items-center gap-3 text-xs">
+            <a href="https://line.me/R/ti/p/@480kqjoj" target="_blank" class="text-emerald-700 hover:text-emerald-900 font-bold underline flex items-center gap-1">
+              <i class="fa-brands fa-line text-sm"></i>
+              <span>聯繫客服領取本工具試用</span>
+            </a>
+          </div>
+          <button type="button" onclick="toggleCartTool('reminder', 1680, 'LINE 預約防放鳥推播')" id="btn-add-reminder" class="w-full sm:w-auto px-5 py-2.5 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-300 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-plus text-[10px]"></i>
+            <span>加入選購清單 (NT$ 1,680)</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- 06. overview.html -->
+      <section class="bg-white rounded-3xl border border-brand-200 p-6 md:p-8 shadow-sm">
+        <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 border-b border-brand-100 pb-5 mb-5">
+          <div class="flex items-center gap-3.5">
+            <div class="w-12 h-12 rounded-2xl bg-brand-100 text-brand-700 border border-brand-200 flex items-center justify-center text-xl shrink-0">
+              <i class="fa-solid fa-table-cells"></i>
+            </div>
+            <div>
+              <div class="text-[10px] font-mono text-brand-400 font-bold uppercase tracking-wider">Module 06</div>
+              <h3 class="text-lg font-bold text-brand-900">06. 全日排程總覽與席位防撞</h3>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span class="text-xs text-gray-400 line-through">原價 NT$ 3,600</span>
+            <span class="text-2xl font-black font-mono text-brand-700">NT$ 1,980</span>
+            <span class="text-[10px] font-bold text-brand-400">/ 終身買斷</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs mb-5">
+          <div class="bg-rose-50/70 p-4 rounded-2xl border border-rose-200 space-y-1.5">
+            <div class="font-bold text-rose-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
+              <span>美業現場實戰痛點</span>
+            </div>
+            <p class="text-rose-900/80 leading-relaxed">
+              多專員排程混亂，燙染靜置等待期想插單剪髮又怕時間打架；沖水椅、按摩沙發等限制設備大家搶著用，導致客人乾等生氣，整體服務體驗大打折扣。
+            </p>
+          </div>
+
+          <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200 space-y-1.5">
+            <div class="font-bold text-emerald-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-lightbulb text-emerald-600"></i>
+              <span>數位轉型解決方案</span>
+            </div>
+            <p class="text-emerald-900/80 leading-relaxed">
+              專員代號化直條排列，點空白格輸入手機秒帶顧客插單；獨家 Group A（等待期允許插單）與 Group B（全程專屬鎖死）雙單並排防遮擋算法，設備上限自動防撞鎖定！
+            </p>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-brand-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div class="flex items-center gap-3 text-xs">
+            <a href="https://line.me/R/ti/p/@480kqjoj" target="_blank" class="text-emerald-700 hover:text-emerald-900 font-bold underline flex items-center gap-1">
+              <i class="fa-brands fa-line text-sm"></i>
+              <span>聯繫客服領取本工具試用</span>
+            </a>
+          </div>
+          <button type="button" onclick="toggleCartTool('overview', 1980, '全日排程總覽與席位防撞')" id="btn-add-overview" class="w-full sm:w-auto px-5 py-2.5 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-300 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-plus text-[10px]"></i>
+            <span>加入選購清單 (NT$ 1,980)</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- 07. contract.html -->
+      <section class="bg-white rounded-3xl border border-brand-200 p-6 md:p-8 shadow-sm">
+        <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 border-b border-brand-100 pb-5 mb-5">
+          <div class="flex items-center gap-3.5">
+            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center text-xl shrink-0">
+              <i class="fa-solid fa-file-contract"></i>
+            </div>
+            <div>
+              <div class="text-[10px] font-mono text-brand-400 font-bold uppercase tracking-wider">Module 07</div>
+              <h3 class="text-lg font-bold text-brand-900">07. 數位定型化契約與電子存證 </h3>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span class="text-xs text-gray-400 line-through">原價 NT$ 4,500</span>
+            <span class="text-2xl font-black font-mono text-brand-700">NT$ 2,490</span>
+            <span class="text-[10px] font-bold text-brand-400">/ 終身買斷</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs mb-5">
+          <div class="bg-rose-50/70 p-4 rounded-2xl border border-rose-200 space-y-1.5">
+            <div class="font-bold text-rose-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
+              <span>美業現場實戰痛點</span>
+            </div>
+            <p class="text-rose-900/80 leading-relaxed">
+              漂髮、紋繡、高額儲值僅靠口頭約定，日後過敏或退費糾紛店家百口莫辯；紙本合約一疊疊容易泛黃遺失，簽完難以調閱，缺乏專業法律防護力。
+            </p>
+          </div>
+
+          <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200 space-y-1.5">
+            <div class="font-bold text-emerald-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-lightbulb text-emerald-600"></i>
+              <span>數位轉型解決方案</span>
+            </div>
+            <p class="text-emerald-900/80 leading-relaxed">
+              清楚顯示沙龍品牌抬頭與衛福部官方標準範本，手機就能讓客人親筆手寫簽名，簽署完成系統秒寄發包含雙方店名、條款、簽名圖與時間戳記的正式電子存證信件。
+            </p>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-brand-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div class="flex items-center gap-3 text-xs">
+            <a href="https://line.me/R/ti/p/@480kqjoj" target="_blank" class="text-emerald-700 hover:text-emerald-900 font-bold underline flex items-center gap-1">
+              <i class="fa-brands fa-line text-sm"></i>
+              <span>聯繫客服領取本工具試用</span>
+            </a>
+          </div>
+          <button type="button" onclick="toggleCartTool('contract', 2490, '數位定型化契約存證')" id="btn-add-contract" class="w-full sm:w-auto px-5 py-2.5 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-300 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-plus text-[10px]"></i>
+            <span>加入選購清單 (NT$ 2,490)</span>
+          </button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- 2. 精選雙入超值組合包專區 (移至單品下方，作為推薦) -->
+  <section class="max-w-5xl mx-auto px-4 md:px-6 mb-16">
+    <div class="text-center space-y-1 mb-8">
+      <h2 class="text-xl font-black text-brand-900 flex items-center justify-center gap-2">
+        <i class="fa-solid fa-layer-group text-brand-500"></i>
+        <span>超值精選實戰組合包</span>
+      </h2>
+      <p class="text-xs text-brand-400">依據美業現場最核心的兩大痛點情境精準搭配，免去零散切換的煩惱</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- 組合 A -->
+      <div class="bg-white p-6 md:p-8 rounded-3xl border-2 border-brand-300 shadow-sm relative flex flex-col justify-between">
+        <div class="space-y-3">
+          <div class="inline-block px-3 py-1 bg-brand-100 text-brand-800 rounded-lg text-[10.5px] font-bold">
+            <i class="fa-solid fa-bolt mr-1"></i> 獲客引流必備
+          </div>
+          <h3 class="text-lg font-bold text-brand-900">日常引流省時組 (空檔生圖 + 報價試算)</h3>
+          <p class="text-xs text-brand-400 leading-relaxed">
+            全面解決 IG 限動繁瑣排版與客人私訊反覆問價的痛點。客人自主點選算好金額與空檔，大幅縮短前置對話時間。
+          </p>
+          <ul class="text-xs text-brand-700 space-y-2 pt-2">
+            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-brand-500 text-[10px]"></i> 模組 01：IG 限動空檔生圖與預約前台</li>
+            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-brand-500 text-[10px]"></i> 模組 03：美業全通用服務報價試算器</li>
+          </ul>
+        </div>
+
+        <div class="pt-6 border-t border-brand-100 mt-6">
+          <div class="flex items-baseline gap-2 mb-3">
+            <span class="text-xs text-gray-400 line-through">原價 NT$ 1,380</span>
+            <span class="text-2xl font-black font-mono text-brand-700">NT$ 990</span>
+            <span class="text-[10px] text-brand-400 font-bold">/ 終身買斷</span>
+          </div>
+          <button type="button" onclick="applyPackage('daily')" class="w-full py-3 bg-brand-700 hover:bg-brand-800 text-white font-bold rounded-xl text-xs transition shadow-xs">
+            選購日常引流組 (NT$ 990)
+          </button>
+        </div>
+      </div>
+
+      <!-- 組合 B -->
+      <div class="bg-white p-6 md:p-8 rounded-3xl border-2 border-brand-400 shadow-sm relative flex flex-col justify-between">
+        <div class="space-y-3">
+          <div class="inline-block px-3 py-1 bg-brand-700 text-white rounded-lg text-[10.5px] font-bold">
+            <i class="fa-solid fa-shield-halved mr-1"></i> 門市營運守護
+          </div>
+          <h3 class="text-lg font-bold text-brand-900">門市營運防漏組 (收銀 + 會員存摺 + LINE防放鳥)</h3>
+          <p class="text-xs text-brand-400 leading-relaxed">
+            現場快速手機收銀記帳、手機號碼秒查 VIP 黑金存摺（集點/儲值/包卡），搭配前晚自動 LINE 推播，有效降低放鳥率。
+          </p>
+          <ul class="text-xs text-brand-700 space-y-2 pt-2">
+            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-brand-500 text-[10px]"></i> 模組 02：極簡收銀小幫手與流水帳庫</li>
+            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-brand-500 text-[10px]"></i> 模組 04：VIP 數位會員存摺 (集點/儲值/包卡)</li>
+            <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-brand-500 text-[10px]"></i> 模組 05：LINE 智慧防放鳥自動排程推播</li>
+          </ul>
+        </div>
+
+        <div class="pt-6 border-t border-brand-100 mt-6">
+          <div class="flex items-baseline gap-2 mb-3">
+            <span class="text-xs text-gray-400 line-through">原價 NT$ 3,860</span>
+            <span class="text-2xl font-black font-mono text-brand-700">NT$ 2,980</span>
+            <span class="text-[10px] text-brand-400 font-bold">/ 終身買斷</span>
+          </div>
+          <button type="button" onclick="applyPackage('operation')" class="w-full py-3 bg-[#8C7355] hover:bg-[#7A6246] text-white font-bold rounded-xl text-xs transition shadow-xs">
+            選購門市防漏組 (NT$ 2,980)
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. 旗艦版完整大系統推廣區 (強大階梯式升級推薦) -->
+  <section class="max-w-5xl mx-auto px-4 md:px-6 mb-16">
+    <div class="bg-gradient-to-br from-brand-900 via-stone-900 to-black text-white p-7 md:p-10 rounded-3xl shadow-xl relative overflow-hidden">
+      <div class="absolute -right-20 -bottom-20 w-80 h-80 rounded-full bg-brand-500/10 blur-3xl pointer-events-none"></div>
+
+      <div class="max-w-2xl space-y-4 relative z-10">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-400/20 border border-amber-400/40 text-amber-200 rounded-lg text-xs font-bold font-mono">
+          <i class="fa-solid fa-crown text-[10px]"></i>
+          <span>FLAGSHIP ALL-IN-ONE SOLUTION</span>
+        </div>
+        <h2 class="text-xl md:text-3xl font-black text-white leading-tight">
+          需要全方位無縫串接？<br>
+          美業沙龍 ＆ 寵物美容住宿預約及管理後台旗艦版
+        </h2>
+        <p class="text-xs md:text-sm text-stone-300 leading-relaxed">
+          若店內有多位設計師與限制設備，單一微工具切換難免產生撕裂感。市場上委託客製化開發此類全功能預約排程系統市值高達 <b class="text-amber-300 font-mono text-base">NT$ 48,000 ～ NT$ 68,000 元</b>！希貝兒旗艦系統將預約前台、席位防撞排程、會員履歷與自動通知一體化串聯，每月只要少許預算，全店營運自動運轉。
+        </p>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 text-[11px] font-bold text-stone-200">
+          <div class="flex items-center gap-1.5"><i class="fa-solid fa-check text-amber-400"></i> 客戶前台自主預約</div>
+          <div class="flex items-center gap-1.5"><i class="fa-solid fa-check text-amber-400"></i> 多專員排程與插單</div>
+          <div class="flex items-center gap-1.5"><i class="fa-solid fa-check text-amber-400"></i> 席位設備智慧防撞</div>
+          <div class="flex items-center gap-1.5"><i class="fa-solid fa-check text-amber-400"></i> 未來新功能免費升級</div>
+        </div>
+
+        <div class="pt-4 flex flex-col sm:flex-row sm:items-center gap-4">
+          <div>
+            <div class="text-[10px] text-stone-400">全方位智慧管理方案</div>
+            <div class="text-2xl font-black font-mono text-amber-300">每月只要 NT$ 680</div>
+          </div>
+          <a href="https://salon.heysibyl.com/order_beauty.html" target="_blank" class="px-6 py-3.5 bg-amber-500 hover:bg-amber-600 text-stone-900 font-black rounded-2xl text-xs transition shadow-lg flex items-center justify-center gap-2">
+            <span>了解旗艦版系統詳情與申請開通</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 結帳填表區 -->
+  <section id="order-section" class="max-w-5xl mx-auto px-4 md:px-6 mb-16">
+    <div class="bg-white p-6 md:p-8 rounded-3xl border border-brand-200 shadow-sm space-y-5">
+      <div class="border-b border-brand-100 pb-3">
+        <h2 class="text-lg font-bold text-brand-900 flex items-center gap-2">
+          <i class="fa-solid fa-cart-shopping text-brand-500"></i>
+          <span>確認您的選購清單</span>
+        </h2>
+        <p class="text-xs text-brand-400 mt-0.5">確認購買項目後，直接前往官方 LINE 開通授權或索取專屬 PAYUNi 付款連結</p>
+      </div>
+
+      <!-- 已選清單表格 -->
+      <div id="cart-items-display" class="space-y-2 text-xs">
+        <div class="text-center py-6 text-brand-400">尚未選取任何工具，請點選上方按鈕加入</div>
+      </div>
+
+      <!-- 表單資料填寫 -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+        <div>
+          <label class="block font-bold text-brand-800 text-xs mb-1">沙龍門市 / 品牌名稱 *</label>
+          <input type="text" id="order-store-name" placeholder="例: 艾莉絲美甲沙龍" class="w-full p-2.5 rounded-xl border border-brand-200 bg-brand-50/50 text-xs outline-none focus:border-brand-500 font-bold">
+        </div>
+        <div>
+          <label class="block font-bold text-brand-800 text-xs mb-1">官方 LINE ID 或聯絡電話 *</label>
+          <input type="text" id="order-contact" placeholder="開通授權代碼與發送操作指南" class="w-full p-2.5 rounded-xl border border-brand-200 bg-brand-50/50 text-xs outline-none focus:border-brand-500 font-mono">
+        </div>
+      </div>
+
+      <!-- 總額與結帳按鈕 -->
+      <div class="border-t border-brand-100 pt-5 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div>
+          <div class="text-xs text-brand-400">終身買斷授權 · 附線上教學手冊</div>
+          <div class="text-2xl font-black font-mono text-brand-700 mt-0.5" id="cart-total-display">NT$ 0</div>
+        </div>
+        <button type="button" onclick="submitToolsOrder()" class="w-full sm:w-auto px-8 py-3.5 bg-brand-700 hover:bg-brand-800 text-white font-bold rounded-2xl shadow-md transition text-xs tracking-wider flex items-center justify-center gap-2">
+          <i class="fa-brands fa-line text-sm"></i>
+          <span>確認送出訂單 (前往官方 LINE 開通付款)</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 軟體服務條款、定期扣款授權與隱私權保護聲明 (法律合規必備) -->
+  <section class="max-w-5xl mx-auto px-4 md:px-6 mb-16">
+    <div class="bg-white p-6 md:p-8 rounded-3xl border border-brand-200 shadow-xs space-y-4 text-xs text-brand-700 leading-relaxed font-sans">
+      <h3 class="font-bold text-sm text-brand-900 border-b border-brand-100 pb-2 flex items-center gap-2">
+        <i class="fa-solid fa-scale-balanced text-brand-500"></i>
+        <span>軟體服務條款、定期扣款授權與隱私權保護聲明</span>
+      </h3>
+      <div class="space-y-3">
+        <div>
+          <b class="text-brand-900">1. 第三方金流與定期定額授權：</b><br>
+          本服務全面透過 PAYUNi (統一金流) 官方加密平台進行交易。選用【月繳方案】之客戶，即代表同意授權商店【Sibyl Design】透過 PAYUNi 平台綁定信用卡進行日後續期付款（固定於每月 10 號定期扣款），扣款成立後將收到 PAYUNi 官方發送之「續期收款-訂單成立」信件；電子發票亦將自動開立並寄發至信箱。
+        </div>
+        <div>
+          <b class="text-brand-900">2. 數位服務開通：</b><br>
+          本系統為雲端 SaaS 軟體授權服務，付款完成後系統將即時建立專屬資料庫與後台管理入口，依消保法第19條規定，屬於「非以有形媒介提供之數位內容線上服務」，一經開通即完成履約。
+        </div>
+        <div>
+          <b class="text-brand-900">3. 退費與終止政策：</b><br>
+          自開通日起算 7 日內，若系統遭遇重大功能缺陷且經技術客服協助後仍無法排除者，得申請全額退還該期款項。月繳客戶可隨時聯繫官方客服或於官方 LINE（@480kqjoj）告知店名，由技術人員於後台協助停止下期定期扣款。
+        </div>
+        <div>
+          <b class="text-brand-900">4. 資料安全保護：</b><br>
+          本系統使用國際級加密雲端資料庫，您與顧客填寫之預約排程及店內資料受到完整隱私保護，本公司絕不向任何第三方出售、洩漏或挪作他用。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 官方正式頁尾 -->
+  <footer class="bg-white border-t border-brand-200 py-10 px-5 text-center text-xs text-brand-400 space-y-3">
+    <div>
+      <a href="https://line.me/R/ti/p/@480kqjoj" target="_blank" class="inline-flex items-center gap-1.5 text-brand-700 hover:text-brand-900 font-bold">
+        <i class="fa-brands fa-line text-emerald-600 text-sm"></i>
+        <span>聯繫 Sibyl 官方線上客服 (@480kqjoj)</span>
+      </a>
+    </div>
+    <div class="font-medium text-brand-500">
+      希貝兒設計所 | 統一編號 61347275
+    </div>
+    <div class="font-mono text-[10.5px] opacity-75">
+      © 2026 SIBYL.DESIGN All Rights Reserved.
+    </div>
+  </footer>
 
   <script>
-    function calcTotal() {
-      const keys = ['slot', 'pos', 'quote', 'loyalty', 'reminder', 'overview', 'contract'];
-      let sum = 0;
-      let count = 0;
-      keys.forEach(k => {
-        const cb = document.getElementById(`check_tool_${k}`);
-        if(cb && cb.checked) { sum += Number(cb.value); count++; }
-      });
-      document.getElementById('displayTotal').innerText = sum.toLocaleString();
-    }
-    function toggleOption(k) {
-      const cb = document.getElementById(`check_tool_${k}`);
-      if(cb) { cb.checked = !cb.checked; cb.closest('.option-item').classList.toggle('active', cb.checked); calcTotal(); }
-    }
-    function quickSelect(k) {
-      const cb = document.getElementById(`check_${k}`);
-      if(cb) { cb.checked = true; cb.closest('.option-item').classList.add('active'); calcTotal(); document.getElementById('checkoutSection').scrollIntoView({ behavior: 'smooth' }); }
-    }
-    function applyBundle(type) {
-      ['slot', 'pos', 'quote', 'loyalty', 'reminder', 'overview', 'contract'].forEach(k => {
-        const cb = document.getElementById(`check_tool_${k}`);
-        if(cb) { cb.checked = false; cb.closest('.option-item').classList.remove('active'); }
-      });
-      if(type === 'bundle_daily') {
-        document.getElementById('check_tool_slot').checked = true;
-        document.getElementById('check_tool_quote').checked = true;
-      } else if(type === 'bundle_all') {
-        ['slot', 'pos', 'quote', 'loyalty'].forEach(k => document.getElementById(`check_tool_${k}`).checked = true);
+    let cart = {};
+
+    function toggleCartTool(key, price, name) {
+      if (cart[key]) {
+        delete cart[key];
+      } else {
+        cart[key] = { name, price };
       }
-      document.querySelectorAll('.option-item').forEach(item => {
-        if(item.querySelector('input').checked) item.classList.add('active');
-      });
-      calcTotal();
-      document.getElementById('checkoutSection').scrollIntoView({ behavior: 'smooth' });
+      renderCartUI();
     }
-    function submitOrder() {
-      const store = document.getElementById('orderStore').value.trim();
-      const contact = document.getElementById('orderContact').value.trim();
-      if(!store || !contact) return alert("請填寫店家名稱與聯絡方式！");
-      alert("已準備送出訂單到 LINE！");
+
+    function applyPackage(type) {
+      cart = {};
+      if (type === 'daily') {
+        cart['pkg_daily'] = { name: "日常引流省時組 (空檔生圖 + 報價試算)", price: 990 };
+      } else if (type === 'operation') {
+        cart['pkg_operation'] = { name: "門市營運防漏組 (收銀 + 會員存摺 + LINE防放鳥)", price: 2980 };
+      }
+      renderCartUI();
+      document.getElementById('order-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function renderCartUI() {
+      const display = document.getElementById('cart-items-display');
+      const keys = Object.keys(cart);
+
+      ['slot', 'pos', 'quote', 'loyalty', 'reminder', 'overview', 'contract'].forEach(k => {
+        const btn = document.getElementById(`btn-add-${k}`);
+        if (btn) {
+          if (cart[k]) {
+            btn.className = "px-4 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl transition shadow-xs";
+            btn.innerText = "已加入清單";
+          } else {
+            btn.className = "px-4 py-2 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-300 font-bold text-xs rounded-xl transition";
+            btn.innerText = "加入選購清單";
+          }
+        }
+      });
+
+      if (keys.length === 0) {
+        display.innerHTML = '<div class="text-center py-6 text-brand-400">尚未選取任何工具，請點選上方按鈕加入</div>';
+        document.getElementById('cart-total-display').innerText = 'NT$ 0';
+        return;
+      }
+
+      let total = 0;
+      let html = '';
+      keys.forEach(k => {
+        const item = cart[k];
+        total += item.price;
+        html += `
+          <div class="flex justify-between items-center p-3 bg-brand-50 rounded-xl border border-brand-200">
+            <span class="font-bold text-brand-900">• ${item.name}</span>
+            <div class="flex items-center gap-3">
+              <span class="font-mono font-bold text-brand-700">NT$ ${item.price.toLocaleString()}</span>
+              <button type="button" onclick="delete cart['${k}']; renderCartUI();" class="text-rose-500 hover:text-rose-700 font-bold">✕</button>
+            </div>
+          </div>
+        `;
+      });
+
+      display.innerHTML = html;
+      document.getElementById('cart-total-display').innerText = `NT$ ${total.toLocaleString()}`;
+    }
+
+    function submitToolsOrder() {
+      const keys = Object.keys(cart);
+      if (keys.length === 0) return Swal.fire('請先挑選您想選購的微工具或組合包', '', 'warning');
+
+      const store = document.getElementById('order-store-name').value.trim();
+      const contact = document.getElementById('order-contact').value.trim();
+      if (!store || !contact) return Swal.fire('請填寫沙龍門市名稱與聯絡方式', '', 'warning');
+
+      const total = Object.values(cart).reduce((sum, item) => sum + item.price, 0);
+      const itemsList = Object.values(cart).map(i => i.name).join('、');
+
+      const orderMessage = encodeURIComponent(
+        `您好！我想買斷訂購希貝兒美業微工具：\n` +
+        `• 門市名稱：${store}\n` +
+        `• 聯絡方式：${contact}\n` +
+        `• 訂購項目：${itemsList}\n` +
+        `• 結帳總計：NT$ ${total.toLocaleString()} 元\n\n` +
+        `請提供 PAYUNi 付款連結或匯款資訊，並協助開通授權！`
+      );
+
+      Swal.fire({
+        title: '訂購清單確認',
+        html: `
+          <div class="text-left text-xs bg-brand-50 p-3.5 rounded-2xl border border-brand-200 space-y-1.5 font-sans">
+            <div>門市名稱：<b>${store}</b></div>
+            <div>聯絡方式：<b>${contact}</b></div>
+            <div>選購內容：<b>${itemsList}</b></div>
+            <div>應付總額：<b class="text-brand-700 font-mono text-sm">NT$ ${total.toLocaleString()}</b></div>
+            <div class="text-gray-500 pt-1">確認送出後，將直接跳轉至官方 LINE (@480kqjoj) 由客服專員為您發送付款連結與開通教學！</div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '前往官方 LINE 完成付款',
+        confirmButtonColor: '#8C7355',
+        cancelButtonText: '返回修改'
+      }).then(r => {
+        if (r.isConfirmed) {
+          window.location.href = `https://line.me/R/ti/p/@480kqjoj?text=${orderMessage}`;
+        }
+      });
     }
   </script>
 </body>

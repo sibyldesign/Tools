@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>希貝兒微工具總監控台 | Director Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8fafc; --card: #ffffff; --text-main: #0f172a; --text-muted: #64748b;
+      --primary: #c49a6c; --danger: #ef4444; --success: #10b981; --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif; }
+    body { background: var(--bg); color: var(--text-main); display: flex; min-height: 100vh; }
+    .sidebar { width: 260px; background: #1f1a17; color: #fff; padding: 25px 20px; display: flex; flex-direction: column; }
+    .sidebar h2 { font-size: 1.15rem; font-weight: 700; color: #f3eae2; margin-bottom: 25px; }
+    .nav-list { list-style: none; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+    .nav-item { padding: 12px 16px; border-radius: 8px; cursor: pointer; color: #a19b96; font-weight: 500; transition: 0.2s; }
+    .nav-item:hover, .nav-item.active { background: #332d29; color: #fff; }
+    .main-content { flex: 1; padding: 30px 40px; overflow-y: auto; }
+    .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+    .page-title { font-size: 1.5rem; font-weight: 700; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
+    .stat-card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); }
+    .stat-title { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; }
+    .stat-val { font-size: 1.5rem; font-weight: 700; }
+    .card { background: var(--card); border-radius: 14px; border: 1px solid var(--border); padding: 24px; margin-bottom: 25px; }
+    .card-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { padding: 12px 14px; background: #f8fafc; font-size: 0.85rem; color: var(--text-muted); font-weight: 600; border-bottom: 1px solid var(--border); }
+    td { padding: 14px; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+    .badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+    .badge-buyout { background: #fef3c7; color: #b45309; }
+    .badge-active { background: #d1fae5; color: #065f46; }
+    .switch-group { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .switch-label { font-size: 0.9rem; font-weight: 500; min-width: 160px; }
+    .toggle-btn { padding: 6px 14px; border-radius: 20px; border: none; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .toggle-on { background: var(--success); color: #fff; }
+    .toggle-off { background: var(--danger); color: #fff; }
+    .btn-primary { background: var(--primary); color: #fff; padding: 10px 18px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-sm { padding: 6px 10px; font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <h2>希貝兒微工具總監</h2>
+    <ul class="nav-list">
+      <li class="nav-item active">🏪 買斷店家名冊與授權</li>
+      <li class="nav-item">🛠 微工具獨立維護鎖定</li>
+      <li class="nav-item">🔑 授權序號管理</li>
+      <li class="nav-item">🚀 升級大系統折抵追蹤</li>
+    </ul>
+    <div style="font-size:0.75rem; color:#a19b96;">Project: sibyl-tools</div>
+  </div>
+
+  <div class="main-content">
+    <div class="header-bar">
+      <div class="page-title">微工具總監控制台 (Director)</div>
+      <button class="btn-primary" onclick="openAddStoreModal()">+ 開通新店家授權</button>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-title">已開通小工具店家</div>
+        <div class="stat-val">18 店</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">總累積現金流</div>
+        <div class="stat-val" style="color:var(--primary);">$34,200</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">待升級大系統名單</div>
+        <div class="stat-val">2 店</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">資料庫隔離狀態</div>
+        <div class="stat-val" style="color:var(--success);">完全獨立</div>
+      </div>
+    </div>
+
+    <!-- 獨立微工具維護開關 -->
+    <div class="card">
+      <div class="card-title">微工具獨立維護與鎖定開關</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div class="switch-group">
+          <span class="switch-label">1. IG 空檔生圖器</span>
+          <button class="toggle-btn toggle-on" onclick="toggleTool(this, '空檔生圖')">營運中</button>
+        </div>
+        <div class="switch-group">
+          <span class="switch-label">2. 極簡快速結帳</span>
+          <button class="toggle-btn toggle-on" onclick="toggleTool(this, '快速結帳')">營運中</button>
+        </div>
+        <div class="switch-group">
+          <span class="switch-label">3. 服務報價試算器</span>
+          <button class="toggle-btn toggle-on" onclick="toggleTool(this, '報價試算')">營運中</button>
+        </div>
+        <div class="switch-group">
+          <span class="switch-label">4. 數位會員集點卡</span>
+          <button class="toggle-btn toggle-on" onclick="toggleTool(this, '會員集點')">營運中</button>
+        </div>
+        <div class="switch-group">
+          <span class="switch-label">5. LINE 預防放鳥</span>
+          <button class="toggle-btn toggle-on" onclick="toggleTool(this, '防放鳥推播')">營運中</button>
+        </div>
+        <div class="switch-group">
+          <span class="switch-label">6. 全日排程甘特圖</span>
+          <button class="toggle-btn toggle-on" onclick="toggleTool(this, '排程總覽')">營運中</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 店家授權總覽 -->
+    <div class="card">
+      <div class="card-title">買斷客戶與已購模組清單 (`tool_stores`)</div>
+      <table>
+        <thead>
+          <tr>
+            <th>店家名稱 / 聯繫方式</th>
+            <th>方案類型</th>
+            <th>已開通微工具權限</th>
+            <th>可折抵大系統金額</th>
+            <th>狀態</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>莫莫美甲 MoMo</strong><br><span style="font-size:0.75rem; color:#888;">momo@line.me</span></td>
+            <td><span class="badge badge-buyout">小資大滿貫 4 入組</span></td>
+            <td>
+              <span class="badge badge-active">空檔生圖</span>
+              <span class="badge badge-active">報價試算</span>
+              <span class="badge badge-active">會員集點</span>
+              <span class="badge badge-active">防放鳥</span>
+            </td>
+            <td><strong style="color:var(--primary);">$2,990 元</strong> (全額可折抵)</td>
+            <td><span style="color:var(--success); font-weight:bold;">正常</span></td>
+            <td><button class="btn-primary btn-sm" onclick="alert('管理該店授權與 Store ID')">管理</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    function toggleTool(btn, name) {
+      if (btn.classList.contains('toggle-on')) {
+        btn.classList.remove('toggle-on'); btn.classList.add('toggle-off'); btn.innerText = '維護中';
+        alert(`已將【${name}】切換為維護中！`);
+      } else {
+        btn.classList.remove('toggle-off'); btn.classList.add('toggle-on'); btn.innerText = '營運中';
+        alert(`已將【${name}】解除維護。`);
+      }
+    }
+    function openAddStoreModal() {
+      alert("開通新店家對話框：產生專屬 Store ID 並寫入 sibyl-tools 資料庫！");
+    }
+  </script>
+</body>
+</html>

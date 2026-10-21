@@ -1,160 +1,256 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>希貝兒微工具總監控台 | Director Admin</title>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>希貝兒微工具總管中心 | super_tools.html</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#FDFBF7', 100: '#F5ECE3', 200: '#EBE5DF', 300: '#D5C7BC',
+              400: '#BCA38F', 500: '#8C7355', 600: '#7A6246', 700: '#68523A',
+              800: '#5C4B3C', 900: '#3D3126',
+            }
+          }
+        }
+      }
+    };
+  </script>
   <style>
-    :root {
-      --bg: #f8fafc; --card: #ffffff; --text-main: #0f172a; --text-muted: #64748b;
-      --primary: #c49a6c; --danger: #ef4444; --success: #10b981; --border: #e2e8f0;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif; }
-    body { background: var(--bg); color: var(--text-main); display: flex; min-height: 100vh; }
-    .sidebar { width: 260px; background: #1f1a17; color: #fff; padding: 25px 20px; display: flex; flex-direction: column; }
-    .sidebar h2 { font-size: 1.15rem; font-weight: 700; color: #f3eae2; margin-bottom: 25px; }
-    .nav-list { list-style: none; display: flex; flex-direction: column; gap: 8px; flex: 1; }
-    .nav-item { padding: 12px 16px; border-radius: 8px; cursor: pointer; color: #a19b96; font-weight: 500; transition: 0.2s; }
-    .nav-item:hover, .nav-item.active { background: #332d29; color: #fff; }
-    .main-content { flex: 1; padding: 30px 40px; overflow-y: auto; }
-    .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-    .page-title { font-size: 1.5rem; font-weight: 700; }
-    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
-    .stat-card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); }
-    .stat-title { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; }
-    .stat-val { font-size: 1.5rem; font-weight: 700; }
-    .card { background: var(--card); border-radius: 14px; border: 1px solid var(--border); padding: 24px; margin-bottom: 25px; }
-    .card-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; }
-    table { width: 100%; border-collapse: collapse; text-align: left; }
-    th { padding: 12px 14px; background: #f8fafc; font-size: 0.85rem; color: var(--text-muted); font-weight: 600; border-bottom: 1px solid var(--border); }
-    td { padding: 14px; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
-    .badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
-    .badge-buyout { background: #fef3c7; color: #b45309; }
-    .badge-active { background: #d1fae5; color: #065f46; }
-    .switch-group { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-    .switch-label { font-size: 0.9rem; font-weight: 500; min-width: 160px; }
-    .toggle-btn { padding: 6px 14px; border-radius: 20px; border: none; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
-    .toggle-on { background: var(--success); color: #fff; }
-    .toggle-off { background: var(--danger); color: #fff; }
-    .btn-primary { background: var(--primary); color: #fff; padding: 10px 18px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-    .btn-sm { padding: 6px 10px; font-size: 0.8rem; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body>
+<body class="bg-brand-50 text-brand-900 antialiased min-h-screen pb-28">
 
-  <div class="sidebar">
-    <h2>希貝兒微工具總監</h2>
-    <ul class="nav-list">
-      <li class="nav-item active">🏪 買斷店家名冊與授權</li>
-      <li class="nav-item">🛠 微工具獨立維護鎖定</li>
-      <li class="nav-item">🔑 授權序號管理</li>
-      <li class="nav-item">🚀 升級大系統折抵追蹤</li>
-    </ul>
-    <div style="font-size:0.75rem; color:#a19b96;">Project: sibyl-tools</div>
-  </div>
-
-  <div class="main-content">
-    <div class="header-bar">
-      <div class="page-title">微工具總監控制台 (Director)</div>
-      <button class="btn-primary" onclick="openAddStoreModal()">+ 開通新店家授權</button>
-    </div>
-
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-title">已開通小工具店家</div>
-        <div class="stat-val">18 店</div>
+  <!-- 頂部導航 -->
+  <header class="bg-white border-b border-brand-200 px-4 py-3 sticky top-0 z-30 shadow-xs flex justify-between items-center max-w-4xl mx-auto w-full">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xs">
+        <i class="fa-solid fa-crown"></i>
       </div>
-      <div class="stat-card">
-        <div class="stat-title">總累積現金流</div>
-        <div class="stat-val" style="color:var(--primary);">$34,200</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-title">待升級大系統名單</div>
-        <div class="stat-val">2 店</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-title">資料庫隔離狀態</div>
-        <div class="stat-val" style="color:var(--success);">完全獨立</div>
+      <div>
+        <h1 class="text-xs font-black text-brand-900">微工具總管控制中心</h1>
+        <div class="text-[9.5px] text-brand-400 font-mono">Project: sibyl-tools</div>
       </div>
     </div>
+    <button type="button" onclick="openAddStoreModal()" class="px-3 py-1.5 bg-[#8C7355] hover:bg-[#7A6246] text-white rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-2xs">
+      <i class="fa-solid fa-plus text-[10px]"></i>
+      <span>開通新店家</span>
+    </button>
+  </header>
 
-    <!-- 獨立微工具維護開關 -->
-    <div class="card">
-      <div class="card-title">微工具獨立維護與鎖定開關</div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-        <div class="switch-group">
-          <span class="switch-label">1. IG 空檔生圖器</span>
-          <button class="toggle-btn toggle-on" onclick="toggleTool(this, '空檔生圖')">營運中</button>
+  <!-- 總管作業面板容器 -->
+  <main class="max-w-4xl mx-auto p-4 space-y-4">
+
+    <!-- [頁籤 1] 店家授權名冊 (含店家後台 PIN 碼即時檢視) -->
+    <div id="page-stores" class="super-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3 text-xs">
+      <div class="flex justify-between items-center border-b border-brand-100 pb-2">
+        <div>
+          <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
+            <i class="fa-solid fa-store text-[#8C7355]"></i> 已開通微工具店家名冊 (tool_stores)
+          </span>
+          <p class="text-[10px] text-brand-400">總管可直接檢視各店家當前 PIN 碼</p>
         </div>
-        <div class="switch-group">
-          <span class="switch-label">2. 極簡快速結帳</span>
-          <button class="toggle-btn toggle-on" onclick="toggleTool(this, '快速結帳')">營運中</button>
+        <span class="font-mono text-emerald-700 font-bold" id="total-stores-badge">共 24 家店</span>
+      </div>
+
+      <div class="space-y-2.5" id="store-list-container">
+        <!-- 店家 1 -->
+        <div class="p-4 bg-brand-50/70 rounded-2xl border border-brand-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <div class="space-y-1">
+            <div class="font-bold text-brand-900 text-sm flex items-center gap-2">
+              <span>莫莫美甲 MoMo Studio</span>
+              <span class="px-2 py-0.5 bg-amber-100 text-amber-900 rounded-md text-[10px] font-bold">旗艦大滿貫買斷</span>
+              <span class="px-2 py-0.5 bg-brand-200 text-brand-800 rounded font-mono text-[10.5px]">後台PIN: <b class="tracking-widest">8888</b></span>
+            </div>
+            <div class="text-gray-500 font-mono text-[11px]">聯絡方式: momo@line.me ｜ 累計收款: NT$ 4,550</div>
+            <div class="flex flex-wrap gap-1 pt-1">
+              <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[9.5px] font-bold">空檔生圖</span>
+              <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[9.5px] font-bold">快速收銀</span>
+              <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[9.5px] font-bold">報價單</span>
+              <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[9.5px] font-bold">數位集點</span>
+              <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[9.5px] font-bold">防放鳥推播</span>
+            </div>
+          </div>
+          <div class="flex gap-1.5 shrink-0">
+            <button type="button" onclick="resetStorePinPrompt('莫莫美甲', '8888')" class="px-3 py-1.5 bg-white border border-brand-200 text-brand-800 rounded-xl font-bold hover:bg-brand-50">重設PIN</button>
+            <button type="button" onclick="editStorePermissions('momo')" class="px-3 py-1.5 bg-[#8C7355] text-white rounded-xl font-bold">授權矩陣</button>
+          </div>
         </div>
-        <div class="switch-group">
-          <span class="switch-label">3. 服務報價試算器</span>
-          <button class="toggle-btn toggle-on" onclick="toggleTool(this, '報價試算')">營運中</button>
-        </div>
-        <div class="switch-group">
-          <span class="switch-label">4. 數位會員集點卡</span>
-          <button class="toggle-btn toggle-on" onclick="toggleTool(this, '會員集點')">營運中</button>
-        </div>
-        <div class="switch-group">
-          <span class="switch-label">5. LINE 預防放鳥</span>
-          <button class="toggle-btn toggle-on" onclick="toggleTool(this, '防放鳥推播')">營運中</button>
-        </div>
-        <div class="switch-group">
-          <span class="switch-label">6. 全日排程甘特圖</span>
-          <button class="toggle-btn toggle-on" onclick="toggleTool(this, '排程總覽')">營運中</button>
+
+        <!-- 店家 2 -->
+        <div class="p-4 bg-brand-50/70 rounded-2xl border border-brand-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <div class="space-y-1">
+            <div class="font-bold text-brand-900 text-sm flex items-center gap-2">
+              <span>Kemi Coiffure 髮型</span>
+              <span class="px-2 py-0.5 bg-blue-100 text-blue-900 rounded-md text-[10px] font-bold">單品買斷</span>
+              <span class="px-2 py-0.5 bg-brand-200 text-brand-800 rounded font-mono text-[10.5px]">後台PIN: <b class="tracking-widest">1234</b></span>
+            </div>
+            <div class="text-gray-500 font-mono text-[11px]">聯絡方式: 0912345678 ｜ 累計收款: NT$ 1,980</div>
+            <div class="flex flex-wrap gap-1 pt-1">
+              <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[9.5px] font-bold">全日排程總覽</span>
+            </div>
+          </div>
+          <div class="flex gap-1.5 shrink-0">
+            <button type="button" onclick="resetStorePinPrompt('Kemi髮型', '1234')" class="px-3 py-1.5 bg-white border border-brand-200 text-brand-800 rounded-xl font-bold hover:bg-brand-50">重設PIN</button>
+            <button type="button" onclick="editStorePermissions('kemi')" class="px-3 py-1.5 bg-[#8C7355] text-white rounded-xl font-bold">授權矩陣</button>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- 店家授權總覽 -->
-    <div class="card">
-      <div class="card-title">買斷客戶與已購模組清單 (`tool_stores`)</div>
-      <table>
-        <thead>
-          <tr>
-            <th>店家名稱 / 聯繫方式</th>
-            <th>方案類型</th>
-            <th>已開通微工具權限</th>
-            <th>可折抵大系統金額</th>
-            <th>狀態</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>莫莫美甲 MoMo</strong><br><span style="font-size:0.75rem; color:#888;">momo@line.me</span></td>
-            <td><span class="badge badge-buyout">小資大滿貫 4 入組</span></td>
-            <td>
-              <span class="badge badge-active">空檔生圖</span>
-              <span class="badge badge-active">報價試算</span>
-              <span class="badge badge-active">會員集點</span>
-              <span class="badge badge-active">防放鳥</span>
-            </td>
-            <td><strong style="color:var(--primary);">$2,990 元</strong> (全額可折抵)</td>
-            <td><span style="color:var(--success); font-weight:bold;">正常</span></td>
-            <td><button class="btn-primary btn-sm" onclick="alert('管理該店授權與 Store ID')">管理</button></td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- [頁籤 2] 微工具獨立維護鎖定 -->
+    <div id="page-maintenance" class="super-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3 text-xs hidden">
+      <div class="border-b border-brand-100 pb-2">
+        <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
+          <i class="fa-solid fa-lock text-rose-500"></i> 各微工具獨立維護鎖定開關
+        </span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        <div class="p-3 bg-brand-50 rounded-2xl border flex justify-between items-center">
+          <span class="font-bold">1. IG 限動空檔生圖器</span>
+          <button type="button" onclick="toggleMaintenance(this)" class="px-3 py-1 bg-emerald-600 text-white rounded-full font-bold">營運中</button>
+        </div>
+        <div class="p-3 bg-brand-50 rounded-2xl border flex justify-between items-center">
+          <span class="font-bold">2. 極簡快速收銀 POS</span>
+          <button type="button" onclick="toggleMaintenance(this)" class="px-3 py-1 bg-emerald-600 text-white rounded-full font-bold">營運中</button>
+        </div>
+        <div class="p-3 bg-brand-50 rounded-2xl border flex justify-between items-center">
+          <span class="font-bold">3. 服務報價試算器</span>
+          <button type="button" onclick="toggleMaintenance(this)" class="px-3 py-1 bg-emerald-600 text-white rounded-full font-bold">營運中</button>
+        </div>
+        <div class="p-3 bg-brand-50 rounded-2xl border flex justify-between items-center">
+          <span class="font-bold">4. 數位會員集點卡</span>
+          <button type="button" onclick="toggleMaintenance(this)" class="px-3 py-1 bg-emerald-600 text-white rounded-full font-bold">營運中</button>
+        </div>
+        <div class="p-3 bg-brand-50 rounded-2xl border flex justify-between items-center">
+          <span class="font-bold">5. LINE 預約防放鳥推播</span>
+          <button type="button" onclick="toggleMaintenance(this)" class="px-3 py-1 bg-emerald-600 text-white rounded-full font-bold">營運中</button>
+        </div>
+        <div class="p-3 bg-brand-50 rounded-2xl border flex justify-between items-center">
+          <span class="font-bold">6. 全日排程總覽 (甘特圖)</span>
+          <button type="button" onclick="toggleMaintenance(this)" class="px-3 py-1 bg-emerald-600 text-white rounded-full font-bold">營運中</button>
+        </div>
+        <div class="p-3 bg-brand-50 rounded-2xl border flex justify-between items-center">
+          <span class="font-bold">7. 數位定型化契約簽署</span>
+          <button type="button" onclick="toggleMaintenance(this)" class="px-3 py-1 bg-emerald-600 text-white rounded-full font-bold">營運中</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- [頁籤 3] 授權序號產出器 -->
+    <div id="page-licenses" class="super-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3 text-xs hidden">
+      <div class="border-b border-brand-100 pb-2">
+        <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
+          <i class="fa-solid fa-key text-brand-500"></i> 工具授權序號 (License Key) 產出
+        </span>
+      </div>
+      <div class="space-y-2">
+        <button type="button" onclick="generateNewLicense()" class="w-full py-2.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold">
+          一鍵產出 16 碼買斷授權金鑰
+        </button>
+        <div class="p-3.5 bg-brand-50 rounded-xl border font-mono text-center font-bold text-brand-900" id="disp-gen-key">
+          尚未生成
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- 底部固定滑動式導覽列 -->
+  <div class="fixed bottom-0 left-0 right-0 z-40 flex justify-center bg-white/95 backdrop-blur-md border-t border-brand-200 shadow-xl pb-[env(safe-area-inset-bottom,12px)] px-2">
+    <div class="max-w-4xl w-full flex items-center min-h-[64px]">
+      <nav class="flex-1 flex justify-around items-center" id="super-bottom-nav">
+        <button class="super-nav-item flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition bg-brand-50 text-brand-500 font-bold" onclick="switchSuperTab('page-stores', this)">
+          <i class="fa-solid fa-store text-base"></i><span class="text-[10px] mt-1">店家名冊</span>
+        </button>
+        <button class="super-nav-item flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition text-brand-400 font-medium" onclick="switchSuperTab('page-maintenance', this)">
+          <i class="fa-solid fa-lock text-base"></i><span class="text-[10px] mt-1">維護鎖定</span>
+        </button>
+        <button class="super-nav-item flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition text-brand-400 font-medium" onclick="switchSuperTab('page-licenses', this)">
+          <i class="fa-solid fa-key text-base"></i><span class="text-[10px] mt-1">序號產出</span>
+        </button>
+      </nav>
     </div>
   </div>
 
   <script>
-    function toggleTool(btn, name) {
-      if (btn.classList.contains('toggle-on')) {
-        btn.classList.remove('toggle-on'); btn.classList.add('toggle-off'); btn.innerText = '維護中';
-        alert(`已將【${name}】切換為維護中！`);
-      } else {
-        btn.classList.remove('toggle-off'); btn.classList.add('toggle-on'); btn.innerText = '營運中';
-        alert(`已將【${name}】解除維護。`);
-      }
+    function switchSuperTab(pageId, btn) {
+      document.querySelectorAll('.super-panel').forEach(p => p.classList.add('hidden'));
+      document.querySelectorAll('.super-nav-item').forEach(b => {
+        b.className = "super-nav-item flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition text-brand-400 font-medium";
+      });
+
+      const target = document.getElementById(pageId);
+      if (target) target.classList.remove('hidden');
+      if (btn) btn.className = "super-nav-item flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition bg-brand-50 text-brand-500 font-bold";
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+
+    function toggleMaintenance(btn) {
+      const isRunning = btn.innerText === '營運中';
+      btn.innerText = isRunning ? '維護中' : '營運中';
+      btn.className = isRunning ? 'px-3 py-1 bg-rose-600 text-white rounded-full font-bold' : 'px-3 py-1 bg-emerald-600 text-white rounded-full font-bold';
+      Swal.fire({ title: `已變更為【${btn.innerText}】`, icon: 'success', timer: 800, showConfirmButton: false });
+    }
+
+    function generateNewLicense() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let key = 'SIBYL-';
+      for (let i = 0; i < 12; i++) {
+        if (i > 0 && i % 4 === 0) key += '-';
+        key += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      document.getElementById('disp-gen-key').innerText = key;
+    }
+
+    function resetStorePinPrompt(storeName, currentPin) {
+      Swal.fire({
+        title: `重設【${storeName}】後台密碼`,
+        html: `當前密碼為：<b class="font-mono text-base">${currentPin}</b>`,
+        input: 'password',
+        inputPlaceholder: '請輸入新的 4~6 位 PIN 碼',
+        showCancelButton: true,
+        confirmButtonText: '確定儲存',
+        confirmButtonColor: '#8C7355',
+        inputValidator: v => (!v || v.length < 4 ? '密碼至少需 4 碼！' : null)
+      }).then(r => {
+        if (r.isConfirmed) {
+          Swal.fire('密碼重設成功！', `已將該店密碼更新為：${r.value.trim()}`, 'success');
+        }
+      });
+    }
+
     function openAddStoreModal() {
-      alert("開通新店家對話框：產生專屬 Store ID 並寫入 sibyl-tools 資料庫！");
+      Swal.fire({
+        title: '開通新店家買斷授權',
+        html: `
+          <div class="text-left text-xs space-y-2">
+            <div><label class="font-bold">店家名稱：</label><input id="new-store-name" class="swal2-input text-xs" placeholder="例: 艾莉絲美學館"></div>
+            <div><label class="font-bold">聯繫 LINE / 電話：</label><input id="new-store-contact" class="swal2-input text-xs" placeholder="0900000000"></div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '確定開通',
+        confirmButtonColor: '#8C7355'
+      });
+    }
+
+    function editStorePermissions(slug) {
+      Swal.fire({
+        title: '編輯店家工具授權矩陣',
+        text: `正在配置 ${slug} 之 allowed_modules 模組勾選清單`,
+        icon: 'info'
+      });
     }
   </script>
 </body>

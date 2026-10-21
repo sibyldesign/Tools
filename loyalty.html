@@ -1,1 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>會員數位集點卡</title>
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, sans-serif; }
+    body { background: #fdfbf7; padding: 20px; display: flex; justify-content: center; }
+    .card-wrap { width: 100%; max-width: 400px; }
+    .loyalty-card { background: linear-gradient(135deg, #3a3d40 0%, #181719 100%); color: #e2c07d; border-radius: 16px; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); margin-bottom: 20px; }
+    .card-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+    .card-brand { font-size: 1.05rem; font-weight: 700; letter-spacing: 1px; }
+    .card-phone { font-size: 0.88rem; opacity: 0.8; }
+    .points-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 15px; }
+    .point-dot { aspect-ratio: 1; border: 2px dashed #e2c07d; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; }
+    .point-dot.filled { background: #e2c07d; color: #181719; border-style: solid; }
+    .action-panel { background: #fff; padding: 20px; border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 5px; }
+    input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem; }
+    .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; }
+    .btn-search { background: #3a3d40; color: #fff; }
+    .btn-manage { background: #e2c07d; color: #222; margin-top: 8px; }
+  </style>
+</head>
+<body>
 
+<div class="card-wrap">
+  <div class="loyalty-card">
+    <div class="card-header">
+      <div class="card-brand">VIP CLUB</div>
+      <div class="card-phone" id="displayPhone">請輸入電話查詢</div>
+    </div>
+    <div class="points-grid" id="stampGrid"></div>
+    <div style="font-size:0.78rem; text-align:right;">集滿 10 點折抵 $500</div>
+  </div>
+
+  <div class="action-panel">
+    <div class="form-group">
+      <label>顧客手機號碼查詢</label>
+      <input type="tel" id="inputPhone" placeholder="0912345678">
+    </div>
+    <button class="btn btn-search" onclick="searchPoints()">查詢集點進度</button>
+
+    <details style="margin-top: 18px;">
+      <summary style="font-size: 0.82rem; color: #888; cursor: pointer;">店家專用給點操作</summary>
+      <div class="form-group" style="margin-top: 8px;">
+        <label>店家 PIN 碼 (預設 8888)</label>
+        <input type="password" id="storePin" placeholder="PIN 碼">
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-manage" onclick="modPoint(1)">+1 點 (蓋章)</button>
+        <button class="btn btn-manage" style="background:#f0e2e2;" onclick="modPoint(-1)">-1 點 (核銷)</button>
+      </div>
+    </details>
+  </div>
+</div>
+
+<script>
+  let pts = 3;
+  function render(p) {
+    const grid = document.getElementById('stampGrid');
+    grid.innerHTML = '';
+    for (let i = 1; i <= 10; i++) {
+      const dot = document.createElement('div');
+      dot.className = `point-dot ${i <= p ? 'filled' : ''}`;
+      dot.innerText = i <= p ? '✓' : i;
+      grid.appendChild(dot);
+    }
+  }
+  function searchPoints() {
+    const ph = document.getElementById('inputPhone').value;
+    if(!ph) return alert("請輸入電話");
+    document.getElementById('displayPhone').innerText = ph;
+    render(pts);
+  }
+  function modPoint(delta) {
+    if(document.getElementById('storePin').value !== "8888") return alert("PIN 碼錯誤！");
+    pts = Math.max(0, Math.min(10, pts + delta));
+    render(pts);
+    alert(`操作成功！目前累計 ${pts} 點`);
+  }
+  render(0);
+</script>
+</body>
+</html>

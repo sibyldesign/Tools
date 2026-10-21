@@ -633,15 +633,23 @@
         <div class="text-center py-6 text-brand-400">尚未選取任何工具，請點選上方按鈕加入</div>
       </div>
 
-      <!-- 表單資料填寫 -->
+      <!-- 表單資料填寫 (補齊開通與信件發送必備資訊) -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
         <div>
           <label class="block font-bold text-brand-800 text-xs mb-1">沙龍門市 / 品牌名稱 *</label>
           <input type="text" id="order-store-name" placeholder="例: 艾莉絲美甲沙龍" class="w-full p-2.5 rounded-xl border border-brand-200 bg-brand-50/50 text-xs outline-none focus:border-brand-500 font-bold">
         </div>
         <div>
-          <label class="block font-bold text-brand-800 text-xs mb-1">官方 LINE ID 或聯絡電話 *</label>
-          <input type="text" id="order-contact" placeholder="開通授權代碼與發送操作指南" class="w-full p-2.5 rounded-xl border border-brand-200 bg-brand-50/50 text-xs outline-none focus:border-brand-500 font-mono">
+          <label class="block font-bold text-brand-800 text-xs mb-1">負責人手機號碼 *</label>
+          <input type="tel" id="order-phone" maxlength="10" placeholder="0912345678" class="w-full p-2.5 rounded-xl border border-brand-200 bg-brand-50/50 text-xs outline-none focus:border-brand-500 font-mono font-bold">
+        </div>
+        <div>
+          <label class="block font-bold text-brand-800 text-xs mb-1">負責人 LINE 稱呼 / ID (選填)</label>
+          <input type="text" id="order-line-name" placeholder="例: May 或 @alice_nail" class="w-full p-2.5 rounded-xl border border-brand-200 bg-brand-50/50 text-xs outline-none focus:border-brand-500">
+        </div>
+        <div>
+          <label class="block font-bold text-brand-800 text-xs mb-1">電子信箱 Email (接收開通網址與金鑰) *</label>
+          <input type="email" id="order-email" placeholder="owner@gmail.com" class="w-full p-2.5 rounded-xl border border-brand-200 bg-brand-50/50 text-xs outline-none focus:border-brand-500 font-mono font-bold">
         </div>
       </div>
 
@@ -769,45 +777,90 @@
       document.getElementById('cart-total-display').innerText = `NT$ ${total.toLocaleString()}`;
     }
 
-    function submitToolsOrder() {
+    const TOOLS_SUPABASE_URL = "https://kwbxskvnfejfguuwzqfr.supabase.co"; // 或你 sibyl-tools 的 URL
+    const TOOLS_SUPABASE_ANON_KEY = "sb_publishable_JnpaLZVnGkW9Jr967LeYuQ_d8bXwfnz";
+
+    async function submitToolsOrder() {
       const keys = Object.keys(cart);
       if (keys.length === 0) return Swal.fire('請先挑選您想選購的微工具或組合包', '', 'warning');
 
       const store = document.getElementById('order-store-name').value.trim();
-      const contact = document.getElementById('order-contact').value.trim();
-      if (!store || !contact) return Swal.fire('請填寫沙龍門市名稱與聯絡方式', '', 'warning');
+      const phone = document.getElementById('order-phone').value.trim();
+      const lineName = document.getElementById('order-line-name').value.trim();
+      const email = document.getElementById('order-email').value.trim();
+
+      if (!store || !phone || !email) {
+        return Swal.fire('請填寫門市名稱、負責人手機與電子信箱！', '電子信箱將用於寄發開通指南與後台網址，避免日後忘記。', 'warning');
+      }
 
       const total = Object.values(cart).reduce((sum, item) => sum + item.price, 0);
       const itemsList = Object.values(cart).map(i => i.name).join('、');
+      const purchasedKeys = keys;
 
+      Swal.fire({
+        title: '訂單建立中...',
+        text: '正在將您的選購清單寫入雲端開通名冊',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      // 1. 同步將訂單寫入 sibyl-tools 的 tool_stores 資料表 (狀態為 pending)
+      try {
+        const payload = {
+          store_name: store,
+          owner_phone: phone,
+          owner_line_name: lineName,
+          owner_email: email,
+          contact_info: `${phone} (${lineName || '未填'})`,
+          purchased_tools: purchasedKeys,
+          total_paid: total,
+          is_active: false, // 待總管在 super_tools 確認收款後開通
+          plan_status: 'pending',
+          admin_pin: '8888',
+          created_at: new Date().toISOString()
+        };
+
+        await fetch(`${TOOLS_SUPABASE_URL}/rest/v1/tool_stores`, {
+          method: "POST",
+          headers: {
+            "apikey": TOOLS_SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${TOOLS_SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+      } catch (e) {
+        console.warn("離線環境或資料庫預存:", e);
+      }
+
+      // 2. 組合官方 LINE 下單訊息
       const orderMessage = encodeURIComponent(
-        `您好！我想買斷訂購希貝兒美業微工具：\n` +
+        `您好！我已在官網送出微工具訂購申請：\n` +
         `• 門市名稱：${store}\n` +
-        `• 聯絡方式：${contact}\n` +
+        `• 負責人手機：${phone}\n` +
+        `• 負責人 LINE：${lineName || '同本帳號'}\n` +
+        `• 電子信箱：${email}\n` +
         `• 訂購項目：${itemsList}\n` +
         `• 結帳總計：NT$ ${total.toLocaleString()} 元\n\n` +
-        `請提供 PAYUNi 付款連結或匯款資訊，並協助開通授權！`
+        `資料已同步送出，請提供付款方式與開通信件！`
       );
 
       Swal.fire({
-        title: '訂購清單確認',
+        title: '訂單已成功送出！',
         html: `
           <div class="text-left text-xs bg-brand-50 p-3.5 rounded-2xl border border-brand-200 space-y-1.5 font-sans">
             <div>門市名稱：<b>${store}</b></div>
-            <div>聯絡方式：<b>${contact}</b></div>
-            <div>選購內容：<b>${itemsList}</b></div>
-            <div>應付總額：<b class="text-brand-700 font-mono text-sm">NT$ ${total.toLocaleString()}</b></div>
-            <div class="text-gray-500 pt-1">確認送出後，將直接跳轉至官方 LINE (@480kqjoj) 由客服專員為您發送付款連結與開通教學！</div>
+            <div>負責人：<b>${phone}</b> (${lineName || 'LINE'})</div>
+            <div>接收開通信箱：<b>${email}</b></div>
+            <div>訂購內容：<b>${itemsList}</b></div>
+            <div>應付金額：<b class="text-brand-700 font-mono text-sm">NT$ ${total.toLocaleString()}</b></div>
+            <div class="text-emerald-700 font-bold pt-1">✓ 訂單已送達總管審核室，點擊下方立即前往 LINE 完成付款與開通！</div>
           </div>
         `,
-        showCancelButton: true,
         confirmButtonText: '前往官方 LINE 完成付款',
-        confirmButtonColor: '#8C7355',
-        cancelButtonText: '返回修改'
+        confirmButtonColor: '#8C7355'
       }).then(r => {
-        if (r.isConfirmed) {
-          window.location.href = `https://line.me/R/ti/p/@480kqjoj?text=${orderMessage}`;
-        }
+        window.location.href = `https://line.me/R/ti/p/@480kqjoj?text=${orderMessage}`;
       });
     }
   </script>

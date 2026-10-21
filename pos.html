@@ -1,1 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>美業極簡快速結帳與營收小幫手</title>
+  <style>
+    :root { --primary: #d4a5b8; --primary-dark: #b8869b; --bg: #fcf9f5; --card-bg: #ffffff; --text: #4a4046; --border: #f0e6ed; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding-bottom: 70px; }
+    .app-header { background: #fff; padding: 16px 20px; font-size: 1.1rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+    .container { max-width: 480px; margin: 0 auto; padding: 15px; }
+    .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
+    .dash-card { background: var(--card-bg); padding: 18px; border-radius: 14px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+    .dash-title { font-size: 0.85rem; color: #887a82; margin-bottom: 6px; }
+    .dash-val { font-size: 1.4rem; font-weight: 800; color: #33262d; }
+    .btn-action { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; text-align: center; }
+    .btn-checkout { background: var(--primary); color: #fff; }
+    .section-subtitle { font-size: 0.95rem; font-weight: 700; margin: 15px 0 10px; color: #7a6b73; }
+    .item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; cursor: pointer; background: #fff; }
+    .item-row.selected { background: #fdf5f8; border-color: var(--primary); }
+    .item-name { font-weight: 600; font-size: 0.95rem; }
+    .item-price { color: var(--primary-dark); font-weight: 700; }
+    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; padding: 12px 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 -4px 15px rgba(0,0,0,0.05); }
+    .input-box { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; margin-bottom: 10px; outline: none; }
+  </style>
+</head>
+<body>
 
+  <div class="app-header">
+    <span>🌸 美業極簡營運小幫手</span>
+    <span style="font-size: 0.8rem; color: #888;" id="todayStr"></span>
+  </div>
+
+  <div class="container">
+    <div id="homeView">
+      <div class="dashboard-grid">
+        <div class="dash-card">
+          <div class="dash-title">今日營收</div>
+          <div class="dash-val">$<span id="todayRev">0</span></div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-title">本月累積營收</div>
+          <div class="dash-val">$<span id="monthRev">7,900</span></div>
+        </div>
+      </div>
+      <button class="btn-action btn-checkout" onclick="switchView('checkout')">💰 開始快速結帳開單</button>
+      <div class="dash-card" style="margin-top: 15px;">
+        <div class="dash-title" style="font-weight:700; color:#4a4046; margin-bottom:8px;">💡 工具特色</div>
+        <p style="font-size: 0.85rem; color: #777; line-height: 1.5;">點兩下品項快速結帳，隨時掌握業績，體驗數位化帶來的輕量便利！</p>
+      </div>
+    </div>
+
+    <div id="checkoutView" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h3 style="font-size: 1.1rem;">快速結帳開單</h3>
+        <button onclick="switchView('home')" style="background:none; border:none; color:#888; cursor:pointer; font-weight:bold;">✕ 取消</button>
+      </div>
+      <input type="text" id="clientName" class="input-box" placeholder="輸入顧客姓名 / 電話 (選填，不填=散客)">
+      
+      <div class="section-subtitle">手部項目</div>
+      <div class="item-row" onclick="toggleItem(this, '單色凝膠', 800)"><span class="item-name">單色凝膠</span><span class="item-price">$800</span></div>
+      <div class="item-row" onclick="toggleItem(this, '法式凝膠', 1000)"><span class="item-name">法式凝膠</span><span class="item-price">$1,000</span></div>
+      <div class="item-row" onclick="toggleItem(this, '造型設計', 1300)"><span class="item-name">造型設計款</span><span class="item-price">$1,300</span></div>
+
+      <div class="section-subtitle">卸甲與保養</div>
+      <div class="item-row" onclick="toggleItem(this, '卸甲', 200)"><span class="item-name">凝膠卸甲</span><span class="item-price">$200</span></div>
+      <div class="item-row" onclick="toggleItem(this, '手部保養', 300)"><span class="item-name">手部深層保養</span><span class="item-price">$300</span></div>
+      <div style="height: 70px;"></div>
+    </div>
+  </div>
+
+  <div class="bottom-bar" id="checkoutBottomBar" style="display: none;">
+    <div>
+      <span style="font-size: 0.85rem; color: #666;">總計：</span>
+      <span style="font-size: 1.3rem; font-weight: 800; color: var(--primary-dark);">$<span id="cartTotal">0</span></span>
+    </div>
+    <button class="btn-action btn-checkout" style="width: auto; padding: 10px 22px;" onclick="completeCheckout()">完成結帳 ✓</button>
+  </div>
+
+  <script>
+    let cart = [];
+    let todayTotal = 0;
+    let monthTotal = 7900;
+    document.getElementById('todayStr').innerText = new Date().toLocaleDateString();
+
+    function switchView(view) {
+      if (view === 'home') {
+        document.getElementById('homeView').style.display = 'block';
+        document.getElementById('checkoutView').style.display = 'none';
+        document.getElementById('checkoutBottomBar').style.display = 'none';
+      } else {
+        document.getElementById('homeView').style.display = 'none';
+        document.getElementById('checkoutView').style.display = 'block';
+        document.getElementById('checkoutBottomBar').style.display = 'flex';
+      }
+    }
+
+    function toggleItem(el, name, price) {
+      el.classList.toggle('selected');
+      const idx = cart.findIndex(i => i.name === name);
+      if (idx > -1) cart.splice(idx, 1);
+      else cart.push({ name, price });
+      document.getElementById('cartTotal').innerText = cart.reduce((s, i) => s + i.price, 0);
+    }
+
+    function completeCheckout() {
+      const total = cart.reduce((s, i) => s + i.price, 0);
+      if (total === 0) return alert("請至少選擇一項服務！");
+      todayTotal += total;
+      monthTotal += total;
+      document.getElementById('todayRev').innerText = todayTotal;
+      document.getElementById('monthRev').innerText = monthTotal.toLocaleString();
+      alert(`結帳成功！已記錄營收 $${total} 元`);
+      cart = [];
+      document.querySelectorAll('.item-row').forEach(e => e.classList.remove('selected'));
+      document.getElementById('cartTotal').innerText = '0';
+      document.getElementById('clientName').value = '';
+      switchView('home');
+    }
+  </script>
+</body>
+</html>

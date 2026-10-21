@@ -1,123 +1,241 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>美業極簡快速結帳與營收小幫手</title>
-  <style>
-    :root { --primary: #d4a5b8; --primary-dark: #b8869b; --bg: #fcf9f5; --card-bg: #ffffff; --text: #4a4046; --border: #f0e6ed; }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
-    body { background: var(--bg); color: var(--text); padding-bottom: 70px; }
-    .app-header { background: #fff; padding: 16px 20px; font-size: 1.1rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
-    .container { max-width: 480px; margin: 0 auto; padding: 15px; }
-    .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
-    .dash-card { background: var(--card-bg); padding: 18px; border-radius: 14px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-    .dash-title { font-size: 0.85rem; color: #887a82; margin-bottom: 6px; }
-    .dash-val { font-size: 1.4rem; font-weight: 800; color: #33262d; }
-    .btn-action { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; text-align: center; }
-    .btn-checkout { background: var(--primary); color: #fff; }
-    .section-subtitle { font-size: 0.95rem; font-weight: 700; margin: 15px 0 10px; color: #7a6b73; }
-    .item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; cursor: pointer; background: #fff; }
-    .item-row.selected { background: #fdf5f8; border-color: var(--primary); }
-    .item-name { font-weight: 600; font-size: 0.95rem; }
-    .item-price { color: var(--primary-dark); font-weight: 700; }
-    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; padding: 12px 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 -4px 15px rgba(0,0,0,0.05); }
-    .input-box { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; margin-bottom: 10px; outline: none; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>極簡收銀小幫手 | Express POS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#FDFBF7', 100: '#F7EDE8', 200: '#EBE5DF', 300: '#D5C7BC',
+              400: '#BCA38F', 500: '#8C7355', 600: '#7A6246', 700: '#68523A',
+              800: '#5C4B3C', 900: '#3D3126',
+            }
+          }
+        }
+      }
+    };
+  </script>
 </head>
-<body>
+<body class="bg-brand-50 text-brand-900 antialiased min-h-screen p-4 md:p-6 pb-24">
 
-  <div class="app-header">
-    <span>🌸 美業極簡營運小幫手</span>
-    <span style="font-size: 0.8rem; color: #888;" id="todayStr"></span>
-  </div>
-
-  <div class="container">
-    <div id="homeView">
-      <div class="dashboard-grid">
-        <div class="dash-card">
-          <div class="dash-title">今日營收</div>
-          <div class="dash-val">$<span id="todayRev">0</span></div>
+  <div class="max-w-md mx-auto space-y-4">
+    <!-- 頂部與營收指標 -->
+    <div class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3">
+      <div class="flex justify-between items-center border-b border-brand-100 pb-2">
+        <div>
+          <h1 class="font-black text-brand-900 text-sm flex items-center gap-1.5">
+            <i class="fa-solid fa-cash-register text-brand-500"></i> 極簡快速結帳收銀台
+          </h1>
+          <p class="text-[10px] text-brand-400">輸入手機自動帶入舊客檔案</p>
         </div>
-        <div class="dash-card">
-          <div class="dash-title">本月累積營收</div>
-          <div class="dash-val">$<span id="monthRev">7,900</span></div>
+        <button type="button" onclick="openItemsManageModal()" class="px-2.5 py-1 bg-brand-100 hover:bg-brand-200 text-brand-800 rounded-lg text-xs font-bold transition">
+          <i class="fa-solid fa-gear text-[10px]"></i> 項目設定
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 text-center font-mono">
+        <div class="p-3 bg-brand-50 rounded-2xl border border-brand-200">
+          <div class="text-[10px] text-brand-500 font-sans font-bold">今日實收營收</div>
+          <div class="text-xl font-black text-brand-900 mt-0.5" id="stat-today-total">NT$ 0</div>
+        </div>
+        <div class="p-3 bg-emerald-50 rounded-2xl border border-emerald-200">
+          <div class="text-[10px] text-emerald-700 font-sans font-bold">本月累計營收</div>
+          <div class="text-xl font-black text-emerald-900 mt-0.5" id="stat-month-total">NT$ 0</div>
         </div>
       </div>
-      <button class="btn-action btn-checkout" onclick="switchView('checkout')">💰 開始快速結帳開單</button>
-      <div class="dash-card" style="margin-top: 15px;">
-        <div class="dash-title" style="font-weight:700; color:#4a4046; margin-bottom:8px;">💡 工具特色</div>
-        <p style="font-size: 0.85rem; color: #777; line-height: 1.5;">點兩下品項快速結帳，隨時掌握業績，體驗數位化帶來的輕量便利！</p>
+    </div>
+
+    <!-- 顧客小資料庫即時輸入帶入 -->
+    <div class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3 text-xs">
+      <div class="font-bold text-brand-900 flex justify-between items-center border-b pb-1.5">
+        <span>1. 顧客資料 (輸入手機秒自動帶入)：</span>
+        <span id="cust-status-badge" class="text-[10px] text-brand-400 font-mono">新客登記</span>
+      </div>
+      <div>
+        <label class="block text-gray-500 mb-1">手機號碼 *</label>
+        <input type="tel" id="cust-phone" placeholder="0912345678" maxlength="10" class="w-full p-2.5 rounded-xl border border-brand-200 bg-brand-50/50 font-mono font-bold text-sm outline-none" oninput="autoLookupCustomer(this.value)">
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="block text-gray-500 mb-1">顧客姓名 *</label>
+          <input type="text" id="cust-name" placeholder="王小美" class="w-full p-2.5 rounded-xl border border-brand-200 bg-brand-50/50 outline-none">
+        </div>
+        <div>
+          <label class="block text-gray-500 mb-1">LINE 顯示名稱 (選填)</label>
+          <input type="text" id="cust-line" placeholder="例: May" class="w-full p-2.5 rounded-xl border border-brand-200 bg-brand-50/50 outline-none">
+        </div>
       </div>
     </div>
 
-    <div id="checkoutView" style="display: none;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <h3 style="font-size: 1.1rem;">快速結帳開單</h3>
-        <button onclick="switchView('home')" style="background:none; border:none; color:#888; cursor:pointer; font-weight:bold;">✕ 取消</button>
+    <!-- 項目點選區域 -->
+    <div class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3 text-xs">
+      <div class="flex justify-between items-center font-bold text-brand-800">
+        <span>2. 點選施作項目：</span>
+        <button type="button" onclick="clearCart()" class="text-stone-400 underline font-normal">清空重選</button>
       </div>
-      <input type="text" id="clientName" class="input-box" placeholder="輸入顧客姓名 / 電話 (選填，不填=散客)">
-      
-      <div class="section-subtitle">手部項目</div>
-      <div class="item-row" onclick="toggleItem(this, '單色凝膠', 800)"><span class="item-name">單色凝膠</span><span class="item-price">$800</span></div>
-      <div class="item-row" onclick="toggleItem(this, '法式凝膠', 1000)"><span class="item-name">法式凝膠</span><span class="item-price">$1,000</span></div>
-      <div class="item-row" onclick="toggleItem(this, '造型設計', 1300)"><span class="item-name">造型設計款</span><span class="item-price">$1,300</span></div>
-
-      <div class="section-subtitle">卸甲與保養</div>
-      <div class="item-row" onclick="toggleItem(this, '卸甲', 200)"><span class="item-name">凝膠卸甲</span><span class="item-price">$200</span></div>
-      <div class="item-row" onclick="toggleItem(this, '手部保養', 300)"><span class="item-name">手部深層保養</span><span class="item-price">$300</span></div>
-      <div style="height: 70px;"></div>
+      <div class="grid grid-cols-2 gap-2" id="pos-items-container">
+        <!-- 動態渲染品項按鈕 -->
+      </div>
     </div>
-  </div>
 
-  <div class="bottom-bar" id="checkoutBottomBar" style="display: none;">
-    <div>
-      <span style="font-size: 0.85rem; color: #666;">總計：</span>
-      <span style="font-size: 1.3rem; font-weight: 800; color: var(--primary-dark);">$<span id="cartTotal">0</span></span>
+    <!-- 小計與結單送出 -->
+    <div class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3 text-xs">
+      <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 space-y-1.5 font-mono">
+        <div class="text-[11px] font-sans font-bold text-brand-700">本次開單明細：</div>
+        <div id="cart-details-box" class="space-y-1 text-xs text-brand-900">
+          <div class="text-brand-400 font-sans">(尚未點選任何項目)</div>
+        </div>
+        <div class="border-t border-brand-200 pt-2 flex justify-between items-baseline font-sans font-black">
+          <span>實收總金額：</span>
+          <span class="text-2xl text-brand-500 font-mono" id="disp-total-price">NT$ 0</span>
+        </div>
+      </div>
+
+      <button type="button" onclick="submitPosOrder()" class="w-full py-3.5 bg-[#8C7355] hover:bg-[#7A6246] text-white font-bold rounded-2xl shadow-md transition text-xs tracking-wider">
+        確認收銀開單 (同步更新顧客庫與流水帳)
+      </button>
     </div>
-    <button class="btn-action btn-checkout" style="width: auto; padding: 10px 22px;" onclick="completeCheckout()">完成結帳 ✓</button>
   </div>
 
   <script>
-    let cart = [];
-    let todayTotal = 0;
-    let monthTotal = 7900;
-    document.getElementById('todayStr').innerText = new Date().toLocaleDateString();
+    // 預設或自訂品項資料庫
+    let storeItems = JSON.parse(localStorage.getItem('pos_store_items') || 'null') || [
+      { name: "基礎單色凝膠", price: 1000, category: "手部" },
+      { name: "法式 / 璀璨漸層", price: 1300, category: "手部" },
+      { name: "本月特選造型款", price: 1500, category: "手部" },
+      { name: "深層手部保養", price: 800, category: "保養" },
+      { name: "本店卸甲續做", price: 200, category: "卸甲" },
+      { name: "他店凝膠卸除", price: 400, category: "卸甲" }
+    ];
 
-    function switchView(view) {
-      if (view === 'home') {
-        document.getElementById('homeView').style.display = 'block';
-        document.getElementById('checkoutView').style.display = 'none';
-        document.getElementById('checkoutBottomBar').style.display = 'none';
+    let cart = [];
+    let customersDb = JSON.parse(localStorage.getItem('pos_customers_db') || '{}');
+    let todayOrders = JSON.parse(localStorage.getItem('pos_orders_today') || '[]');
+
+    function renderItems() {
+      const container = document.getElementById('pos-items-container');
+      container.innerHTML = storeItems.map(it => `
+        <button type="button" onclick="addToCart('${it.name}', ${it.price})" class="p-3 bg-brand-50/70 hover:bg-brand-100 border border-brand-200 rounded-2xl text-left transition shadow-2xs">
+          <div class="font-bold text-brand-900">${it.name}</div>
+          <div class="font-mono text-emerald-800 font-black mt-1 text-xs">NT$ ${it.price.toLocaleString()}</div>
+        </button>
+      `).join('');
+    }
+
+    function autoLookupCustomer(phone) {
+      const cleanPhone = phone.trim().replace(/\D/g, '');
+      const badge = document.getElementById('cust-status-badge');
+      if (cleanPhone.length >= 8 && customersDb[cleanPhone]) {
+        const c = customersDb[cleanPhone];
+        document.getElementById('cust-name').value = c.name || '';
+        document.getElementById('cust-line').value = c.line || '';
+        badge.innerText = '✓ 已帶入舊客檔案';
+        badge.className = 'text-[10px] text-emerald-700 font-bold font-mono';
       } else {
-        document.getElementById('homeView').style.display = 'none';
-        document.getElementById('checkoutView').style.display = 'block';
-        document.getElementById('checkoutBottomBar').style.display = 'flex';
+        badge.innerText = '新客登記';
+        badge.className = 'text-[10px] text-brand-400 font-mono';
       }
     }
 
-    function toggleItem(el, name, price) {
-      el.classList.toggle('selected');
-      const idx = cart.findIndex(i => i.name === name);
-      if (idx > -1) cart.splice(idx, 1);
-      else cart.push({ name, price });
-      document.getElementById('cartTotal').innerText = cart.reduce((s, i) => s + i.price, 0);
+    function addToCart(name, price) {
+      cart.push({ name, price });
+      renderCart();
     }
 
-    function completeCheckout() {
-      const total = cart.reduce((s, i) => s + i.price, 0);
-      if (total === 0) return alert("請至少選擇一項服務！");
-      todayTotal += total;
-      monthTotal += total;
-      document.getElementById('todayRev').innerText = todayTotal;
-      document.getElementById('monthRev').innerText = monthTotal.toLocaleString();
-      alert(`結帳成功！已記錄營收 $${total} 元`);
+    function clearCart() {
       cart = [];
-      document.querySelectorAll('.item-row').forEach(e => e.classList.remove('selected'));
-      document.getElementById('cartTotal').innerText = '0';
-      document.getElementById('clientName').value = '';
-      switchView('home');
+      renderCart();
     }
+
+    function renderCart() {
+      const box = document.getElementById('cart-details-box');
+      if (cart.length === 0) {
+        box.innerHTML = '<div class="text-brand-400 font-sans">(尚未點選任何項目)</div>';
+        document.getElementById('disp-total-price').innerText = 'NT$ 0';
+        return;
+      }
+      box.innerHTML = cart.map((it, idx) => `
+        <div class="flex justify-between items-center">
+          <span>• ${it.name}</span>
+          <div class="flex items-center gap-2">
+            <span class="font-bold">NT$ ${it.price.toLocaleString()}</span>
+            <button type="button" onclick="cart.splice(${idx},1); renderCart();" class="text-stone-300 hover:text-rose-600 font-bold">✕</button>
+          </div>
+        </div>
+      `).join('');
+      const sum = cart.reduce((acc, cur) => acc + cur.price, 0);
+      document.getElementById('disp-total-price').innerText = `NT$ ${sum.toLocaleString()}`;
+    }
+
+    function submitPosOrder() {
+      if (cart.length === 0) return Swal.fire('請先選擇消費項目', '', 'warning');
+      const phone = document.getElementById('cust-phone').value.trim();
+      const name = document.getElementById('cust-name').value.trim();
+      const line = document.getElementById('cust-line').value.trim();
+
+      if (!phone || !name) return Swal.fire('請填寫顧客手機與姓名', '', 'warning');
+
+      // 更新顧客小資料庫
+      customersDb[phone] = { phone, name, line, lastVisit: new Date().toLocaleDateString() };
+      localStorage.setItem('pos_customers_db', JSON.stringify(customersDb));
+
+      const total = cart.reduce((acc, cur) => acc + cur.price, 0);
+      todayOrders.push({ phone, name, line, total, items: cart.map(i => i.name).join(', '), time: new Date().toLocaleTimeString() });
+      localStorage.setItem('pos_orders_today', JSON.stringify(todayOrders));
+
+      updateStats();
+      clearCart();
+      document.getElementById('cust-phone').value = '';
+      document.getElementById('cust-name').value = '';
+      document.getElementById('cust-line').value = '';
+
+      Swal.fire({ title: '收銀結單完成！', text: `實收 NT$ ${total.toLocaleString()}，已更新客戶檔案`, icon: 'success', timer: 1200, showConfirmButton: false });
+    }
+
+    function updateStats() {
+      const todayTotal = todayOrders.reduce((acc, cur) => acc + cur.total, 0);
+      document.getElementById('stat-today-total').innerText = `NT$ ${todayTotal.toLocaleString()}`;
+      document.getElementById('stat-month-total').innerText = `NT$ ${(todayTotal + 32800).toLocaleString()}`;
+    }
+
+    function openItemsManageModal() {
+      Swal.fire({
+        title: '新增現場服務項目',
+        html: `
+          <div class="text-left text-xs space-y-2">
+            <div><label class="font-bold">項目名稱：</label><input id="new-item-name" class="swal2-input text-xs" placeholder="例: 美睫晶亮嫁接"></div>
+            <div><label class="font-bold">收費金額 (NT$)：</label><input id="new-item-price" type="number" class="swal2-input text-xs font-mono" placeholder="例: 1200"></div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '確定新增',
+        confirmButtonColor: '#8C7355',
+        preConfirm: () => ({
+          name: document.getElementById('new-item-name').value.trim(),
+          price: Number(document.getElementById('new-item-price').value || 0)
+        })
+      }).then(r => {
+        if (r.isConfirmed && r.value.name) {
+          storeItems.push(r.value);
+          localStorage.setItem('pos_store_items', JSON.stringify(storeItems));
+          renderItems();
+          Swal.fire('品項已加入！', '', 'success');
+        }
+      });
+    }
+
+    window.onload = () => {
+      renderItems();
+      updateStats();
+    };
   </script>
 </body>
 </html>

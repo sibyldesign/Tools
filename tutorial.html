@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>希貝兒美業微工具 | 官方線上操作教學指南</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#FAF8F5', 100: '#F5EFE6', 200: '#EBE3D5', 300: '#D5C7B5',
+              400: '#B5A08A', 500: '#8C7355', 600: '#735C43', 700: '#5C4834',
+              800: '#473626', 900: '#2E2217'
+            }
+          },
+          fontFamily: {
+            sans: ['Noto Sans TC', 'sans-serif'],
+            serif: ['Playfair Display', 'serif']
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-brand-50 text-brand-900 antialiased selection:bg-brand-200 pb-20">
+
+  <!-- 頂部導航 -->
+  <header class="bg-white border-b border-brand-200 sticky top-0 z-30 px-5 py-3.5">
+    <div class="max-w-4xl mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-xl bg-brand-500 text-white flex items-center justify-center text-xs">
+          <i class="fa-solid fa-book-open"></i>
+        </div>
+        <div>
+          <h1 class="text-xs font-black text-brand-900">微工具線上操作教學手冊</h1>
+          <span class="text-[9.5px] text-brand-400 font-mono">User Guide & Setup Documentation</span>
+        </div>
+      </div>
+      <a href="https://line.me/R/ti/p/@480kqjoj" target="_blank" class="text-xs text-emerald-700 font-bold flex items-center gap-1 hover:underline">
+        <i class="fa-brands fa-line text-sm"></i>
+        <span>線上技術客服</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto p-4 md:p-6 space-y-6">
+
+    <!-- 快速新手引導：新增至手機主畫面 -->
+    <section class="bg-white p-6 rounded-3xl border border-brand-200 shadow-sm space-y-3">
+      <div class="flex items-center gap-2 text-brand-900 font-bold text-sm border-b border-brand-100 pb-2">
+        <i class="fa-solid fa-mobile-screen-button text-brand-500"></i>
+        <span>第一步：將工具加入手機主畫面（如同 APP 隨點即開）</span>
+      </div>
+      <p class="text-xs text-brand-400 leading-relaxed">
+        微工具無需透過 App Store 下載安裝，請使用手機瀏覽器開啟專屬網址，依照下列步驟即可建立桌面捷徑：
+      </p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-1">
+        <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 space-y-1">
+          <div class="font-bold text-brand-900 flex items-center gap-1.5">
+            <i class="fa-brands fa-apple text-sm"></i> iPhone (Safari 瀏覽器)
+          </div>
+          <ol class="list-decimal list-inside text-brand-700 space-y-1 pl-1">
+            <li>使用 Safari 開啟工具網址</li>
+            <li>點擊瀏覽器下方正中央的「分享」圖示</li>
+            <li>向下滑動點選「加入主畫面」</li>
+            <li>點擊右上角「新增」，完成建立捷徑</li>
+          </ol>
+        </div>
+        <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 space-y-1">
+          <div class="font-bold text-brand-900 flex items-center gap-1.5">
+            <i class="fa-brands fa-android text-sm"></i> Android (Chrome 瀏覽器)
+          </div>
+          <ol class="list-decimal list-inside text-brand-700 space-y-1 pl-1">
+            <li>使用 Chrome 開啟工具網址</li>
+            <li>點擊右上角「三個圓點」選單</li>
+            <li>點選「加到主畫面」或「安裝應用程式」</li>
+            <li>確認新增，即可在手機桌面找到圖示</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- 各工具操作指南清單 -->
+    <div class="space-y-4">
+
+      <!-- 1. studio_slot.html -->
+      <details class="bg-white rounded-3xl border border-brand-200 p-5 shadow-xs group" open>
+        <summary class="font-bold text-sm text-brand-900 cursor-pointer flex justify-between items-center list-none">
+          <span class="flex items-center gap-2">
+            <i class="fa-solid fa-camera-retro text-amber-600"></i>
+            <span>01. IG 限動空檔生圖器 (studio_slot.html) 操作方式</span>
+          </span>
+          <i class="fa-solid fa-chevron-down text-brand-400 group-open:rotate-180 transition text-xs"></i>
+        </summary>
+        <div class="pt-3 border-t border-brand-100 mt-3 text-xs text-brand-700 space-y-2 leading-relaxed">
+          <p><b>1. 顧客視角與店長管理切換：</b>網頁開啟時預設為顧客查詢畫面，點擊右上角「店長生圖管理」並輸入 PIN 碼（預設 8888）即可解鎖排程控制台。</p>
+          <p><b>2. 設定營業時間與公休：</b>調整切割間隔（15/30/60 分鐘）、設定每日起迄時段，並勾選固定公休日，系統將自動過濾無法預約的時間。</p>
+          <p><b>3. 日期區間與時段釋出：</b>選擇開始與結束日期，點擊下方綠色時段按鈕切換開放狀態，確認無誤後點選「一鍵下載 9:16 IG 限動美圖」即可直接轉發至社群限時動態。</p>
+        </div>
+      </details>
+
+      <!-- 2. pos.html -->
+      <details class="bg-white rounded-3xl border border-brand-200 p-5 shadow-xs group">
+        <summary class="font-bold text-sm text-brand-900 cursor-pointer flex justify-between items-center list-none">
+          <span class="flex items-center gap-2">
+            <i class="fa-solid fa-cash-register text-brand-500"></i>
+            <span>02. 極簡快速收銀小幫手 (pos.html) 操作方式</span>
+          </span>
+          <i class="fa-solid fa-chevron-down text-brand-400 group-open:rotate-180 transition text-xs"></i>
+        </summary>
+        <div class="pt-3 border-t border-brand-100 mt-3 text-xs text-brand-700 space-y-2 leading-relaxed">
+          <p><b>1. 顧客快速帶入：</b>輸入顧客手機號碼，若為曾消費過的顧客，系統將秒自動帶入姓名與 LINE 暱稱；若顧客更換稱呼，送單時將自動更新覆寫。</p>
+          <p><b>2. 點選開單：</b>點擊現場施作項目與加購項目，下方即時顯示應收金額，點擊「確認收銀開單」即可記錄至本地流水帳並更新今日與本月營收指標。</p>
+          <p><b>3. 新增自訂品項：</b>點擊右上角「項目設定」，可隨時依現場營運狀況新增或調整服務名稱與收費金額。</p>
+        </div>
+      </details>
+
+      <!-- 3. quote.html -->
+      <details class="bg-white rounded-3xl border border-brand-200 p-5 shadow-xs group">
+        <summary class="font-bold text-sm text-brand-900 cursor-pointer flex justify-between items-center list-none">
+          <span class="flex items-center gap-2">
+            <i class="fa-solid fa-calculator text-amber-600"></i>
+            <span>03. 美業通用服務報價試算器 (quote.html) 操作方式</span>
+          </span>
+          <i class="fa-solid fa-chevron-down text-brand-400 group-open:rotate-180 transition text-xs"></i>
+        </summary>
+        <div class="pt-3 border-t border-brand-100 mt-3 text-xs text-brand-700 space-y-2 leading-relaxed">
+          <p><b>1. 頂部直式輪播說明圖：</b>上方支援多張 9:16 活動圖片自動輪播，圖片若非標準直式尺寸，系統會自動以背景高斯模糊填補，呈現精緻視覺效果。</p>
+          <p><b>2. 自主試算與回傳：</b>將網址置於官方 LINE 圖文選單或 IG 主頁，客人自行勾選基礎項目、護理加購與設計指數後，點擊「複製報價明細」即可格式化貼入官方 LINE 完成預約。</p>
+        </div>
+      </details>
+
+      <!-- 4. loyalty.html -->
+      <details class="bg-white rounded-3xl border border-brand-200 p-5 shadow-xs group">
+        <summary class="font-bold text-sm text-brand-900 cursor-pointer flex justify-between items-center list-none">
+          <span class="flex items-center gap-2">
+            <i class="fa-solid fa-stamp text-amber-600"></i>
+            <span>04. VIP 數位會員存摺 (loyalty.html) 操作方式</span>
+          </span>
+          <i class="fa-solid fa-chevron-down text-brand-400 group-open:rotate-180 transition text-xs"></i>
+        </summary>
+        <div class="pt-3 border-t border-brand-100 mt-3 text-xs text-brand-700 space-y-2 leading-relaxed">
+          <p><b>1. 會員查詢：</b>顧客出示手機輸入號碼，立即展開專屬黑灰燙金數位卡面，同步檢視集點章、儲值餘額與包卡堂數。</p>
+          <p><b>2. 店長現場蓋章與核銷：</b>下方管理按鈕受 PIN 碼保護（預設 8888），輸入密碼後可直接進行「+1 點蓋章」、「扣除儲值金」或「核銷包卡 1 堂」。</p>
+        </div>
+      </details>
+
+      <!-- 5. reminder.gs -->
+      <details class="bg-white rounded-3xl border border-brand-200 p-5 shadow-xs group">
+        <summary class="font-bold text-sm text-brand-900 cursor-pointer flex justify-between items-center list-none">
+          <span class="flex items-center gap-2">
+            <i class="fa-brands fa-line text-emerald-600"></i>
+            <span>05. LINE 防放鳥推播排程 (reminder.gs) 設定方式</span>
+          </span>
+          <i class="fa-solid fa-chevron-down text-brand-400 group-open:rotate-180 transition text-xs"></i>
+        </summary>
+        <div class="pt-3 border-t border-brand-100 mt-3 text-xs text-brand-700 space-y-2 leading-relaxed">
+          <p><b>1. 試算表準備：</b>在 Google 試算表中建立「預約名冊」工作表，欄位依序包含姓名、日期、時間、項目、顧客 LINE UID 與發送狀態。</p>
+          <p><b>2. 部署 Apps Script：</b>點選「擴充功能 > Apps Script」，貼上提供的 `reminder.gs` 程式碼，並在頂端變數填入您的 LINE Messaging API Token。</p>
+          <p><b>3. 設定排程觸發器：</b>點擊左側時鐘圖示（觸發條件），新增一個每日定時觸發器（建議設定在每晚 20:00 至 21:00 之間），系統即會自動針對明日預約客發送出席提醒。</p>
+        </div>
+      </details>
+
+      <!-- 6. overview.html -->
+      <details class="bg-white rounded-3xl border border-brand-200 p-5 shadow-xs group">
+        <summary class="font-bold text-sm text-brand-900 cursor-pointer flex justify-between items-center list-none">
+          <span class="flex items-center gap-2">
+            <i class="fa-solid fa-table-cells text-brand-500"></i>
+            <span>06. 全日排程總覽與席位防撞 (overview.html) 操作方式</span>
+          </span>
+          <i class="fa-solid fa-chevron-down text-brand-400 group-open:rotate-180 transition text-xs"></i>
+        </summary>
+        <div class="pt-3 border-t border-brand-100 mt-3 text-xs text-brand-700 space-y-2 leading-relaxed">
+          <p><b>1. 專員代號化與雙檢視切換：</b>上方提供日期橫排按鈕快速切換查看，可選擇「滑動檢視」或「全店同屏」模式掌握各專員全天空檔。</p>
+          <p><b>2. 快速插單與防遮擋算法：</b>點擊任何專員的空白時段格子，輸入手機帶入顧客資料即可快速開單；若為 Group A（等待期允許插單）項目，重疊時段自動分欄並排展示，並受到店內設備容量上限保護。</p>
+        </div>
+      </details>
+
+      <!-- 7. contract.html -->
+      <details class="bg-white rounded-3xl border border-brand-200 p-5 shadow-xs group">
+        <summary class="font-bold text-sm text-brand-900 cursor-pointer flex justify-between items-center list-none">
+          <span class="flex items-center gap-2">
+            <i class="fa-solid fa-file-contract text-amber-600"></i>
+            <span>07. 數位定型化契約與 Resend 電子存證 (contract.html) 操作方式</span>
+          </span>
+          <i class="fa-solid fa-chevron-down text-brand-400 group-open:rotate-180 transition text-xs"></i>
+        </summary>
+        <div class="pt-3 border-t border-brand-100 mt-3 text-xs text-brand-700 space-y-2 leading-relaxed">
+          <p><b>1. 顧客簽署：</b>由顧客填寫姓名、電話與 Email，閱讀完定型化合約條款後，在虛線簽名框內以手指親筆手寫簽名。</p>
+          <p><b>2. 電子存證副本自動寄發：</b>點擊確認送出後，系統自動將簽名圖檔封裝，並透過 Resend API 將包含店名、完整條款、簽名圖與時間戳記的正式存證信件寄發至顧客信箱。</p>
+        </div>
+      </details>
+
+    </div>
+
+    <!-- 常見問題 FAQ -->
+    <section class="bg-white p-6 rounded-3xl border border-brand-200 shadow-sm space-y-3">
+      <div class="font-bold text-brand-900 text-sm border-b border-brand-100 pb-2 flex items-center gap-2">
+        <i class="fa-solid fa-circle-question text-brand-500"></i>
+        <span>常見問題與技術支援 FAQ</span>
+      </div>
+      <div class="space-y-3 text-xs text-brand-700 leading-relaxed">
+        <div>
+          <b class="text-brand-900">Q1：更換手機或清除瀏覽器紀錄，資料會遺失嗎？</b>
+          <p class="text-brand-400">微工具的顧客小資料庫與設定預設保存在手機本地儲存區（LocalStorage），若更換手機，可透過整合管理中心（tools-admin.html）匯出或與 Supabase 雲端資料庫同步保存。</p>
+        </div>
+        <div>
+          <b class="text-brand-900">Q2：店長預設 PIN 碼可以修改嗎？忘記密碼怎麼辦？</b>
+          <p class="text-brand-400">所有工具預設 PIN 碼均為 8888，在各工具管理面板中皆可直接點擊「改 PIN 碼」重設。若忘記密碼，可聯繫官方客服提供店家名稱由技術人員為您重設。</p>
+        </div>
+        <div>
+          <b class="text-brand-900">Q3：未來想改用完整版預約系統，流程如何銜接？</b>
+          <p class="text-brand-400">隨時可洽詢官方客服了解「美業沙龍 ＆ 寵物美容住宿旗艦系統」，專員將協助您將現有顧客名冊與服務項目無縫匯入旗艦系統。</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="text-center text-xs text-brand-400 py-8 border-t border-brand-200 space-y-2">
+    <div>
+      <a href="https://line.me/R/ti/p/@480kqjoj" target="_blank" class="text-brand-700 font-bold hover:underline">
+        聯繫 Sibyl 官方線上客服 (@480kqjoj)
+      </a>
+    </div>
+    <div>希貝兒設計所 | 統一編號 61347275</div>
+    <div class="font-mono text-[10px] opacity-70">© 2026 SIBYL.DESIGN All Rights Reserved.</div>
+  </footer>
+
+</body>
+</html>

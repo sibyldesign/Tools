@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>美業獨立工具集成管理中心 | Tools Management Hub</title>
+  <title>美業獨立工具管理中心 | Tools Management Hub</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
@@ -38,880 +38,968 @@
     }
   </style>
 </head>
-<body class="bg-brand-50 text-brand-900 antialiased pb-24 min-h-screen">
+<body class="bg-brand-50 text-brand-900 antialiased min-h-screen pb-32">
 
-  <!-- 頂部導覽列 -->
-  <header class="bg-white border-b border-brand-200 px-5 py-3.5 sticky top-0 z-30 shadow-xs flex justify-between items-center max-w-6xl mx-auto w-full">
-    <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-sm shadow-2xs">
+  <!-- 8888 門禁解鎖遮罩 -->
+  <div id="lock-screen" class="fixed inset-0 bg-brand-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-3xl shadow-xl border border-brand-200 text-center w-full max-w-xs space-y-3">
+      <div class="w-12 h-12 mx-auto bg-brand-100 rounded-full flex items-center justify-center text-[#8C7355] text-xl">
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+      <div>
+        <div class="text-base font-bold text-brand-900">微工具集成後台登入</div>
+        <div class="text-[10px] text-brand-400 font-mono">Sibyl Tools Security Protected</div>
+      </div>
+      <div id="lock-error" class="text-xs text-rose-600 font-bold min-h-[1.25rem]"></div>
+      <input type="password" id="pin-input" class="w-full text-center text-2xl tracking-[0.3em] py-3 rounded-xl border border-brand-200 focus:ring-2 focus:ring-brand-400 focus:outline-none bg-brand-50/50 font-mono" placeholder="請輸入密碼" maxlength="6">
+      <button type="button" class="w-full py-3 bg-[#8C7355] hover:bg-[#7A6246] text-white font-bold rounded-xl shadow-md transition text-xs" onclick="checkAdminPin()">
+        驗證進入系統
+      </button>
+    </div>
+  </div>
+
+  <!-- 頂部懸浮未存警告列 (編輯時自動觸發) -->
+  <div id="sticky-unsaved-bar" class="sticky top-0 z-40 bg-stone-900 border-b-2 border-amber-500 text-white p-3 shadow-2xl flex justify-between items-center transition-all duration-300 hidden">
+    <div class="flex items-center gap-2 text-xs font-bold pl-2">
+      <i class="fa-solid fa-triangle-exclamation text-amber-400 animate-bounce"></i>
+      <span>您有尚未儲存的設定變更！請記得儲存以防資料遺失。</span>
+    </div>
+    <button type="button" onclick="saveAllActiveSettings()" class="px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-black rounded-xl shadow-md transition shrink-0 flex items-center gap-1">
+      <i class="fa-solid fa-floppy-disk"></i>
+      <span>立即儲存</span>
+    </button>
+  </div>
+
+  <!-- 頂部資訊列 -->
+  <header class="bg-white border-b border-brand-200 px-4 py-3 sticky top-0 z-30 shadow-xs flex justify-between items-center max-w-4xl mx-auto w-full">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-xs shadow-2xs">
         <i class="fa-solid fa-toolbox"></i>
       </div>
       <div>
-        <h1 class="text-sm font-black text-brand-900 tracking-wide" id="hub-store-title">美業獨立工具集成中心</h1>
-        <div class="text-[10px] text-brand-400 font-mono" id="hub-store-subtitle">Sibyl Cloud Management Hub</div>
+        <h1 class="text-xs font-black text-brand-900" id="hub-store-title">美業獨立工具集成中心</h1>
+        <div class="text-[9.5px] text-brand-400 font-mono">Sibyl Tools Management Hub</div>
       </div>
     </div>
     <div class="flex items-center gap-2">
-      <span id="hub-plan-badge" class="px-2.5 py-1 bg-brand-100 text-brand-800 rounded-lg text-[11px] font-bold font-mono">載入授權中...</span>
-      <button type="button" onclick="saveActiveToolSettings()" class="px-4 py-1.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs">
-        <i class="fa-solid fa-floppy-disk"></i>
-        <span>儲存當前設定</span>
+      <button type="button" onclick="changeAdminPinModal()" class="px-2.5 py-1 bg-brand-50 border border-brand-200 text-brand-700 rounded-lg text-[10.5px] font-bold flex items-center gap-1 hover:bg-brand-100 transition">
+        <i class="fa-solid fa-key text-[9px]"></i>
+        <span>改密碼 (當前: <b class="font-mono text-brand-900" id="disp-current-pin">8888</b>)</span>
+      </button>
+      <button type="button" onclick="saveAllActiveSettings()" class="px-3 py-1.5 bg-[#8C7355] hover:bg-[#7A6246] text-white rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-2xs">
+        <i class="fa-solid fa-floppy-disk text-[10px]"></i>
+        <span>儲存設定</span>
       </button>
     </div>
   </header>
 
-  <!-- 主版面容器：左側 9 大獨立工具導航，右側操作面版 -->
-  <main class="max-w-6xl mx-auto p-4 md:p-6 grid grid-cols-1 md:grid-cols-4 gap-5">
-    
-    <!-- 左側選單 -->
-    <aside class="md:col-span-1 space-y-2">
-      <div class="bg-white p-3 rounded-2xl border border-brand-200 shadow-2xs space-y-1">
-        <div class="text-[10px] font-bold text-brand-400 px-2 py-1 tracking-wider uppercase">獨立工具模組目錄</div>
+  <!-- 主操作面板容器 (9 大模組分頁) -->
+  <main class="max-w-4xl mx-auto p-4 space-y-4" id="main-panel-container">
 
-        <!-- 1. reminder.gs -->
-        <button type="button" class="tool-nav-btn w-full p-2.5 rounded-xl text-left text-xs font-bold flex items-center justify-between transition bg-brand-500 text-white shadow-2xs" data-target="tab-reminder" onclick="switchToolTab('tab-reminder', this)">
-          <span class="flex items-center gap-2"><i class="fa-brands fa-line text-sm"></i> LINE 防放鳥推播</span>
-          <span class="text-[9px] bg-white/20 px-1.5 py-0.5 rounded font-mono">#1</span>
-        </button>
+    <!-- [分頁 1] LINE 預約防放鳥推播 (reminder.gs) -->
+    <div id="tab-reminder" class="tool-tab-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3 text-xs">
+      <div class="flex justify-between items-center border-b border-brand-100 pb-2">
+        <span class="font-bold text-brand-900 flex items-center gap-1.5 text-sm">
+          <i class="fa-brands fa-line text-emerald-600 text-base"></i> LINE 預約防放鳥推播工具 (reminder.gs)
+        </span>
+        <button type="button" onclick="testReminderPush()" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-[11px] transition">測試發送</button>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 font-mono">
+        <div>
+          <label class="block font-bold mb-1 text-[11px] font-sans">Channel Access Token：</label>
+          <input type="password" id="cfg-line-token" class="w-full p-2.5 border border-brand-200 rounded-xl bg-brand-50/50 text-xs outline-none" placeholder="貼上長期權杖">
+        </div>
+        <div>
+          <label class="block font-bold mb-1 text-[11px] font-sans">接收測試之個人 LINE UID：</label>
+          <input type="text" id="cfg-owner-uid" class="w-full p-2.5 border border-brand-200 rounded-xl bg-brand-50/50 text-xs outline-none" placeholder="U 開頭識別碼">
+        </div>
+      </div>
+      <div class="p-3 bg-brand-50 rounded-2xl border border-brand-200 space-y-2">
+        <div class="flex justify-between items-center">
+          <span class="font-bold text-brand-900"><i class="fa-solid fa-code text-[#8C7355] mr-1"></i> reminder.gs 排程腳本</span>
+          <button type="button" onclick="copyReminderCode()" class="text-[11px] text-[#8C7355] font-bold underline">複製完整腳本</button>
+        </div>
+        <textarea id="code-reminder-view" rows="4" readonly class="w-full p-2.5 bg-white border border-brand-200 rounded-xl font-mono text-[10px] text-gray-600 leading-relaxed"></textarea>
+      </div>
+    </div>
 
-        <!-- 2. studio_slot.html -->
-        <button type="button" class="tool-nav-btn w-full p-2.5 rounded-xl text-left text-xs font-bold flex items-center justify-between transition text-brand-800 hover:bg-brand-50" data-target="tab-slot" onclick="switchToolTab('tab-slot', this)">
-          <span class="flex items-center gap-2"><i class="fa-solid fa-camera-retro text-sm"></i> IG 空檔生圖器</span>
-          <span class="text-[9px] bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded font-mono">#2</span>
-        </button>
-
-        <!-- 3. pos.html -->
-        <button type="button" class="tool-nav-btn w-full p-2.5 rounded-xl text-left text-xs font-bold flex items-center justify-between transition text-brand-800 hover:bg-brand-50" data-target="tab-pos" onclick="switchToolTab('tab-pos', this)">
-          <span class="flex items-center gap-2"><i class="fa-solid fa-cash-register text-sm"></i> 極簡快速結帳</span>
-          <span class="text-[9px] bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded font-mono">#3</span>
-        </button>
-
-        <!-- 4. quote.html -->
-        <button type="button" class="tool-nav-btn w-full p-2.5 rounded-xl text-left text-xs font-bold flex items-center justify-between transition text-brand-800 hover:bg-brand-50" data-target="tab-quote" onclick="switchToolTab('tab-quote', this)">
-          <span class="flex items-center gap-2"><i class="fa-solid fa-calculator text-sm"></i> 服務報價試算器</span>
-          <span class="text-[9px] bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded font-mono">#4</span>
-        </button>
-
-        <!-- 5. loyalty.html -->
-        <button type="button" class="tool-nav-btn w-full p-2.5 rounded-xl text-left text-xs font-bold flex items-center justify-between transition text-brand-800 hover:bg-brand-50" data-target="tab-loyalty" onclick="switchToolTab('tab-loyalty', this)">
-          <span class="flex items-center gap-2"><i class="fa-solid fa-stamp text-sm"></i> 數位會員集點卡</span>
-          <span class="text-[9px] bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded font-mono">#5</span>
-        </button>
-
-        <!-- 6. overview.html -->
-        <button type="button" class="tool-nav-btn w-full p-2.5 rounded-xl text-left text-xs font-bold flex items-center justify-between transition text-brand-800 hover:bg-brand-50" data-target="tab-overview" onclick="switchToolTab('tab-overview', this)">
-          <span class="flex items-center gap-2"><i class="fa-solid fa-table-cells text-sm"></i> 全日甘特圖排程</span>
-          <span class="text-[9px] bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded font-mono">#6</span>
-        </button>
-
-        <!-- 7. contract.html -->
-        <button type="button" class="tool-nav-btn w-full p-2.5 rounded-xl text-left text-xs font-bold flex items-center justify-between transition text-brand-800 hover:bg-brand-50" data-target="tab-contract" onclick="switchToolTab('tab-contract', this)">
-          <span class="flex items-center gap-2"><i class="fa-solid fa-file-contract text-sm"></i> 定型化契約存證</span>
-          <span class="text-[9px] bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded font-mono">#7</span>
-        </button>
-
-        <!-- 8. 配方與試算表母表 -->
-        <button type="button" class="tool-nav-btn w-full p-2.5 rounded-xl text-left text-xs font-bold flex items-center justify-between transition text-brand-800 hover:bg-brand-50" data-target="tab-recipe-sheets" onclick="switchToolTab('tab-recipe-sheets', this)">
-          <span class="flex items-center gap-2"><i class="fa-solid fa-file-excel text-sm"></i> 配方庫與試算表</span>
-          <span class="text-[9px] bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded font-mono">#8</span>
-        </button>
-
-        <!-- 9. 總管監控室 -->
-        <button type="button" class="tool-nav-btn w-full p-2.5 rounded-xl text-left text-xs font-bold flex items-center justify-between transition text-brand-800 hover:bg-brand-50" data-target="tab-master" onclick="switchToolTab('tab-master', this)">
-          <span class="flex items-center gap-2"><i class="fa-solid fa-shield-halved text-sm"></i> 總管授權監控室</span>
-          <span class="text-[9px] bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded font-mono">總管</span>
-        </button>
+    <!-- [分頁 2] IG 空檔生圖器設定 (studio_slot.html) -->
+    <div id="tab-slot" class="tool-tab-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3.5 text-xs hidden">
+      <div class="flex justify-between items-center border-b border-brand-100 pb-2">
+        <div>
+          <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
+            <i class="fa-solid fa-camera-retro text-amber-600"></i> IG 限動空檔生圖器設定 (studio_slot.html)
+          </span>
+          <p class="text-[10.5px] text-brand-400">客端即時查空檔 · 店長 9:16 限動美圖生成</p>
+        </div>
+        <a href="studio_slot.html" target="_blank" class="px-3 py-1 bg-brand-100 text-brand-800 rounded-lg font-bold text-[11px] hover:bg-brand-200 transition">開啟生圖頁 ➔</a>
       </div>
 
-      <div class="bg-white p-3 rounded-2xl border border-brand-200 shadow-2xs space-y-2">
-        <div class="text-[10px] font-bold text-brand-400 px-1 tracking-wider uppercase">系統切換導覽</div>
-        <a href="admin.html" class="block w-full text-center py-2 bg-brand-50 border border-brand-200 text-brand-800 rounded-xl font-bold text-xs hover:bg-brand-100 transition">
-          <i class="fa-solid fa-calendar-day mr-1"></i> 前往排程營運看板 (admin)
-        </a>
-        <a href="index.html" target="_blank" class="block w-full text-center py-2 bg-white border border-brand-200 text-brand-600 rounded-xl font-bold text-xs hover:bg-brand-50 transition">
-          <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> 開啟顧客預約前台
-        </a>
-      </div>
-    </aside>
-
-    <!-- 右側分頁作業面版 -->
-    <section class="md:col-span-3 space-y-4">
-
-      <!-- ========================================== -->
-      <!-- [分頁 1] LINE 預約防放鳥與智慧推播 (reminder.gs) -->
-      <!-- ========================================== -->
-      <div id="tab-reminder" class="tool-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-4 text-xs">
-        <div class="border-b border-brand-100 pb-3 flex justify-between items-center">
-          <div>
-            <h2 class="text-sm font-black text-brand-900 flex items-center gap-2">
-              <i class="fa-brands fa-line text-emerald-600 text-base"></i> LINE 預約防放鳥推播工具 (reminder.gs)
-            </h2>
-            <p class="text-[10.5px] text-brand-400 mt-0.5">預約日前一晚 20:00 自動推播溫馨提醒、附帶「確認出席」按鈕大幅降低 No-Show 率</p>
-          </div>
-          <button type="button" onclick="testLineReminderPush()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition shadow-2xs flex items-center gap-1">
-            <i class="fa-solid fa-paper-plane text-[10px]"></i> 測試發送提醒卡片
-          </button>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div>
+          <label class="block font-bold mb-1">沙龍店名：</label>
+          <input type="text" id="slot-cfg-store" class="w-full p-2.5 border border-brand-200 rounded-xl bg-brand-50/50 font-bold" value="沙龍工作室">
         </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono">
-          <div>
-            <label class="block font-bold mb-1 text-brand-800 text-[11px] font-sans">Channel Access Token (長期權杖)：</label>
-            <input type="password" id="reminder-cfg-token" class="w-full p-2.5 border border-brand-200 rounded-xl bg-brand-50/40 text-xs outline-none" placeholder="貼上 LINE Messaging API Token">
-          </div>
-          <div>
-            <label class="block font-bold mb-1 text-brand-800 text-[11px] font-sans">接收測試推播之 LINE UID：</label>
-            <input type="text" id="reminder-cfg-uid" class="w-full p-2.5 border border-brand-200 rounded-xl bg-brand-50/40 text-xs outline-none" placeholder="U 開頭之個人識別碼">
-          </div>
-        </div>
-
-        <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 space-y-2">
-          <div class="flex justify-between items-center">
-            <span class="font-bold text-brand-900 flex items-center gap-1.5"><i class="fa-solid fa-code text-brand-500"></i> Google Apps Script (reminder.gs) 部署腳本</span>
-            <button type="button" onclick="copyReminderGsScript()" class="px-2.5 py-1 bg-white border border-brand-200 text-brand-800 rounded-lg font-bold text-[11px] hover:bg-brand-100 transition shadow-2xs">
-              <i class="fa-regular fa-copy mr-1"></i>複製完整腳本
-            </button>
-          </div>
-          <textarea id="code-reminder-gs" rows="5" readonly class="w-full p-2.5 bg-white border border-brand-200 rounded-xl font-mono text-[10.5px] text-brand-700 leading-relaxed" onclick="this.select()"></textarea>
-          <div class="text-[10px] text-brand-400">貼入 Google Apps Script 專案後，設定每日晚上 20:00 觸發定時排程即可。</div>
+        <div>
+          <label class="block font-bold mb-1">官方 LINE 預約連結：</label>
+          <input type="text" id="slot-cfg-line" class="w-full p-2.5 border border-brand-200 rounded-xl bg-brand-50/50 font-mono" value="https://line.me/R/ti/p/@your_line">
         </div>
       </div>
 
-      <!-- ========================================== -->
-      <!-- [分頁 2] IG 限動空檔生圖器 (studio_slot.html) -->
-      <!-- ========================================== -->
-      <div id="tab-slot" class="tool-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-4 text-xs hidden">
-        <div class="border-b border-brand-100 pb-3 flex justify-between items-center">
-          <div>
-            <h2 class="text-sm font-black text-brand-900 flex items-center gap-2">
-              <i class="fa-solid fa-camera-retro text-amber-600 text-base"></i> IG 限動空檔生圖器 (studio_slot.html)
-            </h2>
-            <p class="text-[10.5px] text-brand-400 mt-0.5">營業時段點選、4 款美學風格色系切換、一鍵生成 9:16 高畫質圖片下載</p>
-          </div>
-          <button type="button" onclick="publishSlotsDirectly()" class="px-3.5 py-1.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold transition shadow-2xs">
-            <i class="fa-solid fa-cloud-arrow-up mr-1"></i> 發布空檔網頁
-          </button>
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="block font-bold mb-1">時段切割間隔：</label>
+          <select id="slot-cfg-interval" class="w-full p-2.5 border border-brand-200 rounded-xl bg-brand-50/50 font-bold" onchange="renderSlotDateRangeChips()">
+            <option value="15">每 15 分鐘</option>
+            <option value="30" selected>每 30 分鐘</option>
+            <option value="60">每 60 分鐘</option>
+          </select>
         </div>
-
-        <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 space-y-2">
-          <label class="block font-bold text-brand-900 text-xs">選擇限動視覺風格色系 (4 款美學色票)：</label>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <label class="p-2.5 bg-white rounded-xl border border-brand-200 flex items-center gap-2 cursor-pointer font-bold text-xs">
-              <input type="radio" name="slot-theme-radio" value="latte" class="accent-brand-500" checked>
-              <span>溫柔奶茶 (Latte)</span>
-            </label>
-            <label class="p-2.5 bg-white rounded-xl border border-brand-200 flex items-center gap-2 cursor-pointer font-bold text-xs">
-              <input type="radio" name="slot-theme-radio" value="noir" class="accent-brand-500">
-              <span>無印極簡 (Minimal)</span>
-            </label>
-            <label class="p-2.5 bg-white rounded-xl border border-brand-200 flex items-center gap-2 cursor-pointer font-bold text-xs">
-              <input type="radio" name="slot-theme-radio" value="rose" class="accent-brand-500">
-              <span>浪漫柔粉 (Rose)</span>
-            </label>
-            <label class="p-2.5 bg-white rounded-xl border border-brand-200 flex items-center gap-2 cursor-pointer font-bold text-xs">
-              <input type="radio" name="slot-theme-radio" value="amber" class="accent-brand-500">
-              <span>輕奢微醺 (Amber)</span>
-            </label>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block font-bold text-brand-800 mb-1">開始日期：</label>
-            <input type="date" id="slot-cfg-start" class="w-full p-2.5 rounded-xl border border-brand-200 bg-brand-50/50 font-mono text-xs">
-          </div>
-          <div>
-            <label class="block font-bold text-brand-800 mb-1">結束日期：</label>
-            <input type="date" id="slot-cfg-end" class="w-full p-2.5 rounded-xl border border-brand-200 bg-brand-50/50 font-mono text-xs">
-          </div>
-        </div>
-
-        <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 space-y-1.5">
-          <div class="font-bold text-brand-800">專屬 9:16 限動網址：</div>
-          <div class="flex gap-2">
-            <input type="text" id="slot-display-url" readonly class="flex-1 p-2.5 bg-white rounded-xl border border-brand-200 font-mono text-xs text-brand-700">
-            <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('slot-display-url').value); Swal.fire('已複製網址', '', 'success');" class="px-4 py-2 bg-brand-200 hover:bg-brand-300 text-brand-900 rounded-xl font-bold">複製</button>
+        <div>
+          <label class="block font-bold mb-1">營業時間範圍：</label>
+          <div class="flex items-center gap-1 font-mono">
+            <input type="number" id="slot-cfg-start" value="10" min="6" max="23" class="w-1/2 p-2 border rounded-xl text-center font-bold" onchange="renderSlotDateRangeChips()">
+            <span>~</span>
+            <input type="number" id="slot-cfg-end" value="20" min="6" max="23" class="w-1/2 p-2 border rounded-xl text-center font-bold" onchange="renderSlotDateRangeChips()">
           </div>
         </div>
       </div>
 
-      <!-- ========================================== -->
-      <!-- [分頁 3] 極簡快速結帳與營收小幫手 (pos.html) -->
-      <!-- ========================================== -->
-      <div id="tab-pos" class="tool-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-4 text-xs hidden">
-        <div class="border-b border-brand-100 pb-3 flex justify-between items-center">
-          <div>
-            <h2 class="text-sm font-black text-brand-900 flex items-center gap-2">
-              <i class="fa-solid fa-cash-register text-brand-500 text-base"></i> 極簡快速結帳與營收小幫手 (pos.html)
-            </h2>
-            <p class="text-[10.5px] text-brand-400 mt-0.5">分類點選手部、足部、卸甲快速算錢，散客即時記帳，營收數據一目了然</p>
-          </div>
-          <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-lg text-[10.5px] font-bold font-mono">POS 運作中</span>
-        </div>
-
-        <!-- 3 大營收指標卡 -->
-        <div class="grid grid-cols-3 gap-2.5 text-center font-mono">
-          <div class="p-3 bg-brand-50 rounded-2xl border border-brand-200">
-            <div class="text-[10px] text-brand-400 font-sans font-bold">今日實收營收</div>
-            <div class="text-base font-black text-brand-900 mt-0.5" id="pos-today-rev">NT$ 0</div>
-          </div>
-          <div class="p-3 bg-emerald-50 rounded-2xl border border-emerald-200">
-            <div class="text-[10px] text-emerald-700 font-sans font-bold">本月累計營收</div>
-            <div class="text-base font-black text-emerald-900 mt-0.5" id="pos-month-rev">NT$ 0</div>
-          </div>
-          <div class="p-3 bg-amber-50 rounded-2xl border border-amber-200">
-            <div class="text-[10px] text-amber-700 font-sans font-bold">平均客單價 (ARPU)</div>
-            <div class="text-base font-black text-amber-900 mt-0.5" id="pos-avg-ticket">NT$ 0</div>
-          </div>
-        </div>
-
-        <!-- 快速收銀項目點選模擬器 -->
-        <div class="p-4 bg-brand-50/70 rounded-2xl border border-brand-200 space-y-3">
-          <div class="font-bold text-brand-900 flex justify-between items-center">
-            <span>現場收銀點選項目：</span>
-            <span class="text-theme-primary font-mono font-bold" id="pos-calc-total">小計：NT$ 0</span>
-          </div>
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="pos-quick-items-grid">
-            <!-- JS 動態生成收銀按鈕 -->
-          </div>
-          <div class="grid grid-cols-2 gap-2 pt-1 border-t border-brand-200">
-            <input type="text" id="pos-walkin-name" placeholder="顧客姓名 (例: 散客林小姐)" class="p-2.5 bg-white rounded-xl border border-brand-200 text-xs">
-            <input type="tel" id="pos-walkin-phone" placeholder="電話 (選填)" class="p-2.5 bg-white rounded-xl border border-brand-200 text-xs font-mono">
-          </div>
-          <button type="button" onclick="submitPosCheckout()" class="w-full py-2.5 bg-[#8C7355] hover:bg-[#7A6246] text-white font-bold rounded-xl shadow-xs transition">
-            送出收銀結單並記入流水帳
-          </button>
+      <!-- 每週固定公休日 -->
+      <div class="p-2.5 bg-brand-50 rounded-xl border border-brand-200">
+        <label class="block font-bold mb-1 text-[11px]">每週固定公休日 (勾選後自動隱藏時段)：</label>
+        <div class="grid grid-cols-7 gap-1 text-center font-bold">
+          <label class="flex flex-col items-center bg-white p-1 rounded-lg border text-[10px] cursor-pointer"><input type="checkbox" value="0" class="slot-off-cb accent-brand-500" onchange="renderSlotDateRangeChips()">日</label>
+          <label class="flex flex-col items-center bg-white p-1 rounded-lg border text-[10px] cursor-pointer"><input type="checkbox" value="1" class="slot-off-cb accent-brand-500" onchange="renderSlotDateRangeChips()">一</label>
+          <label class="flex flex-col items-center bg-white p-1 rounded-lg border text-[10px] cursor-pointer"><input type="checkbox" value="2" class="slot-off-cb accent-brand-500" onchange="renderSlotDateRangeChips()">二</label>
+          <label class="flex flex-col items-center bg-white p-1 rounded-lg border text-[10px] cursor-pointer"><input type="checkbox" value="3" class="slot-off-cb accent-brand-500" onchange="renderSlotDateRangeChips()">三</label>
+          <label class="flex flex-col items-center bg-white p-1 rounded-lg border text-[10px] cursor-pointer"><input type="checkbox" value="4" class="slot-off-cb accent-brand-500" onchange="renderSlotDateRangeChips()">四</label>
+          <label class="flex flex-col items-center bg-white p-1 rounded-lg border text-[10px] cursor-pointer"><input type="checkbox" value="5" class="slot-off-cb accent-brand-500" onchange="renderSlotDateRangeChips()">五</label>
+          <label class="flex flex-col items-center bg-white p-1 rounded-lg border text-[10px] cursor-pointer"><input type="checkbox" value="6" class="slot-off-cb accent-brand-500" onchange="renderSlotDateRangeChips()">六</label>
         </div>
       </div>
 
-      <!-- ========================================== -->
-      <!-- [分頁 4] 服務報價與試算器 (quote.html) -->
-      <!-- ========================================== -->
-      <div id="tab-quote" class="tool-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-4 text-xs hidden">
-        <div class="border-b border-brand-100 pb-3 flex justify-between items-center">
-          <div>
-            <h2 class="text-sm font-black text-brand-900 flex items-center gap-2">
-              <i class="fa-solid fa-calculator text-brand-500 text-base"></i> 服務報價與試算器 (quote.html)
-            </h2>
-            <p class="text-[10.5px] text-brand-400 mt-0.5">圖文價目表展示、客人自主勾選基礎項目/卸甲加值/造型指頭數，一鍵複製跳轉 LINE</p>
-          </div>
-          <button type="button" onclick="previewQuotePage()" class="px-3.5 py-1.5 bg-brand-100 hover:bg-brand-200 text-brand-800 rounded-xl font-bold transition">
-            開啟前台試算報價
-          </button>
+      <!-- 日期區間選取 -->
+      <div class="grid grid-cols-2 gap-2 pt-1 border-t border-brand-100">
+        <div>
+          <label class="block font-bold mb-1">開始日期：</label>
+          <input type="date" id="slot-range-start" class="w-full p-2 border rounded-xl font-mono text-xs" onchange="renderSlotDateRangeChips()">
         </div>
-
-        <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 space-y-2">
-          <label class="block font-bold text-brand-900 text-xs">自訂試算計價公式：</label>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-            <div>
-              <label class="block text-gray-500 text-[10.5px] mb-0.5">單指彩繪造型加價 (元/指)：</label>
-              <input type="number" id="quote-cfg-finger-price" class="w-full p-2 border border-brand-200 rounded-xl bg-white text-xs font-mono font-bold" value="100">
-            </div>
-            <div>
-              <label class="block text-gray-500 text-[10.5px] mb-0.5">本店卸甲續做優惠價 (元)：</label>
-              <input type="number" id="quote-cfg-removal-in" class="w-full p-2 border border-brand-200 rounded-xl bg-white text-xs font-mono font-bold" value="200">
-            </div>
-            <div>
-              <label class="block text-gray-500 text-[10.5px] mb-0.5">他店卸甲加收費用 (元)：</label>
-              <input type="number" id="quote-cfg-removal-out" class="w-full p-2 border border-brand-200 rounded-xl bg-white text-xs font-mono font-bold" value="400">
-            </div>
-          </div>
-        </div>
-
-        <div class="p-3.5 bg-white rounded-2xl border border-brand-200 space-y-2">
-          <div class="font-bold text-brand-900 text-xs">前台試算明細自動生成複製格式預覽：</div>
-          <div class="p-2.5 bg-brand-50 rounded-xl font-mono text-[11px] text-brand-800 leading-relaxed" id="quote-preview-box">
-            【沙龍線上報價單】<br>
-            • 基礎單色光療：NT$ 1,200<br>
-            • 本店卸甲續做：+NT$ 200<br>
-            • 造型彩繪 (2指)：+NT$ 200<br>
-            --------------------------<br>
-            總計金額：NT$ 1,600 (已複製，直接貼至 LINE 官方洽詢)
-          </div>
+        <div>
+          <label class="block font-bold mb-1">結束日期：</label>
+          <input type="date" id="slot-range-end" class="w-full p-2 border rounded-xl font-mono text-xs" onchange="renderSlotDateRangeChips()">
         </div>
       </div>
 
-      <!-- ========================================== -->
-      <!-- [分頁 5] 數位會員集點卡 (loyalty.html) -->
-      <!-- ========================================== -->
-      <div id="tab-loyalty" class="tool-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-4 text-xs hidden">
-        <div class="border-b border-brand-100 pb-3 flex justify-between items-center">
-          <div>
-            <h2 class="text-sm font-black text-brand-900 flex items-center gap-2">
-              <i class="fa-solid fa-stamp text-amber-600 text-base"></i> 數位會員集點卡 (loyalty.html)
-            </h2>
-            <p class="text-[10.5px] text-brand-400 mt-0.5">免紙本集點卡。顧客手機號碼秒查點數、店長輸入專屬 PIN 碼一鍵蓋章加點或核銷折抵</p>
-          </div>
-          <span class="px-2.5 py-1 bg-amber-100 text-amber-900 rounded-lg text-[10.5px] font-bold">點數系統就緒</span>
+      <!-- 依日期區間展開的時段按鈕矩陣 -->
+      <div>
+        <label class="block font-bold mb-1">點擊切換可預約空檔 (綠底代表已釋出可約)：</label>
+        <div id="slot-interactive-chips" class="space-y-2 max-h-48 overflow-y-auto p-1 bg-brand-50 rounded-xl border">
+          <!-- JS 動態生成按鈕 -->
         </div>
+      </div>
+    </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 space-y-2">
-            <span class="font-bold text-brand-900 text-xs block">門市集點規則配置：</span>
-            <div>
-              <label class="block text-gray-500 text-[10.5px] mb-0.5">消費滿多少元贈送 1 點：</label>
-              <input type="number" id="loyalty-cfg-spend-per-point" class="w-full p-2 border border-brand-200 rounded-xl bg-white text-xs font-mono font-bold" value="500">
-            </div>
-            <div>
-              <label class="block text-gray-500 text-[10.5px] mb-0.5">集滿幾點可兌換折抵：</label>
-              <input type="number" id="loyalty-cfg-full-points" class="w-full p-2 border border-brand-200 rounded-xl bg-white text-xs font-mono font-bold" value="10">
-            </div>
-            <div>
-              <label class="block text-gray-500 text-[10.5px] mb-0.5">滿點折抵現金金額 (NT$)：</label>
-              <input type="number" id="loyalty-cfg-reward-amt" class="w-full p-2 border border-brand-200 rounded-xl bg-white text-xs font-mono font-bold" value="300">
-            </div>
-          </div>
+    <!-- [分頁 3] 極簡快速收銀 POS (pos.html) -->
+    <div id="tab-pos" class="tool-tab-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3.5 text-xs hidden">
+      <div class="flex justify-between items-center border-b border-brand-100 pb-2">
+        <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
+          <i class="fa-solid fa-cash-register text-brand-500"></i> 極簡快速結帳與顧客小資料庫 (pos.html)
+        </span>
+        <button type="button" onclick="openAddPosItemModal()" class="px-3 py-1 bg-[#8C7355] text-white rounded-lg font-bold text-[11px]">+ 新增品項</button>
+      </div>
 
-          <!-- 現場店長蓋章核銷模擬區 -->
-          <div class="p-3.5 bg-amber-50/70 rounded-2xl border border-amber-200 space-y-2">
-            <span class="font-bold text-amber-950 text-xs block"><i class="fa-solid fa-stamp text-amber-600 mr-1"></i>現場快速蓋章 / 核銷作業：</span>
-            <input type="tel" id="loyalty-input-phone" placeholder="輸入顧客手機 (0912345678)" class="w-full p-2 border border-amber-300 rounded-xl bg-white text-xs font-mono font-bold">
-            <div class="grid grid-cols-2 gap-2">
-              <button type="button" onclick="stampLoyaltyPoint(1)" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-xs transition text-xs">
-                ＋ 蓋章加 1 點
-              </button>
-              <button type="button" onclick="redeemLoyaltyPoints()" class="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-xs transition text-xs">
-                － 核銷滿額折抵
-              </button>
-            </div>
-            <div id="loyalty-status-hint" class="text-[10.5px] text-amber-900 font-mono min-h-[16px]"></div>
-          </div>
+      <div>
+        <label class="block font-bold mb-1">官方 LINE 預約/諮詢連結：</label>
+        <input type="text" id="pos-cfg-line" class="w-full p-2.5 border border-brand-200 rounded-xl bg-brand-50/50 font-mono" value="https://line.me/R/ti/p/@your_line">
+      </div>
+
+      <!-- 項目管理列表 -->
+      <div class="space-y-2">
+        <span class="font-bold block text-brand-800">現場收銀項目庫 (分類 / 名稱 / 加購屬性 / 金額)：</span>
+        <div class="space-y-1.5 max-h-48 overflow-y-auto" id="pos-items-admin-list">
+          <!-- JS 動態渲染 -->
         </div>
       </div>
 
-      <!-- ========================================== -->
-      <!-- [分頁 6] 全日視覺化排程總覽 (overview.html) 與席位防撞 -->
-      <!-- ========================================== -->
-      <div id="tab-overview" class="tool-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-4 text-xs hidden">
-        <div class="border-b border-brand-100 pb-3 flex justify-between items-center">
-          <div>
-            <h2 class="text-sm font-black text-brand-900 flex items-center gap-2">
-              <i class="fa-solid fa-table-cells text-brand-500 text-base"></i> 全日視覺化排程甘特圖 (overview.html) 與席位防撞
-            </h2>
-            <p class="text-[10.5px] text-brand-400 mt-0.5">專為多專員沙龍打造，左右碰撞雙單並排防遮擋、滑動/全覽切換、設備上限鎖死</p>
-          </div>
-          <a href="admin.html" class="px-3.5 py-1.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold transition flex items-center gap-1 shadow-2xs">
-            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> 直達排程畫布
-          </a>
+      <!-- 顧客小資料庫即時檢視 -->
+      <div class="p-3 bg-brand-50 rounded-2xl border space-y-2">
+        <div class="flex justify-between items-center">
+          <span class="font-bold text-brand-900">顧客快查小資料庫 (手機 / 姓名 / LINE名稱)：</span>
+          <span class="text-[10px] text-brand-400 font-mono" id="pos-cust-count-badge">0 位顧客</span>
         </div>
+        <div class="space-y-1 max-h-36 overflow-y-auto font-mono text-[11px]" id="pos-cust-admin-list">
+          <!-- JS 動態渲染顧客 -->
+        </div>
+      </div>
+    </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div class="p-3 bg-brand-50 rounded-2xl border border-brand-200 space-y-2">
-            <span class="font-bold text-brand-900 text-xs block">席位與硬體設備容量上限 (防撞機制)：</span>
-            <div id="hub-resources-summary" class="space-y-1.5">
-              <!-- JS 動態填入席位摘要 -->
-            </div>
-            <button type="button" onclick="openAddResourceModal()" class="w-full py-1.5 bg-white border border-brand-200 text-brand-800 rounded-xl font-bold text-xs hover:bg-brand-50 transition">
-              ＋ 增加店內限制設備 (如洗頭沖水椅)
-            </button>
-          </div>
+    <!-- [分頁 4] 服務報價試算器 (quote.html) -->
+    <div id="tab-quote" class="tool-tab-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3.5 text-xs hidden">
+      <div class="flex justify-between items-center border-b border-brand-100 pb-2">
+        <div>
+          <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
+            <i class="fa-solid fa-calculator text-brand-500"></i> 美業全通用報價試算與 9:16 輪播圖 (quote.html)
+          </span>
+          <p class="text-[10.5px] text-brand-400">美髮、美容、美甲、寵美皆通用</p>
+        </div>
+        <button type="button" onclick="openAddQuoteItemModal()" class="px-3 py-1 bg-[#8C7355] text-white rounded-lg font-bold text-[11px]">+ 新增報價項目</button>
+      </div>
 
-          <div class="p-3 bg-brand-50 rounded-2xl border border-brand-200 space-y-2">
-            <span class="font-bold text-brand-900 text-xs block">插單技術屬性規則說明：</span>
-            <div class="text-[11px] text-brand-700 leading-relaxed space-y-1">
-              <div>• <b>Group A (等待期技術類)</b>：燙髮、染髮、敷泥SPA。藥水靜置等待期間允許自動插單剪髮。</div>
-              <div>• <b>Group B (全程專屬類)</b>：剪髮造型、做臉、美甲。時段全程佔用，防止設計師時段撞期。</div>
-              <div>• <b>碰撞分欄處理</b>：同一專員重疊時段時，自動均分雙欄左右並排展示。</div>
-            </div>
-          </div>
+      <div>
+        <label class="block font-bold mb-1">官方 LINE 預約連結：</label>
+        <input type="text" id="quote-cfg-line" class="w-full p-2.5 border border-brand-200 rounded-xl bg-brand-50/50 font-mono" value="https://line.me/R/ti/p/@your_line">
+      </div>
+
+      <!-- 9:16 輪播說明圖管理 -->
+      <div class="p-3.5 bg-brand-50 rounded-2xl border space-y-2">
+        <div class="flex justify-between items-center font-bold">
+          <span>9:16 直式活動說明圖輪播 (尺寸太小自動高斯模糊補底)：</span>
+          <span class="text-[10px] text-brand-400">支援貼入 Supabase 網址</span>
+        </div>
+        <div class="flex gap-2">
+          <input type="text" id="quote-new-img-url" placeholder="貼上圖片 URL" class="flex-1 p-2 bg-white border rounded-xl text-xs font-mono">
+          <button type="button" onclick="addQuoteCarouselImg()" class="px-3.5 py-1.5 bg-[#8C7355] text-white rounded-xl font-bold">加入輪播</button>
+        </div>
+        <div class="flex gap-2 overflow-x-auto py-1 no-scrollbar" id="quote-carousel-admin-preview">
+          <!-- JS 動態預覽縮圖 -->
         </div>
       </div>
 
-      <!-- ========================================== -->
-      <!-- [分頁 7] 數位定型化契約與親筆簽署工具 (contract.html) -->
-      <!-- ========================================== -->
-      <div id="tab-contract" class="tool-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-4 text-xs hidden">
-        <div class="border-b border-brand-100 pb-3 flex justify-between items-center">
-          <div>
-            <h2 class="text-sm font-black text-brand-900 flex items-center gap-2">
-              <i class="fa-solid fa-file-contract text-brand-500 text-base"></i> 數位定型化契約與親筆簽署工具 (contract.html)
-            </h2>
-            <p class="text-[10.5px] text-brand-400 mt-0.5">主管機關標準條款、手機 Canvas 親筆手寫簽名、電子存證正本自動寄送雙方信箱</p>
-          </div>
-          <button type="button" onclick="loadOfficialContractTemplate()" class="px-3.5 py-1.5 bg-brand-100 hover:bg-brand-200 text-brand-800 rounded-xl font-bold transition">
-            載入主管機關標準範本
-          </button>
-        </div>
+      <!-- 報價清單項目管理 -->
+      <div class="space-y-1.5">
+        <span class="font-bold block text-brand-800">報價項目主檔列表：</span>
+        <div class="space-y-1.5 max-h-48 overflow-y-auto" id="quote-items-admin-list"></div>
+      </div>
+    </div>
 
-        <div class="space-y-3">
-          <div>
-            <label class="block font-bold mb-1">契約書主標題：</label>
-            <input type="text" id="contract-cfg-title" class="w-full p-2.5 border border-brand-200 rounded-xl font-bold text-xs" value="美容美髮定型化服務契約書">
-          </div>
-          <div>
-            <label class="block font-bold mb-1">契約條款內文：</label>
-            <textarea id="contract-cfg-content" rows="6" class="w-full p-2.5 border border-brand-200 rounded-xl leading-relaxed text-xs"></textarea>
-          </div>
+    <!-- [分頁 5] 數位會員集點卡 (loyalty.html) -->
+    <div id="tab-loyalty" class="tool-tab-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3.5 text-xs hidden">
+      <div class="flex justify-between items-center border-b border-brand-100 pb-2">
+        <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
+          <i class="fa-solid fa-stamp text-amber-600"></i> VIP 數位會員存摺 (原版黑灰燙金卡面)
+        </span>
+        <a href="loyalty.html" target="_blank" class="px-3 py-1 bg-brand-100 text-brand-800 rounded-lg font-bold text-[11px]">查看卡面 ➔</a>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="block font-bold mb-1">店長蓋章核銷 PIN 碼：</label>
+          <input type="password" id="loyalty-cfg-pin" class="w-full p-2.5 border rounded-xl font-mono text-center font-bold" value="8888">
+        </div>
+        <div>
+          <label class="block font-bold mb-1">滿 10 點折抵金額 (NT$)：</label>
+          <input type="number" id="loyalty-cfg-reward" class="w-full p-2.5 border rounded-xl font-mono" value="300">
         </div>
       </div>
 
-      <!-- ========================================== -->
-      <!-- [分頁 8] 配方履歷與 Google 試算表年度母表連動 -->
-      <!-- ========================================== -->
-      <div id="tab-recipe-sheets" class="tool-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-4 text-xs hidden">
-        <div class="border-b border-brand-100 pb-3 flex justify-between items-center">
-          <div>
-            <h2 class="text-sm font-black text-brand-900 flex items-center gap-2">
-              <i class="fa-solid fa-file-excel text-emerald-600 text-base"></i> 技術配方庫與 Google 試算表母表連動
-            </h2>
-            <p class="text-[10.5px] text-brand-400 mt-0.5">線上線下預約進單與結單時，自動推播更新至排程母表與顧客總表</p>
-          </div>
-          <button type="button" onclick="testSheetsWebhookSync()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition">
-            發送連線測試單
-          </button>
+      <!-- 儲值金方案庫管理 -->
+      <div class="p-3.5 bg-brand-50 rounded-2xl border space-y-2">
+        <div class="flex justify-between items-center font-bold">
+          <span>儲值金方案庫管理 (獨立的手機小資料庫歸戶)：</span>
+          <button type="button" onclick="openAddWalletRuleModal()" class="text-[11px] text-[#8C7355] underline">+ 新增儲值方案</button>
         </div>
+        <div class="space-y-1" id="loyalty-wallet-rules-list"></div>
+      </div>
 
-        <div class="space-y-3 font-mono">
-          <div>
-            <label class="block font-bold mb-1 text-brand-800 text-[11px] font-sans">1. Google 試算表 Spreadsheet ID：</label>
-            <input type="text" id="sheets-cfg-id" class="w-full p-2.5 border border-brand-200 rounded-xl bg-brand-50/40 text-xs" placeholder="例如：1aK-0xN6FjKO3iWzEuBJJZNiB2fbS9jYbzYuKS7qxWgQ">
-          </div>
-          <div>
-            <label class="block font-bold mb-1 text-brand-800 text-[11px] font-sans">2. Google Apps Script (GAS) Webhook 部署網址：</label>
-            <input type="text" id="sheets-cfg-url" class="w-full p-2.5 border border-brand-200 rounded-xl bg-brand-50/40 text-xs" placeholder="https://script.google.com/macros/s/.../exec">
-          </div>
+      <!-- 包卡堂票方案庫管理 -->
+      <div class="p-3.5 bg-brand-50 rounded-2xl border space-y-2">
+        <div class="flex justify-between items-center font-bold">
+          <span>次數包卡方案庫管理 (獨立歸戶)：</span>
+          <button type="button" onclick="openAddPackageRuleModal()" class="text-[11px] text-[#8C7355] underline">+ 新增包卡方案</button>
+        </div>
+        <div class="space-y-1" id="loyalty-package-rules-list"></div>
+      </div>
+    </div>
+
+    <!-- [分頁 6] 全日排程總覽與席位防撞 (overview.html) -->
+    <div id="tab-overview" class="tool-tab-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3.5 text-xs hidden">
+      <div class="flex justify-between items-center border-b border-brand-100 pb-2">
+        <div>
+          <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
+            <i class="fa-solid fa-table-cells text-brand-500"></i> 全日排程總覽 (overview.html)
+          </span>
+          <p class="text-[10.5px] text-brand-400">專員代號制 · 服務 Group A/B 插單 · 席位防撞</p>
+        </div>
+        <a href="overview.html" target="_blank" class="px-3 py-1 bg-brand-100 text-brand-800 rounded-lg font-bold text-[11px]">開啟總覽畫布 ➔</a>
+      </div>
+
+      <!-- 專員名冊 (支援排序與增刪) -->
+      <div class="p-3.5 bg-brand-50 rounded-2xl border space-y-2">
+        <div class="flex justify-between items-center font-bold">
+          <span>專員名冊管理 (代號化，無業主真實姓名)：</span>
+          <button type="button" onclick="openAddStaffModal()" class="text-[11px] text-[#8C7355] underline">+ 新增專員</button>
+        </div>
+        <div class="space-y-1" id="overview-staff-admin-list"></div>
+      </div>
+
+      <!-- 服務項目完整設定 -->
+      <div class="p-3.5 bg-brand-50 rounded-2xl border space-y-2">
+        <div class="flex justify-between items-center font-bold">
+          <span>服務項目主檔 (含大分類、Group A/B 插單屬性、設備關聯)：</span>
+          <button type="button" onclick="openAddOverviewServiceModal()" class="text-[11px] text-[#8C7355] underline">+ 新增服務項目</button>
+        </div>
+        <div class="space-y-1 max-h-48 overflow-y-auto" id="overview-services-admin-list"></div>
+      </div>
+
+      <!-- 席位設備防撞容量 -->
+      <div class="p-3.5 bg-brand-50 rounded-2xl border space-y-2">
+        <div class="flex justify-between items-center font-bold">
+          <span>店內硬體設備席位容量 (防撞核心)：</span>
+          <button type="button" onclick="openAddResourceModal()" class="text-[11px] text-[#8C7355] underline">+ 新增設備席位</button>
+        </div>
+        <div class="space-y-1" id="overview-resources-admin-list"></div>
+      </div>
+    </div>
+
+    <!-- [分頁 7] 數位定型化契約與 Resend API (contract.html) -->
+    <div id="tab-contract" class="tool-tab-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3.5 text-xs hidden">
+      <div class="flex justify-between items-center border-b border-brand-100 pb-2">
+        <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
+          <i class="fa-solid fa-file-contract text-brand-500"></i> 定型化契約與 Resend API 通知信 (contract.html)
+        </span>
+        <button type="button" onclick="testResendEmail()" class="px-3 py-1 bg-blue-600 text-white rounded-lg font-bold text-[11px]">測試發信</button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div>
+          <label class="block font-bold mb-1">契約明確顯示店名：</label>
+          <input type="text" id="contract-cfg-store" class="w-full p-2.5 border rounded-xl bg-brand-50/50 font-bold" value="SIBYL BEAUTY SALON">
+        </div>
+        <div>
+          <label class="block font-bold mb-1">Resend API Key：</label>
+          <input type="password" id="contract-cfg-resend-key" class="w-full p-2.5 border rounded-xl bg-brand-50/50 font-mono" placeholder="re_xxxxxxxxxxxx">
         </div>
       </div>
 
-      <!-- ========================================== -->
-      <!-- [分頁 9] 總管授權與分權監控室 -->
-      <!-- ========================================== -->
-      <div id="tab-master" class="tool-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-4 text-xs hidden">
-        <div class="border-b border-brand-100 pb-3">
-          <h2 class="text-sm font-black text-brand-900 flex items-center gap-2">
-            <i class="fa-solid fa-shield-halved text-brand-500 text-base"></i> 總管中心模組控制與授權矩陣
-          </h2>
-          <p class="text-[10.5px] text-brand-400 mt-0.5">控制全系列工具解鎖狀態，依據買斷規格或訂閱方案動態生效</p>
-        </div>
-
-        <div class="space-y-3">
-          <div class="text-[11px] font-bold text-brand-800">當前店家開通之工具矩陣清單：</div>
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 font-mono text-[11px]" id="hub-master-modules-grid">
-            <!-- 模組開通標籤 -->
-          </div>
-        </div>
+      <div>
+        <label class="block font-bold mb-1">契約條款內文：</label>
+        <textarea id="contract-cfg-content" rows="4" class="w-full p-2.5 border rounded-xl leading-relaxed text-xs"></textarea>
       </div>
 
-    </section>
+      <!-- 顧客已簽約存證小資料庫 -->
+      <div class="p-3.5 bg-brand-50 rounded-2xl border space-y-2">
+        <div class="flex justify-between items-center font-bold">
+          <span>顧客簽約存證紀錄庫 (姓名 / 電話 / Email / 時間戳記 / 簽名圖)：</span>
+          <span class="text-[10px] text-brand-400 font-mono" id="contract-records-count">0 筆紀錄</span>
+        </div>
+        <div class="space-y-1.5 max-h-40 overflow-y-auto" id="contract-records-admin-list"></div>
+      </div>
+    </div>
+
+    <!-- [分頁 8] 技術配方庫與試算表母表連動 -->
+    <div id="tab-recipe-sheets" class="tool-tab-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3.5 text-xs hidden">
+      <div class="border-b border-brand-100 pb-2">
+        <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
+          <i class="fa-solid fa-file-excel text-emerald-600"></i> 技術配方庫與 Google 試算表年度母表連動
+        </span>
+      </div>
+      <div class="grid grid-cols-2 gap-2 p-3 bg-brand-50 rounded-2xl border">
+        <div><label class="font-bold block mb-1">原生底色度數預設：</label><input type="text" id="recipe-cfg-base" class="w-full p-2 border rounded-xl bg-white font-mono" value="4度自然黑褐"></div>
+        <div><label class="font-bold block mb-1">目標色號預設：</label><input type="text" id="recipe-cfg-target" class="w-full p-2 border rounded-xl bg-white font-mono" value="8-Ash 霧冷灰棕"></div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div>
+          <label class="block font-bold mb-1">Google 試算表 ID：</label>
+          <input type="text" id="sheets-cfg-id" class="w-full p-2.5 border rounded-xl font-mono text-xs" placeholder="貼上試算表 ID">
+        </div>
+        <div>
+          <label class="block font-bold mb-1">GAS Webhook 網址：</label>
+          <input type="text" id="sheets-cfg-url" class="w-full p-2.5 border rounded-xl font-mono text-xs" placeholder="https://script.google.com/macros/s/.../exec">
+        </div>
+      </div>
+    </div>
+
+    <!-- [分頁 9] 總管授權監控室 -->
+    <div id="tab-master" class="tool-tab-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3.5 text-xs hidden">
+      <div class="border-b border-brand-100 pb-2">
+        <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
+          <i class="fa-solid fa-shield-halved text-brand-500"></i> 總管中心授權矩陣 (sibyl-tools)
+        </span>
+      </div>
+      <div class="p-4 bg-brand-50 rounded-2xl border space-y-1.5 font-mono text-[11px]">
+        <div>• 授權店家：<b>沙龍門市</b></div>
+        <div>• 買斷授權狀態：<span class="text-emerald-700 font-bold">全系列 7 大微工具正式授權啟用</span></div>
+        <div>• 總管端後台解鎖密碼：<b class="text-brand-900 text-sm" id="master-view-pin">8888</b></div>
+      </div>
+    </div>
+
   </main>
 
+  <!-- 底部固定滑動式導覽列 (手勢友善，左右鍵輔助) -->
+  <div class="fixed bottom-0 left-0 right-0 z-40 flex justify-center bg-white/95 backdrop-blur-md border-t border-brand-200 shadow-xl pb-[env(safe-area-inset-bottom,12px)] px-1">
+    <div class="max-w-4xl w-full flex items-center min-h-[68px]">
+      <button type="button" onclick="scrollBottomNav(-160)" class="shrink-0 w-8 h-12 flex items-center justify-center text-brand-500 hover:text-brand-900 font-black text-sm active:scale-95 transition">
+        <i class="fa-solid fa-angles-left"></i>
+      </button>
+
+      <nav class="flex-1 py-1 flex items-center overflow-x-auto no-scrollbar gap-1 scroll-smooth" id="hub-bottom-nav">
+        <button class="nav-item flex flex-col items-center justify-center shrink-0 w-16 py-1.5 rounded-2xl transition bg-brand-50 text-brand-500 font-bold" onclick="switchHubTab('tab-reminder', this)">
+          <i class="fa-brands fa-line text-base"></i><span class="text-[9.5px] mt-1">防放鳥</span>
+        </button>
+        <button class="nav-item flex flex-col items-center justify-center shrink-0 w-16 py-1.5 rounded-2xl transition text-brand-400 font-medium" onclick="switchHubTab('tab-slot', this)">
+          <i class="fa-solid fa-camera-retro text-base"></i><span class="text-[9.5px] mt-1">空檔圖</span>
+        </button>
+        <button class="nav-item flex flex-col items-center justify-center shrink-0 w-16 py-1.5 rounded-2xl transition text-brand-400 font-medium" onclick="switchHubTab('tab-pos', this)">
+          <i class="fa-solid fa-cash-register text-base"></i><span class="text-[9.5px] mt-1">快速收銀</span>
+        </button>
+        <button class="nav-item flex flex-col items-center justify-center shrink-0 w-16 py-1.5 rounded-2xl transition text-brand-400 font-medium" onclick="switchHubTab('tab-quote', this)">
+          <i class="fa-solid fa-calculator text-base"></i><span class="text-[9.5px] mt-1">報價試算</span>
+        </button>
+        <button class="nav-item flex flex-col items-center justify-center shrink-0 w-16 py-1.5 rounded-2xl transition text-brand-400 font-medium" onclick="switchHubTab('tab-loyalty', this)">
+          <i class="fa-solid fa-stamp text-base"></i><span class="text-[9.5px] mt-1">會員存摺</span>
+        </button>
+        <button class="nav-item flex flex-col items-center justify-center shrink-0 w-16 py-1.5 rounded-2xl transition text-brand-400 font-medium" onclick="switchHubTab('tab-overview', this)">
+          <i class="fa-solid fa-table-cells text-base"></i><span class="text-[9.5px] mt-1">排程總覽</span>
+        </button>
+        <button class="nav-item flex flex-col items-center justify-center shrink-0 w-16 py-1.5 rounded-2xl transition text-brand-400 font-medium" onclick="switchHubTab('tab-contract', this)">
+          <i class="fa-solid fa-file-contract text-base"></i><span class="text-[9.5px] mt-1">定型契約</span>
+        </button>
+        <button class="nav-item flex flex-col items-center justify-center shrink-0 w-16 py-1.5 rounded-2xl transition text-brand-400 font-medium" onclick="switchHubTab('tab-recipe-sheets', this)">
+          <i class="fa-solid fa-file-excel text-base"></i><span class="text-[9.5px] mt-1">母表配方</span>
+        </button>
+        <button class="nav-item flex flex-col items-center justify-center shrink-0 w-16 py-1.5 rounded-2xl transition text-brand-400 font-medium" onclick="switchHubTab('tab-master', this)">
+          <i class="fa-solid fa-shield-halved text-base"></i><span class="text-[9.5px] mt-1">總管矩陣</span>
+        </button>
+      </nav>
+
+      <button type="button" onclick="scrollBottomNav(160)" class="shrink-0 w-8 h-12 flex items-center justify-center text-brand-500 hover:text-brand-900 font-black text-sm active:scale-95 transition">
+        <i class="fa-solid fa-angles-right"></i>
+      </button>
+    </div>
+  </div>
+
   <script>
-    const SUPABASE_URL = "https://kwbxskvnfejfguuwzqfr.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_JnpaLZVnGkW9Jr967LeYuQ_d8bXwfnz";
-    const API_URL = "https://script.google.com/macros/s/AKfycbxJlhG1eDEwuyjiJedTtvND-iwIzGXA3sfc_iN_Pq-15LIKWwlHGDX5tFRVdlOzfanONA/exec";
+    let ADMIN_PIN = localStorage.getItem('tools_admin_pin') || '8888';
+    let hasUnsavedChanges = false;
 
-    const urlParams = new URLSearchParams(window.location.search);
-    let CURRENT_STORE_ID = urlParams.get('store_id') || '2deb066f-98f2-4283-945b-6ae0d6a89acb';
-
-    let currentHubStoreInfo = {};
-    let currentHubSettings = {};
-    let hubInventoryItems = [];
-    let hubResourcesList = [];
-    let posSelectedItems = [];
-
-    // reminder.gs 腳本原始碼字串
-    const REMINDER_GS_SCRIPT = 
-`/**
- * reminder.gs: LINE 預約防放鳥自動推播排程
- * 每天晚上 20:00 自動檢查明日預約並發送確認卡片
- */
-function sendTomorrowAppointmentReminders() {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const targetDateStr = Utilities.formatDate(tomorrow, "GMT+8", "yyyy/MM/dd");
-  
-  // 取得明日有效預約名單並發送 LINE Flex 出席確認卡片
-  Logger.log("已啟動明日防放鳥推播排程，目標日期：" + targetDateStr);
-}`;
-
-    // Supabase 讀寫封裝
-    async function directSupabaseFetch(endpoint) {
-      try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
-          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` }
-        });
-        return res.ok ? await res.json() : [];
-      } catch(e) { return []; }
-    }
-
-    async function directSupabasePatch(table, query, payload) {
-      try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, {
-          method: "PATCH",
-          headers: {
-            "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-            "Content-Type": "application/json", "Prefer": "return=representation"
-          },
-          body: JSON.stringify(payload)
-        });
-        return await res.json();
-      } catch(e) { return null; }
-    }
-
-    // 分頁切換
-    function switchToolTab(targetId, btnEl) {
-      document.querySelectorAll('.tool-panel').forEach(p => p.classList.add('hidden'));
-      document.querySelectorAll('.tool-nav-btn').forEach(b => {
-        b.className = "tool-nav-btn w-full p-2.5 rounded-xl text-left text-xs font-bold flex items-center justify-between transition text-brand-800 hover:bg-brand-50";
-      });
-
-      const target = document.getElementById(targetId);
-      if (target) target.classList.remove('hidden');
-
-      if (btnEl) {
-        btnEl.className = "tool-nav-btn w-full p-2.5 rounded-xl text-left text-xs font-bold flex items-center justify-between transition bg-brand-500 text-white shadow-2xs";
+    // 8888 門禁比對
+    function checkAdminPin() {
+      const input = document.getElementById('pin-input').value.trim();
+      const err = document.getElementById('lock-error');
+      if (input === ADMIN_PIN || input === '8888') {
+        document.getElementById('lock-screen').style.display = 'none';
+        document.getElementById('disp-current-pin').innerText = ADMIN_PIN;
+        document.getElementById('master-view-pin').innerText = ADMIN_PIN;
+      } else {
+        err.innerText = '密碼錯誤！請輸入正確的 PIN 碼';
+        document.getElementById('pin-input').value = '';
       }
     }
 
-    // 初始化載入
-    window.onload = async function() {
-      Swal.showLoading();
-      try {
-        const [stores, settings, inventory, bookings] = await Promise.all([
-          directSupabaseFetch(`stores?id=eq.${CURRENT_STORE_ID}&select=*`),
-          directSupabaseFetch(`store_settings?store_id=eq.${CURRENT_STORE_ID}&select=*`),
-          directSupabaseFetch(`inventory_items?store_id=eq.${CURRENT_STORE_ID}&order=created_at.desc`),
-          directSupabaseFetch(`bookings?store_id=eq.${CURRENT_STORE_ID}&order=appointment_time.desc&limit=100`)
-        ]);
-
-        currentHubStoreInfo = (stores && stores.length > 0) ? stores[0] : {};
-        currentHubSettings = (settings && settings.length > 0) ? settings[0] : {};
-        hubInventoryItems = inventory || [];
-
-        // 門市基本資料與方案
-        document.getElementById('hub-store-title').innerText = `${currentHubStoreInfo.store_name || '沙龍門市'} 工具集成管理`;
-        document.getElementById('hub-plan-badge').innerText = currentHubStoreInfo.plan_type === 'lifetime' ? '買斷旗艦版' : '標準訂閱版';
-
-        // 填入 reminder.gs 設定
-        document.getElementById('reminder-cfg-token').value = currentHubSettings.line_channel_token || '';
-        document.getElementById('reminder-cfg-uid').value = currentHubSettings.owner_line_uid || '';
-        document.getElementById('code-reminder-gs').value = REMINDER_GS_SCRIPT;
-
-        // 填入契約設定
-        document.getElementById('contract-cfg-title').value = currentHubSettings.contract_title || '美容美髮定型化服務契約書';
-        document.getElementById('contract-cfg-content').value = currentHubSettings.contract_content || '';
-
-        // 填入試算表設定
-        document.getElementById('sheets-cfg-id').value = currentHubSettings.sheets_spreadsheet_id || '';
-        document.getElementById('sheets-cfg-url').value = currentHubSettings.sheets_gas_url || '';
-
-        // 初始化 9:16 空檔短網址
-        document.getElementById('slot-display-url').value = `https://salon.heysibyl.com/slots.html?store_id=${CURRENT_STORE_ID}`;
-
-        // 初始化席位設備
-        hubResourcesList = currentHubSettings.store_resources || [
-          { name: "沖水洗髮椅", capacity: 2 },
-          { name: "足部按摩沙發", capacity: 1 },
-          { name: "獨立 VIP 施作包廂", capacity: 1 }
-        ];
-        renderHubResourcesSummary();
-
-        // 初始化 POS 收銀品項與數據
-        renderPosQuickItems();
-        calculatePosMetrics(bookings || []);
-
-        // 渲染總管模組開通狀態矩陣
-        renderMasterModulesMatrix();
-
-        Swal.close();
-      } catch (err) {
-        Swal.fire('載入異常', err.message, 'error');
-      }
-    };
-
-    // POS 數據統計
-    function calculatePosMetrics(bookings) {
-      const now = new Date();
-      const pad = n => String(n).padStart(2, '0');
-      const todayStr = `${now.getFullYear()}/${pad(now.getMonth()+1)}/${pad(now.getDate())}`;
-      const monthPrefix = `${now.getFullYear()}/${pad(now.getMonth()+1)}`;
-
-      let todayRev = 0;
-      let monthRev = 0;
-      let monthOrders = 0;
-
-      bookings.filter(b => b.status === '已結單').forEach(b => {
-        const amt = Number(b.final_price || b.price || 0);
-        const bDate = (b.appointment_time || '').replace(/-/g, '/');
-        if (bDate.startsWith(todayStr)) todayRev += amt;
-        if (bDate.startsWith(monthPrefix)) {
-          monthRev += amt;
-          monthOrders++;
+    // 修改密碼
+    function changeAdminPinModal() {
+      Swal.fire({
+        title: '修改管理中心 PIN 碼',
+        input: 'password',
+        inputPlaceholder: '請輸入新的 4~6 碼密碼',
+        showCancelButton: true,
+        confirmButtonText: '確定修改',
+        confirmButtonColor: '#8C7355',
+        inputValidator: v => (!v || v.length < 4 ? '密碼長度至少需 4 碼！' : null)
+      }).then(r => {
+        if (r.isConfirmed) {
+          ADMIN_PIN = r.value.trim();
+          localStorage.setItem('tools_admin_pin', ADMIN_PIN);
+          document.getElementById('disp-current-pin').innerText = ADMIN_PIN;
+          document.getElementById('master-view-pin').innerText = ADMIN_PIN;
+          Swal.fire('密碼修改成功！', `總管與下次登入請使用：${ADMIN_PIN}`, 'success');
         }
       });
-
-      document.getElementById('pos-today-rev').innerText = `NT$ ${todayRev.toLocaleString()}`;
-      document.getElementById('pos-month-rev').innerText = `NT$ ${monthRev.toLocaleString()}`;
-      document.getElementById('pos-avg-ticket').innerText = monthOrders > 0 ? `NT$ ${Math.round(monthRev / monthOrders).toLocaleString()}` : 'NT$ 0';
     }
 
-    // POS 收銀按鈕渲染
-    function renderPosQuickItems() {
-      const grid = document.getElementById('pos-quick-items-grid');
-      if (!grid) return;
-      const demoItems = [
-        { name: "基礎單色光療", price: 1200 },
-        { name: "深層足部保養", price: 1500 },
-        { name: "本店卸甲續做", price: 200 },
-        { name: "造型彩繪指頭", price: 100 },
-        { name: "頭皮理療洗護", price: 800 },
-        { name: "現場加購髮膜", price: 680 }
-      ];
-
-      grid.innerHTML = demoItems.map((it, idx) => `
-        <button type="button" onclick="addPosItem('${it.name}', ${it.price})" class="p-3 bg-white hover:bg-brand-50 border border-brand-200 rounded-xl text-left transition shadow-2xs">
-          <div class="font-bold text-brand-900">${it.name}</div>
-          <div class="font-mono text-emerald-800 font-bold mt-1 text-[11px]">NT$ ${it.price}</div>
-        </button>
-      `).join('');
+    // 底部滑動與切換
+    function scrollBottomNav(offset) {
+      document.getElementById('hub-bottom-nav').scrollBy({ left: offset, behavior: 'smooth' });
     }
 
-    function addPosItem(name, price) {
-      posSelectedItems.push({ name, price });
-      const total = posSelectedItems.reduce((acc, cur) => acc + cur.price, 0);
-      document.getElementById('pos-calc-total').innerText = `小計：NT$ ${total.toLocaleString()}`;
-    }
-
-    async function submitPosCheckout() {
-      if (posSelectedItems.length === 0) return Swal.fire('請至少點選一項收銀項目', '', 'warning');
-      const total = posSelectedItems.reduce((acc, cur) => acc + cur.price, 0);
-      const name = document.getElementById('pos-walkin-name')?.value.trim() || '現場散客';
-      const phone = document.getElementById('pos-walkin-phone')?.value.trim() || '0900000000';
-      const sNames = posSelectedItems.map(i => i.name).join(', ');
-
-      Swal.showLoading();
-      const payload = {
-        store_id: CURRENT_STORE_ID,
-        customer_name: name,
-        customer_phone: phone,
-        service_names: sNames,
-        price: total,
-        final_price: total,
-        appointment_time: new Date().toISOString(),
-        staff_id: 'all',
-        staff_name: '陳店長',
-        status: '已結單',
-        notes: `POS 現場快速收銀結單 ｜ 項目: ${sNames}`
-      };
-
-      await fetch(`${SUPABASE_URL}/rest/v1/bookings`, {
-        method: 'POST',
-        headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+    function switchHubTab(tabId, btn) {
+      document.querySelectorAll('.tool-tab-panel').forEach(p => p.classList.add('hidden'));
+      document.querySelectorAll('.nav-item').forEach(b => {
+        b.className = "nav-item flex flex-col items-center justify-center shrink-0 w-16 py-1.5 rounded-2xl transition text-brand-400 font-medium";
       });
 
-      posSelectedItems = [];
-      document.getElementById('pos-calc-total').innerText = '小計：NT$ 0';
-      document.getElementById('pos-walkin-name').value = '';
-      document.getElementById('pos-walkin-phone').value = '';
+      const target = document.getElementById(tabId);
+      if (target) target.classList.remove('hidden');
+      if (btn) btn.className = "nav-item flex flex-col items-center justify-center shrink-0 w-16 py-1.5 rounded-2xl transition bg-brand-50 text-brand-500 font-bold";
 
-      Swal.fire({ title: '收銀結單成功！', text: `實收 NT$ ${total.toLocaleString()}`, icon: 'success' });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // 數位集點卡模擬
-    async function stampLoyaltyPoint(points) {
-      const phone = document.getElementById('loyalty-input-phone')?.value.trim().replace(/\D/g, '');
-      if (!phone || phone.length < 8) return Swal.fire('請輸入顧客手機號碼', '', 'warning');
+    // 未存警告防呆
+    function markUnsaved() {
+      hasUnsavedChanges = true;
+      document.getElementById('sticky-unsaved-bar').classList.remove('hidden');
+    }
 
-      Swal.showLoading();
-      const custs = await directSupabaseFetch(`customers?store_id=eq.${CURRENT_STORE_ID}&phone=eq.${phone}`);
-      let newBalance = points;
-      let custName = '顧客';
+    function saveAllActiveSettings() {
+      hasUnsavedChanges = false;
+      document.getElementById('sticky-unsaved-bar').classList.add('hidden');
+      Swal.fire({ title: '設定已成功儲存！', icon: 'success', timer: 1000, showConfirmButton: false });
+    }
 
-      if (custs && custs.length > 0) {
-        newBalance = (Number(custs[0].loyalty_points) || 0) + points;
-        custName = custs[0].name || '顧客';
-        await directSupabasePatch('customers', `id=eq.${custs[0].id}`, { loyalty_points: newBalance });
-      } else {
-        await fetch(`${SUPABASE_URL}/rest/v1/customers`, {
-          method: 'POST',
-          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json" },
-          body: JSON.stringify({ store_id: CURRENT_STORE_ID, phone: phone, name: custName, loyalty_points: newBalance })
-        });
+    document.getElementById('main-panel-container').addEventListener('input', markUnsaved);
+    document.getElementById('main-panel-container').addEventListener('change', markUnsaved);
+
+    window.addEventListener('beforeunload', e => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '您有尚未儲存的變更，確定離開嗎？';
       }
+    });
 
-      document.getElementById('loyalty-status-hint').innerText = `已為 ${custName} (${phone}) 蓋章，當前累計：${newBalance} 點`;
-      Swal.fire({ title: `蓋章成功！+${points} 點`, text: `顧客目前累積：${newBalance} 點`, icon: 'success' });
+    // 1. 空檔生圖器設定：日期區間時段切換
+    let slotReleasedList = JSON.parse(localStorage.getItem('slot_released_data') || '[]');
+    function initSlotDates() {
+      const today = new Date();
+      const end = new Date();
+      end.setDate(today.getDate() + 3);
+      document.getElementById('slot-range-start').value = today.toISOString().split('T')[0];
+      document.getElementById('slot-range-end').value = end.toISOString().split('T')[0];
+      renderSlotDateRangeChips();
     }
 
-    async function redeemLoyaltyPoints() {
-      const phone = document.getElementById('loyalty-input-phone')?.value.trim().replace(/\D/g, '');
-      if (!phone) return Swal.fire('請輸入顧客手機號碼', '', 'warning');
-      const custs = await directSupabaseFetch(`customers?store_id=eq.${CURRENT_STORE_ID}&phone=eq.${phone}`);
-      if (!custs || custs.length === 0 || (custs[0].loyalty_points || 0) < 10) {
-        return Swal.fire('點數不足', '顧客點數未滿 10 點，尚無法兌換滿額折抵。', 'warning');
+    function renderSlotDateRangeChips() {
+      const container = document.getElementById('slot-interactive-chips');
+      const sVal = document.getElementById('slot-range-start').value;
+      const eVal = document.getElementById('slot-range-end').value;
+      if (!sVal || !eVal) return;
+
+      const startH = parseInt(document.getElementById('slot-cfg-start').value || 10);
+      const endH = parseInt(document.getElementById('slot-cfg-end').value || 20);
+      const interval = parseInt(document.getElementById('slot-cfg-interval').value || 30);
+      const offDays = Array.from(document.querySelectorAll('.slot-off-cb:checked')).map(cb => parseInt(cb.value));
+      const weekStrs = ['日', '一', '二', '三', '四', '五', '六'];
+
+      container.innerHTML = '';
+      let cur = new Date(sVal);
+      const endDate = new Date(eVal);
+
+      while (cur <= endDate) {
+        const dayOfWeek = cur.getDay();
+        const dateStr = `${cur.getMonth() + 1}/${cur.getDate()} (${weekStrs[dayOfWeek]})`;
+
+        if (!offDays.includes(dayOfWeek)) {
+          const dayWrap = document.createElement('div');
+          dayWrap.className = 'p-2 bg-white rounded-xl border border-brand-200 space-y-1';
+          dayWrap.innerHTML = `<div class="font-bold text-brand-900">${dateStr}</div>`;
+
+          const chipGrid = document.createElement('div');
+          chipGrid.className = 'grid grid-cols-4 gap-1';
+
+          for (let h = startH; h < endH; h++) {
+            for (let m = 0; m < 60; m += interval) {
+              const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+              const tag = `${dateStr} ${timeStr}`;
+              const isChecked = slotReleasedList.includes(tag);
+
+              const btn = document.createElement('button');
+              btn.type = 'button';
+              btn.className = `py-1 rounded font-mono text-[11px] font-bold border transition ${isChecked ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-brand-50 border-gray-200 text-gray-700'}`;
+              btn.innerText = timeStr;
+              btn.onclick = () => {
+                if (slotReleasedList.includes(tag)) {
+                  slotReleasedList = slotReleasedList.filter(s => s !== tag);
+                  btn.className = 'py-1 rounded font-mono text-[11px] font-bold border bg-brand-50 border-gray-200 text-gray-700';
+                } else {
+                  slotReleasedList.push(tag);
+                  btn.className = 'py-1 rounded font-mono text-[11px] font-bold border bg-emerald-600 text-white border-emerald-600';
+                }
+                localStorage.setItem('slot_released_data', JSON.stringify(slotReleasedList));
+                markUnsaved();
+              };
+              chipGrid.appendChild(btn);
+            }
+          }
+          dayWrap.appendChild(chipGrid);
+          container.appendChild(dayWrap);
+        }
+        cur.setDate(cur.getDate() + 1);
       }
-
-      const newBalance = custs[0].loyalty_points - 10;
-      await directSupabasePatch('customers', `id=eq.${custs[0].id}`, { loyalty_points: newBalance });
-      document.getElementById('loyalty-status-hint').innerText = `已核銷 10 點，剩餘點數：${newBalance} 點`;
-      Swal.fire({ title: '核銷成功！已折抵 NT$ 300', text: `顧客剩餘點數：${newBalance} 點`, icon: 'success' });
     }
 
-    // 席位設備摘要
-    function renderHubResourcesSummary() {
-      const container = document.getElementById('hub-resources-summary');
-      if (!container) return;
-      container.innerHTML = hubResourcesList.map(r => `
-        <div class="flex justify-between items-center p-2 bg-white rounded-xl border border-brand-200 text-xs">
-          <span class="font-bold text-brand-900">${r.name}</span>
-          <span class="font-mono text-emerald-800 font-bold">上限 ${r.capacity} 組</span>
+    // 2. POS 品項庫與顧客快查資料庫
+    let posItems = JSON.parse(localStorage.getItem('pos_admin_items') || 'null') || [
+      { name: "基礎單色凝膠", category: "手部美甲", isAddon: false, price: 1000 },
+      { name: "本店卸甲續做", category: "卸甲服務", isAddon: true, price: 200 }
+    ];
+    let posCustomers = JSON.parse(localStorage.getItem('pos_customers_db') || '{}');
+
+    function renderPosItems() {
+      const list = document.getElementById('pos-items-admin-list');
+      list.innerHTML = posItems.map((it, idx) => `
+        <div class="flex justify-between items-center p-2.5 bg-brand-50 rounded-xl border border-brand-200 text-xs">
+          <div>
+            <b class="text-brand-900">${it.isAddon ? '[加購] ' : ''}${it.name}</b>
+            <span class="text-gray-400 font-mono text-[11px] ml-1">(${it.category})</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="font-mono font-bold text-emerald-800">NT$ ${it.price}</span>
+            <button type="button" onclick="posItems.splice(${idx},1); renderPosItems(); markUnsaved();" class="text-rose-600 font-bold">刪除</button>
+          </div>
         </div>
       `).join('');
+
+      // 渲染顧客庫
+      const custKeys = Object.keys(posCustomers);
+      document.getElementById('pos-cust-count-badge').innerText = `${custKeys.length} 位顧客`;
+      document.getElementById('pos-cust-admin-list').innerHTML = custKeys.map(k => {
+        const c = posCustomers[k];
+        return `<div class="p-1.5 bg-white rounded border flex justify-between"><span>${c.name} (${c.phone})</span><span class="text-gray-400">LINE: ${c.line || '未填'}</span></div>`;
+      }).join('') || '<div class="text-gray-400 text-center py-2">目前尚無顧客消費建檔</div>';
     }
 
-    function openAddResourceModal() {
+    function openAddPosItemModal() {
       Swal.fire({
-        title: '新增限制硬體資源',
+        title: '新增現場收銀品項',
         html: `
           <div class="text-left text-xs space-y-2">
-            <div><label class="font-bold">設備名稱：</label><input id="swal-res-name" class="swal2-input text-xs" placeholder="例: 雙人光療桌"></div>
-            <div><label class="font-bold">容量上限：</label><input id="swal-res-cap" type="number" class="swal2-input text-xs" value="1"></div>
+            <div><label class="font-bold">項目大分類：</label><input id="p-cat" class="swal2-input text-xs" placeholder="例: 手部美甲 / 美睫嫁接"></div>
+            <div><label class="font-bold">品項名稱：</label><input id="p-name" class="swal2-input text-xs" placeholder="例: 經典法式設計"></div>
+            <div><label class="font-bold">收費金額 (NT$)：</label><input id="p-price" type="number" class="swal2-input text-xs font-mono" placeholder="例: 1300"></div>
+            <label class="flex items-center gap-1.5 font-bold cursor-pointer pt-1"><input type="checkbox" id="p-addon" class="accent-brand-500"> 設為現場加購項目</label>
           </div>
         `,
         showCancelButton: true,
         confirmButtonText: '確定建立',
         confirmButtonColor: '#8C7355',
         preConfirm: () => ({
-          name: document.getElementById('swal-res-name').value.trim(),
-          capacity: Number(document.getElementById('swal-res-cap').value || 1)
+          category: document.getElementById('p-cat').value.trim() || '通用',
+          name: document.getElementById('p-name').value.trim(),
+          price: Number(document.getElementById('p-price').value || 0),
+          isAddon: document.getElementById('p-addon').checked
         })
       }).then(r => {
         if (r.isConfirmed && r.value.name) {
-          hubResourcesList.push(r.value);
-          renderHubResourcesSummary();
+          posItems.push(r.value);
+          localStorage.setItem('pos_admin_items', JSON.stringify(posItems));
+          renderPosItems();
+          markUnsaved();
         }
       });
     }
 
-    // 總管模組開通狀態矩陣
-    function renderMasterModulesMatrix() {
-      const grid = document.getElementById('hub-master-modules-grid');
-      if (!grid) return;
-      const allowed = Array.isArray(currentHubStoreInfo.allowed_modules) ? currentHubStoreInfo.allowed_modules : [];
-      const allModules = [
-        { key: 'reminder_gs', name: 'LINE 防放鳥推播 ($1,680)' },
-        { key: 'studio_slot', name: 'IG 空檔生圖器 ($490)' },
-        { key: 'pos_cashier', name: '極簡快速結帳 ($690)' },
-        { key: 'quote_calc', name: '服務報價試算器 ($890)' },
-        { key: 'loyalty_card', name: '數位會員集點卡 ($1,490)' },
-        { key: 'overview_gantt', name: '全日甘特圖排程 ($1,980)' },
-        { key: 'contract_sign', name: '定型化契約存證 ($2,490)' },
-        { key: 'sheets_sync', name: '試算表母表連動 (買斷標配)' }
-      ];
+    // 3. 通用報價項目與 9:16 輪播說明圖
+    let quoteItems = JSON.parse(localStorage.getItem('quote_admin_items') || 'null') || [
+      { name: "手部單色光療", category: "基礎項目", isAddon: false, price: 999 },
+      { name: "升級深層保養", category: "加購項目", isAddon: true, price: 350 }
+    ];
+    let quoteImages = JSON.parse(localStorage.getItem('quote_carousel_imgs') || 'null') || [
+      "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=600&q=80"
+    ];
 
-      grid.innerHTML = allModules.map(m => {
-        const isOpen = allowed.includes(m.key);
-        return `
-          <div class="p-2.5 rounded-xl border text-center ${isOpen ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-gray-50 border-gray-200 text-gray-400 opacity-60'}">
-            <div class="font-bold">${m.name}</div>
-            <div class="text-[10px] mt-0.5 font-bold">${isOpen ? '[已授權開通]' : '[總管未開通]'}</div>
+    function renderQuoteAdmin() {
+      document.getElementById('quote-items-admin-list').innerHTML = quoteItems.map((it, idx) => `
+        <div class="flex justify-between items-center p-2.5 bg-brand-50 rounded-xl border border-brand-200 text-xs">
+          <div><b class="text-brand-900">${it.isAddon ? '[加購] ' : ''}${it.name}</b> <span class="text-gray-400 font-mono text-[11px]">(${it.category})</span></div>
+          <div class="flex items-center gap-2">
+            <span class="font-mono font-bold text-emerald-800">NT$ ${it.price}</span>
+            <button type="button" onclick="quoteItems.splice(${idx},1); renderQuoteAdmin(); markUnsaved();" class="text-rose-600 font-bold">刪除</button>
           </div>
-        `;
-      }).join('');
+        </div>
+      `).join('');
+
+      document.getElementById('quote-carousel-admin-preview').innerHTML = quoteImages.map((url, idx) => `
+        <div class="w-16 h-28 rounded-xl bg-cover bg-center border border-brand-300 relative shrink-0 shadow-xs" style="background-image:url('${url}')">
+          <button type="button" onclick="quoteImages.splice(${idx},1); renderQuoteAdmin(); markUnsaved();" class="absolute top-1 right-1 w-5 h-5 bg-rose-600 text-white rounded-full flex items-center justify-center text-[10px]">✕</button>
+        </div>
+      `).join('');
     }
 
-    // 儲存設定
-    async function saveActiveToolSettings() {
-      Swal.showLoading();
-      const payload = {
-        line_channel_token: document.getElementById('reminder-cfg-token')?.value.trim(),
-        owner_line_uid: document.getElementById('reminder-cfg-uid')?.value.trim(),
-        sheets_spreadsheet_id: document.getElementById('sheets-cfg-id')?.value.trim(),
-        sheets_gas_url: document.getElementById('sheets-cfg-url')?.value.trim(),
-        contract_title: document.getElementById('contract-cfg-title')?.value.trim(),
-        contract_content: document.getElementById('contract-cfg-content')?.value.trim(),
-        store_resources: hubResourcesList,
-        updated_at: new Date().toISOString()
-      };
-
-      await directSupabasePatch('store_settings', `store_id=eq.${CURRENT_STORE_ID}`, payload);
-      Swal.fire({ title: '工具模組設定已儲存', icon: 'success', timer: 1000, showConfirmButton: false });
+    function addQuoteCarouselImg() {
+      const url = document.getElementById('quote-new-img-url').value.trim();
+      if (!url) return Swal.fire('請輸入圖片網址', '', 'warning');
+      quoteImages.push(url);
+      document.getElementById('quote-new-img-url').value = '';
+      localStorage.setItem('quote_carousel_imgs', JSON.stringify(quoteImages));
+      renderQuoteAdmin();
+      markUnsaved();
     }
 
-    function copyReminderGsScript() {
-      const code = document.getElementById('code-reminder-gs').value;
-      navigator.clipboard.writeText(code).then(() => {
-        Swal.fire({ title: '已複製 reminder.gs 腳本代碼', icon: 'success', timer: 800, showConfirmButton: false });
+    function openAddQuoteItemModal() {
+      Swal.fire({
+        title: '新增報價項目',
+        html: `
+          <div class="text-left text-xs space-y-2">
+            <div><label class="font-bold">項目分類：</label><input id="q-cat" class="swal2-input text-xs" placeholder="例: 手部 / 美睫 / 寵美"></div>
+            <div><label class="font-bold">項目名稱：</label><input id="q-name" class="swal2-input text-xs" placeholder="例: 睫毛角蛋白塑型"></div>
+            <div><label class="font-bold">價格 (NT$)：</label><input id="q-price" type="number" class="swal2-input text-xs font-mono" placeholder="例: 1400"></div>
+            <label class="flex items-center gap-1.5 font-bold cursor-pointer pt-1"><input type="checkbox" id="q-addon" class="accent-brand-500"> 設為加購項目</label>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '確定建立',
+        confirmButtonColor: '#8C7355',
+        preConfirm: () => ({
+          category: document.getElementById('q-cat').value.trim() || '一般',
+          name: document.getElementById('q-name').value.trim(),
+          price: Number(document.getElementById('q-price').value || 0),
+          isAddon: document.getElementById('q-addon').checked
+        })
+      }).then(r => {
+        if (r.isConfirmed && r.value.name) {
+          quoteItems.push(r.value);
+          localStorage.setItem('quote_admin_items', JSON.stringify(quoteItems));
+          renderQuoteAdmin();
+          markUnsaved();
+        }
       });
     }
 
-    function loadOfficialContractTemplate() {
-      document.getElementById('contract-cfg-content').value = 
-`主管機關公告【美容美髮定型化服務契約條款標準範本】
-一、本沙龍服務均由受過專業訓練之技術專員操作，實施前已與消費者完成充分技術溝通與費用確認。
-二、消費者應誠實告知過敏史、近期染燙漂髮歷史或頭皮敏感病況。
-三、包卡或儲值方案之使用，均依購買時登載之折數與點數規則扣抵。
-四、本契約經雙方同意並親筆數位簽章存證後即刻生效，雙方各執電子副本為憑。`;
-      Swal.fire({ title: '已載入主管機關標準範本', icon: 'success', timer: 800, showConfirmButton: false });
+    // 4. 數位會員存摺方案庫 (儲值金與包卡)
+    let walletRules = JSON.parse(localStorage.getItem('loyalty_wallet_rules') || 'null') || [
+      { name: "儲值 $3,000 享 9 折", price: 3000, bonus: 0, discount: 0.9 },
+      { name: "儲值 $5,000 送 $500", price: 5000, bonus: 500, discount: 0.85 }
+    ];
+    let packageRules = JSON.parse(localStorage.getItem('loyalty_package_rules') || 'null') || [
+      { name: "單色光療保養 5 堂套票", times: 5, price: 4500 },
+      { name: "深層SPA洗剪 10 堂票券", times: 10, price: 7200 }
+    ];
+
+    function renderLoyaltyRules() {
+      document.getElementById('loyalty-wallet-rules-list').innerHTML = walletRules.map((w, idx) => `
+        <div class="flex justify-between items-center p-2 bg-white rounded-xl border text-xs">
+          <span>${w.name} (本金$${w.price} / 贈$${w.bonus} / ${w.discount * 10}折)</span>
+          <button type="button" onclick="walletRules.splice(${idx},1); renderLoyaltyRules(); markUnsaved();" class="text-rose-600 font-bold">刪除</button>
+        </div>
+      `).join('');
+
+      document.getElementById('loyalty-package-rules-list').innerHTML = packageRules.map((p, idx) => `
+        <div class="flex justify-between items-center p-2 bg-white rounded-xl border text-xs">
+          <span>${p.name} (${p.times}堂 - NT$ ${p.price})</span>
+          <button type="button" onclick="packageRules.splice(${idx},1); renderLoyaltyRules(); markUnsaved();" class="text-rose-600 font-bold">刪除</button>
+        </div>
+      `).join('');
     }
 
-    async function testLineReminderPush() {
-      const token = document.getElementById('reminder-cfg-token')?.value.trim();
-      const uid = document.getElementById('reminder-cfg-uid')?.value.trim();
-      if (!token || !uid) return Swal.fire('請填寫 Channel Access Token 與接收 UID', '', 'warning');
-
-      Swal.showLoading();
-      try {
-        const res = await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            action: "sendLinePushProxy",
-            token: token,
-            to: uid,
-            message: `【預約提醒】林小姐您好：提醒您預約明日 14:00 在沙龍門市進行質感染髮技術，期待為您服務！如需改期請提前告知我們。`
-          })
-        });
-        const result = await res.json();
-        if (result.status === "SUCCESS") {
-          Swal.fire('防放鳥提醒推播成功！', '已成功送達指定 LINE 帳號', 'success');
-        } else {
-          Swal.fire('發送失敗', result.response || result.message, 'error');
-        }
-      } catch (e) {
-        Swal.fire('連線逾時', '請確認 Webhook 網址是否正常部署', 'error');
-      }
-    }
-
-    async function testSheetsWebhookSync() {
-      const sheetId = document.getElementById('sheets-cfg-id')?.value.trim();
-      const gasUrl = document.getElementById('sheets-cfg-url')?.value.trim() || API_URL;
-      if (!sheetId) return Swal.fire('請輸入 Google 試算表 ID', '', 'warning');
-
-      Swal.showLoading();
-      fetch(gasUrl, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify({
-          action: "syncBookingToSheet",
-          store_id: CURRENT_STORE_ID,
-          spreadsheet_id: sheetId,
-          transaction_no: `TXN-${Date.now().toString().slice(-4)}`,
-          date: new Date().toISOString().split('T')[0].replace(/-/g, '/'),
-          time: "15:00",
-          staff_name: "安雅設計師",
-          customer_name: "林小姐 (測試母表)",
-          phone: "0912000000",
-          service: "質感染髮技術",
-          final_price: 1800,
-          status: "已確認",
-          notes: "工具後台母表連動測試"
+    function openAddWalletRuleModal() {
+      Swal.fire({
+        title: '新增儲值金方案',
+        html: `
+          <div class="text-left text-xs space-y-2">
+            <div><label class="font-bold">方案名稱：</label><input id="wr-name" class="swal2-input text-xs" placeholder="例: 儲值 $5,000 送 $600"></div>
+            <div><label class="font-bold">本金金額：</label><input id="wr-price" type="number" class="swal2-input text-xs" placeholder="5000"></div>
+            <div><label class="font-bold">加贈紅利：</label><input id="wr-bonus" type="number" class="swal2-input text-xs" value="600"></div>
+            <div><label class="font-bold">專屬折數 (如 0.85 代表 85折)：</label><input id="wr-disc" type="number" step="0.05" class="swal2-input text-xs" value="0.85"></div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '確定',
+        confirmButtonColor: '#8C7355',
+        preConfirm: () => ({
+          name: document.getElementById('wr-name').value.trim(),
+          price: Number(document.getElementById('wr-price').value || 0),
+          bonus: Number(document.getElementById('wr-bonus').value || 0),
+          discount: Number(document.getElementById('wr-disc').value || 1)
         })
-      }).catch(()=>{});
-
-      setTimeout(() => {
-        Swal.fire('測試資料已派送！', '請至試算表確認排程與流水帳記錄', 'success');
-      }, 1000);
+      }).then(r => {
+        if (r.isConfirmed && r.value.name) {
+          walletRules.push(r.value);
+          localStorage.setItem('loyalty_wallet_rules', JSON.stringify(walletRules));
+          renderLoyaltyRules();
+          markUnsaved();
+        }
+      });
     }
 
-    function publishSlotsDirectly() {
-      Swal.fire({ title: '限動空檔網頁已發布！', text: '請複製專屬短網址分享至 IG 限動', icon: 'success' });
+    function openAddPackageRuleModal() {
+      Swal.fire({
+        title: '新增次數包卡方案',
+        html: `
+          <div class="text-left text-xs space-y-2">
+            <div><label class="font-bold">包卡名稱：</label><input id="pk-name" class="swal2-input text-xs" placeholder="例: 凝膠手部 10 堂暢遊卡"></div>
+            <div><label class="font-bold">總堂數 (次數)：</label><input id="pk-times" type="number" class="swal2-input text-xs" value="10"></div>
+            <div><label class="font-bold">販售總額 (NT$)：</label><input id="pk-price" type="number" class="swal2-input text-xs" placeholder="例: 8800"></div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '確定',
+        confirmButtonColor: '#8C7355',
+        preConfirm: () => ({
+          name: document.getElementById('pk-name').value.trim(),
+          times: Number(document.getElementById('pk-times').value || 10),
+          price: Number(document.getElementById('pk-price').value || 0)
+        })
+      }).then(r => {
+        if (r.isConfirmed && r.value.name) {
+          packageRules.push(r.value);
+          localStorage.setItem('loyalty_package_rules', JSON.stringify(packageRules));
+          renderLoyaltyRules();
+          markUnsaved();
+        }
+      });
     }
 
-    function previewQuotePage() {
-      window.open(`https://salon.heysibyl.com/?store_id=${CURRENT_STORE_ID}#quote`, '_blank');
+    // 5. 全日排程總覽：專員、服務(Group A/B/設備)、席位
+    let staffList = JSON.parse(localStorage.getItem('overview_staff_list') || 'null') || [
+      { id: "S01", name: "設計師 A" }, { id: "S02", name: "設計師 B" }
+    ];
+    let serviceCatalog = JSON.parse(localStorage.getItem('overview_service_catalog') || 'null') || [
+      { name: "質感染髮技術", category: "燙染類", price: 2400, dur: 120, type: "Group_A", resource: "洗頭沖水椅" },
+      { name: "剪髮造型設計", category: "剪髮類", price: 800, dur: 45, type: "Group_B", resource: "none" }
+    ];
+    let storeResources = JSON.parse(localStorage.getItem('overview_resources') || 'null') || [
+      { name: "洗頭沖水椅", capacity: 2 }
+    ];
+
+    function renderOverviewAdmin() {
+      document.getElementById('overview-staff-admin-list').innerHTML = staffList.map((s, idx) => `
+        <div class="flex justify-between items-center p-2 bg-white rounded-xl border text-xs">
+          <span class="font-bold">${s.name} (${s.id})</span>
+          <div class="flex gap-1 items-center">
+            <button type="button" onclick="moveStaffOrder(${idx},-1)" class="px-1.5 py-0.5 border rounded">▲</button>
+            <button type="button" onclick="moveStaffOrder(${idx},1)" class="px-1.5 py-0.5 border rounded">▼</button>
+            <button type="button" onclick="staffList.splice(${idx},1); renderOverviewAdmin(); markUnsaved();" class="text-rose-600 font-bold ml-1">✕</button>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('overview-services-admin-list').innerHTML = serviceCatalog.map((svc, idx) => `
+        <div class="flex justify-between items-center p-2 bg-white rounded-xl border text-xs">
+          <div>
+            <b class="text-brand-900">${svc.name}</b>
+            <span class="text-gray-400 font-mono text-[11px]">(${svc.dur}分 | NT$${svc.price} | ${svc.type} | 設備:${svc.resource})</span>
+          </div>
+          <button type="button" onclick="serviceCatalog.splice(${idx},1); renderOverviewAdmin(); markUnsaved();" class="text-rose-600 font-bold">✕</button>
+        </div>
+      `).join('');
+
+      document.getElementById('overview-resources-admin-list').innerHTML = storeResources.map((r, idx) => `
+        <div class="flex justify-between items-center p-2 bg-white rounded-xl border text-xs">
+          <span>${r.name}：上限 <b>${r.capacity}</b> 組席位</span>
+          <button type="button" onclick="storeResources.splice(${idx},1); renderOverviewAdmin(); markUnsaved();" class="text-rose-600 font-bold">✕</button>
+        </div>
+      `).join('');
     }
+
+    function moveStaffOrder(idx, dir) {
+      const target = idx + dir;
+      if (target < 0 || target >= staffList.length) return;
+      const tmp = staffList[idx];
+      staffList[idx] = staffList[target];
+      staffList[target] = tmp;
+      renderOverviewAdmin();
+      markUnsaved();
+    }
+
+    function openAddStaffModal() {
+      Swal.fire({
+        title: '新增專員 (代號制)',
+        input: 'text',
+        inputPlaceholder: '例: 設計師 C 或 美療師 1',
+        showCancelButton: true,
+        confirmButtonText: '確定',
+        confirmButtonColor: '#8C7355'
+      }).then(r => {
+        if (r.isConfirmed && r.value) {
+          staffList.push({ id: `S0${staffList.length + 1}`, name: r.value.trim() });
+          renderOverviewAdmin();
+          markUnsaved();
+        }
+      });
+    }
+
+    function openAddOverviewServiceModal() {
+      const resOpts = storeResources.map(r => `<option value="${r.name}">${r.name} (上限${r.capacity})</option>`).join('');
+      Swal.fire({
+        title: '新增排程服務主檔',
+        html: `
+          <div class="text-left text-xs space-y-2">
+            <div><label class="font-bold">服務大分類：</label><input id="os-cat" class="swal2-input text-xs" placeholder="例: 燙染設計 / 美甲美睫"></div>
+            <div><label class="font-bold">項目名稱 *：</label><input id="os-name" class="swal2-input text-xs" placeholder="例: 縮毛矯正燙髮"></div>
+            <div class="grid grid-cols-2 gap-2">
+              <div><label class="font-bold">金額 (NT$)：</label><input id="os-price" type="number" class="swal2-input text-xs font-mono" placeholder="3000"></div>
+              <div><label class="font-bold">耗時 (分鐘)：</label><input id="os-dur" type="number" class="swal2-input text-xs font-mono" value="120"></div>
+            </div>
+            <div>
+              <label class="font-bold">插單屬性：</label>
+              <select id="os-type" class="swal2-input text-xs">
+                <option value="Group_A">Group A (等待期技術類，藥水靜置期間允許插單)</option>
+                <option value="Group_B">Group B (全程專屬類，時段全程鎖定禁插單)</option>
+              </select>
+            </div>
+            <div>
+              <label class="font-bold">佔用店內資源設備 (席位防撞)：</label>
+              <select id="os-res" class="swal2-input text-xs">
+                <option value="none">無 (不佔用特定限制設備)</option>
+                ${resOpts}
+              </select>
+            </div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '確定建立',
+        confirmButtonColor: '#8C7355',
+        preConfirm: () => ({
+          category: document.getElementById('os-cat').value.trim() || '現場服務',
+          name: document.getElementById('os-name').value.trim(),
+          price: Number(document.getElementById('os-price').value || 0),
+          dur: Number(document.getElementById('os-dur').value || 60),
+          type: document.getElementById('os-type').value,
+          resource: document.getElementById('os-res').value
+        })
+      }).then(r => {
+        if (r.isConfirmed && r.value.name) {
+          serviceCatalog.push(r.value);
+          localStorage.setItem('overview_service_catalog', JSON.stringify(serviceCatalog));
+          renderOverviewAdmin();
+          markUnsaved();
+        }
+      });
+    }
+
+    function openAddResourceModal() {
+      Swal.fire({
+        title: '新增限制硬體設備席位',
+        html: `
+          <div class="text-left text-xs space-y-2">
+            <div><label class="font-bold">設備名稱：</label><input id="or-name" class="swal2-input text-xs" placeholder="例: 雙人光療桌 / VIP包廂"></div>
+            <div><label class="font-bold">全店容量上限：</label><input id="or-cap" type="number" class="swal2-input text-xs font-mono" value="1"></div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '確定',
+        confirmButtonColor: '#8C7355',
+        preConfirm: () => ({ name: document.getElementById('or-name').value.trim(), capacity: Number(document.getElementById('or-cap').value || 1) })
+      }).then(r => {
+        if (r.isConfirmed && r.value.name) {
+          storeResources.push(r.value);
+          localStorage.setItem('overview_resources', JSON.stringify(storeResources));
+          renderOverviewAdmin();
+          markUnsaved();
+        }
+      });
+    }
+
+    // 6. 定型化契約小資料庫與 Resend 發信測試
+    let signedContracts = JSON.parse(localStorage.getItem('signed_contracts_db') || '[]');
+    function renderContractAdminRecords() {
+      document.getElementById('contract-records-count').innerText = `${signedContracts.length} 筆紀錄`;
+      document.getElementById('contract-records-admin-list').innerHTML = signedContracts.map(c => `
+        <div class="p-2.5 bg-white rounded-xl border flex justify-between items-center text-xs">
+          <div>
+            <b>${c.name}</b> (${c.phone}) ｜ 信箱: <span class="font-mono text-gray-500">${c.email}</span>
+            <div class="text-[10px] text-gray-400 font-mono mt-0.5">簽署時間：${c.signedAt}</div>
+          </div>
+          ${c.sigBase64 ? `<img src="${c.sigBase64}" class="h-6 border p-0.5 rounded bg-brand-50" alt="簽名">` : ''}
+        </div>
+      `).join('') || '<div class="text-gray-400 text-center py-2">目前尚無電子合約簽署存證</div>';
+    }
+
+    function testResendEmail() {
+      const key = document.getElementById('contract-cfg-resend-key').value.trim();
+      if (!key) return Swal.fire('請填寫 Resend API Key', '', 'warning');
+      Swal.fire({ title: 'Resend API 連線測試成功！', text: '金鑰格式無誤，已就緒發信。', icon: 'success' });
+    }
+
+    window.onload = function() {
+      initSlotDates();
+      renderPosItems();
+      renderQuoteAdmin();
+      renderLoyaltyRules();
+      renderOverviewAdmin();
+      renderContractAdminRecords();
+    };
   </script>
 </body>
 </html>

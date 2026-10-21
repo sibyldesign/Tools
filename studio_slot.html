@@ -1,197 +1,317 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IG 限動空檔告示圖產生器</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-  <style>
-    :root { --primary-color: #d4a373; --bg-color: #f7f3f0; --text-color: #333; }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Noto Sans TC', sans-serif; }
-    body { background-color: var(--bg-color); color: var(--text-color); padding: 20px; }
-    .app-container { max-width: 1050px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
-    @media (max-width: 768px) { .app-container { grid-template-columns: 1fr; } }
-    .control-panel { background: #fff; padding: 24px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
-    .panel-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 18px; color: #4a4036; }
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: #666; }
-    .form-control { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem; outline: none; }
-    .form-control:focus { border-color: var(--primary-color); }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .theme-selector { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
-    .theme-btn { padding: 10px; border: 2px solid transparent; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; text-align: center; }
-    .theme-btn.active { border-color: #333; transform: scale(1.02); }
-    .theme-latte { background: #f3ece4; color: #6f4e37; }
-    .theme-minimal { background: #f0f0f0; color: #222; }
-    .theme-blush { background: #fcebeb; color: #b56576; }
-    .theme-dark { background: #262626; color: #d4af37; }
-    .time-slot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); gap: 8px; max-height: 200px; overflow-y: auto; padding: 6px; border: 1px solid #eee; border-radius: 8px; background: #fafafa; }
-    .slot-chip { padding: 8px 4px; border-radius: 6px; border: 1px solid #ddd; background: #fff; font-size: 0.82rem; text-align: center; cursor: pointer; }
-    .slot-chip.selected { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
-    .btn-action { width: 100%; padding: 14px; background: #333; color: #fff; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 10px; }
-    .preview-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; }
-    .preview-canvas { width: 340px; height: 600px; padding: 35px 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; flex-direction: column; justify-content: space-between; }
-    .theme-latte-style { background: linear-gradient(135deg, #f7f1ea 0%, #ede0d4 100%); color: #5c4738; }
-    .theme-latte-style .card-slot { background: rgba(255,255,255,0.7); }
-    .theme-minimal-style { background: #ffffff; color: #1a1a1a; border: 1px solid #e0e0e0; }
-    .theme-minimal-style .card-slot { background: #f5f5f5; }
-    .theme-blush-style { background: linear-gradient(135deg, #fef5f5 0%, #f7dede 100%); color: #724046; }
-    .theme-blush-style .card-slot { background: rgba(255,255,255,0.8); }
-    .theme-dark-style { background: linear-gradient(135deg, #1f1f1f 0%, #111111 100%); color: #e5c158; }
-    .theme-dark-style .card-slot { background: #2a2a2a; border: 1px solid #444; }
-    .canvas-header { text-align: center; }
-    .canvas-brand { font-family: 'Playfair Display', serif; font-size: 1.3rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
-    .canvas-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
-    .canvas-date { font-size: 0.9rem; opacity: 0.85; }
-    .canvas-body { flex: 1; margin: 20px 0; display: flex; flex-direction: column; justify-content: center; }
-    .slot-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .card-slot { padding: 10px; border-radius: 8px; text-align: center; font-weight: 700; font-size: 1rem; }
-    .canvas-footer { text-align: center; font-size: 0.78rem; line-height: 1.4; opacity: 0.9; border-top: 1px dashed rgba(150,150,150,0.3); padding-top: 12px; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>即時預約空檔與限動告示 | Studio Slot</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#FDFBF7', 100: '#F5ECE3', 200: '#EBE5DF', 300: '#D5C7BC',
+              400: '#BCA38F', 500: '#8C7355', 600: '#7A6246', 700: '#68523A',
+              800: '#5C4B3C', 900: '#3D3126',
+            }
+          },
+          fontFamily: { sans: ['Noto Sans TC', 'sans-serif'], serif: ['Playfair Display', 'serif'] }
+        }
+      }
+    };
+  </script>
 </head>
-<body>
+<body class="bg-brand-50 text-brand-900 antialiased min-h-screen p-4 md:p-6 pb-20 flex flex-col items-center">
 
-  <div class="app-container">
-    <div class="control-panel">
-      <div class="panel-title">✨ 空檔告示圖設定</div>
-      <div class="form-group">
-        <label>選擇色系風格</label>
-        <div class="theme-selector">
-          <div class="theme-btn theme-latte active" onclick="setTheme('latte')">溫柔奶茶</div>
-          <div class="theme-btn theme-minimal" onclick="setTheme('minimal')">無印極簡</div>
-          <div class="theme-btn theme-blush" onclick="setTheme('blush')">浪漫柔粉</div>
-          <div class="theme-btn theme-dark" onclick="setTheme('dark')">輕奢微醺</div>
-        </div>
+  <div class="max-w-md w-full space-y-4">
+    <!-- 頂部切換列 -->
+    <div class="flex justify-between items-center bg-white px-4 py-3 rounded-2xl border border-brand-200 shadow-2xs">
+      <div>
+        <h1 class="text-xs font-black text-brand-900" id="store-title-header">沙龍工作室</h1>
+        <p class="text-[10px] text-brand-400">即時釋出空檔告示</p>
       </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>店名 / 品牌</label>
-          <input type="text" id="inputBrand" class="form-control" value="SIBYL NAIL" oninput="updatePreview()">
-        </div>
-        <div class="form-group">
-          <label>公告標題</label>
-          <input type="text" id="inputTitle" class="form-control" value="本週釋出空檔" oninput="updatePreview()">
-        </div>
-      </div>
-      <div class="form-group">
-        <label>公告日期區間</label>
-        <input type="text" id="inputDate" class="form-control" value="10/25 (五) - 10/26 (六)" oninput="updatePreview()">
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>時間間隔</label>
-          <select id="intervalSelect" class="form-control" onchange="generateSlots()">
-            <option value="60">60 分鐘</option>
-            <option value="30">30 分鐘</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>營業時段範圍</label>
-          <div style="display: flex; gap: 4px; align-items: center;">
-            <input type="number" id="startHour" class="form-control" value="11" min="6" max="23" onchange="generateSlots()">
-            <span>至</span>
-            <input type="number" id="endHour" class="form-control" value="20" min="6" max="23" onchange="generateSlots()">
-          </div>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>點擊切換可預約空檔（綠底代表已選取）：</label>
-        <div class="time-slot-grid" id="slotsContainer"></div>
-      </div>
-      <div class="form-group">
-        <label>預約備註</label>
-        <textarea id="inputFooter" class="form-control" rows="2" oninput="updatePreview()">預約請加入官方 LINE: @sibyl&#10;保留15分鐘 · 謝絕攜伴</textarea>
-      </div>
-      <button class="btn-action" onclick="downloadImage()">📸 一鍵生成並下載 IG 限動圖</button>
+      <button type="button" onclick="toggleManagerMode()" class="px-3 py-1.5 bg-brand-100 hover:bg-brand-200 text-brand-800 rounded-xl font-bold text-xs transition flex items-center gap-1">
+        <i class="fa-solid fa-lock text-[10px]"></i>
+        <span id="btn-mode-label">店長生圖管理</span>
+      </button>
     </div>
 
-    <div class="preview-wrapper">
-      <div id="captureArea" class="preview-canvas theme-latte-style">
-        <div class="canvas-header">
-          <div class="canvas-brand" id="viewBrand">SIBYL NAIL</div>
-          <div class="canvas-title" id="viewTitle">本週釋出空檔</div>
-          <div class="canvas-date" id="viewDate">10/25 (五) - 10/26 (六)</div>
+    <!-- 客人端視角：即時可約清單 -->
+    <div id="client-view" class="space-y-4">
+      <div class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm text-center space-y-1">
+        <div class="text-[10px] uppercase font-mono tracking-widest text-brand-400">Available Slots</div>
+        <h2 class="text-base font-black text-brand-900" id="disp-client-store">目前開放預約時段</h2>
+        <p class="text-xs text-brand-500 pt-1">點擊下方想要的時段，直接跳轉官方 LINE 完成預約！</p>
+      </div>
+
+      <div class="space-y-2.5" id="client-slots-list">
+        <!-- 動態渲染時段 -->
+      </div>
+
+      <div class="text-center pt-2">
+        <a id="btn-line-direct" href="https://line.me/R/ti/p/@your_line" target="_blank" class="inline-flex items-center justify-center gap-2 w-full py-3.5 bg-[#06C755] hover:bg-[#05b34c] text-white font-bold rounded-2xl shadow-md transition text-xs">
+          <i class="fa-brands fa-line text-base"></i>
+          <span>私訊官方 LINE 預約其他時間</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 店長端視角：生圖設定與畫布 (預設隱藏，驗證 PIN 碼展開) -->
+    <div id="manager-view" class="space-y-4 hidden">
+      <div class="bg-white p-4 rounded-3xl border border-brand-200 shadow-sm space-y-3 text-xs">
+        <div class="flex justify-between items-center border-b border-brand-100 pb-2">
+          <span class="font-bold text-brand-900 text-xs flex items-center gap-1.5">
+            <i class="fa-solid fa-sliders text-[#8C7355]"></i> 空檔排程與 9:16 限動生成控制台
+          </span>
+          <button type="button" onclick="changeAdminPinPrompt()" class="text-[10px] text-blue-600 underline font-bold">改管理 PIN</button>
         </div>
-        <div class="canvas-body">
-          <div class="slot-list" id="viewSlots"></div>
+
+        <!-- 基礎營業設定 -->
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold mb-1">店名：</label>
+            <input type="text" id="cfg-store-name" value="SIBYL STUDIO" class="w-full p-2 border rounded-xl bg-brand-50/50" oninput="syncPreview()">
+          </div>
+          <div>
+            <label class="block font-bold mb-1">官方 LINE 連結：</label>
+            <input type="text" id="cfg-line-link" value="https://line.me/R/ti/p/@your_line" class="w-full p-2 border rounded-xl bg-brand-50/50" oninput="syncPreview()">
+          </div>
         </div>
-        <div class="canvas-footer" id="viewFooter">
-          預約請加入官方 LINE: @sibyl<br>保留15分鐘 · 謝絕攜伴
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold mb-1">時段切割間隔：</label>
+            <select id="cfg-interval" class="w-full p-2 border rounded-xl bg-brand-50/50 font-bold" onchange="generateAvailableTimes()">
+              <option value="15">每 15 分鐘</option>
+              <option value="30" selected>每 30 分鐘</option>
+              <option value="60">每 60 分鐘</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold mb-1">營業時間：</label>
+            <div class="flex items-center gap-1">
+              <input type="number" id="cfg-start-hour" value="10" min="6" max="23" class="w-1/2 p-2 border rounded-xl font-mono text-center font-bold" onchange="generateAvailableTimes()">
+              <span>~</span>
+              <input type="number" id="cfg-end-hour" value="20" min="6" max="23" class="w-1/2 p-2 border rounded-xl font-mono text-center font-bold" onchange="generateAvailableTimes()">
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 款風格色系切換 -->
+        <div>
+          <label class="block font-bold mb-1">限動風格色票切換：</label>
+          <div class="grid grid-cols-4 gap-1.5 text-center font-bold">
+            <button type="button" onclick="setStoryTheme('latte', this)" class="theme-btn py-1.5 rounded-xl border border-brand-300 bg-[#8C7355] text-white">奶茶</button>
+            <button type="button" onclick="setStoryTheme('noir', this)" class="theme-btn py-1.5 rounded-xl border border-brand-200 bg-white text-brand-900">極簡</button>
+            <button type="button" onclick="setStoryTheme('rose', this)" class="theme-btn py-1.5 rounded-xl border border-brand-200 bg-white text-brand-900">柔粉</button>
+            <button type="button" onclick="setStoryTheme('amber', this)" class="theme-btn py-1.5 rounded-xl border border-brand-200 bg-white text-brand-900">微醺</button>
+          </div>
+        </div>
+
+        <!-- 日期區間選擇 -->
+        <div class="grid grid-cols-2 gap-2 pt-1 border-t border-brand-100">
+          <div>
+            <label class="block font-bold mb-1">開始日期：</label>
+            <input type="date" id="slot-range-start" class="w-full p-2 border rounded-xl font-mono" onchange="buildDateRangeButtons()">
+          </div>
+          <div>
+            <label class="block font-bold mb-1">結束日期：</label>
+            <input type="date" id="slot-range-end" class="w-full p-2 border rounded-xl font-mono" onchange="buildDateRangeButtons()">
+          </div>
+        </div>
+
+        <!-- 點擊挑選時段按鈕矩陣 -->
+        <div>
+          <label class="block font-bold mb-1">點擊切換開放時段 (綠色代表開放客約)：</label>
+          <div id="time-chips-container" class="grid grid-cols-4 gap-1.5 max-h-36 overflow-y-auto p-1 bg-brand-50 rounded-xl border">
+            <!-- 動態生成時段按鈕 -->
+          </div>
+        </div>
+
+        <button type="button" onclick="downloadIGStory()" class="w-full py-3 bg-[#8C7355] hover:bg-[#7A6246] text-white font-bold rounded-2xl shadow-md transition flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-download"></i>
+          <span>一鍵下載 9:16 IG 限動美圖</span>
+        </button>
+      </div>
+
+      <!-- 9:16 限動預覽畫布 -->
+      <div class="flex justify-center">
+        <div id="capture-story-canvas" class="w-[360px] h-[640px] rounded-3xl p-6 flex flex-col justify-between shadow-2xl relative overflow-hidden transition-all duration-300" style="background-color: #FDFBF7; color: #3A3026; border: 1px solid #E9DFD5;">
+          <div class="text-center space-y-1 pt-3">
+            <div class="text-[9px] tracking-[0.3em] uppercase opacity-60 font-mono">Official Open Slots</div>
+            <h2 class="text-xl font-black font-serif" id="canvas-store-name">SIBYL STUDIO</h2>
+            <div class="text-xs font-medium opacity-80" id="canvas-date-range">近期精選釋出空檔</div>
+          </div>
+
+          <div class="space-y-2 my-auto" id="canvas-slots-list">
+            <!-- 畫布時段標籤 -->
+          </div>
+
+          <div class="text-center space-y-1.5 pb-2">
+            <div class="inline-block px-4 py-1.5 bg-black/10 rounded-full text-[10.5px] font-bold">
+              請點擊主頁連結或私訊官方 LINE 預約
+            </div>
+            <div class="text-[8px] opacity-40 font-mono">Designed by Sibyl Management System</div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    let currentTheme = 'latte';
-    let selectedSlots = new Set(["13:00", "15:00", "18:00"]);
+    let STORE_PIN = localStorage.getItem('slot_tool_pin') || '8888';
+    let isManager = false;
+    let selectedSlots = ["10/24 13:00", "10/24 16:30", "10/25 11:00", "10/25 15:30"];
+    
+    const THEME_STYLES = {
+      latte: { bg: '#FDFBF7', text: '#3A3026', border: '#E9DFD5' },
+      noir:  { bg: '#1A1A1A', text: '#FFFFFF', border: '#333333' },
+      rose:  { bg: '#FCF8F8', text: '#42282C', border: '#E4CFD2' },
+      amber: { bg: '#24201D', text: '#ED8E38', border: '#423730' }
+    };
 
-    window.onload = function() { generateSlots(); updatePreview(); };
-
-    function setTheme(theme) {
-      currentTheme = theme;
-      document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelector(`.theme-${theme}`).classList.add('active');
-      document.getElementById('captureArea').className = `preview-canvas theme-${theme}-style`;
-    }
-
-    function generateSlots() {
-      const container = document.getElementById('slotsContainer');
-      container.innerHTML = '';
-      const start = parseInt(document.getElementById('startHour').value);
-      const end = parseInt(document.getElementById('endHour').value);
-      const interval = parseInt(document.getElementById('intervalSelect').value);
-
-      for (let h = start; h < end; h++) {
-        for (let m = 0; m < 60; m += interval) {
-          const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-          const chip = document.createElement('div');
-          chip.className = `slot-chip ${selectedSlots.has(timeStr) ? 'selected' : ''}`;
-          chip.innerText = timeStr;
-          chip.onclick = () => {
-            if (selectedSlots.has(timeStr)) { selectedSlots.delete(timeStr); chip.classList.remove('selected'); }
-            else { selectedSlots.add(timeStr); chip.classList.add('selected'); }
-            updatePreview();
-          };
-          container.appendChild(chip);
-        }
-      }
-      updatePreview();
-    }
-
-    function updatePreview() {
-      document.getElementById('viewBrand').innerText = document.getElementById('inputBrand').value;
-      document.getElementById('viewTitle').innerText = document.getElementById('inputTitle').value;
-      document.getElementById('viewDate').innerText = document.getElementById('inputDate').value;
-      document.getElementById('viewFooter').innerHTML = document.getElementById('inputFooter').value.replace(/\n/g, '<br>');
-
-      const slotListEl = document.getElementById('viewSlots');
-      slotListEl.innerHTML = '';
-      const sorted = Array.from(selectedSlots).sort();
-      if (sorted.length === 0) {
-        slotListEl.innerHTML = '<div style="grid-column: span 2; text-align: center; opacity: 0.6; padding: 20px;">今日預約已滿</div>';
+    function toggleManagerMode() {
+      if (isManager) {
+        isManager = false;
+        document.getElementById('manager-view').classList.add('hidden');
+        document.getElementById('client-view').classList.remove('hidden');
+        document.getElementById('btn-mode-label').innerText = '店長生圖管理';
+        renderClientSlots();
       } else {
-        sorted.forEach(slot => {
-          const item = document.createElement('div');
-          item.className = 'card-slot';
-          item.innerText = slot;
-          slotListEl.appendChild(item);
+        Swal.fire({
+          title: '輸入店長 PIN 碼',
+          input: 'password',
+          inputPlaceholder: '預設 8888',
+          showCancelButton: true,
+          confirmButtonText: '驗證進入',
+          confirmButtonColor: '#8C7355',
+          inputValidator: v => (v !== STORE_PIN ? '密碼錯誤！' : null)
+        }).then(r => {
+          if (r.isConfirmed) {
+            isManager = true;
+            document.getElementById('client-view').classList.add('hidden');
+            document.getElementById('manager-view').classList.remove('hidden');
+            document.getElementById('btn-mode-label').innerText = '切換顧客視角';
+            generateAvailableTimes();
+            syncPreview();
+          }
         });
       }
     }
 
-    function downloadImage() {
-      html2canvas(document.getElementById('captureArea'), { scale: 2, useCORS: true, backgroundColor: null }).then(canvas => {
+    function changeAdminPinPrompt() {
+      Swal.fire({
+        title: '修改店長 PIN 碼',
+        input: 'password',
+        inputPlaceholder: '請輸入新的 4~6 碼密碼',
+        showCancelButton: true,
+        confirmButtonText: '儲存新密碼',
+        confirmButtonColor: '#8C7355',
+        inputValidator: v => (!v || v.length < 4 ? '密碼長度至少需 4 碼' : null)
+      }).then(r => {
+        if (r.isConfirmed) {
+          STORE_PIN = r.value.trim();
+          localStorage.setItem('slot_tool_pin', STORE_PIN);
+          Swal.fire('密碼修改成功！', `下次登入請使用：${STORE_PIN}`, 'success');
+        }
+      });
+    }
+
+    function generateAvailableTimes() {
+      const container = document.getElementById('time-chips-container');
+      const startH = parseInt(document.getElementById('cfg-start-hour').value);
+      const endH = parseInt(document.getElementById('cfg-end-hour').value);
+      const interval = parseInt(document.getElementById('cfg-interval').value);
+      container.innerHTML = '';
+
+      for (let h = startH; h < endH; h++) {
+        for (let m = 0; m < 60; m += interval) {
+          const tStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+          const isSelected = selectedSlots.some(s => s.includes(tStr));
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = `py-1.5 rounded-lg font-mono font-bold text-xs transition ${isSelected ? 'bg-emerald-600 text-white' : 'bg-white border text-gray-700'}`;
+          btn.innerText = tStr;
+          btn.onclick = () => {
+            const sampleTag = `時段 ${tStr}`;
+            if (selectedSlots.includes(sampleTag)) {
+              selectedSlots = selectedSlots.filter(s => s !== sampleTag);
+              btn.className = 'py-1.5 rounded-lg font-mono font-bold text-xs bg-white border text-gray-700';
+            } else {
+              selectedSlots.push(sampleTag);
+              btn.className = 'py-1.5 rounded-lg font-mono font-bold text-xs bg-emerald-600 text-white';
+            }
+            syncPreview();
+          };
+          container.appendChild(btn);
+        }
+      }
+    }
+
+    function setStoryTheme(themeKey, btnEl) {
+      document.querySelectorAll('.theme-btn').forEach(b => b.className = 'theme-btn py-1.5 rounded-xl border border-brand-200 bg-white text-brand-900');
+      btnEl.className = 'theme-btn py-1.5 rounded-xl border border-brand-300 bg-[#8C7355] text-white';
+      const t = THEME_STYLES[themeKey] || THEME_STYLES.latte;
+      const canvas = document.getElementById('capture-story-canvas');
+      canvas.style.backgroundColor = t.bg;
+      canvas.style.color = t.text;
+      canvas.style.borderColor = t.border;
+    }
+
+    function syncPreview() {
+      const name = document.getElementById('cfg-store-name').value;
+      const lineLink = document.getElementById('cfg-line-link').value;
+      document.getElementById('store-title-header').innerText = name;
+      document.getElementById('canvas-store-name').innerText = name;
+      document.getElementById('disp-client-store').innerText = `${name} 最新空檔`;
+      document.getElementById('btn-line-direct').href = lineLink;
+
+      const canvasList = document.getElementById('canvas-slots-list');
+      canvasList.innerHTML = selectedSlots.slice(0, 5).map(s => `
+        <div class="p-2.5 bg-white/80 rounded-xl border border-black/5 flex justify-between items-center text-xs">
+          <span class="font-bold">${s}</span>
+          <span class="px-2 py-0.5 rounded-md font-bold text-[10px] bg-black/10">可約</span>
+        </div>
+      `).join('') || '<div class="text-center opacity-40 text-xs py-4">無選取空檔</div>';
+    }
+
+    function renderClientSlots() {
+      const list = document.getElementById('client-slots-list');
+      const lineLink = document.getElementById('cfg-line-link').value;
+      if (selectedSlots.length === 0) {
+        list.innerHTML = '<div class="text-center py-8 bg-white rounded-2xl border text-brand-400 text-xs">本週預約已額滿，歡迎直接洽詢！</div>';
+        return;
+      }
+      list.innerHTML = selectedSlots.map(s => `
+        <div class="p-3.5 bg-white rounded-2xl border border-brand-200 shadow-2xs flex justify-between items-center text-xs">
+          <div class="font-black text-brand-900 font-mono text-sm">${s}</div>
+          <a href="${lineLink}" target="_blank" class="px-3.5 py-1.5 bg-[#8C7355] text-white rounded-xl font-bold hover:bg-[#7A6246] transition">
+            預約此時段
+          </a>
+        </div>
+      `).join('');
+    }
+
+    function downloadIGStory() {
+      Swal.showLoading();
+      html2canvas(document.getElementById('capture-story-canvas'), { scale: 3, useCORS: true, backgroundColor: null }).then(canvas => {
+        Swal.close();
         const link = document.createElement('a');
-        link.download = `空檔公告_${new Date().toISOString().slice(0,10)}.png`;
+        link.download = `IG限動空檔_${Date.now()}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
       });
     }
+
+    window.onload = () => {
+      renderClientSlots();
+      syncPreview();
+    };
   </script>
 </body>
 </html>

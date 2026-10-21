@@ -1,61 +1,377 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>全日排程總覽 | 甘特圖</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>全日排程總覽 | Schedule Overview</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-  <style> body { font-family: 'Noto Sans TC', sans-serif; background: #faf7f2; } </style>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#FDFBF7', 100: '#F5ECE3', 200: '#EBE5DF', 300: '#D5C7BC',
+              400: '#BCA38F', 500: '#8C7355', 600: '#7A6246', 700: '#68523A',
+              800: '#5C4B3C', 900: '#3D3126',
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
 </head>
-<body class="p-4 text-stone-800">
+<body class="bg-brand-50 text-brand-900 antialiased min-h-screen p-3 md:p-6 pb-24">
 
-  <div class="max-w-4xl mx-auto bg-white p-5 rounded-2xl shadow-sm border border-stone-200">
-    <div class="flex justify-between items-center pb-3 border-b border-stone-100 mb-4">
-      <h1 class="font-bold text-base text-stone-900 flex items-center gap-2">
-        📊 全日排程與插單總覽 (Gantt View)
-      </h1>
-      <input type="date" id="ganttDate" class="p-2 border rounded-xl text-xs bg-stone-50 font-mono" onchange="loadGanttData()">
-    </div>
-
-    <!-- 類 Excel 甘特圖畫布 -->
-    <div class="overflow-x-auto">
-      <div class="min-w-[600px] grid grid-cols-4 gap-3 text-xs" id="ganttCanvas">
-        <div class="col-span-full text-center py-10 text-stone-400">正在載入今日各專員排程與空檔...</div>
+  <div class="max-w-5xl mx-auto space-y-4">
+    <!-- 頂部面板 -->
+    <div class="bg-white p-4 md:p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-brand-100 gap-2">
+        <div class="flex items-center gap-2">
+          <span class="w-8 h-8 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-sm">
+            <i class="fa-solid fa-table-cells"></i>
+          </span>
+          <div>
+            <h1 class="text-xs font-black text-brand-900">全日排程與穿插預約總覽</h1>
+            <p class="text-[10px] text-brand-400">左右滑動切換日期 · 點擊空白格快速插單 · 席位防撞</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="openStaffServiceConfigModal()" class="px-3 py-1.5 bg-brand-50 hover:bg-brand-100 border border-brand-200 text-brand-800 rounded-xl text-xs font-bold transition flex items-center gap-1">
+            <i class="fa-solid fa-sliders text-[10px]"></i> 專員與服務管理
+          </button>
+          <div class="inline-flex p-1 bg-brand-100/70 rounded-xl border border-brand-200 text-xs font-bold">
+            <button type="button" id="btn-zoom-scroll" onclick="setOverviewZoom('scroll')" class="px-3 py-1 rounded-lg bg-white text-brand-900 shadow-xs">滑動檢視</button>
+            <button type="button" id="btn-zoom-fit" onclick="setOverviewZoom('fit')" class="px-3 py-1 rounded-lg text-brand-600">全店同屏</button>
+          </div>
+        </div>
       </div>
+
+      <!-- 橫向日期滑動按鈕列 -->
+      <div class="flex gap-1.5 overflow-x-auto pb-1 border-b border-dashed border-brand-200 no-scrollbar" id="date-scroll-bar"></div>
+
+      <!-- 限制設備上限監控列 -->
+      <div class="flex flex-wrap items-center gap-2 pt-1 text-[11px] font-mono" id="resource-status-bar"></div>
     </div>
+
+    <!-- 總覽畫布容器 -->
+    <div id="overview-canvas-wrapper" class="bg-white rounded-3xl border border-brand-200 shadow-sm overflow-hidden p-2"></div>
   </div>
 
   <script>
-    document.getElementById('ganttDate').value = new Date().toISOString().split('T')[0];
+    let currentZoom = 'scroll';
+    let selectedDate = new Date().toISOString().split('T')[0];
+    const timeInterval = 15;
+    const startMinOfDay = 9 * 60; // 09:00
+    const endMinOfDay = 20 * 60;  // 20:00
+    const totalSlotsCount = (endMinOfDay - startMinOfDay) / timeInterval;
 
-    function loadGanttData() {
-      const selectedDate = document.getElementById('ganttDate').value;
-      const canvas = document.getElementById('ganttCanvas');
-      
-      // 模擬從 Supabase 或 API 載入當日各專員預約
-      canvas.innerHTML = `
-        <div class="p-3 bg-stone-50 rounded-xl border border-stone-200 space-y-2">
-          <div class="font-bold text-stone-900 text-sm border-b pb-1">👩 莫莉 (Molly)</div>
-          <div class="p-2 bg-amber-100 text-amber-900 rounded-lg font-bold">11:00 - 12:30 | 單色凝膠 ($800)</div>
-          <div class="p-2 bg-emerald-100 text-emerald-900 rounded-lg font-bold">14:00 - 16:00 | 造型款 ($1,300)</div>
+    let staffList = JSON.parse(localStorage.getItem('overview_staff_list') || 'null') || [
+      { id: "S01", name: "專員 A" },
+      { id: "S02", name: "專員 B" },
+      { id: "S03", name: "專員 C" }
+    ];
+
+    let serviceCatalog = JSON.parse(localStorage.getItem('overview_service_catalog') || 'null') || [
+      { name: "質感染髮技術", price: 2400, dur: 120, type: "Group_A", resource: "洗頭沖水椅", color: "#8C7A6B" },
+      { name: "剪髮造型設計", price: 800, dur: 45, type: "Group_B", resource: "none", color: "#5D737E" },
+      { name: "溫塑燙髮設計", price: 3200, dur: 150, type: "Group_A", resource: "none", color: "#9A6B75" },
+      { name: "深層頭皮理療", price: 1200, dur: 60, type: "Group_B", resource: "洗頭沖水椅", color: "#607466" }
+    ];
+
+    let storeResources = JSON.parse(localStorage.getItem('overview_resources') || 'null') || [
+      { name: "洗頭沖水椅", capacity: 2 },
+      { name: "美甲光療席位", capacity: 2 }
+    ];
+
+    let customerDb = JSON.parse(localStorage.getItem('overview_cust_db') || '{}');
+    let bookingsDb = JSON.parse(localStorage.getItem('overview_bookings_db') || 'null') || [
+      { id: "B101", date: selectedDate, staffId: "S01", name: "林小姐", phone: "0912345678", lineName: "May", service: "質感染髮技術", time: "10:00", dur: 120, price: 2400, color: "#8C7A6B" },
+      { id: "B102", date: selectedDate, staffId: "S01", name: "陳小姐", phone: "0922333444", lineName: "Chen", service: "剪髮造型設計", time: "11:00", dur: 45, price: 800, color: "#5D737E" },
+      { id: "B103", date: selectedDate, staffId: "S02", name: "王先生", phone: "0933555777", lineName: "Leo", service: "溫塑燙髮設計", time: "13:30", dur: 150, price: 3200, color: "#9A6B75" }
+    ];
+
+    function setOverviewZoom(mode) {
+      currentZoom = mode;
+      document.getElementById('btn-zoom-scroll').className = mode === 'scroll' ? 'px-3 py-1 rounded-lg bg-white text-brand-900 shadow-xs' : 'px-3 py-1 rounded-lg text-brand-600';
+      document.getElementById('btn-zoom-fit').className = mode === 'fit' ? 'px-3 py-1 rounded-lg bg-[#8C7355] text-white shadow-xs' : 'px-3 py-1 rounded-lg text-brand-600';
+      renderOverviewCanvas();
+    }
+
+    function renderDateScroll() {
+      const container = document.getElementById('date-scroll-bar');
+      const weekDays = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
+      const today = new Date();
+      let html = '';
+
+      for (let i = 0; i < 14; i++) {
+        const d = new Date(today);
+        d.setDate(today.getDate() + i);
+        const dIso = d.toISOString().split('T')[0];
+        const isSel = (dIso === selectedDate);
+        html += `
+          <button type="button" onclick="selectDate('${dIso}')" class="shrink-0 px-3 py-1.5 rounded-xl text-center border text-xs font-bold transition ${isSel ? 'bg-[#8C7355] text-white border-[#8C7355] shadow-xs' : 'bg-brand-50/60 border-brand-200 text-brand-800'}">
+            <div class="text-[9.5px] opacity-70">${weekDays[d.getDay()]}</div>
+            <div class="font-mono text-xs mt-0.5">${d.getMonth() + 1}/${d.getDate()}</div>
+          </button>
+        `;
+      }
+      container.innerHTML = html;
+    }
+
+    function selectDate(dIso) {
+      selectedDate = dIso;
+      renderDateScroll();
+      renderOverviewCanvas();
+    }
+
+    function renderResourcesBar() {
+      const bar = document.getElementById('resource-status-bar');
+      bar.innerHTML = storeResources.map(r => `
+        <span class="px-2.5 py-1 bg-amber-50 text-amber-900 border border-amber-200 rounded-xl">
+          <i class="fa-solid fa-couch text-amber-600 mr-1"></i>${r.name}：上限 ${r.capacity} 組
+        </span>
+      `).join('');
+    }
+
+    function renderOverviewCanvas() {
+      const wrapper = document.getElementById('overview-canvas-wrapper');
+      const isFit = (currentZoom === 'fit');
+      const slotHeight = isFit ? 16 : 22;
+      const totalHeight = totalSlotsCount * slotHeight;
+      const colWidthStyle = isFit ? "flex: 1 1 0%; min-width: 0;" : "width: 140px; min-width: 140px; flex-shrink: 0;";
+
+      let headerHtml = staffMembers.map(s => `
+        <div style="${colWidthStyle}" class="text-center py-2 px-1 border-r border-[#EBE5DF] last:border-r-0 bg-[#FAF8F5]">
+          <div class="font-bold text-xs text-brand-900 truncate">${s.name}</div>
         </div>
-        <div class="p-3 bg-stone-50 rounded-xl border border-stone-200 space-y-2">
-          <div class="font-bold text-stone-900 text-sm border-b pb-1">👩 岑岑 (CenCen)</div>
-          <div class="p-2 bg-purple-100 text-purple-900 rounded-lg font-bold">13:00 - 14:30 | 足部凝膠 ($1,100)</div>
-        </div>
-        <div class="p-3 bg-stone-50 rounded-xl border border-stone-200 space-y-2">
-          <div class="font-bold text-stone-900 text-sm border-b pb-1">👩 娜娜 (Nana)</div>
-          <div class="p-2 text-stone-400 text-center py-6 font-medium">今日尚無預約 (全日空檔)</div>
-        </div>
-        <div class="p-3 bg-stone-50 rounded-2xl border border-stone-200 space-y-2">
-          <div class="font-bold text-stone-900 text-sm border-b pb-1">👩 琪琪 (Kiki)</div>
-          <div class="p-2 bg-rose-100 text-rose-900 rounded-lg font-bold">10:30 - 11:30 | 卸甲保養 ($400)</div>
+      `).join('');
+
+      let colsHtml = staffMembers.map(staff => {
+        const staffAppts = bookingsDb.filter(b => b.date === selectedDate && b.staffId === staff.id).map(b => {
+          const [h, m] = b.time.split(':').map(Number);
+          const startMin = h * 60 + m;
+          return { ...b, startMin, endMin: startMin + b.dur };
+        }).sort((a, b) => a.startMin - b.startMin);
+
+        // 碰撞分欄 (Group A 插單並排)
+        staffAppts.forEach(appt => {
+          const overlaps = staffAppts.filter(other => other.id !== appt.id && Math.max(appt.startMin, other.startMin) < Math.min(appt.endMin, other.endMin));
+          if (overlaps.length > 0) {
+            appt.colIndex = overlaps.some(o => o.colIndex === 0) ? 1 : 0;
+            appt.totalCols = 2;
+          } else {
+            appt.colIndex = 0;
+            appt.totalCols = 1;
+          }
+        });
+
+        let cardsHtml = staffAppts.map(a => {
+          const top = ((a.startMin - startMinOfDay) / timeInterval) * slotHeight;
+          const height = Math.max(slotHeight - 2, (a.dur / timeInterval) * slotHeight - 2);
+          const posStyle = a.totalCols === 2
+            ? (a.colIndex === 0 ? "left: 1px; width: calc(49% - 1px);" : "left: calc(51% + 1px); width: calc(49% - 1px);")
+            : "left: 2px; right: 2px;";
+
+          return `
+            <div style="top: ${top}px; height: ${height}px; ${posStyle} background-color: ${a.color}; color: #fff; z-index: 10;"
+                 class="absolute p-1 rounded-lg shadow-2xs cursor-pointer hover:opacity-90 overflow-hidden flex flex-col justify-start leading-tight"
+                 onclick="openApptDetailModal('${a.id}', '${a.name}', '${a.phone}', '${a.service}', '${a.time}', ${a.dur}, ${a.price})">
+              <div class="font-mono text-[8px] font-bold opacity-80">${a.time} (${a.dur}分)</div>
+              <div class="font-bold text-[9px] truncate">${a.name}</div>
+              ${height > 25 ? `<div class="text-[8px] opacity-80 truncate">${a.service}</div>` : ''}
+            </div>
+          `;
+        }).join('');
+
+        let bgGridHtml = Array.from({ length: totalSlotsCount }).map((_, idx) => {
+          const m = startMinOfDay + (idx * timeInterval);
+          const hh = String(Math.floor(m / 60)).padStart(2, '0');
+          const mm = String(m % 60).padStart(2, '0');
+          const isHour = (mm === '00');
+
+          return `
+            <div style="height: ${slotHeight}px;"
+                 class="border-t ${isHour ? 'border-[#D5C7BC]/80' : 'border-dashed border-[#F0EBE5]'} relative hover:bg-brand-50/60 cursor-pointer"
+                 onclick="openQuickInsertModal('${selectedDate}', '${hh}:${mm}', '${staff.id}', '${staff.name}')">
+              ${isHour ? `<span class="text-[8.5px] font-mono text-gray-300 pointer-events-none pl-1 select-none">${hh}:00</span>` : ''}
+            </div>
+          `;
+        }).join('');
+
+        return `
+          <div style="${colWidthStyle} height: ${totalHeight}px;" class="relative border-r border-[#EBE5DF] last:border-r-0">
+            <div class="absolute inset-0 z-0">${bgGridHtml}</div>
+            ${cardsHtml}
+          </div>
+        `;
+      }).join('');
+
+      wrapper.innerHTML = `
+        <div class="${isFit ? 'w-full' : 'overflow-x-auto relative no-scrollbar'}">
+          <div class="flex border-b border-[#EBE5DF] ${isFit ? 'w-full' : 'min-w-max'}">${headerHtml}</div>
+          <div class="flex relative ${isFit ? 'w-full' : 'min-w-max'}" style="height: ${totalHeight}px;">${colsHtml}</div>
         </div>
       `;
     }
 
-    loadGanttData();
+    function openQuickInsertModal(dateStr, timeStr, staffId, staffName) {
+      const svcOptions = serviceCatalog.map(s => `
+        <option value="${s.name}" data-dur="${s.dur}" data-price="${s.price}" data-color="${s.color}">
+          ${s.name} (${s.dur}分鐘 - NT$ ${s.price})
+        </option>
+      `).join('');
+
+      Swal.fire({
+        title: '現場排程插單',
+        html: `
+          <div class="text-left text-xs space-y-2.5 font-sans">
+            <div class="p-2.5 bg-brand-50 rounded-xl border border-brand-200 text-brand-900 font-mono">
+              排入專員：<b>${staffName}</b> ｜ 日期時段：<b>${dateStr} ${timeStr}</b>
+            </div>
+
+            <div>
+              <label class="block font-bold text-gray-700 mb-1">顧客手機 (輸入後自動帶出舊客)：</label>
+              <input type="tel" id="ins-phone" maxlength="10" placeholder="0912345678" class="swal2-input !m-0 !w-full text-xs font-mono font-bold" oninput="lookupInsertCustomer(this.value)">
+              <div id="ins-cust-hint" class="text-[10.5px] text-brand-500 font-bold mt-1 min-h-[16px]"></div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block font-bold text-gray-700 mb-1">顧客姓名 *</label>
+                <input type="text" id="ins-name" placeholder="王小美" class="swal2-input !m-0 !w-full text-xs font-bold">
+              </div>
+              <div>
+                <label class="block font-bold text-gray-700 mb-1">LINE 顯示名稱</label>
+                <input type="text" id="ins-line" placeholder="May" class="swal2-input !m-0 !w-full text-xs">
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-bold text-gray-700 mb-1">選擇服務項目：</label>
+              <select id="ins-service" class="swal2-input !m-0 !w-full text-xs font-bold">
+                ${svcOptions}
+              </select>
+            </div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '確定排入預約',
+        confirmButtonColor: '#8C7355',
+        cancelButtonText: '取消',
+        preConfirm: () => {
+          const phone = document.getElementById('ins-phone').value.trim();
+          const name = document.getElementById('ins-name').value.trim();
+          const line = document.getElementById('ins-line').value.trim();
+          const sel = document.getElementById('ins-service');
+          const opt = sel.options[sel.selectedIndex];
+
+          if (!name) return Swal.showValidationMessage('請輸入顧客姓名！');
+
+          return {
+            phone, name, line,
+            service: sel.value,
+            dur: Number(opt.getAttribute('data-dur') || 60),
+            price: Number(opt.getAttribute('data-price') || 0),
+            color: opt.getAttribute('data-color') || '#8C7A6B'
+          };
+        }
+      }).then(r => {
+        if (r.isConfirmed && r.value) {
+          const v = r.value;
+          if (v.phone) {
+            customerDb[v.phone] = { name: v.name, line: v.line, phone: v.phone };
+            localStorage.setItem('overview_cust_db', JSON.stringify(customerDb));
+          }
+
+          bookingsDb.push({
+            id: `B-${Date.now().toString().slice(-5)}`,
+            date: dateStr,
+            staffId: staffId,
+            time: timeStr,
+            name: v.name,
+            phone: v.phone,
+            lineName: v.line,
+            service: v.service,
+            dur: v.dur,
+            price: v.price,
+            color: v.color
+          });
+
+          localStorage.setItem('overview_bookings_db', JSON.stringify(bookingsDb));
+          renderOverviewCanvas();
+          Swal.fire({ title: '已成功排入排程！', icon: 'success', timer: 1000, showConfirmButton: false });
+        }
+      });
+    }
+
+    function lookupInsertCustomer(phoneVal) {
+      const p = phoneVal.trim().replace(/\D/g, '');
+      const hint = document.getElementById('ins-cust-hint');
+      const nameInput = document.getElementById('ins-name');
+      const lineInput = document.getElementById('ins-line');
+
+      if (p.length >= 8 && customerDb[p]) {
+        const c = customerDb[p];
+        nameInput.value = c.name || '';
+        lineInput.value = c.line || '';
+        hint.innerText = `✓ 已帶入熟客檔案：${c.name}`;
+        hint.className = 'text-[10.5px] text-emerald-700 font-bold mt-1';
+      } else {
+        hint.innerText = p.length >= 8 ? '此手機為新朋友' : '';
+        hint.className = 'text-[10.5px] text-brand-400 font-bold mt-1';
+      }
+    }
+
+    function openApptDetailModal(id, name, phone, service, time, dur, price) {
+      Swal.fire({
+        title: `預約明細 - ${name}`,
+        html: `
+          <div class="text-left text-xs bg-brand-50 p-3.5 rounded-2xl border border-brand-200 space-y-1.5 font-mono">
+            <div>顧客電話：<b>${phone || '未填寫'}</b></div>
+            <div>預約項目：<b>${service}</b></div>
+            <div>時段時長：<b>${time}</b> (${dur} 分鐘)</div>
+            <div>預估費用：<b>NT$ ${price.toLocaleString()} 元</b></div>
+          </div>
+        `,
+        showDenyButton: true,
+        showCancelButton: true,
+        confirmButtonText: '完成施作結單',
+        denyButtonText: '🗑️ 取消並釋出時段',
+        cancelButtonText: '關閉',
+        confirmButtonColor: '#8C7355',
+        denyButtonColor: '#E11D48'
+      }).then(r => {
+        if (r.isDenied) {
+          bookingsDb = bookingsDb.filter(b => b.id !== id);
+          localStorage.setItem('overview_bookings_db', JSON.stringify(bookingsDb));
+          renderOverviewCanvas();
+          Swal.fire('時段已成功取消並釋出！', '', 'success');
+        }
+      });
+    }
+
+    function openStaffServiceConfigModal() {
+      Swal.fire({
+        title: '專員與服務管理',
+        text: '可至整合後台 (tools-admin.html) 之「排程總覽」分頁進行完整增刪排序與席位配置。',
+        icon: 'info',
+        confirmButtonColor: '#8C7355'
+      });
+    }
+
+    window.onload = function() {
+      renderDateScroll();
+      renderResourcesBar();
+      renderOverviewCanvas();
+    };
   </script>
 </body>
 </html>

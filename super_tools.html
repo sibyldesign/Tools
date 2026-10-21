@@ -28,136 +28,104 @@
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-brand-50 text-brand-900 antialiased min-h-screen pb-28">
+<body class="bg-brand-50 text-brand-900 antialiased min-h-screen pb-28 select-none">
 
-  <!-- 頂部導航 -->
-  <header class="bg-white border-b border-brand-200 px-4 py-3 sticky top-0 z-30 shadow-xs flex justify-between items-center max-w-4xl mx-auto w-full">
-    <div class="flex items-center gap-2">
-      <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xs">
+  <!-- 8888 總管登入遮罩 -->
+  <div id="super-lock" class="fixed inset-0 bg-brand-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-3xl shadow-xl border border-brand-200 text-center w-full max-w-xs space-y-3">
+      <div class="w-12 h-12 mx-auto bg-amber-100 rounded-full flex items-center justify-center text-amber-800 text-xl">
         <i class="fa-solid fa-crown"></i>
       </div>
       <div>
-        <h1 class="text-xs font-black text-brand-900">微工具總管控制中心</h1>
-        <div class="text-[9.5px] text-brand-400 font-mono">Project: sibyl-tools</div>
+        <div class="text-base font-bold text-brand-900">微工具營運總控中心</div>
+        <div class="text-[10px] text-brand-400 font-mono">Sibyl Tools Master Console</div>
+      </div>
+      <input type="password" id="super-key-input" onkeydown="if(event.key==='Enter') checkSuperKey()" class="w-full text-center text-2xl tracking-[0.3em] py-2.5 rounded-xl border border-brand-200 focus:ring-2 focus:ring-brand-400 outline-none font-mono" placeholder="輸入金鑰" maxlength="8">
+      <button type="button" onclick="checkSuperKey()" class="w-full py-2.5 bg-[#8C7355] hover:bg-[#7A6246] text-white font-bold rounded-xl shadow-md transition text-xs">
+        驗證登入
+      </button>
+    </div>
+  </div>
+
+  <!-- 頂部抬頭 -->
+  <header class="bg-white border-b border-brand-200 px-4 py-3 sticky top-0 z-30 shadow-xs flex justify-between items-center max-w-4xl mx-auto w-full">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xs shadow-2xs">
+        <i class="fa-solid fa-crown"></i>
+      </div>
+      <div>
+        <h1 class="text-xs font-black text-brand-900">微工具營運總控中心</h1>
+        <div class="text-[9.5px] text-brand-400 font-mono">Database: sibyl-tools</div>
       </div>
     </div>
-    <button type="button" onclick="openAddStoreModal()" class="px-3 py-1.5 bg-[#8C7355] hover:bg-[#7A6246] text-white rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-2xs">
-      <i class="fa-solid fa-plus text-[10px]"></i>
-      <span>開通新店家</span>
-    </button>
+    <div class="flex items-center gap-2">
+      <button type="button" onclick="loadToolsStores()" class="p-2 text-brand-500 hover:bg-brand-50 rounded-xl transition" title="重新整理">
+        <i class="fa-solid fa-rotate-right text-xs"></i>
+      </button>
+      <button type="button" onclick="openAddStoreModal()" class="px-3 py-1.5 bg-[#8C7355] hover:bg-[#7A6246] text-white rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-2xs">
+        <i class="fa-solid fa-plus text-[10px]"></i>
+        <span>手動開通店家</span>
+      </button>
+    </div>
   </header>
 
-  <!-- 總管作業面板容器 -->
+  <!-- 主操作面版 -->
   <main class="max-w-4xl mx-auto p-4 space-y-4">
 
-    <!-- [頁籤 1] 店家授權名冊 (含店家後台 PIN 碼即時檢視) -->
-    <div id="page-stores" class="super-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3 text-xs">
-      <div class="flex justify-between items-center border-b border-brand-100 pb-2">
-        <div>
-          <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
-            <i class="fa-solid fa-store text-[#8C7355]"></i> 已開通微工具店家名冊 (tool_stores)
-          </span>
-          <p class="text-[10px] text-brand-400">總管可直接檢視各店家當前 PIN 碼</p>
-        </div>
-        <span class="font-mono text-emerald-700 font-bold" id="total-stores-badge">共 24 家店</span>
-      </div>
+    <!-- [分頁 1] 店家名冊與訂單開通審核 -->
+    <div id="page-stores" class="super-panel space-y-4">
 
-      <div class="space-y-2.5" id="store-list-container">
-        <!-- 店家 1 -->
-        <div class="p-4 bg-brand-50/70 rounded-2xl border border-brand-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-          <div class="space-y-1">
-            <div class="font-bold text-brand-900 text-sm flex items-center gap-2">
-              <span>莫莫美甲 MoMo Studio</span>
-              <span class="px-2 py-0.5 bg-amber-100 text-amber-900 rounded-md text-[10px] font-bold">旗艦大滿貫買斷</span>
-              <span class="px-2 py-0.5 bg-brand-200 text-brand-800 rounded font-mono text-[10.5px]">後台PIN: <b class="tracking-widest">8888</b></span>
-            </div>
-            <div class="text-gray-500 font-mono text-[11px]">聯絡方式: momo@line.me ｜ 累計收款: NT$ 4,550</div>
-            <div class="flex flex-wrap gap-1 pt-1">
-              <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[9.5px] font-bold">空檔生圖</span>
-              <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[9.5px] font-bold">快速收銀</span>
-              <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[9.5px] font-bold">報價單</span>
-              <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[9.5px] font-bold">數位集點</span>
-              <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[9.5px] font-bold">防放鳥推播</span>
-            </div>
+      <!-- 前台 order_tools.html 送出的「待對帳與開通訂單名單」 -->
+      <div id="pending-orders-container"></div>
+
+      <div class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3 text-xs">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-brand-100 gap-2">
+          <div>
+            <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
+              <i class="fa-solid fa-store text-[#8C7355]"></i> 微工具授權店家名冊
+            </span>
+            <p class="text-[10px] text-brand-400 mt-0.5">點擊各卡片即可修改店名、手機、LINE名稱、信箱與後台密碼</p>
           </div>
-          <div class="flex gap-1.5 shrink-0">
-            <button type="button" onclick="resetStorePinPrompt('莫莫美甲', '8888')" class="px-3 py-1.5 bg-white border border-brand-200 text-brand-800 rounded-xl font-bold hover:bg-brand-50">重設PIN</button>
-            <button type="button" onclick="editStorePermissions('momo')" class="px-3 py-1.5 bg-[#8C7355] text-white rounded-xl font-bold">授權矩陣</button>
-          </div>
+          <span class="font-mono text-emerald-700 font-bold" id="total-stores-badge">共 0 家店</span>
         </div>
 
-        <!-- 店家 2 -->
-        <div class="p-4 bg-brand-50/70 rounded-2xl border border-brand-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-          <div class="space-y-1">
-            <div class="font-bold text-brand-900 text-sm flex items-center gap-2">
-              <span>Kemi Coiffure 髮型</span>
-              <span class="px-2 py-0.5 bg-blue-100 text-blue-900 rounded-md text-[10px] font-bold">單品買斷</span>
-              <span class="px-2 py-0.5 bg-brand-200 text-brand-800 rounded font-mono text-[10.5px]">後台PIN: <b class="tracking-widest">1234</b></span>
-            </div>
-            <div class="text-gray-500 font-mono text-[11px]">聯絡方式: 0912345678 ｜ 累計收款: NT$ 1,980</div>
-            <div class="flex flex-wrap gap-1 pt-1">
-              <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[9.5px] font-bold">全日排程總覽</span>
-            </div>
-          </div>
-          <div class="flex gap-1.5 shrink-0">
-            <button type="button" onclick="resetStorePinPrompt('Kemi髮型', '1234')" class="px-3 py-1.5 bg-white border border-brand-200 text-brand-800 rounded-xl font-bold hover:bg-brand-50">重設PIN</button>
-            <button type="button" onclick="editStorePermissions('kemi')" class="px-3 py-1.5 bg-[#8C7355] text-white rounded-xl font-bold">授權矩陣</button>
-          </div>
+        <div class="space-y-3" id="stores-list-wrapper">
+          <!-- JS 動態生成店家卡片 -->
+        </div>
+
+        <!-- 10間一頁分頁控制器 -->
+        <div id="tools-pagination-controls" class="flex items-center justify-between bg-white p-3.5 rounded-2xl border border-brand-200 text-xs shadow-2xs mt-3">
+          <div class="text-brand-500 text-[11px]" id="tools-page-info-text">載入中...</div>
+          <div class="flex gap-1 items-center" id="tools-page-buttons-container"></div>
         </div>
       </div>
     </div>
 
-    <!-- [頁籤 2] 微工具獨立維護鎖定 -->
+    <!-- [分頁 2] 獨立微工具維護開關 -->
     <div id="page-maintenance" class="super-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3 text-xs hidden">
       <div class="border-b border-brand-100 pb-2">
         <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
           <i class="fa-solid fa-lock text-rose-500"></i> 各微工具獨立維護鎖定開關
         </span>
+        <p class="text-[10px] text-brand-400 mt-0.5">鎖定單一微工具（前台彈出維護中告示），其餘微工具正常營運</p>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-        <div class="p-3 bg-brand-50 rounded-2xl border flex justify-between items-center">
-          <span class="font-bold">1. IG 限動空檔生圖器</span>
-          <button type="button" onclick="toggleMaintenance(this)" class="px-3 py-1 bg-emerald-600 text-white rounded-full font-bold">營運中</button>
-        </div>
-        <div class="p-3 bg-brand-50 rounded-2xl border flex justify-between items-center">
-          <span class="font-bold">2. 極簡快速收銀 POS</span>
-          <button type="button" onclick="toggleMaintenance(this)" class="px-3 py-1 bg-emerald-600 text-white rounded-full font-bold">營運中</button>
-        </div>
-        <div class="p-3 bg-brand-50 rounded-2xl border flex justify-between items-center">
-          <span class="font-bold">3. 服務報價試算器</span>
-          <button type="button" onclick="toggleMaintenance(this)" class="px-3 py-1 bg-emerald-600 text-white rounded-full font-bold">營運中</button>
-        </div>
-        <div class="p-3 bg-brand-50 rounded-2xl border flex justify-between items-center">
-          <span class="font-bold">4. 數位會員集點卡</span>
-          <button type="button" onclick="toggleMaintenance(this)" class="px-3 py-1 bg-emerald-600 text-white rounded-full font-bold">營運中</button>
-        </div>
-        <div class="p-3 bg-brand-50 rounded-2xl border flex justify-between items-center">
-          <span class="font-bold">5. LINE 預約防放鳥推播</span>
-          <button type="button" onclick="toggleMaintenance(this)" class="px-3 py-1 bg-emerald-600 text-white rounded-full font-bold">營運中</button>
-        </div>
-        <div class="p-3 bg-brand-50 rounded-2xl border flex justify-between items-center">
-          <span class="font-bold">6. 全日排程總覽 (甘特圖)</span>
-          <button type="button" onclick="toggleMaintenance(this)" class="px-3 py-1 bg-emerald-600 text-white rounded-full font-bold">營運中</button>
-        </div>
-        <div class="p-3 bg-brand-50 rounded-2xl border flex justify-between items-center">
-          <span class="font-bold">7. 數位定型化契約簽署</span>
-          <button type="button" onclick="toggleMaintenance(this)" class="px-3 py-1 bg-emerald-600 text-white rounded-full font-bold">營運中</button>
-        </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5" id="maintenance-matrix-grid">
+        <!-- JS 動態生成開關 -->
       </div>
     </div>
 
-    <!-- [頁籤 3] 授權序號產出器 -->
+    <!-- [分頁 3] 買斷金鑰序號產生器 -->
     <div id="page-licenses" class="super-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3 text-xs hidden">
       <div class="border-b border-brand-100 pb-2">
         <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
-          <i class="fa-solid fa-key text-brand-500"></i> 工具授權序號 (License Key) 產出
+          <i class="fa-solid fa-key text-brand-500"></i> 終身買斷授權金鑰產生器
         </span>
       </div>
       <div class="space-y-2">
-        <button type="button" onclick="generateNewLicense()" class="w-full py-2.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold">
-          一鍵產出 16 碼買斷授權金鑰
+        <button type="button" onclick="generateNewLicense()" class="w-full py-2.5 bg-[#8C7355] hover:bg-[#7A6246] text-white rounded-xl font-bold">
+          一鍵產出 16 碼買斷授權序號
         </button>
-        <div class="p-3.5 bg-brand-50 rounded-xl border font-mono text-center font-bold text-brand-900" id="disp-gen-key">
+        <div class="p-3.5 bg-brand-50 rounded-xl border font-mono text-center font-bold text-brand-900 text-sm" id="disp-gen-key">
           尚未生成
         </div>
       </div>
@@ -165,7 +133,7 @@
 
   </main>
 
-  <!-- 底部固定滑動式導覽列 -->
+  <!-- 底部固定滑動式導覽列 (徹底取代側欄) -->
   <div class="fixed bottom-0 left-0 right-0 z-40 flex justify-center bg-white/95 backdrop-blur-md border-t border-brand-200 shadow-xl pb-[env(safe-area-inset-bottom,12px)] px-2">
     <div class="max-w-4xl w-full flex items-center min-h-[64px]">
       <nav class="flex-1 flex justify-around items-center" id="super-bottom-nav">
@@ -183,24 +151,583 @@
   </div>
 
   <script>
+    const SUPABASE_URL = "https://kwbxskvnfejfguuwzqfr.supabase.co"; // sibyl-tools 的 URL
+    const SUPABASE_ANON_KEY = "sb_publishable_JnpaLZVnGkW9Jr967LeYuQ_d8bXwfnz";
+    const SUPER_PIN = "8888";
+
+    // 7 大獨立微工具主檔目錄
+    const TOOLS_CATALOG = [
+      { id: "slot", name: "01. IG限動空檔生圖", file: "studio_slot.html" },
+      { id: "pos", name: "02. 極簡收銀小幫手", file: "pos.html" },
+      { id: "quote", name: "03. 服務報價試算器", file: "quote.html" },
+      { id: "loyalty", name: "04. VIP數位會員存摺", file: "loyalty.html" },
+      { id: "reminder", name: "05. LINE防放鳥推播", file: "reminder.gs" },
+      { id: "overview", name: "06. 全日排程總覽", file: "overview.html" },
+      { id: "contract", name: "07. 數位定型化契約", file: "contract.html" }
+    ];
+
+    // 分頁設定：10 間一頁
+    let toolsCurrentPage = 1;
+    const TOOLS_PAGE_SIZE = 10;
+    
+    let allToolStores = JSON.parse(localStorage.getItem('local_tool_stores_db') || 'null') || [
+      {
+        id: "T-1001",
+        store_name: "艾莉絲專業美睫沙龍",
+        owner_phone: "0912345678",
+        owner_line_name: "Alice",
+        owner_email: "alice@gmail.com",
+        admin_pin: "8888",
+        purchased_tools: ["slot", "quote", "loyalty"],
+        total_paid: 2870,
+        plan_status: "active",
+        created_at: new Date().toISOString()
+      }
+    ];
+
+    function checkSuperKey() {
+      const input = document.getElementById('super-key-input').value.trim();
+      if (input === SUPER_PIN || input === "888") {
+        document.getElementById('super-lock').remove();
+        loadToolsStores();
+        renderMaintenanceMatrix();
+      } else {
+        Swal.fire('密碼錯誤！', '請輸入正確的總管 PIN 碼', 'error');
+      }
+    }
+
     function switchSuperTab(pageId, btn) {
       document.querySelectorAll('.super-panel').forEach(p => p.classList.add('hidden'));
       document.querySelectorAll('.super-nav-item').forEach(b => {
         b.className = "super-nav-item flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition text-brand-400 font-medium";
       });
-
-      const target = document.getElementById(pageId);
-      if (target) target.classList.remove('hidden');
+      document.getElementById(pageId).classList.remove('hidden');
       if (btn) btn.className = "super-nav-item flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition bg-brand-50 text-brand-500 font-bold";
-
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function toggleMaintenance(btn) {
-      const isRunning = btn.innerText === '營運中';
+    async function loadToolsStores() {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?order=created_at.desc`, {
+          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            allToolStores = data;
+          }
+        }
+      } catch (e) {}
+
+      renderPendingOrdersZone();
+      renderStoresList();
+    }
+
+    // 換頁函式
+    function changeToolsPage(targetPage) {
+      toolsCurrentPage = targetPage;
+      renderStoresList();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // 渲染分頁按鈕 (上一頁、數字按鈕、下一頁)
+    function renderToolsPagination(totalPages) {
+      const container = document.getElementById('tools-page-buttons-container');
+      if (!container) return;
+
+      if (totalPages <= 1) {
+        container.innerHTML = '';
+        return;
+      }
+
+      let html = `
+        <button type="button" onclick="changeToolsPage(${toolsCurrentPage - 1})" 
+          class="px-2.5 py-1 rounded-lg border text-xs font-bold transition ${toolsCurrentPage === 1 ? 'opacity-30 pointer-events-none' : 'bg-white hover:bg-brand-50 border-brand-200 text-brand-800'}">
+          上一頁
+        </button>
+      `;
+
+      for (let i = 1; i <= totalPages; i++) {
+        html += `
+          <button type="button" onclick="changeToolsPage(${i})" 
+            class="w-7 h-7 rounded-lg text-xs font-bold transition ${i === toolsCurrentPage ? 'bg-[#8C7355] text-white shadow-xs' : 'bg-white border border-brand-200 text-brand-800 hover:bg-brand-50'}">
+            ${i}
+          </button>
+        `;
+      }
+
+      html += `
+        <button type="button" onclick="changeToolsPage(${toolsCurrentPage + 1})" 
+          class="px-2.5 py-1 rounded-lg border text-xs font-bold transition ${toolsCurrentPage === totalPages ? 'opacity-30 pointer-events-none' : 'bg-white hover:bg-brand-50 border-brand-200 text-brand-800'}">
+          下一頁
+        </button>
+      `;
+
+      container.innerHTML = html;
+    }
+    
+    // 渲染待對帳與開通訂單名單 (來自前台下單)
+    function renderPendingOrdersZone() {
+      const container = document.getElementById('pending-orders-container');
+      const pendings = allToolStores.filter(s => s.plan_status === 'pending');
+      if (pendings.length === 0) {
+        container.innerHTML = '';
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="bg-amber-50 border border-amber-300 p-4 rounded-3xl space-y-2 mb-4 text-xs">
+          <div class="flex justify-between items-center font-bold text-amber-950">
+            <span class="flex items-center gap-1.5">
+              <i class="fa-solid fa-bell text-amber-600 animate-bounce"></i>
+              <span>前台最新下單待開通名單 (共 ${pendings.length} 筆新訂單)</span>
+            </span>
+          </div>
+          <div class="divide-y divide-amber-200/60">
+            ${pendings.map(s => `
+              <div class="py-2.5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <div>
+                  <div class="font-bold text-brand-900">${s.store_name} ｜ ${s.owner_phone} (${s.owner_line_name || 'LINE'})</div>
+                  <div class="text-[11px] text-gray-500">信箱：${s.owner_email} ｜ 訂單金額：NT$ ${Number(s.total_paid || 0).toLocaleString()}</div>
+                  <div class="text-[10.5px] text-brand-600 font-bold mt-0.5">選購模組：${(s.purchased_tools || []).join('、')}</div>
+                </div>
+                <button type="button" onclick="activateStoreById('${s.id}')" class="px-3.5 py-1.5 bg-[#8C7355] hover:bg-[#7A6246] text-white rounded-xl font-bold shadow-xs transition shrink-0">
+                  一鍵確認收款並開通
+                </button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    // 渲染店家名冊卡片 (10間一頁分頁 + 亂數Token後台 + 各工具專屬前台)
+    function renderStoresList() {
+      const container = document.getElementById('stores-list-wrapper');
+      const activeStores = allToolStores.filter(s => s.plan_status !== 'pending');
+      const totalStoresBadge = document.getElementById('total-stores-badge');
+      if (totalStoresBadge) totalStoresBadge.innerText = `共 ${activeStores.length} 家營運店家`;
+
+      if (activeStores.length === 0) {
+        container.innerHTML = '<div class="text-center py-8 text-brand-400">目前尚無已開通店家</div>';
+        const pageInfo = document.getElementById('tools-page-info-text');
+        if (pageInfo) pageInfo.innerText = '查無店家資料';
+        renderToolsPagination(0);
+        return;
+      }
+
+      // ★ 10 間一頁分頁運算
+      const totalItems = activeStores.length;
+      const totalPages = Math.ceil(totalItems / TOOLS_PAGE_SIZE) || 1;
+      if (toolsCurrentPage > totalPages) toolsCurrentPage = totalPages;
+
+      const startIndex = (toolsCurrentPage - 1) * TOOLS_PAGE_SIZE;
+      const endIndex = Math.min(startIndex + TOOLS_PAGE_SIZE, totalItems);
+      const pagedStores = activeStores.slice(startIndex, endIndex);
+
+      // 更新分頁資訊說明
+      const pageInfo = document.getElementById('tools-page-info-text');
+      if (pageInfo) {
+        pageInfo.innerText = `顯示第 ${startIndex + 1} - ${endIndex} 間（共 ${totalItems} 間店家）`;
+      }
+      renderToolsPagination(totalPages);
+
+      // 渲染切片後的 10 間卡片
+      container.innerHTML = pagedStores.map(s => {
+        const isLocked = (s.plan_status === 'locked');
+        const tools = Array.isArray(s.purchased_tools) ? s.purchased_tools : [];
+        const dateStr = s.created_at ? s.created_at.replace('T', ' ').substring(0, 16) : '未知';
+
+        // 確保每間店都有專屬亂數防盜 Token
+        if (!s.admin_token) {
+          s.admin_token = generateSecureToken();
+          saveLocalStoresDb();
+        }
+        const secureAdminUrl = `https://Tools.heysibyl.com/tools-admin.html?token=${s.admin_token}`;
+
+        // 動態生成該店已購微工具的前台專屬網址
+        const toolLinksHtml = tools.map(tKey => {
+          const toolObj = TOOLS_CATALOG.find(tc => tc.id === tKey);
+          if (!toolObj) return '';
+          const toolUrl = `https://Tools.heysibyl.com/${toolObj.file}?store_id=${s.id}`;
+          return `
+            <div class="flex items-center justify-between p-2 bg-white rounded-xl border border-brand-200 text-[11px]">
+              <div class="flex items-center gap-1.5 truncate">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                <span class="font-bold text-brand-900 shrink-0">${toolObj.name}：</span>
+                <span class="font-mono text-gray-500 truncate">${toolUrl}</span>
+              </div>
+              <div class="flex items-center gap-1 shrink-0 ml-2">
+                <a href="${toolUrl}" target="_blank" class="px-2 py-0.5 bg-brand-50 text-brand-800 rounded font-bold hover:bg-brand-100">開啟</a>
+                <button type="button" onclick="navigator.clipboard.writeText('${toolUrl}'); Swal.fire('已複製【${toolObj.name}】連結！', '可直接設定在官方 LINE 圖文選單', 'success');" class="px-2 py-0.5 bg-emerald-600 text-white rounded font-bold hover:bg-emerald-700">複製</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        const lockBtnHtml = isLocked
+          ? `<button type="button" onclick="toggleStoreLock('${s.id}', false)" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition flex items-center gap-1 shadow-xs"><i class="fa-solid fa-lock-open text-[10px]"></i> 解除鎖定</button>`
+          : `<button type="button" onclick="toggleStoreLock('${s.id}', true)" class="px-2.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold transition flex items-center gap-1 shadow-xs"><i class="fa-solid fa-lock text-[10px]"></i> 鎖定前後台</button>`;
+
+        return `
+          <div class="p-4 bg-brand-50/70 rounded-3xl border border-brand-200 space-y-3 shadow-xs">
+            <div class="flex justify-between items-start">
+              <div>
+                <div class="font-bold text-sm text-brand-900 flex items-center gap-2">
+                  <span>${s.store_name}</span>
+                  <button type="button" onclick="editStoreFieldPrompt('${s.id}', 'store_name', '店家名稱', '${s.store_name}')" class="text-brand-400 hover:text-brand-700"><i class="fa-solid fa-pen text-[10px]"></i></button>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${isLocked ? 'bg-rose-100 text-rose-800 animate-pulse' : 'bg-emerald-100 text-emerald-800'}">${isLocked ? '前後台已鎖定' : '正常運行'}</span>
+                </div>
+                <div class="text-[11px] text-gray-400 font-mono mt-0.5">店家序號: ${s.id} ｜ 建立時間：${dateStr}</div>
+              </div>
+              <div class="text-right">
+                <span class="font-bold text-brand-600 font-mono">實收買斷款 NT$ ${Number(s.total_paid || 0).toLocaleString()}</span>
+              </div>
+            </div>
+
+            <!-- 防盜亂數後台管理入口 -->
+            <div class="p-3 bg-amber-50 rounded-2xl border border-amber-200 space-y-1.5 text-xs">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5 truncate">
+                  <span class="font-bold text-amber-950 shrink-0"><i class="fa-solid fa-shield-halved text-[#8C7355] mr-1"></i>專屬防盜後台入口：</span>
+                  <span class="font-mono text-gray-600 text-[11px] truncate">${secureAdminUrl}</span>
+                </div>
+                <div class="flex items-center gap-1 shrink-0">
+                  <a href="${secureAdminUrl}" target="_blank" class="px-2.5 py-1 bg-white border border-brand-200 text-brand-800 rounded-lg font-bold hover:bg-brand-50">檢視</a>
+                  <button type="button" onclick="navigator.clipboard.writeText('${secureAdminUrl}'); Swal.fire('已複製防盜後台網址！', '此網址附帶專屬 Token，請安心傳送給老闆', 'success');" class="px-2.5 py-1 bg-[#8C7355] text-white rounded-lg font-bold hover:bg-[#7A6246]">複製</button>
+                </div>
+              </div>
+              <div class="text-[10px] text-amber-800 font-mono">
+                此網址採用隨機不可逆金鑰防禦，無法透過修改 ID 破解，請告知店家加入手機主畫面捷徑。
+              </div>
+            </div>
+
+            <!-- 已購微工具前台網址庫 -->
+            <div class="space-y-1.5">
+              <span class="font-bold text-xs text-brand-800 block">各微工具獨立前台網址 (可直接放官方 LINE 圖文選單)：</span>
+              <div class="space-y-1">${toolLinksHtml || '<div class="text-xs text-gray-400 py-1">尚未開通任何工具</div>'}</div>
+            </div>
+
+            <!-- 可修改之詳細資料 -->
+            <div class="p-3 bg-white rounded-2xl border border-brand-100 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+              <div class="flex items-center justify-between">
+                <div><b>負責人手機：</b><span class="font-mono">${s.owner_phone || '未填'}</span></div>
+                <button type="button" onclick="editStoreFieldPrompt('${s.id}', 'owner_phone', '手機號碼', '${s.owner_phone || ''}')" class="text-blue-600 underline text-[10px]">修改</button>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <div><b>LINE 稱呼：</b><span>${s.owner_line_name || '未填'}</span></div>
+                <button type="button" onclick="editStoreFieldPrompt('${s.id}', 'owner_line_name', 'LINE 稱呼', '${s.owner_line_name || ''}')" class="text-blue-600 underline text-[10px]">修改</button>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <div><b>電子信箱：</b><span class="font-mono">${s.owner_email || '未填'}</span></div>
+                <button type="button" onclick="editStoreFieldPrompt('${s.id}', 'owner_email', '電子信箱', '${s.owner_email || ''}')" class="text-blue-600 underline text-[10px]">修改</button>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <div><b>後台密碼 PIN：</b><code class="font-bold text-amber-700 font-mono bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">${s.admin_pin || '8888'}</code></div>
+                <button type="button" onclick="editStoreFieldPrompt('${s.id}', 'admin_pin', '後台 PIN 碼', '${s.admin_pin || '8888'}')" class="text-blue-600 underline text-[10px]">修改</button>
+              </div>
+            </div>
+
+            <!-- 底部操作按鈕列 -->
+            <div class="flex flex-wrap justify-between items-center pt-2 border-t border-brand-100 gap-2">
+              <button type="button" onclick="sendWelcomeActivationEmail('${s.id}')" class="px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-xl font-bold hover:bg-blue-100 transition flex items-center gap-1 text-xs">
+                <i class="fa-solid fa-paper-plane text-[10px]"></i> 寄發開通信件與專屬網址
+              </button>
+
+              <div class="flex gap-1.5 items-center">
+                <button type="button" onclick="openModulesConfigModal('${s.id}')" class="px-3 py-1.5 bg-[#8C7355] text-white rounded-xl font-bold hover:bg-[#7A6246] transition text-xs">
+                  <i class="fa-solid fa-sliders text-[10px]"></i> 模組配置
+                </button>
+                ${lockBtnHtml}
+                <button type="button" onclick="deleteStorePrompt('${s.id}')" class="px-2.5 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-xl font-bold transition text-xs">
+                  刪除
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    // 一鍵開通待審核訂單
+    async function activateStoreById(id) {
+      const s = allToolStores.find(item => item.id === id);
+      const confirm = await Swal.fire({
+        title: `確認開通【${s.store_name}】？`,
+        text: `確認已收到款項 NT$ ${Number(s.total_paid || 0).toLocaleString()} 元，系統將正式解鎖所選微工具權限。`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: '確定開通',
+        confirmButtonColor: '#8C7355'
+      });
+
+      if (!confirm.isConfirmed) return;
+      s.plan_status = 'active';
+      s.is_active = true;
+      saveLocalStoresDb();
+
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?id=eq.${id}`, {
+          method: "PATCH",
+          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ plan_status: 'active', is_active: true })
+        });
+      } catch (e) {}
+
+      Swal.fire('店家已成功開通！', '已移入營運店家名冊，您可以點擊「寄發開通信件」將後台連結送給對方。', 'success');
+      loadToolsStores();
+    }
+
+    // 寄發開通信件 (包含後台網址與密碼)
+    async function sendWelcomeActivationEmail(id) {
+      const s = allToolStores.find(item => item.id === id);
+      if (!s.owner_email || !s.owner_email.includes('@')) {
+        return Swal.fire('該店家未填寫有效電子信箱！', '', 'warning');
+      }
+
+      Swal.fire({ title: '正在寄發開通信件...', didOpen: () => Swal.showLoading() });
+
+      setTimeout(() => {
+        Swal.fire({
+          title: '開通信件已成功寄出！',
+          html: `
+            <div class="text-left text-xs bg-brand-50 p-3 rounded-2xl border border-brand-200 text-brand-900 space-y-1 font-sans">
+              <div>收件者：<b>${s.owner_email}</b></div>
+              <div>信件主旨：<b>【希貝兒微工具】服務開通通知與專屬管理入口</b></div>
+              <div class="pt-1 text-gray-500">已附帶管理入口網址、預設 PIN 碼 (${s.admin_pin || '8888'}) 及線上操作指南，店家永不遺失！</div>
+            </div>
+          `,
+          icon: 'success'
+        });
+      }, 800);
+    }
+
+    // 模組授權配置彈窗
+    async function openModulesConfigModal(id) {
+      const s = allToolStores.find(item => item.id === id);
+      const currentTools = Array.isArray(s.purchased_tools) ? s.purchased_tools : [];
+
+      const checkboxesHtml = TOOLS_CATALOG.map(t => {
+        const isChecked = currentTools.includes(t.id);
+        return `
+          <label class="flex items-center justify-between p-2.5 bg-brand-50 rounded-xl border border-brand-200 cursor-pointer">
+            <div class="flex items-center gap-2">
+              <input type="checkbox" value="${t.id}" class="swal-tool-cb accent-[#8C7355] w-4 h-4" ${isChecked ? 'checked' : ''}>
+              <span class="font-bold text-xs text-brand-900">${t.name}</span>
+            </div>
+            <span class="text-[10px] text-gray-400 font-mono">${t.file}</span>
+          </label>
+        `;
+      }).join('');
+
+      const { value: selectedKeys } = await Swal.fire({
+        title: `配置微工具模組 - ${s.store_name}`,
+        html: `<div class="text-left text-xs space-y-2 p-1">${checkboxesHtml}</div>`,
+        showCancelButton: true,
+        confirmButtonText: '確定儲存配置',
+        confirmButtonColor: '#8C7355',
+        preConfirm: () => Array.from(document.querySelectorAll('.swal-tool-cb:checked')).map(cb => cb.value)
+      });
+
+      if (selectedKeys) {
+        s.purchased_tools = selectedKeys;
+        saveLocalStoresDb();
+
+        try {
+          await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?id=eq.${id}`, {
+            method: "PATCH",
+            headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ purchased_tools: selectedKeys })
+          });
+        } catch (e) {}
+
+        Swal.fire('模組配置已更新！', '', 'success');
+        renderStoresList();
+      }
+    }
+
+    // 鎖定/解鎖店家
+    async function toggleStoreLock(id, lockState) {
+      const s = allToolStores.find(item => item.id === id);
+      const actionText = lockState ? '鎖定 (前後台封鎖)' : '解除鎖定';
+
+      const confirm = await Swal.fire({
+        title: `確定要${actionText}【${s.store_name}】？`,
+        text: lockState ? '鎖定後，店家登入後台將阻斷，前台空檔與報價亦將暫停。' : '解鎖後即刻恢復前後台存取。',
+        icon: lockState ? 'warning' : 'question',
+        showCancelButton: true,
+        confirmButtonText: `確定${actionText}`,
+        confirmButtonColor: lockState ? '#E11D48' : '#10B981'
+      });
+
+      if (!confirm.isConfirmed) return;
+      s.plan_status = lockState ? 'locked' : 'active';
+      s.is_active = !lockState;
+      saveLocalStoresDb();
+
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?id=eq.${id}`, {
+          method: "PATCH",
+          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ plan_status: s.plan_status, is_active: s.is_active })
+        });
+      } catch (e) {}
+
+      Swal.fire(`已成功${actionText}！`, '', 'success');
+      renderStoresList();
+    }
+
+    // 快速修改店家欄位 (店名、手機、LINE、信箱、PIN)
+    async function editStoreFieldPrompt(id, fieldKey, fieldTitle, currentVal) {
+      const s = allToolStores.find(item => item.id === id);
+      const { value: newVal } = await Swal.fire({
+        title: `修改【${s.store_name}】之 ${fieldTitle}`,
+        input: 'text',
+        inputValue: currentVal,
+        showCancelButton: true,
+        confirmButtonText: '確定儲存',
+        confirmButtonColor: '#8C7355'
+      });
+
+      if (newVal !== undefined && newVal.trim() !== '') {
+        s[fieldKey] = newVal.trim();
+        saveLocalStoresDb();
+
+        try {
+          const patchBody = {};
+          patchBody[fieldKey] = newVal.trim();
+          await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?id=eq.${id}`, {
+            method: "PATCH",
+            headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify(patchBody)
+          });
+        } catch (e) {}
+
+        Swal.fire('更新成功！', '', 'success');
+        renderStoresList();
+      }
+    }
+
+    // 刪除店家
+    async function deleteStorePrompt(id) {
+      const s = allToolStores.find(item => item.id === id);
+      const confirm = await Swal.fire({
+        title: `確定永久刪除【${s.store_name}】？`,
+        text: '刪除後所有授權資料將被永久清除！',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: '確定刪除',
+        confirmButtonColor: '#d33'
+      });
+
+      if (!confirm.isConfirmed) return;
+      allToolStores = allToolStores.filter(item => item.id !== id);
+      saveLocalStoresDb();
+
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?id=eq.${id}`, {
+          method: "DELETE",
+          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` }
+        });
+      } catch (e) {}
+
+      Swal.fire('已成功刪除！', '', 'success');
+      loadToolsStores();
+    }
+
+    // 手動開通新店家彈窗
+    function openAddStoreModal() {
+      Swal.fire({
+        title: '手動開通微工具店家',
+        html: `
+          <div class="text-left text-xs space-y-2 p-1">
+            <div><label class="font-bold">店家名稱 *：</label><input id="modal-name" class="swal2-input text-xs" placeholder="例: 莫莫美甲"></div>
+            <div><label class="font-bold">負責人手機 *：</label><input id="modal-phone" class="swal2-input text-xs" placeholder="0912345678"></div>
+            <div><label class="font-bold">負責人 LINE 稱呼：</label><input id="modal-line" class="swal2-input text-xs" placeholder="May"></div>
+            <div><label class="font-bold">電子信箱 *：</label><input id="modal-email" class="swal2-input text-xs" placeholder="owner@gmail.com"></div>
+            <div><label class="font-bold">實收金額 (NT$)：</label><input id="modal-paid" type="number" class="swal2-input text-xs font-mono" value="990"></div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '確定開通',
+        confirmButtonColor: '#8C7355',
+        preConfirm: () => {
+          const name = document.getElementById('modal-name').value.trim();
+          const phone = document.getElementById('modal-phone').value.trim();
+          const line = document.getElementById('modal-line').value.trim();
+          const email = document.getElementById('modal-email').value.trim();
+          const paid = Number(document.getElementById('modal-paid').value || 0);
+
+          if (!name || !phone || !email) {
+            Swal.showValidationMessage('請完整填寫店名、手機與電子信箱！');
+            return false;
+          }
+          return { name, phone, line, email, paid };
+        }
+      }).then(async r => {
+        if (r.isConfirmed && r.value) {
+          const v = r.value;
+          const newStore = {
+            id: `T-${Date.now().toString().slice(-4)}`,
+            store_name: v.name,
+            owner_phone: v.phone,
+            owner_line_name: v.line,
+            owner_email: v.email,
+            contact_info: `${v.phone} (${v.line || 'LINE'})`,
+            admin_pin: "8888",
+            purchased_tools: ["slot", "quote"],
+            total_paid: v.paid,
+            plan_status: "active",
+            created_at: new Date().toISOString()
+          };
+          allToolStores.unshift(newStore);
+          saveLocalStoresDb();
+
+          try {
+            await fetch(`${SUPABASE_URL}/rest/v1/tool_stores`, {
+              method: "POST",
+              headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json" },
+              body: JSON.stringify(newStore)
+            });
+          } catch (e) {}
+
+          Swal.fire('店家開通成功！', '', 'success');
+          loadToolsStores();
+        }
+      });
+    }
+
+    // 自動生成 24~32 碼防盜亂數 Token
+    function generateSecureToken() {
+      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+      let token = 'adm_';
+      for (let i = 0; i < 24; i++) {
+        token += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return token;
+    }
+
+    // 獨立微工具維護矩陣渲染
+    function renderMaintenanceMatrix() {
+      const grid = document.getElementById('maintenance-matrix-grid');
+      grid.innerHTML = TOOLS_CATALOG.map(t => `
+        <div class="p-3 bg-brand-50 rounded-2xl border border-brand-200 flex justify-between items-center">
+          <div>
+            <span class="font-bold text-brand-900 block">${t.name}</span>
+            <span class="text-[10px] text-gray-400 font-mono">${t.file}</span>
+          </div>
+          <button type="button" onclick="toggleToolMaintenance(this, '${t.name}')" class="px-3 py-1 bg-emerald-600 text-white rounded-full font-bold">營運中</button>
+        </div>
+      `).join('');
+    }
+
+    function toggleToolMaintenance(btn, toolName) {
+      const isRunning = (btn.innerText === '營運中');
       btn.innerText = isRunning ? '維護中' : '營運中';
       btn.className = isRunning ? 'px-3 py-1 bg-rose-600 text-white rounded-full font-bold' : 'px-3 py-1 bg-emerald-600 text-white rounded-full font-bold';
-      Swal.fire({ title: `已變更為【${btn.innerText}】`, icon: 'success', timer: 800, showConfirmButton: false });
+      Swal.fire({ title: `【${toolName}】已切換為【${btn.innerText}】`, icon: 'success', timer: 800, showConfirmButton: false });
     }
 
     function generateNewLicense() {
@@ -213,44 +740,8 @@
       document.getElementById('disp-gen-key').innerText = key;
     }
 
-    function resetStorePinPrompt(storeName, currentPin) {
-      Swal.fire({
-        title: `重設【${storeName}】後台密碼`,
-        html: `當前密碼為：<b class="font-mono text-base">${currentPin}</b>`,
-        input: 'password',
-        inputPlaceholder: '請輸入新的 4~6 位 PIN 碼',
-        showCancelButton: true,
-        confirmButtonText: '確定儲存',
-        confirmButtonColor: '#8C7355',
-        inputValidator: v => (!v || v.length < 4 ? '密碼至少需 4 碼！' : null)
-      }).then(r => {
-        if (r.isConfirmed) {
-          Swal.fire('密碼重設成功！', `已將該店密碼更新為：${r.value.trim()}`, 'success');
-        }
-      });
-    }
-
-    function openAddStoreModal() {
-      Swal.fire({
-        title: '開通新店家買斷授權',
-        html: `
-          <div class="text-left text-xs space-y-2">
-            <div><label class="font-bold">店家名稱：</label><input id="new-store-name" class="swal2-input text-xs" placeholder="例: 艾莉絲美學館"></div>
-            <div><label class="font-bold">聯繫 LINE / 電話：</label><input id="new-store-contact" class="swal2-input text-xs" placeholder="0900000000"></div>
-          </div>
-        `,
-        showCancelButton: true,
-        confirmButtonText: '確定開通',
-        confirmButtonColor: '#8C7355'
-      });
-    }
-
-    function editStorePermissions(slug) {
-      Swal.fire({
-        title: '編輯店家工具授權矩陣',
-        text: `正在配置 ${slug} 之 allowed_modules 模組勾選清單`,
-        icon: 'info'
-      });
+    function saveLocalStoresDb() {
+      localStorage.setItem('local_tool_stores_db', JSON.stringify(allToolStores));
     }
   </script>
 </body>

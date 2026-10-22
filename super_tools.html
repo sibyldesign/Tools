@@ -213,15 +213,26 @@
     async function loadToolsStores() {
       try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?order=created_at.desc`, {
-          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` }
+          headers: { 
+            "apikey": SUPABASE_ANON_KEY, 
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Cache-Control": "no-cache"
+          }
         });
+        
         if (res.ok) {
           const data = await res.json();
-          if (Array.isArray(data) && data.length > 0) {
+          if (Array.isArray(data)) {
+            // 直接以 Supabase 資料為主，確保即時性
             allToolStores = data;
+            saveLocalStoresDb();
           }
+        } else {
+          console.error("載入失敗狀態碼:", res.status);
         }
-      } catch (e) {}
+      } catch (e) {
+        console.warn("載入遠端資料庫異常，使用本地暫存備份:", e);
+      }
 
       renderPendingOrdersZone();
       renderStoresList();

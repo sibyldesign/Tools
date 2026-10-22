@@ -486,6 +486,7 @@
 
     // 寄發開通信件 (包含後台網址與密碼)
     // 真實發送開通信件 (呼叫 GAS 寄出)
+    // 寄發開通信件 (包含後台、各工具前台、教學手冊與忘記密碼說明)
     async function sendWelcomeActivationEmail(id) {
       const s = allToolStores.find(item => item.id === id);
       if (!s.owner_email || !s.owner_email.includes('@')) {
@@ -494,16 +495,32 @@
 
       Swal.fire({
         title: '正在寄發開通信件...',
-        text: '透過雲端郵件伺服器寄發開通指南',
+        text: '整理前後台專屬連結與教學手冊中',
         allowOutsideClick: false,
         didOpen: () => Swal.showLoading()
       });
 
-      const secureAdminUrl = `https://Tools.heysibyl.com/tools-admin.html?token=${s.admin_token || s.id}`;
+      // 專屬防盜後台網址
+      const secureAdminUrl = `https://tools.heysibyl.com/tools-admin.html?token=${s.admin_token || s.id}`;
+
+      // 已購工具名稱文字
       const purchasedNames = (s.purchased_tools || []).map(tKey => {
         const found = TOOLS_CATALOG.find(tc => tc.id === tKey);
         return found ? found.name : tKey;
       }).join('、');
+
+      // 動態組裝已購工具專屬前台網址清單 (供信件呈現)
+      const frontendLinksHtml = (s.purchased_tools || []).map(tKey => {
+        const toolObj = TOOLS_CATALOG.find(tc => tc.id === tKey);
+        if (!toolObj) return '';
+        const toolUrl = `https://tools.heysibyl.com/${toolObj.file}?store_id=${s.id}`;
+        return `
+          <div style="margin-bottom: 6px;">
+            <b>• ${toolObj.name}：</b><br>
+            <a href="${toolUrl}" style="color: #2D6A4F; word-break: break-all; text-decoration: underline;">${toolUrl}</a>
+          </div>
+        `;
+      }).join('');
 
       try {
         await fetch(API_URL, {
@@ -516,18 +533,21 @@
             storeName: s.store_name,
             adminUrl: secureAdminUrl,
             pin: s.admin_pin || '8888',
-            purchasedToolsText: purchasedNames
+            purchasedToolsText: purchasedNames,
+            frontendLinksHtml: frontendLinksHtml
           })
         });
 
         Swal.fire({
           title: '開通信件已成功寄出！',
           html: `
-            <div class="text-left text-xs bg-brand-50 p-3 rounded-2xl border border-brand-200 text-brand-900 space-y-1 font-sans">
+            <div class="text-left text-xs bg-brand-50 p-3.5 rounded-2xl border border-brand-200 text-brand-900 space-y-1.5 font-sans">
               <div>收件信箱：<b>${s.owner_email}</b></div>
               <div>店家名稱：<b>${s.store_name}</b></div>
               <div>後台 PIN 碼：<b>${s.admin_pin || '8888'}</b></div>
-              <div class="pt-1 text-emerald-700 font-bold">✓ 信件已包含專屬防盜後台網址與教學指南！</div>
+              <div class="pt-1 text-emerald-700 font-bold">
+                ✓ 信件已包含：防盜後台入口、各工具前台網址、線上教學手冊及忘記密碼客服指引！
+              </div>
             </div>
           `,
           icon: 'success'

@@ -151,8 +151,9 @@
   </div>
 
   <script>
-    const TOOLS_SUPABASE_URL = "https://tzqpfnrpnfzzubofoqlt.supabase.co";
-const TOOLS_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6cXBmbnJwbmZ6enVib2ZvcWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1ODQ5ODYsImV4cCI6MjEwODE2MDk4Nn0.B-ub7DCpzF3b2gjpTrM9jdW0SLOqRPillZTmoXPuNgk";
+    // 統一常數命名，對齊新專案 tzqpfnrpnfzzubofoqlt
+    const SUPABASE_URL = "https://tzqpfnrpnfzzubofoqlt.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6cXBmbnJwbmZ6enVib2ZvcWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1ODQ5ODYsImV4cCI6MjEwODE2MDk4Nn0.B-ub7DCpzF3b2gjpTrM9jdW0SLOqRPillZTmoXPuNgk";
     
     // GAS 部署網址
     const API_URL = "https://script.google.com/macros/s/AKfycby44GCzrpN8ZpGSTNcVkI3IFMbyO7XhyE_Bf-cKMCTzDBbfYxDVaFD-pVcyc0vTykI-/exec";
@@ -170,24 +171,37 @@ const TOOLS_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOi
       { id: "contract", name: "07. 數位定型化契約", file: "contract.html" }
     ];
 
-    // 分頁設定：10 間一頁
     let toolsCurrentPage = 1;
     const TOOLS_PAGE_SIZE = 10;
     
-    let allToolStores = JSON.parse(localStorage.getItem('local_tool_stores_db') || 'null') || [
-      {
-        id: "T-1001",
-        store_name: "艾莉絲專業美睫沙龍",
-        owner_phone: "0912345678",
-        owner_line_name: "Alice",
-        owner_email: "alice@gmail.com",
-        admin_pin: "8888",
-        purchased_tools: ["slot", "quote", "loyalty"],
-        total_paid: 2870,
-        plan_status: "active",
-        created_at: new Date().toISOString()
+    let allToolStores = JSON.parse(localStorage.getItem('local_tool_stores_db') || '[]');
+
+    async function loadToolsStores() {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?order=created_at.desc&t=${Date.now()}`, {
+          headers: { 
+            "apikey": SUPABASE_ANON_KEY, 
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Cache-Control": "no-cache"
+          }
+        });
+        
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            allToolStores = data;
+            saveLocalStoresDb();
+          }
+        } else {
+          console.warn("載入名冊失敗，狀態碼：", res.status, await res.text());
+        }
+      } catch (e) {
+        console.error("載入名冊異常：", e);
       }
-    ];
+
+      renderPendingOrdersZone();
+      renderStoresList();
+    }
 
     function checkSuperKey() {
       const input = document.getElementById('super-key-input').value.trim();

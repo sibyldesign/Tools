@@ -200,7 +200,7 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // ★ 修正後的 loadToolsStores (移除不合法的 &t 參數，正確透過 Headers 防快取) ★
+    // ★ 修 正後的 loadToolsStores (移除不合法的 &t 參數，正確透過 Headers 防快取) ★
     async function loadToolsStores() {
       try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?order=created_at.desc`, {

@@ -155,8 +155,8 @@
     // 1. 核心 Supabase 連線常數 (對齊新專案 tzqpfnrpnfzzubofoqlt)
     const SUPABASE_URL = "https://tzqpfnrpnfzzubofoqlt.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6cXBmbnJwbmZ6enVib2ZvcWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1ODQ5ODYsImV4cCI6MjEwODE2MDk4Nn0.B-ub7DCpzF3b2gjpTrM9jdW0SLOqRPillZTmoXPuNgk";
-
-    // 防呆別名：徹底防止不同函式呼叫 TOOLS_ 或非 TOOLS_ 名稱時報錯
+    
+    // 同時補上別名防呆（無論後續代碼讀取哪一個名稱都保證存在）
     const TOOLS_SUPABASE_URL = SUPABASE_URL;
     const TOOLS_SUPABASE_ANON_KEY = SUPABASE_ANON_KEY;
     

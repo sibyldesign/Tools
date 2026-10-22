@@ -780,6 +780,19 @@
     const TOOLS_SUPABASE_URL = "https://kwbxskvnfejfguuwzqfr.supabase.co"; // 或你 sibyl-tools 的 URL
     const TOOLS_SUPABASE_ANON_KEY = "sb_publishable_JnpaLZVnGkW9Jr967LeYuQ_d8bXwfnz";
 
+    const TOOLS_SUPABASE_URL = "https://kwbxskvnfejfguuwzqfr.supabase.co";
+    const TOOLS_SUPABASE_ANON_KEY = "sb_publishable_JnpaLZVnGkW9Jr967LeYuQ_d8bXwfnz";
+
+    // 產生專屬 24 碼隨機防盜 Token
+    function generateSecureToken() {
+      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+      let token = 'adm_';
+      for (let i = 0; i < 24; i++) {
+        token += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return token;
+    }
+
     async function submitToolsOrder() {
       const keys = Object.keys(cart);
       if (keys.length === 0) return Swal.fire('請先挑選您想選購的微工具或組合包', '', 'warning');
@@ -795,42 +808,53 @@
 
       const total = Object.values(cart).reduce((sum, item) => sum + item.price, 0);
       const itemsList = Object.values(cart).map(i => i.name).join('、');
-      const purchasedKeys = keys;
+      const secureToken = generateSecureToken();
 
       Swal.fire({
         title: '訂單建立中...',
-        text: '正在將您的選購清單寫入雲端開通名冊',
+        text: '正在將您的選購清單寫入雲端審核名冊',
         allowOutsideClick: false,
         didOpen: () => Swal.showLoading()
       });
 
-      // 1. 同步將訂單寫入 sibyl-tools 的 tool_stores 資料表 (狀態為 pending)
+      // 1. 寫入 Supabase 資料表 (狀態固定為 pending 待開通)
       try {
         const payload = {
           store_name: store,
           owner_phone: phone,
-          owner_line_name: lineName,
+          owner_line_name: lineName || '',
           owner_email: email,
-          contact_info: `${phone} (${lineName || '未填'})`,
-          purchased_tools: purchasedKeys,
+          contact_info: `${phone} (${lineName || 'LINE'})`,
+          purchased_tools: keys,
           total_paid: total,
-          is_active: false, // 待總管在 super_tools 確認收款後開通
+          is_active: false,
           plan_status: 'pending',
           admin_pin: '8888',
-          created_at: new Date().toISOString()
+          admin_token: secureToken
         };
 
-        await fetch(`${TOOLS_SUPABASE_URL}/rest/v1/tool_stores`, {
+        const res = await fetch(`${TOOLS_SUPABASE_URL}/rest/v1/tool_stores`, {
           method: "POST",
           headers: {
             "apikey": TOOLS_SUPABASE_ANON_KEY,
             "Authorization": `Bearer ${TOOLS_SUPABASE_ANON_KEY}`,
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Prefer": "return=representation"
           },
           body: JSON.stringify(payload)
         });
-      } catch (e) {
-        console.warn("離線環境或資料庫預存:", e);
+
+        if (!res.ok) {
+          const errData = await res.text();
+          throw new Error(`資料庫寫入失敗 (${res.status}): ${errData}`);
+        }
+      } catch (err) {
+        console.error("下單存檔錯誤:", err);
+        return Swal.fire({
+          title: '下單紀錄暫時無法存入雲端',
+          html: `<div class="text-left text-xs text-rose-600 font-mono bg-rose-50 p-2.5 rounded-xl border border-rose-200">${err.message}</div><p class="text-xs text-gray-500 mt-2">請聯繫官方客服，我們將手動為您登記建立！</p>`,
+          icon: 'error'
+        });
       }
 
       // 2. 組合官方 LINE 下單訊息
@@ -842,11 +866,11 @@
         `• 電子信箱：${email}\n` +
         `• 訂購項目：${itemsList}\n` +
         `• 結帳總計：NT$ ${total.toLocaleString()} 元\n\n` +
-        `資料已同步送出，請提供付款方式與開通信件！`
+        `資料已同步送至後台，請提供付款方式與開通信件！`
       );
 
       Swal.fire({
-        title: '訂單已成功送出！',
+        title: '訂單已送達總管審核室！',
         html: `
           <div class="text-left text-xs bg-brand-50 p-3.5 rounded-2xl border border-brand-200 space-y-1.5 font-sans">
             <div>門市名稱：<b>${store}</b></div>
@@ -854,7 +878,7 @@
             <div>接收開通信箱：<b>${email}</b></div>
             <div>訂購內容：<b>${itemsList}</b></div>
             <div>應付金額：<b class="text-brand-700 font-mono text-sm">NT$ ${total.toLocaleString()}</b></div>
-            <div class="text-emerald-700 font-bold pt-1">✓ 訂單已送達總管審核室，點擊下方立即前往 LINE 完成付款與開通！</div>
+            <div class="text-emerald-700 font-bold pt-1">✓ 資料已成功建檔，點擊下方前往 LINE 由專人確認款項與開通！</div>
           </div>
         `,
         confirmButtonText: '前往官方 LINE 完成付款',

@@ -133,7 +133,7 @@
 
   </main>
 
-  <!-- 底部固定滑動式導覽列 (徹底取代側欄) -->
+  <!-- 底部固定導覽列 -->
   <div class="fixed bottom-0 left-0 right-0 z-40 flex justify-center bg-white/95 backdrop-blur-md border-t border-brand-200 shadow-xl pb-[env(safe-area-inset-bottom,12px)] px-2">
     <div class="max-w-4xl w-full flex items-center min-h-[64px]">
       <nav class="flex-1 flex justify-around items-center" id="super-bottom-nav">
@@ -154,7 +154,7 @@
     const SUPABASE_URL = "https://kwbxskvnfejfguuwzqfr.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_JnpaLZVnGkW9Jr967LeYuQ_d8bXwfnz";
     
-    // ★ 在這裡填入你的 GAS 部署網址 ★
+    // GAS 部署網址
     const API_URL = "https://script.google.com/macros/s/AKfycby44GCzrpN8ZpGSTNcVkI3IFMbyO7XhyE_Bf-cKMCTzDBbfYxDVaFD-pVcyc0vTykI-/exec";
     
     const SUPER_PIN = "8888";
@@ -211,41 +211,36 @@
     }
 
     async function loadToolsStores() {
-  try {
-    // 加上 timestamp 參數，破除瀏覽器快取
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?order=created_at.desc&t=${Date.now()}`, {
-      headers: { 
-        "apikey": SUPABASE_ANON_KEY, 
-        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-        "Cache-Control": "no-cache"
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?order=created_at.desc&t=${Date.now()}`, {
+          headers: { 
+            "apikey": SUPABASE_ANON_KEY, 
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Cache-Control": "no-cache"
+          }
+        });
+        
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            allToolStores = data;
+            saveLocalStoresDb();
+          }
+        }
+      } catch (e) {
+        console.error("載入發生異常：", e);
       }
-    });
-    
-    if (res.ok) {
-      const data = await res.json();
-      console.log("從 Supabase 成功撈回的最新店家名單：", data);
-      if (Array.isArray(data)) {
-        allToolStores = data; // 直接覆蓋
-      }
-    } else {
-      console.error("Supabase 讀取失敗，狀態碼：", res.status, await res.text());
-    }
-  } catch (e) {
-    console.error("載入發生異常：", e);
-  }
 
-  // 重新渲染畫面
-  renderPendingOrdersZone();
-  renderStoresList();
-}
-    // 換頁函式
+      renderPendingOrdersZone();
+      renderStoresList();
+    }
+
     function changeToolsPage(targetPage) {
       toolsCurrentPage = targetPage;
       renderStoresList();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // 渲染分頁按鈕 (上一頁、數字按鈕、下一頁)
     function renderToolsPagination(totalPages) {
       const container = document.getElementById('tools-page-buttons-container');
       if (!container) return;
@@ -281,50 +276,57 @@
       container.innerHTML = html;
     }
     
-    // 渲染待對帳與開通訂單名單 (來自前台下單)
+    // 渲染待對帳與開通訂單名單 (來自前台下單 pending)
     function renderPendingOrdersZone() {
       const container = document.getElementById('pending-orders-container');
       if (!container) return;
-      
+
       const pendings = allToolStores.filter(s => s.plan_status === 'pending' || s.is_active === false);
+
       if (pendings.length === 0) {
         container.innerHTML = '';
         return;
       }
 
       container.innerHTML = `
-        <div class="bg-amber-50 border border-amber-300 p-4 rounded-3xl space-y-2 mb-4 text-xs">
+        <div class="bg-amber-50 border-2 border-amber-300 p-5 rounded-3xl space-y-3 mb-6 shadow-sm">
           <div class="flex justify-between items-center font-bold text-amber-950">
-            <span class="flex items-center gap-1.5">
+            <span class="flex items-center gap-2 text-sm">
               <i class="fa-solid fa-bell text-amber-600 animate-bounce"></i>
-              <span>前台最新下單待開通名單 (共 ${pendings.length} 筆新訂單)</span>
+              <span>前台最新下單待開通名單 (共 ${pendings.length} 筆待核對)</span>
             </span>
           </div>
-          <div class="divide-y divide-amber-200/60">
-            ${pendings.map(s => {
-              const email = s.owner_email || s.contact_info || '未填';
-              const phone = s.owner_phone || s.contact_info || '';
-              return `
-                <div class="py-2.5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                  <div>
-                    <div class="font-bold text-brand-900">${s.store_name} ｜ ${phone}</div>
-                    <div class="text-[11px] text-gray-500">信箱：${email} ｜ 訂單金額：NT$ ${Number(s.total_paid || 0).toLocaleString()}</div>
-                    <div class="text-[10.5px] text-brand-600 font-bold mt-0.5">選購項目：${(s.purchased_tools || []).join('、')}</div>
+          <div class="divide-y divide-amber-200/80">
+            ${pendings.map(s => `
+              <div class="py-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                <div class="space-y-1 text-xs">
+                  <div class="font-bold text-base text-brand-900">${s.store_name}</div>
+                  <div class="text-gray-600">
+                    手機：<b>${s.owner_phone || s.contact_info || '未填'}</b> ｜ 
+                    信箱：<b>${s.owner_email || '未填'}</b> ｜ 
+                    LINE：<b>${s.owner_line_name || '同帳號'}</b>
                   </div>
-                  <button type="button" onclick="activateStoreById('${s.id}')" class="px-3.5 py-1.5 bg-[#8C7355] hover:bg-[#7A6246] text-white rounded-xl font-bold shadow-xs transition shrink-0">
-                    一鍵確認收款並開通
-                  </button>
+                  <div class="text-brand-700 font-bold">
+                    選購項目：${(s.purchased_tools || []).join('、')} ｜ 
+                    應收金額：<span class="font-mono text-sm text-rose-700">NT$ ${Number(s.total_paid || 0).toLocaleString()}</span>
+                  </div>
                 </div>
-              `;
-            }).join('')}
+                <button type="button" onclick="activateStoreById('${s.id}')" class="px-4 py-2 bg-[#8C7355] hover:bg-[#7A6246] text-white text-xs font-bold rounded-xl transition shadow-xs flex items-center gap-1.5 shrink-0">
+                  <i class="fa-solid fa-check"></i>
+                  <span>確認收款並一鍵開通</span>
+                </button>
+              </div>
+            `).join('')}
           </div>
         </div>
       `;
     }
 
-    // 渲染店家名冊卡片 (10間一頁分頁 + 亂數Token後台 + 各工具專屬前台)
+    // 渲染已開通店家名冊卡片
     function renderStoresList() {
       const container = document.getElementById('stores-list-wrapper');
+      if (!container) return;
+
       const activeStores = allToolStores.filter(s => s.plan_status !== 'pending');
       const totalStoresBadge = document.getElementById('total-stores-badge');
       if (totalStoresBadge) totalStoresBadge.innerText = `共 ${activeStores.length} 家營運店家`;
@@ -337,7 +339,6 @@
         return;
       }
 
-      // ★ 10 間一頁分頁運算
       const totalItems = activeStores.length;
       const totalPages = Math.ceil(totalItems / TOOLS_PAGE_SIZE) || 1;
       if (toolsCurrentPage > totalPages) toolsCurrentPage = totalPages;
@@ -346,33 +347,31 @@
       const endIndex = Math.min(startIndex + TOOLS_PAGE_SIZE, totalItems);
       const pagedStores = activeStores.slice(startIndex, endIndex);
 
-      // 更新分頁資訊說明
       const pageInfo = document.getElementById('tools-page-info-text');
       if (pageInfo) {
         pageInfo.innerText = `顯示第 ${startIndex + 1} - ${endIndex} 間（共 ${totalItems} 間店家）`;
       }
       renderToolsPagination(totalPages);
 
-      // 渲染切片後的 10 間卡片
       container.innerHTML = pagedStores.map(s => {
         const isLocked = (s.plan_status === 'locked');
         const tools = Array.isArray(s.purchased_tools) ? s.purchased_tools : [];
         const dateStr = s.created_at ? s.created_at.replace('T', ' ').substring(0, 16) : '未知';
+        const phone = s.owner_phone || s.contact_info || '未填手機';
+        const email = s.owner_email || '未填信箱';
 
-        // 確保每間店都有專屬亂數防盜 Token
         if (!s.admin_token) {
           s.admin_token = generateSecureToken();
           saveLocalStoresDb();
         }
-        const secureAdminUrl = `https://Tools.heysibyl.com/tools-admin.html?token=${s.admin_token}`;
+        const secureAdminUrl = `https://tools.heysibyl.com/tools-admin.html?token=${s.admin_token}`;
 
-        // 動態生成該店已購微工具的前台專屬網址
         const toolLinksHtml = tools.map(tKey => {
           const toolObj = TOOLS_CATALOG.find(tc => tc.id === tKey);
           if (!toolObj) return '';
-          const toolUrl = `https://Tools.heysibyl.com/${toolObj.file}?store_id=${s.id}`;
+          const toolUrl = `https://tools.heysibyl.com/${toolObj.file}?store_id=${s.id}`;
           return `
-            <div class="flex items-center justify-between p-2 bg-white rounded-xl border border-brand-200 text-[11px]">
+            <div class="flex items-center justify-between p-2 bg-white rounded-xl border border-brand-200 text-[11px] mb-1.5">
               <div class="flex items-center gap-1.5 truncate">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
                 <span class="font-bold text-brand-900 shrink-0">${toolObj.name}：</span>
@@ -387,11 +386,11 @@
         }).join('');
 
         const lockBtnHtml = isLocked
-          ? `<button type="button" onclick="toggleStoreLock('${s.id}', false)" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition flex items-center gap-1 shadow-xs"><i class="fa-solid fa-lock-open text-[10px]"></i> 解除鎖定</button>`
-          : `<button type="button" onclick="toggleStoreLock('${s.id}', true)" class="px-2.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold transition flex items-center gap-1 shadow-xs"><i class="fa-solid fa-lock text-[10px]"></i> 鎖定前後台</button>`;
+          ? `<button type="button" onclick="toggleStoreLock('${s.id}', false)" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition flex items-center gap-1 shadow-xs text-xs"><i class="fa-solid fa-lock-open text-[10px]"></i> 解除鎖定</button>`
+          : `<button type="button" onclick="toggleStoreLock('${s.id}', true)" class="px-2.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold transition flex items-center gap-1 shadow-xs text-xs"><i class="fa-solid fa-lock text-[10px]"></i> 鎖定前後台</button>`;
 
         return `
-          <div class="p-4 bg-brand-50/70 rounded-3xl border border-brand-200 space-y-3 shadow-xs">
+          <div class="p-4 bg-brand-50/70 rounded-3xl border border-brand-200 space-y-3 shadow-xs mb-3">
             <div class="flex justify-between items-start">
               <div>
                 <div class="font-bold text-sm text-brand-900 flex items-center gap-2">
@@ -406,7 +405,7 @@
               </div>
             </div>
 
-            <!-- 防盜亂數後台管理入口 -->
+            <!-- 防盜專屬後台入口 -->
             <div class="p-3 bg-amber-50 rounded-2xl border border-amber-200 space-y-1.5 text-xs">
               <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center gap-1.5 truncate">
@@ -432,7 +431,7 @@
             <!-- 可修改之詳細資料 -->
             <div class="p-3 bg-white rounded-2xl border border-brand-100 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
               <div class="flex items-center justify-between">
-                <div><b>負責人手機：</b><span class="font-mono">${s.owner_phone || '未填'}</span></div>
+                <div><b>負責人手機：</b><span class="font-mono">${phone}</span></div>
                 <button type="button" onclick="editStoreFieldPrompt('${s.id}', 'owner_phone', '手機號碼', '${s.owner_phone || ''}')" class="text-blue-600 underline text-[10px]">修改</button>
               </div>
 
@@ -442,7 +441,7 @@
               </div>
 
               <div class="flex items-center justify-between">
-                <div><b>電子信箱：</b><span class="font-mono">${s.owner_email || '未填'}</span></div>
+                <div><b>電子信箱：</b><span class="font-mono">${email}</span></div>
                 <button type="button" onclick="editStoreFieldPrompt('${s.id}', 'owner_email', '電子信箱', '${s.owner_email || ''}')" class="text-blue-600 underline text-[10px]">修改</button>
               </div>
 
@@ -472,8 +471,8 @@
         `;
       }).join('');
     }
-    // 一鍵開通待審核訂單
-    // 3. 一鍵開通店家
+
+    // 一鍵開通店家
     async function activateStoreById(id) {
       const s = allToolStores.find(item => item.id === id);
       if (!s) return;
@@ -517,7 +516,7 @@
       });
     }
 
-    // 4. 手動寄發正式開通信件 (包含專屬防盜後台入口與所有前台網址)
+    // 手動寄發正式開通信件
     async function sendWelcomeActivationEmail(id) {
       const s = allToolStores.find(item => item.id === id);
       if (!s) return;
@@ -545,7 +544,6 @@
         return found ? found.name : tKey;
       }).join('、');
 
-      // 組裝專屬前台網址
       const frontendLinksHtml = (s.purchased_tools || []).map(tKey => {
         const toolObj = TOOLS_CATALOG.find(tc => tc.id === tKey);
         if (!toolObj) return '';
@@ -662,7 +660,7 @@
       renderStoresList();
     }
 
-    // 快速修改店家欄位 (店名、手機、LINE、信箱、PIN)
+    // 快速修改店家欄位
     async function editStoreFieldPrompt(id, fieldKey, fieldTitle, currentVal) {
       const s = allToolStores.find(item => item.id === id);
       const { value: newVal } = await Swal.fire({
@@ -782,7 +780,7 @@
       });
     }
 
-    // 自動生成 24~32 碼防盜亂數 Token
+    // 自動生成 24 碼防盜亂數 Token
     function generateSecureToken() {
       const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
       let token = 'adm_';
@@ -795,6 +793,7 @@
     // 獨立微工具維護矩陣渲染
     function renderMaintenanceMatrix() {
       const grid = document.getElementById('maintenance-matrix-grid');
+      if (!grid) return;
       grid.innerHTML = TOOLS_CATALOG.map(t => `
         <div class="p-3 bg-brand-50 rounded-2xl border border-brand-200 flex justify-between items-center">
           <div>

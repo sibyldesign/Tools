@@ -173,35 +173,7 @@
 
     let toolsCurrentPage = 1;
     const TOOLS_PAGE_SIZE = 10;
-    
     let allToolStores = JSON.parse(localStorage.getItem('local_tool_stores_db') || '[]');
-
-    async function loadToolsStores() {
-      try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?order=created_at.desc&t=${Date.now()}`, {
-          headers: { 
-            "apikey": SUPABASE_ANON_KEY, 
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-            "Cache-Control": "no-cache"
-          }
-        });
-        
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data)) {
-            allToolStores = data;
-            saveLocalStoresDb();
-          }
-        } else {
-          console.warn("載入名冊失敗，狀態碼：", res.status, await res.text());
-        }
-      } catch (e) {
-        console.error("載入名冊異常：", e);
-      }
-
-      renderPendingOrdersZone();
-      renderStoresList();
-    }
 
     function checkSuperKey() {
       const input = document.getElementById('super-key-input').value.trim();
@@ -224,13 +196,15 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    // ★ 修正後的 loadToolsStores (移除不合法的 &t 參數，正確透過 Headers 防快取) ★
     async function loadToolsStores() {
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?order=created_at.desc&t=${Date.now()}`, {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?order=created_at.desc`, {
           headers: { 
             "apikey": SUPABASE_ANON_KEY, 
             "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-            "Cache-Control": "no-cache"
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache"
           }
         });
         
@@ -314,7 +288,9 @@
             </span>
           </div>
           <div class="divide-y divide-amber-200/80">
-            ${pendings.map(s => `
+            ${pendings.map(s => {
+              const tools = Array.isArray(s.purchased_tools) ? s.purchased_tools.join('、') : (s.purchased_tools || '無');
+              return `
               <div class="py-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
                 <div class="space-y-1 text-xs">
                   <div class="font-bold text-base text-brand-900">${s.store_name}</div>
@@ -324,7 +300,7 @@
                     LINE：<b>${s.owner_line_name || '同帳號'}</b>
                   </div>
                   <div class="text-brand-700 font-bold">
-                    選購項目：${(s.purchased_tools || []).join('、')} ｜ 
+                    選購項目：${tools} ｜ 
                     應收金額：<span class="font-mono text-sm text-rose-700">NT$ ${Number(s.total_paid || 0).toLocaleString()}</span>
                   </div>
                 </div>
@@ -333,7 +309,7 @@
                   <span>確認收款並一鍵開通</span>
                 </button>
               </div>
-            `).join('')}
+            `;}).join('')}
           </div>
         </div>
       `;
@@ -344,7 +320,7 @@
       const container = document.getElementById('stores-list-wrapper');
       if (!container) return;
 
-      const activeStores = allToolStores.filter(s => s.plan_status !== 'pending');
+      const activeStores = allToolStores.filter(s => s.plan_status !== 'pending' && s.is_active !== false);
       const totalStoresBadge = document.getElementById('total-stores-badge');
       if (totalStoresBadge) totalStoresBadge.innerText = `共 ${activeStores.length} 家營運店家`;
 
@@ -797,7 +773,6 @@
       });
     }
 
-    // 自動生成 24 碼防盜亂數 Token
     function generateSecureToken() {
       const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
       let token = 'adm_';
@@ -807,7 +782,6 @@
       return token;
     }
 
-    // 獨立微工具維護矩陣渲染
     function renderMaintenanceMatrix() {
       const grid = document.getElementById('maintenance-matrix-grid');
       if (!grid) return;

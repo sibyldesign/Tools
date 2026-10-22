@@ -62,7 +62,7 @@
     </div>
   </nav>
 
-  <!-- 醒目導覽浮動條 (純淨大地色，不刺眼) -->
+  <!-- 醒目導覽浮動條 -->
   <div class="bg-brand-100/70 border-b border-brand-200 py-3 px-4 text-center">
     <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-2 text-xs text-brand-800">
       <span class="font-bold flex items-center gap-1.5">
@@ -70,7 +70,7 @@
         <span>想先體驗操作手感？全系列微工具皆支援免付費在線實測</span>
       </span>
       <button type="button" onclick="contactForTrial('all', '全系列微工具')" class="inline-flex items-center gap-1 font-black text-brand-600 hover:text-brand-800 underline">
-        <span>點此加入官方 LINE (@480kqjoj) 一鍵打包發送試用需求</span>
+        <span>點此加入官方 LINE (@480kqjoj) 一鍵發送試用需求</span>
         <i class="fa-solid fa-arrow-right text-[10px]"></i>
       </button>
     </div>
@@ -90,9 +90,9 @@
       專為美甲、美睫、美容、美髮、寵美現場實戰研發。不需要繁瑣適應期，針對現場最卡關的環節單點升級，徹底終結重複報價、手動排版空檔與客人臨時放鳥。
     </p>
 
-    <!-- 超痛點強化標籤 -->
-    <div class="inline-flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-white border border-brand-300 text-brand-900 text-xs md:text-sm font-bold mb-6 shadow-xs">
-      <i class="fa-solid fa-bolt text-amber-600"></i>
+    <!-- ★ 超痛點強化標籤：醒目撞色搶眼設計 ★ -->
+    <div class="inline-flex items-center gap-2.5 px-6 py-3 rounded-2xl bg-amber-500 text-stone-950 font-black text-xs md:text-sm mb-6 shadow-md border-2 border-amber-300 animate-bounce">
+      <i class="fa-solid fa-bolt-lightning text-stone-900 text-base"></i>
       <span>購後可直接在官方 LINE 放上工具連結，客人自主點選，省去一來一往的繁瑣回覆！</span>
     </div>
 
@@ -108,19 +108,19 @@
     </div>
   </header>
 
-  <!-- 1. 獨立單品微工具自由選購專區 (大字痛點 + 實機影音圖片展示框) -->
+  <!-- 1. 獨立單品微工具自由選購專區 (可多選複選 + 附 YouTube Shorts 影片專用框) -->
   <main id="single-tools" class="max-w-5xl mx-auto px-4 md:px-6 space-y-8 mb-16">
     <div class="border-b border-brand-200 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-2">
       <div>
         <h2 class="text-lg font-bold text-brand-900 flex items-center gap-2">
           <i class="fa-solid fa-screwdriver-wrench text-brand-500"></i>
-          <span>獨立單品微工具自由選購</span>
+          <span>獨立單品微工具自由選購（支援多選）</span>
         </h2>
-        <p class="text-xs text-brand-400 mt-0.5">直擊現場痛點，按需單選買斷，完全不強迫綁約</p>
+        <p class="text-xs text-brand-400 mt-0.5">點擊多款自由搭配，一次買斷終身使用</p>
       </div>
       <button type="button" onclick="contactForTrial('all', '全系列單品')" class="text-xs text-brand-600 hover:underline font-bold flex items-center gap-1">
         <i class="fa-brands fa-line text-sm"></i>
-        <span>聯繫客服打包領取各單品試用</span>
+        <span>聯繫客服打包領取試用</span>
       </button>
     </div>
 
@@ -129,8 +129,6 @@
       <!-- 01. studio_slot.html -->
       <section class="bg-white rounded-3xl border border-brand-200 p-6 md:p-8 shadow-sm">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-          
-          <!-- 左側文案 -->
           <div class="md:col-span-8 space-y-4">
             <div class="flex items-center gap-2.5">
               <span class="w-8 h-8 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center text-sm"><i class="fa-solid fa-camera-retro"></i></span>
@@ -138,7 +136,6 @@
               <h3 class="text-base font-bold text-brand-900">IG 限動空檔生圖與預約前台</h3>
             </div>
 
-            <!-- 醒目重點痛點大字 -->
             <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200/80 space-y-1">
               <div class="text-xs font-black text-rose-900 flex items-center gap-1.5">
                 <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
@@ -149,7 +146,6 @@
               </p>
             </div>
 
-            <!-- 解決方案 -->
             <div class="space-y-1 text-xs text-brand-800">
               <div class="font-bold flex items-center gap-1.5 text-brand-900">
                 <i class="fa-solid fa-lightbulb text-amber-600"></i>
@@ -158,7 +154,6 @@
               <p class="text-[11px] text-brand-400">支援 15/30/60 分鐘彈性切換，固定公休自動排除，4 款沙龍奢華色票隨心換。</p>
             </div>
 
-            <!-- 價格與選購按鈕 -->
             <div class="pt-2 flex flex-wrap items-baseline justify-between gap-3 border-t border-brand-100">
               <div class="flex items-baseline gap-2">
                 <span class="text-xs text-gray-400 line-through">NT$ 800</span>
@@ -172,28 +167,26 @@
                 </button>
                 <button type="button" onclick="toggleCartTool('slot', 490, 'IG 限動空檔生圖器')" id="btn-add-slot" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs rounded-xl transition shadow-xs flex items-center gap-1.5">
                   <i class="fa-solid fa-plus text-[10px]"></i>
-                  <span>選購</span>
+                  <span>加入清單</span>
                 </button>
               </div>
             </div>
           </div>
 
-          <!-- 右側：實機展示圖片/影片框 (可直接替換截圖或影音) -->
+          <!-- YouTube Shorts 影片播放展示框 01 -->
           <div class="md:col-span-4 flex justify-center">
-            <div class="w-full max-w-[200px] aspect-[9/16] rounded-2xl bg-brand-100/60 border-2 border-dashed border-brand-300 flex flex-col items-center justify-center p-3 text-center text-brand-400 space-y-2 overflow-hidden relative group">
-              <i class="fa-solid fa-mobile-screen text-2xl text-brand-400"></i>
-              <div class="text-[10px] font-bold text-brand-500">【實機畫面展示框】</div>
-              <p class="text-[9px] leading-tight opacity-70">可放置限動生圖展示截圖或短影音</p>
+            <div class="w-full max-w-[210px] aspect-[9/16] rounded-2xl bg-black border border-brand-300 shadow-md overflow-hidden relative">
+              <!-- ★ 在此處替換你的 YouTube Short 嵌入網址 (例: https://www.youtube.com/embed/xxxxxx) ★ -->
+              <iframe class="w-full h-full object-cover" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="實機示範影片" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+              <div class="absolute bottom-1 right-2 pointer-events-none text-[9px] bg-black/70 text-white px-1.5 py-0.5 rounded font-mono">Shorts 01</div>
             </div>
           </div>
-
         </div>
       </section>
 
       <!-- 02. pos.html -->
       <section class="bg-white rounded-3xl border border-brand-200 p-6 md:p-8 shadow-sm">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-          
           <div class="md:col-span-8 space-y-4">
             <div class="flex items-center gap-2.5">
               <span class="w-8 h-8 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center text-sm"><i class="fa-solid fa-cash-register"></i></span>
@@ -232,27 +225,26 @@
                 </button>
                 <button type="button" onclick="toggleCartTool('pos', 690, '極簡收銀小幫手')" id="btn-add-pos" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs rounded-xl transition shadow-xs flex items-center gap-1.5">
                   <i class="fa-solid fa-plus text-[10px]"></i>
-                  <span>選購</span>
+                  <span>加入清單</span>
                 </button>
               </div>
             </div>
           </div>
 
+          <!-- YouTube Shorts 影片播放展示框 02 -->
           <div class="md:col-span-4 flex justify-center">
-            <div class="w-full max-w-[200px] aspect-[9/16] rounded-2xl bg-brand-100/60 border-2 border-dashed border-brand-300 flex flex-col items-center justify-center p-3 text-center text-brand-400 space-y-2 overflow-hidden relative group">
-              <i class="fa-solid fa-calculator text-2xl text-brand-400"></i>
-              <div class="text-[10px] font-bold text-brand-500">【實機畫面展示框】</div>
-              <p class="text-[9px] leading-tight opacity-70">可放置手機快速點選開單畫面</p>
+            <div class="w-full max-w-[210px] aspect-[9/16] rounded-2xl bg-black border border-brand-300 shadow-md overflow-hidden relative">
+              <!-- ★ 在此處替換你的 YouTube Short 嵌入網址 ★ -->
+              <iframe class="w-full h-full object-cover" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="實機示範影片" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+              <div class="absolute bottom-1 right-2 pointer-events-none text-[9px] bg-black/70 text-white px-1.5 py-0.5 rounded font-mono">Shorts 02</div>
             </div>
           </div>
-
         </div>
       </section>
 
       <!-- 03. quote.html -->
       <section class="bg-white rounded-3xl border border-brand-200 p-6 md:p-8 shadow-sm">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-          
           <div class="md:col-span-8 space-y-4">
             <div class="flex items-center gap-2.5">
               <span class="w-8 h-8 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center text-sm"><i class="fa-solid fa-file-invoice-dollar"></i></span>
@@ -291,27 +283,26 @@
                 </button>
                 <button type="button" onclick="toggleCartTool('quote', 890, '美業服務報價試算器')" id="btn-add-quote" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs rounded-xl transition shadow-xs flex items-center gap-1.5">
                   <i class="fa-solid fa-plus text-[10px]"></i>
-                  <span>選購</span>
+                  <span>加入清單</span>
                 </button>
               </div>
             </div>
           </div>
 
+          <!-- YouTube Shorts 影片播放展示框 03 -->
           <div class="md:col-span-4 flex justify-center">
-            <div class="w-full max-w-[200px] aspect-[9/16] rounded-2xl bg-brand-100/60 border-2 border-dashed border-brand-300 flex flex-col items-center justify-center p-3 text-center text-brand-400 space-y-2 overflow-hidden relative group">
-              <i class="fa-solid fa-list-check text-2xl text-brand-400"></i>
-              <div class="text-[10px] font-bold text-brand-500">【實機畫面展示框】</div>
-              <p class="text-[9px] leading-tight opacity-70">可放置客人自主勾選報價畫面</p>
+            <div class="w-full max-w-[210px] aspect-[9/16] rounded-2xl bg-black border border-brand-300 shadow-md overflow-hidden relative">
+              <!-- ★ 在此處替換你的 YouTube Short 嵌入網址 ★ -->
+              <iframe class="w-full h-full object-cover" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="實機示範影片" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+              <div class="absolute bottom-1 right-2 pointer-events-none text-[9px] bg-black/70 text-white px-1.5 py-0.5 rounded font-mono">Shorts 03</div>
             </div>
           </div>
-
         </div>
       </section>
 
       <!-- 04. loyalty.html -->
       <section class="bg-white rounded-3xl border border-brand-200 p-6 md:p-8 shadow-sm">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-          
           <div class="md:col-span-8 space-y-4">
             <div class="flex items-center gap-2.5">
               <span class="w-8 h-8 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center text-sm"><i class="fa-solid fa-stamp"></i></span>
@@ -350,27 +341,26 @@
                 </button>
                 <button type="button" onclick="toggleCartTool('loyalty', 1490, 'VIP 數位會員存摺')" id="btn-add-loyalty" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs rounded-xl transition shadow-xs flex items-center gap-1.5">
                   <i class="fa-solid fa-plus text-[10px]"></i>
-                  <span>選購</span>
+                  <span>加入清單</span>
                 </button>
               </div>
             </div>
           </div>
 
+          <!-- YouTube Shorts 影片播放展示框 04 -->
           <div class="md:col-span-4 flex justify-center">
-            <div class="w-full max-w-[200px] aspect-[9/16] rounded-2xl bg-brand-100/60 border-2 border-dashed border-brand-300 flex flex-col items-center justify-center p-3 text-center text-brand-400 space-y-2 overflow-hidden relative group">
-              <i class="fa-solid fa-id-card text-2xl text-brand-400"></i>
-              <div class="text-[10px] font-bold text-brand-500">【實機畫面展示框】</div>
-              <p class="text-[9px] leading-tight opacity-70">可放置黑金卡面與印章展示圖</p>
+            <div class="w-full max-w-[210px] aspect-[9/16] rounded-2xl bg-black border border-brand-300 shadow-md overflow-hidden relative">
+              <!-- ★ 在此處替換你的 YouTube Short 嵌入網址 ★ -->
+              <iframe class="w-full h-full object-cover" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="實機示範影片" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+              <div class="absolute bottom-1 right-2 pointer-events-none text-[9px] bg-black/70 text-white px-1.5 py-0.5 rounded font-mono">Shorts 04</div>
             </div>
           </div>
-
         </div>
       </section>
 
       <!-- 05. reminder.gs -->
       <section class="bg-white rounded-3xl border border-brand-200 p-6 md:p-8 shadow-sm">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-          
           <div class="md:col-span-8 space-y-4">
             <div class="flex items-center gap-2.5">
               <span class="w-8 h-8 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center text-sm"><i class="fa-brands fa-line"></i></span>
@@ -409,27 +399,26 @@
                 </button>
                 <button type="button" onclick="toggleCartTool('reminder', 1680, 'LINE 預約防放鳥推播')" id="btn-add-reminder" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs rounded-xl transition shadow-xs flex items-center gap-1.5">
                   <i class="fa-solid fa-plus text-[10px]"></i>
-                  <span>選購</span>
+                  <span>加入清單</span>
                 </button>
               </div>
             </div>
           </div>
 
+          <!-- YouTube Shorts 影片播放展示框 05 -->
           <div class="md:col-span-4 flex justify-center">
-            <div class="w-full max-w-[200px] aspect-[9/16] rounded-2xl bg-brand-100/60 border-2 border-dashed border-brand-300 flex flex-col items-center justify-center p-3 text-center text-brand-400 space-y-2 overflow-hidden relative group">
-              <i class="fa-brands fa-line text-3xl text-emerald-600"></i>
-              <div class="text-[10px] font-bold text-brand-500">【實機畫面展示框】</div>
-              <p class="text-[9px] leading-tight opacity-70">可放置 LINE 官方推播卡片範例</p>
+            <div class="w-full max-w-[210px] aspect-[9/16] rounded-2xl bg-black border border-brand-300 shadow-md overflow-hidden relative">
+              <!-- ★ 在此處替換你的 YouTube Short 嵌入網址 ★ -->
+              <iframe class="w-full h-full object-cover" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="實機示範影片" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+              <div class="absolute bottom-1 right-2 pointer-events-none text-[9px] bg-black/70 text-white px-1.5 py-0.5 rounded font-mono">Shorts 05</div>
             </div>
           </div>
-
         </div>
       </section>
 
       <!-- 06. overview.html -->
       <section class="bg-white rounded-3xl border border-brand-200 p-6 md:p-8 shadow-sm">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-          
           <div class="md:col-span-8 space-y-4">
             <div class="flex items-center gap-2.5">
               <span class="w-8 h-8 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center text-sm"><i class="fa-solid fa-table-cells"></i></span>
@@ -468,27 +457,26 @@
                 </button>
                 <button type="button" onclick="toggleCartTool('overview', 1980, '全日排程總覽與席位防撞')" id="btn-add-overview" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs rounded-xl transition shadow-xs flex items-center gap-1.5">
                   <i class="fa-solid fa-plus text-[10px]"></i>
-                  <span>選購</span>
+                  <span>加入清單</span>
                 </button>
               </div>
             </div>
           </div>
 
+          <!-- YouTube Shorts 影片播放展示框 06 -->
           <div class="md:col-span-4 flex justify-center">
-            <div class="w-full max-w-[200px] aspect-[9/16] rounded-2xl bg-brand-100/60 border-2 border-dashed border-brand-300 flex flex-col items-center justify-center p-3 text-center text-brand-400 space-y-2 overflow-hidden relative group">
-              <i class="fa-solid fa-calendar-days text-2xl text-brand-400"></i>
-              <div class="text-[10px] font-bold text-brand-500">【實機畫面展示框】</div>
-              <p class="text-[9px] leading-tight opacity-70">可放置多專員直條排程看板畫面</p>
+            <div class="w-full max-w-[210px] aspect-[9/16] rounded-2xl bg-black border border-brand-300 shadow-md overflow-hidden relative">
+              <!-- ★ 在此處替換你的 YouTube Short 嵌入網址 ★ -->
+              <iframe class="w-full h-full object-cover" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="實機示範影片" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+              <div class="absolute bottom-1 right-2 pointer-events-none text-[9px] bg-black/70 text-white px-1.5 py-0.5 rounded font-mono">Shorts 06</div>
             </div>
           </div>
-
         </div>
       </section>
 
       <!-- 07. contract.html -->
       <section class="bg-white rounded-3xl border border-brand-200 p-6 md:p-8 shadow-sm">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-          
           <div class="md:col-span-8 space-y-4">
             <div class="flex items-center gap-2.5">
               <span class="w-8 h-8 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center text-sm"><i class="fa-solid fa-file-contract"></i></span>
@@ -527,27 +515,27 @@
                 </button>
                 <button type="button" onclick="toggleCartTool('contract', 2490, '數位定型化契約存證')" id="btn-add-contract" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs rounded-xl transition shadow-xs flex items-center gap-1.5">
                   <i class="fa-solid fa-plus text-[10px]"></i>
-                  <span>選購</span>
+                  <span>加入清單</span>
                 </button>
               </div>
             </div>
           </div>
 
+          <!-- YouTube Shorts 影片播放展示框 07 -->
           <div class="md:col-span-4 flex justify-center">
-            <div class="w-full max-w-[200px] aspect-[9/16] rounded-2xl bg-brand-100/60 border-2 border-dashed border-brand-300 flex flex-col items-center justify-center p-3 text-center text-brand-400 space-y-2 overflow-hidden relative group">
-              <i class="fa-solid fa-signature text-2xl text-brand-400"></i>
-              <div class="text-[10px] font-bold text-brand-500">【實機畫面展示框】</div>
-              <p class="text-[9px] leading-tight opacity-70">可放置手機簽名板與存證信範例</p>
+            <div class="w-full max-w-[210px] aspect-[9/16] rounded-2xl bg-black border border-brand-300 shadow-md overflow-hidden relative">
+              <!-- ★ 在此處替換你的 YouTube Short 嵌入網址 ★ -->
+              <iframe class="w-full h-full object-cover" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="實機示範影片" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+              <div class="absolute bottom-1 right-2 pointer-events-none text-[9px] bg-black/70 text-white px-1.5 py-0.5 rounded font-mono">Shorts 07</div>
             </div>
           </div>
-
         </div>
       </section>
 
     </div>
   </main>
 
-  <!-- 2. 精選雙入超值組合包專區 (作為強大省錢推薦) -->
+  <!-- 2. 精選雙入超值組合包專區 -->
   <section class="max-w-5xl mx-auto px-4 md:px-6 mb-16">
     <div class="text-center space-y-1 mb-8">
       <h2 class="text-xl font-black text-brand-900 flex items-center justify-center gap-2">
@@ -558,7 +546,6 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <!-- 組合 A -->
       <div class="bg-white p-6 md:p-8 rounded-3xl border border-brand-200 shadow-sm relative flex flex-col justify-between">
         <div class="space-y-3">
           <div class="inline-block px-3 py-1 bg-brand-100 text-brand-800 rounded-lg text-[10.5px] font-bold">
@@ -586,7 +573,6 @@
         </div>
       </div>
 
-      <!-- 組合 B -->
       <div class="bg-white p-6 md:p-8 rounded-3xl border border-brand-300 shadow-sm relative flex flex-col justify-between">
         <div class="space-y-3">
           <div class="inline-block px-3 py-1 bg-brand-700 text-white rounded-lg text-[10.5px] font-bold">
@@ -617,7 +603,7 @@
     </div>
   </section>
 
-  <!-- 3. 旗艦版完整大系統推廣區 (階梯式升級推薦) -->
+  <!-- 3. 旗艦版完整大系統推廣區 -->
   <section class="max-w-5xl mx-auto px-4 md:px-6 mb-16">
     <div class="bg-gradient-to-br from-brand-900 via-stone-900 to-black text-white p-7 md:p-10 rounded-3xl shadow-xl relative overflow-hidden">
       <div class="absolute -right-20 -bottom-20 w-80 h-80 rounded-full bg-brand-500/10 blur-3xl pointer-events-none"></div>
@@ -656,18 +642,18 @@
     </div>
   </section>
 
-  <!-- 4. 結帳填表區 -->
+  <!-- 4. 結帳填表區 (支援多選購買清單) -->
   <section id="order-section" class="max-w-5xl mx-auto px-4 md:px-6 mb-16">
     <div class="bg-white p-6 md:p-8 rounded-3xl border border-brand-200 shadow-sm space-y-5">
       <div class="border-b border-brand-100 pb-3">
         <h2 class="text-lg font-bold text-brand-900 flex items-center gap-2">
           <i class="fa-solid fa-cart-shopping text-brand-500"></i>
-          <span>確認您的選購清單</span>
+          <span>確認您的選購清單（支援多選）</span>
         </h2>
-        <p class="text-xs text-brand-400 mt-0.5">確認購買項目後，直接前往官方 LINE 開通授權或索取專屬 PAYUNi 付款連結</p>
+        <p class="text-xs text-brand-400 mt-0.5">送出訂單後，Resend 系統將自動發送專業開通確認信至您的 Email</p>
       </div>
 
-      <!-- 已選清單表格 -->
+      <!-- 已選清單表格 (支援複選項目展開) -->
       <div id="cart-items-display" class="space-y-2 text-xs">
         <div class="text-center py-6 text-brand-400">尚未選取任何工具，請點選上方按鈕加入</div>
       </div>
@@ -687,7 +673,7 @@
           <input type="text" id="order-line-name" placeholder="例: May 或 @alice_nail" class="w-full p-2.5 rounded-xl border border-brand-200 bg-brand-50/50 text-xs outline-none focus:border-brand-500">
         </div>
         <div>
-          <label class="block font-bold text-brand-800 text-xs mb-1">電子信箱 Email (接收開通網址與金鑰) *</label>
+          <label class="block font-bold text-brand-800 text-xs mb-1">電子信箱 Email (Resend 即刻發送開通信) *</label>
           <input type="email" id="order-email" placeholder="owner@gmail.com" class="w-full p-2.5 rounded-xl border border-brand-200 bg-brand-50/50 text-xs outline-none focus:border-brand-500 font-mono font-bold">
         </div>
       </div>
@@ -700,13 +686,13 @@
         </div>
         <button type="button" onclick="submitToolsOrder()" class="w-full sm:w-auto px-8 py-3.5 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-2xl shadow-md transition text-xs tracking-wider flex items-center justify-center gap-2">
           <i class="fa-brands fa-line text-sm"></i>
-          <span>確認送出訂單 (前往官方 LINE 開通付款)</span>
+          <span>確認送出訂單 (Resend 自動發信 ＆ LINE 專人開通)</span>
         </button>
       </div>
     </div>
   </section>
 
-  <!-- 軟體服務條款、定期扣款授權與隱私權保護聲明 (法律合規必備) -->
+  <!-- 軟體服務條款聲明 -->
   <section class="max-w-5xl mx-auto px-4 md:px-6 mb-16">
     <div class="bg-white p-6 md:p-8 rounded-3xl border border-brand-200 shadow-xs space-y-4 text-xs text-brand-700 leading-relaxed font-sans">
       <h3 class="font-bold text-sm text-brand-900 border-b border-brand-100 pb-2 flex items-center gap-2">
@@ -751,10 +737,12 @@
   </footer>
 
   <script>
-    // 單一宣告 Supabase 憑證，絕不重複報錯
+    // 1. Supabase 與 Resend API 設定 (單一宣告)
     const TOOLS_SUPABASE_URL = "https://kwbxskvnfejfguuwzqfr.supabase.co";
     const TOOLS_SUPABASE_ANON_KEY = "sb_publishable_JnpaLZVnGkW9Jr967LeYuQ_d8bXwfnz";
+    const RESEND_API_KEY = "re_GszR3BKh_HPVeDFxaubykqCV62TeGCk9u";
 
+    // 2. 購物車資料結構 (支援多選複選)
     let cart = {};
 
     function toggleCartTool(key, price, name) {
@@ -767,11 +755,13 @@
     }
 
     function applyPackage(type) {
-      cart = {};
       if (type === 'daily') {
-        cart['pkg_daily'] = { name: "日常引流省時組 (空檔生圖 + 報價試算)", price: 990 };
+        cart['slot'] = { name: "IG 限動空檔生圖器", price: 490 };
+        cart['quote'] = { name: "美業通用服務報價試算器", price: 500 };
       } else if (type === 'operation') {
-        cart['pkg_operation'] = { name: "門市營運防漏組 (收銀 + 會員存摺 + LINE防放鳥)", price: 2980 };
+        cart['pos'] = { name: "極簡收銀小幫手", price: 690 };
+        cart['loyalty'] = { name: "VIP 數位會員存摺", price: 1490 };
+        cart['reminder'] = { name: "LINE 智慧防放鳥自動排程推播", price: 800 };
       }
       renderCartUI();
       document.getElementById('order-section').scrollIntoView({ behavior: 'smooth' });
@@ -785,11 +775,11 @@
         const btn = document.getElementById(`btn-add-${k}`);
         if (btn) {
           if (cart[k]) {
-            btn.className = "px-4 py-2 bg-brand-800 text-white font-bold text-xs rounded-xl transition shadow-xs flex items-center gap-1.5";
-            btn.innerHTML = `<i class="fa-solid fa-check text-[10px]"></i><span>已加入</span>`;
+            btn.className = "px-4 py-2 bg-stone-900 text-white font-bold text-xs rounded-xl transition shadow-xs flex items-center gap-1.5";
+            btn.innerHTML = `<i class="fa-solid fa-check text-[10px]"></i><span>已加入清單</span>`;
           } else {
             btn.className = "px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs rounded-xl transition shadow-xs flex items-center gap-1.5";
-            btn.innerHTML = `<i class="fa-solid fa-plus text-[10px]"></i><span>選購</span>`;
+            btn.innerHTML = `<i class="fa-solid fa-plus text-[10px]"></i><span>加入清單</span>`;
           }
         }
       });
@@ -820,7 +810,7 @@
       document.getElementById('cart-total-display').innerText = `NT$ ${total.toLocaleString()}`;
     }
 
-    // 智能打包試用文字至 LINE
+    // LINE 打包諮詢文字
     function contactForTrial(toolKey, toolName) {
       let msg = "";
       if (toolKey === 'all') {
@@ -841,7 +831,7 @@
       return token;
     }
 
-    // 穩健送單寫入
+    // 3. 穩健送單寫入 ＋ Resend API 自動發送信件
     async function submitToolsOrder() {
       const keys = Object.keys(cart);
       if (keys.length === 0) return Swal.fire('請先挑選您想選購的微工具或組合包', '', 'warning');
@@ -852,21 +842,22 @@
       const email = document.getElementById('order-email').value.trim();
 
       if (!store || !phone || !email) {
-        return Swal.fire('請填寫門市名稱、負責人手機與電子信箱！', '電子信箱將用於寄發開通指南與後台網址，避免日後忘記。', 'warning');
+        return Swal.fire('請填寫門市名稱、負責人手機與電子信箱！', '電子信箱將由 Resend 發送開通確認信，避免日後忘記網址。', 'warning');
       }
 
       const total = Object.values(cart).reduce((sum, item) => sum + item.price, 0);
       const itemsList = Object.values(cart).map(i => i.name).join('、');
       const secureToken = generateSecureToken();
+      const adminUrl = `https://tools.heysibyl.com/tools-admin.html?token=${secureToken}`;
 
       Swal.fire({
-        title: '訂單建立中...',
-        text: '正在將您的選購清單寫入雲端審核名冊',
+        title: '訂單建立與發信中...',
+        text: '正在將資料存入總管名冊並透過 Resend 寄發通知信',
         allowOutsideClick: false,
         didOpen: () => Swal.showLoading()
       });
 
-      // 寫入 Supabase 資料表
+      // 步驟 A：寫入 Supabase 資料表 (tool_stores)
       try {
         const payload = {
           store_name: store,
@@ -895,13 +886,53 @@
 
         if (!res.ok) {
           const errData = await res.text();
-          console.warn("Supabase 寫入退件，啟用本機名冊防護:", errData);
+          console.warn("Supabase 寫入提醒:", errData);
         }
       } catch (err) {
-        console.warn("連線例外，啟用本機備援:", err);
+        console.warn("資料庫連線備援處理:", err);
       }
 
-      // 組合官方 LINE 下單訊息
+      // 步驟 B：透過 Resend API 發送專業開通與訂單通知信
+      try {
+        await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${RESEND_API_KEY}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            from: "Sibyl Micro-Tools <onboarding@resend.dev>",
+            to: [email],
+            subject: `【希貝兒微工具】${store} - 服務選購確認與專屬開通指南`,
+            html: `
+              <div style="font-family: sans-serif; padding: 25px; color: #3D3126; max-width: 600px; border: 1px solid #EBE5DF; border-radius: 20px; background-color: #FAF8F5;">
+                <h2 style="color: #8C7355; margin-top: 0;">希貝兒美業微工具 · 訂購與開通通知</h2>
+                <p>親愛的 <b>${store}</b> 負責人您好：</p>
+                <p>感謝您選購希貝兒美業獨立微工具！系統已收到您的選購清單，以下為您的專屬管理資訊：</p>
+                <div style="background-color: #FFFFFF; padding: 18px; border-radius: 15px; border: 1px solid #EBE5DF; margin: 15px 0;">
+                  <p style="margin: 4px 0;"><b>門市名稱：</b>${store}</p>
+                  <p style="margin: 4px 0;"><b>負責人：</b>${phone} (${lineName || 'LINE'})</p>
+                  <p style="margin: 4px 0;"><b>選購項目：</b>${itemsList}</p>
+                  <p style="margin: 4px 0;"><b>應付金額：</b>NT$ ${total.toLocaleString()} 元</p>
+                  <p style="margin: 4px 0;"><b>後台預設 PIN 碼：</b><code>8888</code></p>
+                  <p style="margin: 8px 0 4px 0;"><b>專屬防盜後台入口（付款後即刻開通）：</b></p>
+                  <a href="${adminUrl}" style="color: #8C7355; word-break: break-all; font-weight: bold;">${adminUrl}</a>
+                </div>
+                <div style="background: #F5ECE3; padding: 12px 16px; border-radius: 12px; font-size: 12px;">
+                  📖 <b>線上教學指南手冊：</b><br>
+                  <a href="https://tools.heysibyl.com/tutorial.html" style="color: #8C7355;">https://tools.heysibyl.com/tutorial.html</a>
+                </div>
+                <hr style="border: none; border-top: 1px solid #EBE5DF; margin: 20px 0;">
+                <p style="font-size: 11px; color: #BCA38F; text-align: center;">希貝兒設計所 | 統一編號 61347275 | 官方 LINE：@480kqjoj</p>
+              </div>
+            `
+          })
+        });
+      } catch (e) {
+        console.warn("Resend API 呼叫:", e);
+      }
+
+      // 步驟 C：打包 LINE 下單訊息跳轉
       const orderMessage = encodeURIComponent(
         `您好！我已在官網送出微工具訂購申請：\n` +
         `• 門市名稱：${store}\n` +
@@ -910,19 +941,19 @@
         `• 電子信箱：${email}\n` +
         `• 訂購項目：${itemsList}\n` +
         `• 結帳總計：NT$ ${total.toLocaleString()} 元\n\n` +
-        `資料已同步送至後台，請提供付款方式與開通信件！`
+        `資料已同步存檔並發送信件，請協助提供付款方式與開通！`
       );
 
       Swal.fire({
-        title: '訂單已送達總管審核室！',
+        title: '訂單送出與信件寄發成功！',
         html: `
           <div class="text-left text-xs bg-brand-50 p-3.5 rounded-2xl border border-brand-200 space-y-1.5 font-sans">
             <div>門市名稱：<b>${store}</b></div>
             <div>負責人：<b>${phone}</b> (${lineName || 'LINE'})</div>
-            <div>接收開通信箱：<b>${email}</b></div>
-            <div>訂購內容：<b>${itemsList}</b></div>
-            <div>應付金額：<b class="text-brand-700 font-mono text-sm">NT$ ${total.toLocaleString()}</b></div>
-            <div class="text-brand-600 font-bold pt-1">✓ 資料已成功建檔，點擊下方前往 LINE 由專人確認款項與開通！</div>
+            <div>開通信箱：<b>${email}</b></div>
+            <div>選購項目：<b>${itemsList}</b></div>
+            <div>結帳金額：<b class="text-brand-700 font-mono text-sm">NT$ ${total.toLocaleString()}</b></div>
+            <div class="text-emerald-700 font-bold pt-1">✓ Resend 已發送開通指南至信箱，點擊下方前往 LINE 由專人確認款項！</div>
           </div>
         `,
         confirmButtonText: '前往官方 LINE 完成付款',

@@ -219,19 +219,15 @@
             "Cache-Control": "no-cache"
           }
         });
-        
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data)) {
-            // 直接以 Supabase 資料為主，確保即時性
             allToolStores = data;
             saveLocalStoresDb();
           }
-        } else {
-          console.error("載入失敗狀態碼:", res.status);
         }
       } catch (e) {
-        console.warn("載入遠端資料庫異常，使用本地暫存備份:", e);
+        console.warn("載入名冊異常:", e);
       }
 
       renderPendingOrdersZone();
@@ -284,7 +280,9 @@
     // 渲染待對帳與開通訂單名單 (來自前台下單)
     function renderPendingOrdersZone() {
       const container = document.getElementById('pending-orders-container');
-      const pendings = allToolStores.filter(s => s.plan_status === 'pending');
+      if (!container) return;
+      
+      const pendings = allToolStores.filter(s => s.plan_status === 'pending' || s.is_active === false);
       if (pendings.length === 0) {
         container.innerHTML = '';
         return;
@@ -299,18 +297,22 @@
             </span>
           </div>
           <div class="divide-y divide-amber-200/60">
-            ${pendings.map(s => `
-              <div class="py-2.5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                <div>
-                  <div class="font-bold text-brand-900">${s.store_name} ｜ ${s.owner_phone} (${s.owner_line_name || 'LINE'})</div>
-                  <div class="text-[11px] text-gray-500">信箱：${s.owner_email} ｜ 訂單金額：NT$ ${Number(s.total_paid || 0).toLocaleString()}</div>
-                  <div class="text-[10.5px] text-brand-600 font-bold mt-0.5">選購模組：${(s.purchased_tools || []).join('、')}</div>
+            ${pendings.map(s => {
+              const email = s.owner_email || s.contact_info || '未填';
+              const phone = s.owner_phone || s.contact_info || '';
+              return `
+                <div class="py-2.5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                  <div>
+                    <div class="font-bold text-brand-900">${s.store_name} ｜ ${phone}</div>
+                    <div class="text-[11px] text-gray-500">信箱：${email} ｜ 訂單金額：NT$ ${Number(s.total_paid || 0).toLocaleString()}</div>
+                    <div class="text-[10.5px] text-brand-600 font-bold mt-0.5">選購項目：${(s.purchased_tools || []).join('、')}</div>
+                  </div>
+                  <button type="button" onclick="activateStoreById('${s.id}')" class="px-3.5 py-1.5 bg-[#8C7355] hover:bg-[#7A6246] text-white rounded-xl font-bold shadow-xs transition shrink-0">
+                    一鍵確認收款並開通
+                  </button>
                 </div>
-                <button type="button" onclick="activateStoreById('${s.id}')" class="px-3.5 py-1.5 bg-[#8C7355] hover:bg-[#7A6246] text-white rounded-xl font-bold shadow-xs transition shrink-0">
-                  一鍵確認收款並開通
-                </button>
-              </div>
-            `).join('')}
+              `;
+            }).join('')}
           </div>
         </div>
       `;
@@ -467,67 +469,84 @@
       }).join('');
     }
     // 一鍵開通待審核訂單
+    // 3. 一鍵開通店家
     async function activateStoreById(id) {
       const s = allToolStores.find(item => item.id === id);
+      if (!s) return;
+
       const confirm = await Swal.fire({
         title: `確認開通【${s.store_name}】？`,
-        text: `確認已收到款項 NT$ ${Number(s.total_paid || 0).toLocaleString()} 元，系統將正式解鎖所選微工具權限。`,
+        text: `確認已收到款項 NT$ ${Number(s.total_paid || 0).toLocaleString()} 元，系統將解鎖微工具權限並移入正式名冊。`,
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: '確定開通',
-        confirmButtonColor: '#8C7355'
+        confirmButtonColor: '#8C7355',
+        cancelButtonText: '取消'
       });
 
       if (!confirm.isConfirmed) return;
+
       s.plan_status = 'active';
       s.is_active = true;
+      if (!s.admin_token) s.admin_token = generateSecureToken();
       saveLocalStoresDb();
 
       try {
         await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?id=eq.${id}`, {
           method: "PATCH",
           headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json" },
-          body: JSON.stringify({ plan_status: 'active', is_active: true })
+          body: JSON.stringify({ plan_status: 'active', is_active: true, admin_token: s.admin_token })
         });
       } catch (e) {}
 
-      Swal.fire('店家已成功開通！', '已移入營運店家名冊，您可以點擊「寄發開通信件」將後台連結送給對方。', 'success');
-      loadToolsStores();
+      Swal.fire({
+        title: '店家已成功開通！',
+        text: '是否立即為該店家發送包含專屬後台與前台連結的【正式開通通知書】？',
+        icon: 'success',
+        showCancelButton: true,
+        confirmButtonText: '立即寄發開通信件',
+        confirmButtonColor: '#8C7355',
+        cancelButtonText: '稍後手動發送'
+      }).then(r => {
+        if (r.isConfirmed) sendWelcomeActivationEmail(s.id);
+        loadToolsStores();
+      });
     }
 
-    // 寄發開通信件
+    // 4. 手動寄發正式開通信件 (包含專屬防盜後台入口與所有前台網址)
     async function sendWelcomeActivationEmail(id) {
       const s = allToolStores.find(item => item.id === id);
-      if (!s) return Swal.fire('找不到該店家資料！', '', 'error');
+      if (!s) return;
 
-      const email = (s.owner_email || s.email || '').trim();
+      const email = (s.owner_email || s.contact_info || '').trim();
       if (!email || !email.includes('@')) {
-        return Swal.fire({
-          title: '該店家尚未填寫有效電子信箱',
-          text: '請先點擊該店家卡片中的「修改」按鈕補上負責人 Email 後，再執行寄發開通信件！',
-          icon: 'warning',
-          confirmButtonColor: '#8C7355'
-        });
+        return Swal.fire('該店家未填寫有效電子信箱！', '請先點擊修改補上 Email', 'warning');
       }
 
       Swal.fire({
-        title: '正在透過雲端發送開通信...',
+        title: '正在寄發正式開通信件...',
         text: `收件者：${email}`,
         allowOutsideClick: false,
         didOpen: () => Swal.showLoading()
       });
 
-      const secureAdminUrl = `https://tools.heysibyl.com/tools-admin.html?token=${s.admin_token || s.id}`;
+      if (!s.admin_token) {
+        s.admin_token = generateSecureToken();
+        saveLocalStoresDb();
+      }
+
+      const secureAdminUrl = `https://tools.heysibyl.com/tools-admin.html?token=${s.admin_token}`;
       const purchasedNames = (s.purchased_tools || []).map(tKey => {
         const found = TOOLS_CATALOG.find(tc => tc.id === tKey);
         return found ? found.name : tKey;
       }).join('、');
 
+      // 組裝專屬前台網址
       const frontendLinksHtml = (s.purchased_tools || []).map(tKey => {
         const toolObj = TOOLS_CATALOG.find(tc => tc.id === tKey);
         if (!toolObj) return '';
         const toolUrl = `https://tools.heysibyl.com/${toolObj.file}?store_id=${s.id}`;
-        return `<div style="margin-bottom: 4px;"><b>• ${toolObj.name}：</b><a href="${toolUrl}" style="color: #2D6A4F; word-break: break-all;">${toolUrl}</a></div>`;
+        return `<div style="margin-bottom: 5px;"><b>• ${toolObj.name}：</b><a href="${toolUrl}" style="color: #2D6A4F; word-break: break-all;">${toolUrl}</a></div>`;
       }).join('');
 
       try {
@@ -547,13 +566,13 @@
         });
 
         Swal.fire({
-          title: '開通信件已成功送出！',
+          title: '正式開通信件已成功送出！',
           html: `
             <div class="text-left text-xs bg-brand-50 p-3.5 rounded-2xl border border-brand-200 text-brand-900 space-y-1.5 font-sans">
               <div>收件信箱：<b>${email}</b></div>
               <div>店家名稱：<b>${s.store_name}</b></div>
               <div>後台 PIN 碼：<b>${s.admin_pin || '8888'}</b></div>
-              <div class="pt-1 text-emerald-700 font-bold">✓ 系統已透過後端順利發送信件！</div>
+              <div class="pt-1 text-emerald-700 font-bold">✓ 信件已包含：專屬防盜後台入口、已購前台網址、線上教學手冊及客服指引！</div>
             </div>
           `,
           icon: 'success',

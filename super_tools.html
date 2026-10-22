@@ -151,12 +151,11 @@
   </div>
 
   <script>
-    <script>
     // 1. 核心 Supabase 連線常數 (對齊新專案 tzqpfnrpnfzzubofoqlt)
     const SUPABASE_URL = "https://tzqpfnrpnfzzubofoqlt.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6cXBmbnJwbmZ6enVib2ZvcWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1ODQ5ODYsImV4cCI6MjEwODE2MDk4Nn0.B-ub7DCpzF3b2gjpTrM9jdW0SLOqRPillZTmoXPuNgk";
     
-    // 同時補上別名防呆（無論後續代碼讀取哪一個名稱都保證存在）
+    // 別名防呆
     const TOOLS_SUPABASE_URL = SUPABASE_URL;
     const TOOLS_SUPABASE_ANON_KEY = SUPABASE_ANON_KEY;
     
@@ -177,8 +176,9 @@
 
     let toolsCurrentPage = 1;
     const TOOLS_PAGE_SIZE = 10;
-    let allToolStores = JSON.parse(localStorage.getItem('local_tool_stores_db') || '[]');
+    let allToolStores = [];
 
+    // 驗證登入
     function checkSuperKey() {
       const input = document.getElementById('super-key-input').value.trim();
       if (input === SUPER_PIN || input === "888") {
@@ -200,7 +200,7 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // ★ 修 正後的 loadToolsStores (移除不合法的 &t 參數，正確透過 Headers 防快取) ★
+    // 從 Supabase 取得最新店家名冊 (防快取 Headers)
     async function loadToolsStores() {
       try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?order=created_at.desc`, {
@@ -319,30 +319,29 @@
       `;
     }
 
-    // 渲染已開通店家名冊卡片
+    // 渲染店家名冊卡片 (包含待開通與已開通店家，全部清晰可見)
     function renderStoresList() {
       const container = document.getElementById('stores-list-wrapper');
       if (!container) return;
 
-      const activeStores = allToolStores.filter(s => s.plan_status !== 'pending' && s.is_active !== false);
       const totalStoresBadge = document.getElementById('total-stores-badge');
-      if (totalStoresBadge) totalStoresBadge.innerText = `共 ${activeStores.length} 家營運店家`;
+      if (totalStoresBadge) totalStoresBadge.innerText = `共 ${allToolStores.length} 家授權/申請店家`;
 
-      if (activeStores.length === 0) {
-        container.innerHTML = '<div class="text-center py-8 text-brand-400">目前尚無已開通店家</div>';
+      if (allToolStores.length === 0) {
+        container.innerHTML = '<div class="text-center py-8 text-brand-400">目前尚無任何店家資料</div>';
         const pageInfo = document.getElementById('tools-page-info-text');
         if (pageInfo) pageInfo.innerText = '查無店家資料';
         renderToolsPagination(0);
         return;
       }
 
-      const totalItems = activeStores.length;
+      const totalItems = allToolStores.length;
       const totalPages = Math.ceil(totalItems / TOOLS_PAGE_SIZE) || 1;
       if (toolsCurrentPage > totalPages) toolsCurrentPage = totalPages;
 
       const startIndex = (toolsCurrentPage - 1) * TOOLS_PAGE_SIZE;
       const endIndex = Math.min(startIndex + TOOLS_PAGE_SIZE, totalItems);
-      const pagedStores = activeStores.slice(startIndex, endIndex);
+      const pagedStores = allToolStores.slice(startIndex, endIndex);
 
       const pageInfo = document.getElementById('tools-page-info-text');
       if (pageInfo) {
@@ -351,6 +350,7 @@
       renderToolsPagination(totalPages);
 
       container.innerHTML = pagedStores.map(s => {
+        const isPending = (s.plan_status === 'pending' || s.is_active === false);
         const isLocked = (s.plan_status === 'locked');
         const tools = Array.isArray(s.purchased_tools) ? s.purchased_tools : [];
         const dateStr = s.created_at ? s.created_at.replace('T', ' ').substring(0, 16) : '未知';
@@ -370,7 +370,7 @@
           return `
             <div class="flex items-center justify-between p-2 bg-white rounded-xl border border-brand-200 text-[11px] mb-1.5">
               <div class="flex items-center gap-1.5 truncate">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                <span class="w-2 h-2 rounded-full ${isPending ? 'bg-amber-400' : 'bg-emerald-500'} shrink-0"></span>
                 <span class="font-bold text-brand-900 shrink-0">${toolObj.name}：</span>
                 <span class="font-mono text-gray-500 truncate">${toolUrl}</span>
               </div>
@@ -386,14 +386,21 @@
           ? `<button type="button" onclick="toggleStoreLock('${s.id}', false)" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition flex items-center gap-1 shadow-xs text-xs"><i class="fa-solid fa-lock-open text-[10px]"></i> 解除鎖定</button>`
           : `<button type="button" onclick="toggleStoreLock('${s.id}', true)" class="px-2.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold transition flex items-center gap-1 shadow-xs text-xs"><i class="fa-solid fa-lock text-[10px]"></i> 鎖定前後台</button>`;
 
+        let statusBadge = '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded-md">營運中</span>';
+        if (isPending) {
+          statusBadge = '<span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-bold rounded-md animate-pulse">待核對開通</span>';
+        } else if (isLocked) {
+          statusBadge = '<span class="px-2 py-0.5 bg-rose-100 text-rose-800 text-[10px] font-bold rounded-md">前後台已鎖定</span>';
+        }
+
         return `
-          <div class="p-4 bg-brand-50/70 rounded-3xl border border-brand-200 space-y-3 shadow-xs mb-3">
+          <div class="p-4 ${isPending ? 'bg-amber-50/40 border-2 border-amber-300' : 'bg-brand-50/70 border border-brand-200'} rounded-3xl space-y-3 shadow-xs mb-3">
             <div class="flex justify-between items-start">
               <div>
                 <div class="font-bold text-sm text-brand-900 flex items-center gap-2">
                   <span>${s.store_name}</span>
                   <button type="button" onclick="editStoreFieldPrompt('${s.id}', 'store_name', '店家名稱', '${s.store_name}')" class="text-brand-400 hover:text-brand-700"><i class="fa-solid fa-pen text-[10px]"></i></button>
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${isLocked ? 'bg-rose-100 text-rose-800 animate-pulse' : 'bg-emerald-100 text-emerald-800'}">${isLocked ? '前後台已鎖定' : '正常運行'}</span>
+                  ${statusBadge}
                 </div>
                 <div class="text-[11px] text-gray-400 font-mono mt-0.5">店家序號: ${s.id} ｜ 建立時間：${dateStr}</div>
               </div>
@@ -450,9 +457,17 @@
 
             <!-- 底部操作按鈕列 -->
             <div class="flex flex-wrap justify-between items-center pt-2 border-t border-brand-100 gap-2">
-              <button type="button" onclick="sendWelcomeActivationEmail('${s.id}')" class="px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-xl font-bold hover:bg-blue-100 transition flex items-center gap-1 text-xs">
-                <i class="fa-solid fa-paper-plane text-[10px]"></i> 寄發開通信件與專屬網址
-              </button>
+              <div class="flex gap-1.5 items-center">
+                ${isPending ? `
+                  <button type="button" onclick="activateStoreById('${s.id}')" class="px-3.5 py-1.5 bg-[#8C7355] text-white rounded-xl font-bold hover:bg-[#7A6246] transition text-xs shadow-xs flex items-center gap-1">
+                    <i class="fa-solid fa-check text-[10px]"></i> 一鍵開通並寄信
+                  </button>
+                ` : `
+                  <button type="button" onclick="sendWelcomeActivationEmail('${s.id}')" class="px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-xl font-bold hover:bg-blue-100 transition flex items-center gap-1 text-xs">
+                    <i class="fa-solid fa-paper-plane text-[10px]"></i> 補發正式開通信件
+                  </button>
+                `}
+              </div>
 
               <div class="flex gap-1.5 items-center">
                 <button type="button" onclick="openModulesConfigModal('${s.id}')" class="px-3 py-1.5 bg-[#8C7355] text-white rounded-xl font-bold hover:bg-[#7A6246] transition text-xs">

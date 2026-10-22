@@ -211,29 +211,33 @@
     }
 
     async function loadToolsStores() {
-      try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?order=created_at.desc`, {
-          headers: { 
-            "apikey": SUPABASE_ANON_KEY, 
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-            "Cache-Control": "no-cache"
-          }
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data)) {
-            allToolStores = data;
-            saveLocalStoresDb();
-          }
-        }
-      } catch (e) {
-        console.warn("載入名冊異常:", e);
+  try {
+    // 加上 timestamp 參數，破除瀏覽器快取
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?order=created_at.desc&t=${Date.now()}`, {
+      headers: { 
+        "apikey": SUPABASE_ANON_KEY, 
+        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+        "Cache-Control": "no-cache"
       }
-
-      renderPendingOrdersZone();
-      renderStoresList();
+    });
+    
+    if (res.ok) {
+      const data = await res.json();
+      console.log("從 Supabase 成功撈回的最新店家名單：", data);
+      if (Array.isArray(data)) {
+        allToolStores = data; // 直接覆蓋
+      }
+    } else {
+      console.error("Supabase 讀取失敗，狀態碼：", res.status, await res.text());
     }
+  } catch (e) {
+    console.error("載入發生異常：", e);
+  }
 
+  // 重新渲染畫面
+  renderPendingOrdersZone();
+  renderStoresList();
+}
     // 換頁函式
     function changeToolsPage(targetPage) {
       toolsCurrentPage = targetPage;

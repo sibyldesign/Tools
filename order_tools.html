@@ -665,6 +665,16 @@
           <input type="text" id="order-store-name" placeholder="例: 艾莉絲美甲沙龍" class="w-full p-2.5 rounded-xl border border-brand-200 bg-brand-50/50 text-xs outline-none focus:border-brand-500 font-bold">
         </div>
         <div>
+          <label class="block font-bold text-brand-800 text-xs mb-1">
+            門市專屬代碼 (自訂短網址) *
+            <span class="text-[10px] text-brand-400 font-normal">限純英文、數字或橫線，如: alicenail</span>
+          </label>
+          <div class="flex items-center rounded-xl border border-brand-200 bg-brand-50/50 overflow-hidden focus-within:border-brand-500">
+            <span class="px-2.5 text-xs text-brand-400 font-mono select-none">heysibyl.com/?s=</span>
+            <input type="text" id="order-store-slug" placeholder="alicenail" maxlength="20" class="w-full p-2.5 bg-transparent text-xs outline-none font-mono font-bold text-brand-900 lowercase" oninput="this.value = this.value.toLowerCase().replace(/[^a-z0-9_-]/g, '')">
+          </div>
+        </div>
+        <div>
           <label class="block font-bold text-brand-800 text-xs mb-1">負責人手機號碼 *</label>
           <input type="tel" id="order-phone" maxlength="10" placeholder="0912345678" class="w-full p-2.5 rounded-xl border border-brand-200 bg-brand-50/50 text-xs outline-none focus:border-brand-500 font-mono font-bold">
         </div>
@@ -835,14 +845,18 @@
       if (keys.length === 0) return Swal.fire('請先挑選您想選購的微工具或組合包', '', 'warning');
 
       const store = document.getElementById('order-store-name').value.trim();
+      const slug = document.getElementById('order-store-slug').value.trim().toLowerCase();
       const phone = document.getElementById('order-phone').value.trim();
       const lineName = document.getElementById('order-line-name').value.trim();
       const email = document.getElementById('order-email').value.trim();
 
-      if (!store || !phone || !email) {
-        return Swal.fire('請填寫門市名稱、負責人手機與電子信箱！', '電子信箱將發送訂購確認單與付款指引。', 'warning');
+      if (!store || !slug || !phone || !email) {
+        return Swal.fire('請完整填寫門市名稱、專屬短網址代碼、手機與信箱！', '', 'warning');
       }
 
+      if (!/^[a-z0-9_-]{3,20}$/.test(slug)) {
+        return Swal.fire('專屬代碼格式不符', '代碼長度需在 3～20 字元之間，僅限純英文小寫、數字與橫線（不可包含空格或中文）', 'warning');
+      }
       const total = Object.values(cart).reduce((sum, item) => sum + item.price, 0);
       const itemsList = Object.values(cart).map(i => i.name).join('、');
       const secureToken = generateSecureToken();
@@ -865,6 +879,7 @@
       try {
         const payload = {
           store_name: store,
+          store_slug: slug, // ★ 存入店家專屬代碼
           owner_phone: phone,
           owner_line_name: lineName || '',
           owner_email: email,

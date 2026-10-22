@@ -84,7 +84,7 @@
             <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
               <i class="fa-solid fa-store text-[#8C7355]"></i> 微工具授權店家名冊
             </span>
-            <p class="text-[10px] text-brand-400 mt-0.5">點擊各卡片即可修改店名、手機、LINE名稱、信箱與後台密碼</p>
+            <p class="text-[10px] text-brand-400 mt-0.5">點擊各卡片即可修改店名、手機、LINE名稱、專屬代碼、信箱與後台密碼</p>
           </div>
           <span class="font-mono text-emerald-700 font-bold" id="total-stores-badge">共 0 家店</span>
         </div>
@@ -303,6 +303,10 @@
                     信箱：<b>${s.owner_email || '未填'}</b> ｜ 
                     LINE：<b>${s.owner_line_name || '同帳號'}</b>
                   </div>
+                  <div class="flex items-center gap-2 text-[11px]">
+                    <b>專屬代碼：</b><span class="font-mono text-brand-700 font-bold">${s.store_slug || '未設定'}</span>
+                    <button type="button" onclick="editStoreFieldPrompt('${s.id}', 'store_slug', '專屬代碼', '${s.store_slug || ''}')" class="text-blue-600 underline text-[10px]">修改</button>
+                  </div>
                   <div class="text-brand-700 font-bold">
                     選購項目：${tools} ｜ 
                     應收金額：<span class="font-mono text-sm text-rose-700">NT$ ${Number(s.total_paid || 0).toLocaleString()}</span>
@@ -366,7 +370,11 @@
         const toolLinksHtml = tools.map(tKey => {
           const toolObj = TOOLS_CATALOG.find(tc => tc.id === tKey);
           if (!toolObj) return '';
-          const toolUrl = `https://tools.heysibyl.com/${toolObj.file}?store_id=${s.id}`;
+          
+          // 優先使用店家自訂短代碼，避免長 UUID
+          const storeKey = s.store_slug || s.id;
+          const toolUrl = `https://tools.heysibyl.com/${toolObj.file}?s=${storeKey}`;
+
           return `
             <div class="flex items-center justify-between p-2 bg-white rounded-xl border border-brand-200 text-[11px] mb-1.5">
               <div class="flex items-center gap-1.5 truncate">
@@ -442,6 +450,11 @@
               <div class="flex items-center justify-between">
                 <div><b>LINE 稱呼：</b><span>${s.owner_line_name || '未填'}</span></div>
                 <button type="button" onclick="editStoreFieldPrompt('${s.id}', 'owner_line_name', 'LINE 稱呼', '${s.owner_line_name || ''}')" class="text-blue-600 underline text-[10px]">修改</button>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <div><b>專屬代碼：</b><span class="font-mono text-brand-700 font-bold">${s.store_slug || '未設定'}</span></div>
+                <button type="button" onclick="editStoreFieldPrompt('${s.id}', 'store_slug', '專屬代碼', '${s.store_slug || ''}')" class="text-blue-600 underline text-[10px]">修改</button>
               </div>
 
               <div class="flex items-center justify-between">
@@ -559,7 +572,8 @@
       const frontendLinksHtml = (s.purchased_tools || []).map(tKey => {
         const toolObj = TOOLS_CATALOG.find(tc => tc.id === tKey);
         if (!toolObj) return '';
-        const toolUrl = `https://tools.heysibyl.com/${toolObj.file}?store_id=${s.id}`;
+        const storeKey = s.store_slug || s.id;
+        const toolUrl = `https://tools.heysibyl.com/${toolObj.file}?s=${storeKey}`;
         return `<div style="margin-bottom: 5px;"><b>• ${toolObj.name}：</b><a href="${toolUrl}" style="color: #2D6A4F; word-break: break-all;">${toolUrl}</a></div>`;
       }).join('');
 

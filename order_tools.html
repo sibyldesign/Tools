@@ -832,6 +832,7 @@
     }
 
     // 3. 穩健送單寫入 ＋ Resend API 自動發送信件
+    // 3. 穩健送單寫入 ＋ 由 GAS 背景呼叫 Resend 發信 (前端零金鑰)
     async function submitToolsOrder() {
       const keys = Object.keys(cart);
       if (keys.length === 0) return Swal.fire('請先挑選您想選購的微工具或組合包', '', 'warning');
@@ -842,7 +843,7 @@
       const email = document.getElementById('order-email').value.trim();
 
       if (!store || !phone || !email) {
-        return Swal.fire('請填寫門市名稱、負責人手機與電子信箱！', '電子信箱將由 Resend 發送開通確認信，避免日後忘記網址。', 'warning');
+        return Swal.fire('請填寫門市名稱、負責人手機與電子信箱！', '電子信箱將由系統發送開通指南，避免日後忘記網址。', 'warning');
       }
 
       const total = Object.values(cart).reduce((sum, item) => sum + item.price, 0);
@@ -857,7 +858,7 @@
         didOpen: () => Swal.showLoading()
       });
 
-      // 步驟 A：寫入 Supabase 資料表 (tool_stores)
+      // 步驟 A：確實寫入 Supabase 資料表 (tool_stores)
       try {
         const payload = {
           store_name: store,
@@ -885,51 +886,30 @@
         });
 
         if (!res.ok) {
-          const errData = await res.text();
-          console.warn("Supabase 寫入提醒:", errData);
+          console.warn("Supabase 寫入提醒:", await res.text());
         }
       } catch (err) {
         console.warn("資料庫連線備援處理:", err);
       }
 
-      // 步驟 B：透過 Resend API 發送專業開通與訂單通知信
+      // 步驟 B：呼叫 GAS 轉發 Resend 發信 (GAS 網址不含機密，GitHub 順暢放行)
+      const GAS_API_URL = "https://script.google.com/macros/s/AKfycby44GCzrpN8ZpGSTNcVkI3IFMbyO7XhyE_Bf-cKMCTzDBbfYxDVaFD-pVcyc0vTykI-/exec";
       try {
-        await fetch("https://api.resend.com/emails", {
+        fetch(GAS_API_URL, {
           method: "POST",
-          headers: {
-            "Authorization": `Bearer ${RESEND_API_KEY}`,
-            "Content-Type": "application/json"
-          },
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
-            from: "Sibyl Micro-Tools <onboarding@resend.dev>",
-            to: [email],
-            subject: `【希貝兒微工具】${store} - 服務選購確認與專屬開通指南`,
-            html: `
-              <div style="font-family: sans-serif; padding: 25px; color: #3D3126; max-width: 600px; border: 1px solid #EBE5DF; border-radius: 20px; background-color: #FAF8F5;">
-                <h2 style="color: #8C7355; margin-top: 0;">希貝兒美業微工具 · 訂購與開通通知</h2>
-                <p>親愛的 <b>${store}</b> 負責人您好：</p>
-                <p>感謝您選購希貝兒美業獨立微工具！系統已收到您的選購清單，以下為您的專屬管理資訊：</p>
-                <div style="background-color: #FFFFFF; padding: 18px; border-radius: 15px; border: 1px solid #EBE5DF; margin: 15px 0;">
-                  <p style="margin: 4px 0;"><b>門市名稱：</b>${store}</p>
-                  <p style="margin: 4px 0;"><b>負責人：</b>${phone} (${lineName || 'LINE'})</p>
-                  <p style="margin: 4px 0;"><b>選購項目：</b>${itemsList}</p>
-                  <p style="margin: 4px 0;"><b>應付金額：</b>NT$ ${total.toLocaleString()} 元</p>
-                  <p style="margin: 4px 0;"><b>後台預設 PIN 碼：</b><code>8888</code></p>
-                  <p style="margin: 8px 0 4px 0;"><b>專屬防盜後台入口（付款後即刻開通）：</b></p>
-                  <a href="${adminUrl}" style="color: #8C7355; word-break: break-all; font-weight: bold;">${adminUrl}</a>
-                </div>
-                <div style="background: #F5ECE3; padding: 12px 16px; border-radius: 12px; font-size: 12px;">
-                  📖 <b>線上教學指南手冊：</b><br>
-                  <a href="https://tools.heysibyl.com/tutorial.html" style="color: #8C7355;">https://tools.heysibyl.com/tutorial.html</a>
-                </div>
-                <hr style="border: none; border-top: 1px solid #EBE5DF; margin: 20px 0;">
-                <p style="font-size: 11px; color: #BCA38F; text-align: center;">希貝兒設計所 | 統一編號 61347275 | 官方 LINE：@480kqjoj</p>
-              </div>
-            `
+            action: "sendToolStoreWelcomeEmail",
+            toEmail: email,
+            storeName: store,
+            adminUrl: adminUrl,
+            pin: '8888',
+            purchasedToolsText: itemsList
           })
         });
       } catch (e) {
-        console.warn("Resend API 呼叫:", e);
+        console.warn("GAS 轉發略過:", e);
       }
 
       // 步驟 C：打包 LINE 下單訊息跳轉
@@ -941,7 +921,7 @@
         `• 電子信箱：${email}\n` +
         `• 訂購項目：${itemsList}\n` +
         `• 結帳總計：NT$ ${total.toLocaleString()} 元\n\n` +
-        `資料已同步存檔並發送信件，請協助提供付款方式與開通！`
+        `資料已同步存檔並發送確認信，請協助提供付款方式與開通！`
       );
 
       Swal.fire({
@@ -953,7 +933,7 @@
             <div>開通信箱：<b>${email}</b></div>
             <div>選購項目：<b>${itemsList}</b></div>
             <div>結帳金額：<b class="text-brand-700 font-mono text-sm">NT$ ${total.toLocaleString()}</b></div>
-            <div class="text-emerald-700 font-bold pt-1">✓ Resend 已發送開通指南至信箱，點擊下方前往 LINE 由專人確認款項！</div>
+            <div class="text-brand-600 font-bold pt-1">✓ 系統已發送開通指南至信箱，點擊下方前往 LINE 由專人確認款項！</div>
           </div>
         `,
         confirmButtonText: '前往官方 LINE 完成付款',

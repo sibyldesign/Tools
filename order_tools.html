@@ -830,38 +830,7 @@
     }
 
     // 下單送單函式 (雙軌建檔：前台直寫 ＋ GAS 備援)
-    async function submitToolsOrder() {
-      const keys = Object.keys(cart);
-      if (keys.length === 0) return Swal.fire('請先挑選您想選購的微工具或組合包', '', 'warning');
-
-      const store = document.getElementById('order-store-name').value.trim();
-      const phone = document.getElementById('order-phone').value.trim();
-      const lineName = document.getElementById('order-line-name').value.trim();
-      const email = document.getElementById('order-email').value.trim();
-
-      if (!store || !phone || !email) {
-        return Swal.fire('請填寫門市名稱、負責人手機與電子信箱！', '電子信箱將發送訂購確認單與付款指引。', 'warning');
-      }
-
-      const total = Object.values(cart).reduce((sum, item) => sum + item.price, 0);
-      const itemsList = Object.values(cart).map(i => i.name).join('、');
-      const secureToken = generateSecureToken();
-
-      const frontendPreviewHtml = keys.map(k => {
-        const fileMap = { slot: 'studio_slot.html', pos: 'pos.html', quote: 'quote.html', loyalty: 'loyalty.html', reminder: 'reminder.gs', overview: 'overview.html', contract: 'contract.html' };
-        const nameMap = { slot: 'IG限動生圖', pos: '極簡收銀', quote: '報價試算', loyalty: 'VIP會員存摺', reminder: 'LINE防放鳥', overview: '排程總覽', contract: '定型化契約' };
-        const url = `https://tools.heysibyl.com/${fileMap[k] || 'studio_slot.html'}`;
-        return `<div>• <b>${nameMap[k]}前台體驗：</b><a href="${url}" style="color:#2D6A4F;">${url}</a></div>`;
-      }).join('');
-
-      Swal.fire({
-        title: '訂單建立中...',
-        text: '正在將資料登記至名冊並發送訂單確認信',
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading()
-      });
-
-      // 1. 前端寫入 Supabase tool_stores
+    // 1. 前端寫入 Supabase tool_stores（加入明確報錯檢測）
       try {
         const payload = {
           store_name: store,
@@ -889,10 +858,23 @@
         });
 
         if (!res.ok) {
-          console.warn("Supabase 寫入提醒:", await res.text());
+          const errText = await res.text();
+          console.error("Supabase 寫入失敗原因：", errText);
+          Swal.fire({
+            title: '資料庫寫入未成功',
+            text: errText,
+            icon: 'error',
+            confirmButtonText: '查看'
+          });
+          return; // ★ 寫入失敗立刻停住，不讓它假裝成功跳轉 LINE
         }
+
+        const inserted = await res.json();
+        console.log("資料庫寫入成功，回傳資料：", inserted);
       } catch (err) {
-        console.warn("前端直連異常，改由 GAS 備援:", err);
+        console.error("連線例外：", err);
+        Swal.fire('連線異常', err.message, 'error');
+        return;
       }
 
       // 2. 呼叫 GAS 伺服端發送確認信

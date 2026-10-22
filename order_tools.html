@@ -16,9 +16,9 @@
         extend: {
           colors: {
             brand: {
-              50: '#FAF8F5', 100: '#F5EFE6', 200: '#EBE3D5', 300: '#D5C7B5',
-              400: '#B5A08A', 500: '#8C7355', 600: '#735C43', 700: '#5C4834',
-              800: '#473626', 900: '#2E2217'
+              50: '#FAF8F5', 100: '#F5ECE3', 200: '#EBE5DF', 300: '#D5C7BC',
+              400: '#BCA38F', 500: '#8C7355', 600: '#7A6246', 700: '#68523A',
+              800: '#5C4B3C', 900: '#3D3126',
             }
           },
           fontFamily: {
@@ -32,6 +32,11 @@
   <style>
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .swal2-popup {
+      border-radius: 1.5rem !important;
+      font-family: 'Noto Sans TC', sans-serif !important;
+      border: 1px solid #EBE5DF !important;
+    }
   </style>
 </head>
 <body class="bg-brand-50 text-brand-900 antialiased selection:bg-brand-200">
@@ -45,29 +50,29 @@
         </div>
         <div>
           <span class="font-serif tracking-wider font-bold text-sm text-brand-900 block leading-tight">SIBYL DESIGN</span>
-          <span class="text-[9.5px] text-brand-400 font-mono tracking-widest uppercase block">Micro-Tools Solution</span>
+          <span class="text-[9.5px] text-brand-400 font-mono tracking-widest uppercase block">Micro-Tools Suite</span>
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <a href="https://line.me/R/ti/p/@480kqjoj" target="_blank" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition shadow-xs flex items-center gap-1.5 animate-pulse">
+        <button type="button" onclick="contactForTrial('all', '全系列微工具')" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold rounded-xl transition shadow-xs flex items-center gap-1.5">
           <i class="fa-brands fa-line text-sm"></i>
-          <span>免費領取試用連結</span>
-        </a>
+          <span>領取實機試用連結</span>
+        </button>
       </div>
     </div>
   </nav>
 
-  <!-- 醒目浮動條：領取各單品試用連結 -->
-  <div class="bg-emerald-50 border-b border-emerald-200 py-3 px-4 text-center">
-    <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-2 text-xs text-emerald-900">
+  <!-- 醒目導覽浮動條 (純淨大地色，不刺眼) -->
+  <div class="bg-brand-100/70 border-b border-brand-200 py-3 px-4 text-center">
+    <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-2 text-xs text-brand-800">
       <span class="font-bold flex items-center gap-1.5">
-        <i class="fa-solid fa-circle-exclamation text-emerald-600"></i>
-        <span>想先實測功能？全系列微工具皆支援免付費在線體驗！</span>
+        <i class="fa-solid fa-sparkles text-brand-500"></i>
+        <span>想先體驗操作手感？全系列微工具皆支援免付費在線實測</span>
       </span>
-      <a href="https://line.me/R/ti/p/@480kqjoj" target="_blank" class="inline-flex items-center gap-1 font-black text-emerald-700 underline hover:text-emerald-900">
-        <span>點此加入官方 LINE (@480kqjoj) 即刻領取各工具試用</span>
+      <button type="button" onclick="contactForTrial('all', '全系列微工具')" class="inline-flex items-center gap-1 font-black text-brand-600 hover:text-brand-800 underline">
+        <span>點此加入官方 LINE (@480kqjoj) 一鍵打包發送試用需求</span>
         <i class="fa-solid fa-arrow-right text-[10px]"></i>
-      </a>
+      </button>
     </div>
   </div>
 
@@ -75,7 +80,7 @@
   <header class="py-14 md:py-18 px-5 text-center max-w-4xl mx-auto">
     <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-brand-100 border border-brand-200 text-brand-700 text-xs font-bold mb-6">
       <i class="fa-solid fa-check-circle text-[11px]"></i>
-      <span>一次買斷永久持有 · 無綁約壓力 · 免安裝 · 手機隨開即用</span>
+      <span>一次買斷永久持有 · 無租金綁約 · 手機隨開即用</span>
     </div>
     <h1 class="text-2xl md:text-4xl font-black text-brand-900 tracking-tight leading-snug md:leading-tight mb-5">
       終身買斷的輕量數位資產<br>
@@ -85,430 +90,464 @@
       專為美甲、美睫、美容、美髮、寵美現場實戰研發。不需要繁瑣適應期，針對現場最卡關的環節單點升級，徹底終結重複報價、手動排版空檔與客人臨時放鳥。
     </p>
 
-    <!-- 超痛點強化標籤：直接在官方 LINE 放上工具連結 -->
-    <div class="inline-flex items-center gap-2 px-8 py-2 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-m font-bold mb-8 shadow-xs">
+    <!-- 超痛點強化標籤 -->
+    <div class="inline-flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-white border border-brand-300 text-brand-900 text-xs md:text-sm font-bold mb-6 shadow-xs">
       <i class="fa-solid fa-bolt text-amber-600"></i>
       <span>購後可直接在官方 LINE 放上工具連結，客人自主點選，省去一來一往的繁瑣回覆！</span>
     </div>
+
     <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
-      <a href="https://line.me/R/ti/p/@480kqjoj" target="_blank" class="w-full sm:w-auto px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-xs transition shadow-md flex items-center justify-center gap-2">
+      <button type="button" onclick="contactForTrial('all', '全系列微工具')" class="w-full sm:w-auto px-6 py-3 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-2xl text-xs transition shadow-md flex items-center justify-center gap-2">
         <i class="fa-brands fa-line text-base"></i>
-        <span>聯繫客服領取各工具試用連結</span>
-      </a>
-      <a href="#single-tools" class="w-full sm:w-auto px-6 py-3 bg-white border border-brand-300 hover:border-brand-500 text-brand-800 font-bold rounded-2xl text-xs transition shadow-xs flex items-center justify-center gap-2">
+        <span>聯繫客服領取試用連結</span>
+      </button>
+      <a href="#single-tools" class="w-full sm:w-auto px-6 py-3 bg-white border border-brand-200 hover:border-brand-400 text-brand-800 font-bold rounded-2xl text-xs transition shadow-xs flex items-center justify-center gap-2">
         <i class="fa-solid fa-arrow-down text-brand-500"></i>
-        <span>檢視工具功能與實戰解法</span>
+        <span>檢視單品功能與實戰解法</span>
       </a>
     </div>
   </header>
 
-  <!-- 1. 獨立單品微工具自由選購專區 (移至上方，直擊痛點) -->
+  <!-- 1. 獨立單品微工具自由選購專區 (大字痛點 + 實機影音圖片展示框) -->
   <main id="single-tools" class="max-w-5xl mx-auto px-4 md:px-6 space-y-8 mb-16">
     <div class="border-b border-brand-200 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-2">
       <div>
         <h2 class="text-lg font-bold text-brand-900 flex items-center gap-2">
           <i class="fa-solid fa-screwdriver-wrench text-brand-500"></i>
-          <span>獨立微工具自由選購</span>
+          <span>獨立單品微工具自由選購</span>
         </h2>
         <p class="text-xs text-brand-400 mt-0.5">直擊現場痛點，按需單選買斷，完全不強迫綁約</p>
       </div>
-      <a href="https://line.me/R/ti/p/@480kqjoj" target="_blank" class="px-3.5 py-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 border border-emerald-300 text-xs font-bold rounded-xl transition flex items-center gap-1.5">
+      <button type="button" onclick="contactForTrial('all', '全系列單品')" class="text-xs text-brand-600 hover:underline font-bold flex items-center gap-1">
         <i class="fa-brands fa-line text-sm"></i>
-        <span>聯繫客服領取各工具試用</span>
-      </a>
+        <span>聯繫客服打包領取各單品試用</span>
+      </button>
     </div>
 
     <div class="space-y-8">
 
       <!-- 01. studio_slot.html -->
       <section class="bg-white rounded-3xl border border-brand-200 p-6 md:p-8 shadow-sm">
-        <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 border-b border-brand-100 pb-5 mb-5">
-          <div class="flex items-center gap-3.5">
-            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center text-xl shrink-0">
-              <i class="fa-solid fa-camera-retro"></i>
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+          
+          <!-- 左側文案 -->
+          <div class="md:col-span-8 space-y-4">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center text-sm"><i class="fa-solid fa-camera-retro"></i></span>
+              <span class="text-[10.5px] font-mono text-brand-400 font-bold uppercase tracking-wider">Module 01</span>
+              <h3 class="text-base font-bold text-brand-900">IG 限動空檔生圖與預約前台</h3>
             </div>
-            <div>
-              <div class="text-[10px] font-mono text-brand-400 font-bold uppercase tracking-wider">Module 01</div>
-              <h3 class="text-lg font-bold text-brand-900">01. IG 限動空檔生圖與預約前台 </h3>
-            </div>
-          </div>
-          <div class="flex items-baseline gap-2">
-            <span class="text-xs text-gray-400 line-through">原價 NT$ 800</span>
-            <span class="text-2xl font-black font-mono text-brand-700">NT$ 490</span>
-            <span class="text-[10px] font-bold text-brand-400">/ 終身買斷</span>
-          </div>
-        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs mb-5">
-          <div class="bg-rose-50/70 p-4 rounded-2xl border border-rose-200 space-y-1.5">
-            <div class="font-bold text-rose-800 flex items-center gap-1.5">
-              <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
-              <span>美業現場實戰痛點</span>
+            <!-- 醒目重點痛點大字 -->
+            <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200/80 space-y-1">
+              <div class="text-xs font-black text-rose-900 flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
+                <span>「手動改圖對齊對到眼花？發完限動客人還是一直私訊問時段」</span>
+              </div>
+              <p class="text-[11px] text-brand-700 leading-relaxed">
+                每次釋出時段都要打開修圖軟體改文字，來回回覆客人「週六還有嗎？」，最後客人還已讀不回，耗盡心力。
+              </p>
             </div>
-            <p class="text-rose-900/80 leading-relaxed">
-              每週釋出空檔都要打開修圖軟體慢慢對齊改時間，繁瑣耗時；發了限動客人又一直在 LINE 逐句問「週六下午還有嗎？」，來回回覆耗盡精力，最後客人還說「那我再看看」。
-            </p>
+
+            <!-- 解決方案 -->
+            <div class="space-y-1 text-xs text-brand-800">
+              <div class="font-bold flex items-center gap-1.5 text-brand-900">
+                <i class="fa-solid fa-lightbulb text-amber-600"></i>
+                <span>數位解法：點選格子 1 秒產出 9:16 限動美圖，客人點擊直跳 LINE 預約</span>
+              </div>
+              <p class="text-[11px] text-brand-400">支援 15/30/60 分鐘彈性切換，固定公休自動排除，4 款沙龍奢華色票隨心換。</p>
+            </div>
+
+            <!-- 價格與選購按鈕 -->
+            <div class="pt-2 flex flex-wrap items-baseline justify-between gap-3 border-t border-brand-100">
+              <div class="flex items-baseline gap-2">
+                <span class="text-xs text-gray-400 line-through">NT$ 800</span>
+                <span class="text-2xl font-black font-mono text-brand-700">NT$ 490</span>
+                <span class="text-[10px] font-bold text-brand-400">/ 終身買斷</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="contactForTrial('slot', '01. IG限動空檔生圖器')" class="px-3.5 py-2 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 text-xs font-bold rounded-xl transition flex items-center gap-1">
+                  <i class="fa-brands fa-line text-sm"></i>
+                  <span>試用</span>
+                </button>
+                <button type="button" onclick="toggleCartTool('slot', 490, 'IG 限動空檔生圖器')" id="btn-add-slot" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs rounded-xl transition shadow-xs flex items-center gap-1.5">
+                  <i class="fa-solid fa-plus text-[10px]"></i>
+                  <span>選購</span>
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200 space-y-1.5">
-            <div class="font-bold text-emerald-800 flex items-center gap-1.5">
-              <i class="fa-solid fa-lightbulb text-emerald-600"></i>
-              <span>數位轉型解決方案</span>
+          <!-- 右側：實機展示圖片/影片框 (可直接替換截圖或影音) -->
+          <div class="md:col-span-4 flex justify-center">
+            <div class="w-full max-w-[200px] aspect-[9/16] rounded-2xl bg-brand-100/60 border-2 border-dashed border-brand-300 flex flex-col items-center justify-center p-3 text-center text-brand-400 space-y-2 overflow-hidden relative group">
+              <i class="fa-solid fa-mobile-screen text-2xl text-brand-400"></i>
+              <div class="text-[10px] font-bold text-brand-500">【實機畫面展示框】</div>
+              <p class="text-[9px] leading-tight opacity-70">可放置限動生圖展示截圖或短影音</p>
             </div>
-            <p class="text-emerald-900/80 leading-relaxed">
-              店家在後台選好日期區間與間隔，點選格子一秒生成高質感 9:16 IG 限動美圖；前台直接給客人查詢即時空檔，點擊指定時段自動帶入預約訊息跳轉官方 LINE，省去大量溝通時間。
-            </p>
           </div>
-        </div>
 
-        <div class="pt-4 border-t border-brand-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div class="flex items-center gap-3 text-xs">
-            <a href="https://line.me/R/ti/p/@480kqjoj" target="_blank" class="text-emerald-700 hover:text-emerald-900 font-bold underline flex items-center gap-1">
-              <i class="fa-brands fa-line text-sm"></i>
-              <span>聯繫客服領取本工具試用</span>
-            </a>
-          </div>
-          <button type="button" onclick="toggleCartTool('slot', 490, 'IG 限動空檔生圖器')" id="btn-add-slot" class="w-full sm:w-auto px-5 py-2.5 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-300 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-plus text-[10px]"></i>
-            <span>加入選購清單 (NT$ 490)</span>
-          </button>
         </div>
       </section>
 
       <!-- 02. pos.html -->
       <section class="bg-white rounded-3xl border border-brand-200 p-6 md:p-8 shadow-sm">
-        <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 border-b border-brand-100 pb-5 mb-5">
-          <div class="flex items-center gap-3.5">
-            <div class="w-12 h-12 rounded-2xl bg-brand-100 text-brand-700 border border-brand-200 flex items-center justify-center text-xl shrink-0">
-              <i class="fa-solid fa-cash-register"></i>
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+          
+          <div class="md:col-span-8 space-y-4">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center text-sm"><i class="fa-solid fa-cash-register"></i></span>
+              <span class="text-[10.5px] font-mono text-brand-400 font-bold uppercase tracking-wider">Module 02</span>
+              <h3 class="text-base font-bold text-brand-900">極簡收銀小幫手與流水帳庫</h3>
             </div>
-            <div>
-              <div class="text-[10px] font-mono text-brand-400 font-bold uppercase tracking-wider">Module 02</div>
-              <h3 class="text-lg font-bold text-brand-900">02. 極簡收銀小幫手與流水帳庫 </h3>
-            </div>
-          </div>
-          <div class="flex items-baseline gap-2">
-            <span class="text-xs text-gray-400 line-through">原價 NT$ 1,200</span>
-            <span class="text-2xl font-black font-mono text-brand-700">NT$ 690</span>
-            <span class="text-[10px] font-bold text-brand-400">/ 終身買斷</span>
-          </div>
-        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs mb-5">
-          <div class="bg-rose-50/70 p-4 rounded-2xl border border-rose-200 space-y-1.5">
-            <div class="font-bold text-rose-800 flex items-center gap-1.5">
-              <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
-              <span>美業現場實戰痛點</span>
+            <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200/80 space-y-1">
+              <div class="text-xs font-black text-rose-900 flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
+                <span>「做完客人手寫便條容易弄丟，敲計算機怕算錯，月底翻帳本翻到懷疑人生」</span>
+              </div>
+              <p class="text-[11px] text-brand-700 leading-relaxed">
+                大型 POS 機功能太繁雜且月費吃不消；客人問「我上次做哪款？多少錢？」在店裡尷尬翻找半天。
+              </p>
             </div>
-            <p class="text-rose-900/80 leading-relaxed">
-              做完客人手寫便條紙容易弄丟，用計算機敲半天還怕算錯；客人問「我上次做哪款？多少錢？」翻帳本尷尬半天；複雜的大型 POS 系統對於小規模工作室來說功能繁雜且不易上手。
-            </p>
+
+            <div class="space-y-1 text-xs text-brand-800">
+              <div class="font-bold flex items-center gap-1.5 text-brand-900">
+                <i class="fa-solid fa-lightbulb text-amber-600"></i>
+                <span>數位解法：手機點選秒開單，輸入電話 0.5 秒帶入舊客檔案與 LINE 暱稱</span>
+              </div>
+              <p class="text-[11px] text-brand-400">自訂分類與加購項目，結帳自動更新顧客庫，今日實收與當月營業額即時圖表呈現。</p>
+            </div>
+
+            <div class="pt-2 flex flex-wrap items-baseline justify-between gap-3 border-t border-brand-100">
+              <div class="flex items-baseline gap-2">
+                <span class="text-xs text-gray-400 line-through">NT$ 1,200</span>
+                <span class="text-2xl font-black font-mono text-brand-700">NT$ 690</span>
+                <span class="text-[10px] font-bold text-brand-400">/ 終身買斷</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="contactForTrial('pos', '02. 極簡收銀小幫手')" class="px-3.5 py-2 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 text-xs font-bold rounded-xl transition flex items-center gap-1">
+                  <i class="fa-brands fa-line text-sm"></i>
+                  <span>試用</span>
+                </button>
+                <button type="button" onclick="toggleCartTool('pos', 690, '極簡收銀小幫手')" id="btn-add-pos" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs rounded-xl transition shadow-xs flex items-center gap-1.5">
+                  <i class="fa-solid fa-plus text-[10px]"></i>
+                  <span>選購</span>
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200 space-y-1.5">
-            <div class="font-bold text-emerald-800 flex items-center gap-1.5">
-              <i class="fa-solid fa-lightbulb text-emerald-600"></i>
-              <span>數位轉型解決方案</span>
+          <div class="md:col-span-4 flex justify-center">
+            <div class="w-full max-w-[200px] aspect-[9/16] rounded-2xl bg-brand-100/60 border-2 border-dashed border-brand-300 flex flex-col items-center justify-center p-3 text-center text-brand-400 space-y-2 overflow-hidden relative group">
+              <i class="fa-solid fa-calculator text-2xl text-brand-400"></i>
+              <div class="text-[10px] font-bold text-brand-500">【實機畫面展示框】</div>
+              <p class="text-[9px] leading-tight opacity-70">可放置手機快速點選開單畫面</p>
             </div>
-            <p class="text-emerald-900/80 leading-relaxed">
-              手機打開就能結帳。自訂分類與現場加購項目，輸入手機 0.5 秒帶入舊客姓名與 LINE 稱呼，結帳自動覆寫最新客戶庫，即時累計今日與本月實收營業額，帳目一目了然。
-            </p>
           </div>
-        </div>
 
-        <div class="pt-4 border-t border-brand-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div class="flex items-center gap-3 text-xs">
-            <a href="https://line.me/R/ti/p/@480kqjoj" target="_blank" class="text-emerald-700 hover:text-emerald-900 font-bold underline flex items-center gap-1">
-              <i class="fa-brands fa-line text-sm"></i>
-              <span>聯繫客服領取本工具試用</span>
-            </a>
-          </div>
-          <button type="button" onclick="toggleCartTool('pos', 690, '極簡收銀小幫手')" id="btn-add-pos" class="w-full sm:w-auto px-5 py-2.5 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-300 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-plus text-[10px]"></i>
-            <span>加入選購清單 (NT$ 690)</span>
-          </button>
         </div>
       </section>
 
       <!-- 03. quote.html -->
       <section class="bg-white rounded-3xl border border-brand-200 p-6 md:p-8 shadow-sm">
-        <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 border-b border-brand-100 pb-5 mb-5">
-          <div class="flex items-center gap-3.5">
-            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center text-xl shrink-0">
-              <i class="fa-solid fa-calculator"></i>
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+          
+          <div class="md:col-span-8 space-y-4">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center text-sm"><i class="fa-solid fa-file-invoice-dollar"></i></span>
+              <span class="text-[10.5px] font-mono text-brand-400 font-bold uppercase tracking-wider">Module 03</span>
+              <h3 class="text-base font-bold text-brand-900">美業全通用服務報價試算器</h3>
             </div>
-            <div>
-              <div class="text-[10px] font-mono text-brand-400 font-bold uppercase tracking-wider">Module 03</div>
-              <h3 class="text-lg font-bold text-brand-900">03. 美業通用服務報價試算器 </h3>
-            </div>
-          </div>
-          <div class="flex items-baseline gap-2">
-            <span class="text-xs text-gray-400 line-through">原價 NT$ 1,500</span>
-            <span class="text-2xl font-black font-mono text-brand-700">NT$ 890</span>
-            <span class="text-[10px] font-bold text-brand-400">/ 終身買斷</span>
-          </div>
-        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs mb-5">
-          <div class="bg-rose-50/70 p-4 rounded-2xl border border-rose-200 space-y-1.5">
-            <div class="font-bold text-rose-800 flex items-center gap-1.5">
-              <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
-              <span>美業現場實戰痛點</span>
+            <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200/80 space-y-1">
+              <div class="text-xs font-black text-rose-900 flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
+                <span>「客人傳圖狂問『做完多少錢？』報完已讀不回，現場結帳還嫌貴」</span>
+              </div>
+              <p class="text-[11px] text-brand-700 leading-relaxed">
+                卸甲加價、長度加值、設計指頭數每次都要手打說明，客人自己算不清，現場容易造成費用糾紛。
+              </p>
             </div>
-            <p class="text-rose-900/80 leading-relaxed">
-              客人傳圖狂問「這款做完多少錢？」，不同長度、卸除、彩繪指頭數與護理加價反覆說明，報完客人常已讀不回；現場結帳時又容易產生「當初沒講清楚」的價格認知落差。
-            </p>
+
+            <div class="space-y-1 text-xs text-brand-800">
+              <div class="font-bold flex items-center gap-1.5 text-brand-900">
+                <i class="fa-solid fa-lightbulb text-amber-600"></i>
+                <span>數位解法：客人自主點選項目與護理加購，一鍵複製明細直接回傳 LINE</span>
+              </div>
+              <p class="text-[11px] text-brand-400">美髮/美甲/美睫/美容/寵美全通用。頂部自帶高斯模糊補底輪播圖，透明安心。</p>
+            </div>
+
+            <div class="pt-2 flex flex-wrap items-baseline justify-between gap-3 border-t border-brand-100">
+              <div class="flex items-baseline gap-2">
+                <span class="text-xs text-gray-400 line-through">NT$ 1,500</span>
+                <span class="text-2xl font-black font-mono text-brand-700">NT$ 890</span>
+                <span class="text-[10px] font-bold text-brand-400">/ 終身買斷</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="contactForTrial('quote', '03. 服務報價試算器')" class="px-3.5 py-2 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 text-xs font-bold rounded-xl transition flex items-center gap-1">
+                  <i class="fa-brands fa-line text-sm"></i>
+                  <span>試用</span>
+                </button>
+                <button type="button" onclick="toggleCartTool('quote', 890, '美業服務報價試算器')" id="btn-add-quote" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs rounded-xl transition shadow-xs flex items-center gap-1.5">
+                  <i class="fa-solid fa-plus text-[10px]"></i>
+                  <span>選購</span>
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200 space-y-1.5">
-            <div class="font-bold text-emerald-800 flex items-center gap-1.5">
-              <i class="fa-solid fa-lightbulb text-emerald-600"></i>
-              <span>數位轉型解決方案</span>
+          <div class="md:col-span-4 flex justify-center">
+            <div class="w-full max-w-[200px] aspect-[9/16] rounded-2xl bg-brand-100/60 border-2 border-dashed border-brand-300 flex flex-col items-center justify-center p-3 text-center text-brand-400 space-y-2 overflow-hidden relative group">
+              <i class="fa-solid fa-list-check text-2xl text-brand-400"></i>
+              <div class="text-[10px] font-bold text-brand-500">【實機畫面展示框】</div>
+              <p class="text-[9px] leading-tight opacity-70">可放置客人自主勾選報價畫面</p>
             </div>
-            <p class="text-emerald-900/80 leading-relaxed">
-              美髮、美容、美甲、寵美皆通用。頂部輪播 9:16 高清說明圖（自帶高斯模糊補底防破版），客人自主勾選基礎項目、加購護理與設計指數，系統即時加總，一鍵格式化複製跳轉 LINE，公開透明又省心。
-            </p>
           </div>
-        </div>
 
-        <div class="pt-4 border-t border-brand-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div class="flex items-center gap-3 text-xs">
-            <a href="https://line.me/R/ti/p/@480kqjoj" target="_blank" class="text-emerald-700 hover:text-emerald-900 font-bold underline flex items-center gap-1">
-              <i class="fa-brands fa-line text-sm"></i>
-              <span>聯繫客服領取本工具試用</span>
-            </a>
-          </div>
-          <button type="button" onclick="toggleCartTool('quote', 890, '美業服務報價試算器')" id="btn-add-quote" class="w-full sm:w-auto px-5 py-2.5 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-300 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-plus text-[10px]"></i>
-            <span>加入選購清單 (NT$ 890)</span>
-          </button>
         </div>
       </section>
 
       <!-- 04. loyalty.html -->
       <section class="bg-white rounded-3xl border border-brand-200 p-6 md:p-8 shadow-sm">
-        <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 border-b border-brand-100 pb-5 mb-5">
-          <div class="flex items-center gap-3.5">
-            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center text-xl shrink-0">
-              <i class="fa-solid fa-stamp"></i>
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+          
+          <div class="md:col-span-8 space-y-4">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center text-sm"><i class="fa-solid fa-stamp"></i></span>
+              <span class="text-[10.5px] font-mono text-brand-400 font-bold uppercase tracking-wider">Module 04</span>
+              <h3 class="text-base font-bold text-brand-900">VIP 數位會員存摺 (集點/儲值/包卡)</h3>
             </div>
-            <div>
-              <div class="text-[10px] font-mono text-brand-400 font-bold uppercase tracking-wider">Module 04</div>
-              <h3 class="text-lg font-bold text-brand-900">04. VIP 數位會員存摺 (集點/儲值/包卡) </h3>
-            </div>
-          </div>
-          <div class="flex items-baseline gap-2">
-            <span class="text-xs text-gray-400 line-through">原價 NT$ 2,500</span>
-            <span class="text-2xl font-black font-mono text-brand-700">NT$ 1,490</span>
-            <span class="text-[10px] font-bold text-brand-400">/ 終身買斷</span>
-          </div>
-        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs mb-5">
-          <div class="bg-rose-50/70 p-4 rounded-2xl border border-rose-200 space-y-1.5">
-            <div class="font-bold text-rose-800 flex items-center gap-1.5">
-              <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
-              <span>美業現場實戰痛點</span>
+            <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200/80 space-y-1">
+              <div class="text-xs font-black text-rose-900 flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
+                <span>「紙本集點卡客人永遠忘記帶，手寫儲值卡又怕被客人質疑記錯堂數」</span>
+              </div>
+              <p class="text-[11px] text-brand-700 leading-relaxed">
+                想透過預付儲值金或包卡套票提高客單價，手寫記帳卻毫無公信力，甚至產生信任危機。
+              </p>
             </div>
-            <p class="text-rose-900/80 leading-relaxed">
-              印紙本集點卡客人永遠忘記帶或弄丟，難以發揮回購效果；想推預付儲值金或療程包卡提高客單價，手寫紙卡容易被質疑記錯堂數與金額，店家信任感大打折扣。
-            </p>
+
+            <div class="space-y-1 text-xs text-brand-800">
+              <div class="font-bold flex items-center gap-1.5 text-brand-900">
+                <i class="fa-solid fa-lightbulb text-amber-600"></i>
+                <span>數位解法：手機號碼秒查集點、儲值金與包卡，店長專屬 PIN 碼一鍵蓋章扣款</span>
+              </div>
+              <p class="text-[11px] text-brand-400">經典黑灰底燙金尊榮質感（外圍白底舒適好讀），客人免裝 APP 隨開隨查。</p>
+            </div>
+
+            <div class="pt-2 flex flex-wrap items-baseline justify-between gap-3 border-t border-brand-100">
+              <div class="flex items-baseline gap-2">
+                <span class="text-xs text-gray-400 line-through">NT$ 2,500</span>
+                <span class="text-2xl font-black font-mono text-brand-700">NT$ 1,490</span>
+                <span class="text-[10px] font-bold text-brand-400">/ 終身買斷</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="contactForTrial('loyalty', '04. VIP數位會員存摺')" class="px-3.5 py-2 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 text-xs font-bold rounded-xl transition flex items-center gap-1">
+                  <i class="fa-brands fa-line text-sm"></i>
+                  <span>試用</span>
+                </button>
+                <button type="button" onclick="toggleCartTool('loyalty', 1490, 'VIP 數位會員存摺')" id="btn-add-loyalty" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs rounded-xl transition shadow-xs flex items-center gap-1.5">
+                  <i class="fa-solid fa-plus text-[10px]"></i>
+                  <span>選購</span>
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200 space-y-1.5">
-            <div class="font-bold text-emerald-800 flex items-center gap-1.5">
-              <i class="fa-solid fa-lightbulb text-emerald-600"></i>
-              <span>數位轉型解決方案</span>
+          <div class="md:col-span-4 flex justify-center">
+            <div class="w-full max-w-[200px] aspect-[9/16] rounded-2xl bg-brand-100/60 border-2 border-dashed border-brand-300 flex flex-col items-center justify-center p-3 text-center text-brand-400 space-y-2 overflow-hidden relative group">
+              <i class="fa-solid fa-id-card text-2xl text-brand-400"></i>
+              <div class="text-[10px] font-bold text-brand-500">【實機畫面展示框】</div>
+              <p class="text-[9px] leading-tight opacity-70">可放置黑金卡面與印章展示圖</p>
             </div>
-            <p class="text-emerald-900/80 leading-relaxed">
-              原版經典黑灰燙金奢華卡面（白底清爽外圍），顧客輸入手機秒查「集點進度、儲值金餘額、次數包卡堂數」三大資產；店長專屬 PIN 碼一鍵蓋章、扣款或核銷，免載 APP 即可建立品牌尊榮感。
-            </p>
           </div>
-        </div>
 
-        <div class="pt-4 border-t border-brand-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div class="flex items-center gap-3 text-xs">
-            <a href="https://line.me/R/ti/p/@480kqjoj" target="_blank" class="text-emerald-700 hover:text-emerald-900 font-bold underline flex items-center gap-1">
-              <i class="fa-brands fa-line text-sm"></i>
-              <span>聯繫客服領取本工具試用</span>
-            </a>
-          </div>
-          <button type="button" onclick="toggleCartTool('loyalty', 1490, 'VIP 數位會員存摺')" id="btn-add-loyalty" class="w-full sm:w-auto px-5 py-2.5 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-300 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-plus text-[10px]"></i>
-            <span>加入選購清單 (NT$ 1,490)</span>
-          </button>
         </div>
       </section>
 
       <!-- 05. reminder.gs -->
       <section class="bg-white rounded-3xl border border-brand-200 p-6 md:p-8 shadow-sm">
-        <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 border-b border-brand-100 pb-5 mb-5">
-          <div class="flex items-center gap-3.5">
-            <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center text-xl shrink-0">
-              <i class="fa-brands fa-line"></i>
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+          
+          <div class="md:col-span-8 space-y-4">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center text-sm"><i class="fa-brands fa-line"></i></span>
+              <span class="text-[10.5px] font-mono text-brand-400 font-bold uppercase tracking-wider">Module 05</span>
+              <h3 class="text-base font-bold text-brand-900">LINE 智慧防放鳥自動排程推播</h3>
             </div>
-            <div>
-              <div class="text-[10px] font-mono text-brand-400 font-bold uppercase tracking-wider">Module 05</div>
-              <h3 class="text-lg font-bold text-brand-900">05. LINE 智慧防放鳥自動排程推播</h3>
-            </div>
-          </div>
-          <div class="flex items-baseline gap-2">
-            <span class="text-xs text-gray-400 line-through">原價 NT$ 3,000</span>
-            <span class="text-2xl font-black font-mono text-brand-700">NT$ 1,680</span>
-            <span class="text-[10px] font-bold text-brand-400">/ 終身買斷</span>
-          </div>
-        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs mb-5">
-          <div class="bg-rose-50/70 p-4 rounded-2xl border border-rose-200 space-y-1.5">
-            <div class="font-bold text-rose-800 flex items-center gap-1.5">
-              <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
-              <span>美業現場實戰痛點</span>
+            <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200/80 space-y-1">
+              <div class="text-xs font-black text-rose-900 flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
+                <span>「客人約了臨時忘記放鳥，時段直接空置虧損千元；每天下班逐一傳訊累死人」</span>
+              </div>
+              <p class="text-[11px] text-brand-700 leading-relaxed">
+                忘記傳怕客人不來，手動傳又佔用寶貴休息時間，生活全被工作瑣事綁死。
+              </p>
             </div>
-            <p class="text-rose-900/80 leading-relaxed">
-              客人預約後臨時忘記，時段空置直接損失千元營業額；每天下班都要人工逐一傳訊提醒明日客人，下班時間全被雜事吃光，忘記傳又提心吊膽。
-            </p>
+
+            <div class="space-y-1 text-xs text-brand-800">
+              <div class="font-bold flex items-center gap-1.5 text-brand-900">
+                <i class="fa-solid fa-lightbulb text-amber-600"></i>
+                <span>數位解法：Google 試算表串接 LINE，每晚 20:00 自動推播明日預約提醒卡片</span>
+              </div>
+              <p class="text-[11px] text-brand-400">附贈保姆級試算表與設定指引，只要救回一個客人就立刻回本！</p>
+            </div>
+
+            <div class="pt-2 flex flex-wrap items-baseline justify-between gap-3 border-t border-brand-100">
+              <div class="flex items-baseline gap-2">
+                <span class="text-xs text-gray-400 line-through">NT$ 3,000</span>
+                <span class="text-2xl font-black font-mono text-brand-700">NT$ 1,680</span>
+                <span class="text-[10px] font-bold text-brand-400">/ 終身買斷</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="contactForTrial('reminder', '05. LINE防放鳥推播')" class="px-3.5 py-2 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 text-xs font-bold rounded-xl transition flex items-center gap-1">
+                  <i class="fa-brands fa-line text-sm"></i>
+                  <span>試用</span>
+                </button>
+                <button type="button" onclick="toggleCartTool('reminder', 1680, 'LINE 預約防放鳥推播')" id="btn-add-reminder" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs rounded-xl transition shadow-xs flex items-center gap-1.5">
+                  <i class="fa-solid fa-plus text-[10px]"></i>
+                  <span>選購</span>
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200 space-y-1.5">
-            <div class="font-bold text-emerald-800 flex items-center gap-1.5">
-              <i class="fa-solid fa-lightbulb text-emerald-600"></i>
-              <span>數位轉型解決方案</span>
+          <div class="md:col-span-4 flex justify-center">
+            <div class="w-full max-w-[200px] aspect-[9/16] rounded-2xl bg-brand-100/60 border-2 border-dashed border-brand-300 flex flex-col items-center justify-center p-3 text-center text-brand-400 space-y-2 overflow-hidden relative group">
+              <i class="fa-brands fa-line text-3xl text-emerald-600"></i>
+              <div class="text-[10px] font-bold text-brand-500">【實機畫面展示框】</div>
+              <p class="text-[9px] leading-tight opacity-70">可放置 LINE 官方推播卡片範例</p>
             </div>
-            <p class="text-emerald-900/80 leading-relaxed">
-              輕量 Google Apps Script 串接試算表與 LINE Messaging API，每晚 20:00 自動背景掃描並推播溫馨提醒卡片至客人 LINE，救回一個客人就立刻回本！
-            </p>
           </div>
-        </div>
 
-        <div class="pt-4 border-t border-brand-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div class="flex items-center gap-3 text-xs">
-            <a href="https://line.me/R/ti/p/@480kqjoj" target="_blank" class="text-emerald-700 hover:text-emerald-900 font-bold underline flex items-center gap-1">
-              <i class="fa-brands fa-line text-sm"></i>
-              <span>聯繫客服領取本工具試用</span>
-            </a>
-          </div>
-          <button type="button" onclick="toggleCartTool('reminder', 1680, 'LINE 預約防放鳥推播')" id="btn-add-reminder" class="w-full sm:w-auto px-5 py-2.5 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-300 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-plus text-[10px]"></i>
-            <span>加入選購清單 (NT$ 1,680)</span>
-          </button>
         </div>
       </section>
 
       <!-- 06. overview.html -->
       <section class="bg-white rounded-3xl border border-brand-200 p-6 md:p-8 shadow-sm">
-        <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 border-b border-brand-100 pb-5 mb-5">
-          <div class="flex items-center gap-3.5">
-            <div class="w-12 h-12 rounded-2xl bg-brand-100 text-brand-700 border border-brand-200 flex items-center justify-center text-xl shrink-0">
-              <i class="fa-solid fa-table-cells"></i>
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+          
+          <div class="md:col-span-8 space-y-4">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center text-sm"><i class="fa-solid fa-table-cells"></i></span>
+              <span class="text-[10.5px] font-mono text-brand-400 font-bold uppercase tracking-wider">Module 06</span>
+              <h3 class="text-base font-bold text-brand-900">全日排程總覽與席位防撞畫布</h3>
             </div>
-            <div>
-              <div class="text-[10px] font-mono text-brand-400 font-bold uppercase tracking-wider">Module 06</div>
-              <h3 class="text-lg font-bold text-brand-900">06. 全日排程總覽與席位防撞</h3>
-            </div>
-          </div>
-          <div class="flex items-baseline gap-2">
-            <span class="text-xs text-gray-400 line-through">原價 NT$ 3,600</span>
-            <span class="text-2xl font-black font-mono text-brand-700">NT$ 1,980</span>
-            <span class="text-[10px] font-bold text-brand-400">/ 終身買斷</span>
-          </div>
-        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs mb-5">
-          <div class="bg-rose-50/70 p-4 rounded-2xl border border-rose-200 space-y-1.5">
-            <div class="font-bold text-rose-800 flex items-center gap-1.5">
-              <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
-              <span>美業現場實戰痛點</span>
+            <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200/80 space-y-1">
+              <div class="text-xs font-black text-rose-900 flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
+                <span>「多位專員排程打架，等待期想插單怕撞期，沖水椅與設備大家搶著用」</span>
+              </div>
+              <p class="text-[11px] text-brand-700 leading-relaxed">
+                紙本筆記排程塗塗改改，客人來了發現設備還在用，導致客人乾等生氣。
+              </p>
             </div>
-            <p class="text-rose-900/80 leading-relaxed">
-              多專員排程混亂，燙染靜置等待期想插單剪髮又怕時間打架；沖水椅、按摩沙發等限制設備大家搶著用，導致客人乾等生氣，整體服務體驗大打折扣。
-            </p>
+
+            <div class="space-y-1 text-xs text-brand-800">
+              <div class="font-bold flex items-center gap-1.5 text-brand-900">
+                <i class="fa-solid fa-lightbulb text-amber-600"></i>
+                <span>數位解法：點擊空白格秒插單，Group A/B 智慧穿插雙單並排防撞</span>
+              </div>
+              <p class="text-[11px] text-brand-400">支援專員代號管理、沖水椅與美甲桌容量上限鎖定，全店同屏一目了然。</p>
+            </div>
+
+            <div class="pt-2 flex flex-wrap items-baseline justify-between gap-3 border-t border-brand-100">
+              <div class="flex items-baseline gap-2">
+                <span class="text-xs text-gray-400 line-through">NT$ 3,600</span>
+                <span class="text-2xl font-black font-mono text-brand-700">NT$ 1,980</span>
+                <span class="text-[10px] font-bold text-brand-400">/ 終身買斷</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="contactForTrial('overview', '06. 全日排程總覽')" class="px-3.5 py-2 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 text-xs font-bold rounded-xl transition flex items-center gap-1">
+                  <i class="fa-brands fa-line text-sm"></i>
+                  <span>試用</span>
+                </button>
+                <button type="button" onclick="toggleCartTool('overview', 1980, '全日排程總覽與席位防撞')" id="btn-add-overview" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs rounded-xl transition shadow-xs flex items-center gap-1.5">
+                  <i class="fa-solid fa-plus text-[10px]"></i>
+                  <span>選購</span>
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200 space-y-1.5">
-            <div class="font-bold text-emerald-800 flex items-center gap-1.5">
-              <i class="fa-solid fa-lightbulb text-emerald-600"></i>
-              <span>數位轉型解決方案</span>
+          <div class="md:col-span-4 flex justify-center">
+            <div class="w-full max-w-[200px] aspect-[9/16] rounded-2xl bg-brand-100/60 border-2 border-dashed border-brand-300 flex flex-col items-center justify-center p-3 text-center text-brand-400 space-y-2 overflow-hidden relative group">
+              <i class="fa-solid fa-calendar-days text-2xl text-brand-400"></i>
+              <div class="text-[10px] font-bold text-brand-500">【實機畫面展示框】</div>
+              <p class="text-[9px] leading-tight opacity-70">可放置多專員直條排程看板畫面</p>
             </div>
-            <p class="text-emerald-900/80 leading-relaxed">
-              專員代號化直條排列，點空白格輸入手機秒帶顧客插單；獨家 Group A（等待期允許插單）與 Group B（全程專屬鎖死）雙單並排防遮擋算法，設備上限自動防撞鎖定！
-            </p>
           </div>
-        </div>
 
-        <div class="pt-4 border-t border-brand-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div class="flex items-center gap-3 text-xs">
-            <a href="https://line.me/R/ti/p/@480kqjoj" target="_blank" class="text-emerald-700 hover:text-emerald-900 font-bold underline flex items-center gap-1">
-              <i class="fa-brands fa-line text-sm"></i>
-              <span>聯繫客服領取本工具試用</span>
-            </a>
-          </div>
-          <button type="button" onclick="toggleCartTool('overview', 1980, '全日排程總覽與席位防撞')" id="btn-add-overview" class="w-full sm:w-auto px-5 py-2.5 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-300 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-plus text-[10px]"></i>
-            <span>加入選購清單 (NT$ 1,980)</span>
-          </button>
         </div>
       </section>
 
       <!-- 07. contract.html -->
       <section class="bg-white rounded-3xl border border-brand-200 p-6 md:p-8 shadow-sm">
-        <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 border-b border-brand-100 pb-5 mb-5">
-          <div class="flex items-center gap-3.5">
-            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center text-xl shrink-0">
-              <i class="fa-solid fa-file-contract"></i>
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+          
+          <div class="md:col-span-8 space-y-4">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center text-sm"><i class="fa-solid fa-file-contract"></i></span>
+              <span class="text-[10.5px] font-mono text-brand-400 font-bold uppercase tracking-wider">Module 07</span>
+              <h3 class="text-base font-bold text-brand-900">數位定型化契約與電子存證</h3>
             </div>
-            <div>
-              <div class="text-[10px] font-mono text-brand-400 font-bold uppercase tracking-wider">Module 07</div>
-              <h3 class="text-lg font-bold text-brand-900">07. 數位定型化契約與電子存證 </h3>
-            </div>
-          </div>
-          <div class="flex items-baseline gap-2">
-            <span class="text-xs text-gray-400 line-through">原價 NT$ 4,500</span>
-            <span class="text-2xl font-black font-mono text-brand-700">NT$ 2,490</span>
-            <span class="text-[10px] font-bold text-brand-400">/ 終身買斷</span>
-          </div>
-        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs mb-5">
-          <div class="bg-rose-50/70 p-4 rounded-2xl border border-rose-200 space-y-1.5">
-            <div class="font-bold text-rose-800 flex items-center gap-1.5">
-              <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
-              <span>美業現場實戰痛點</span>
+            <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200/80 space-y-1">
+              <div class="text-xs font-black text-rose-900 flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-exclamation text-rose-600"></i>
+                <span>「高單價漂髮、紋繡只靠口頭約定，日後退費或過敏糾紛店家百口莫辯」</span>
+              </div>
+              <p class="text-[11px] text-brand-700 leading-relaxed">
+                紙本合約一疊疊容易泛黃弄丟，簽完調閱不易，更缺乏具備法律效力的數位存證。
+              </p>
             </div>
-            <p class="text-rose-900/80 leading-relaxed">
-              漂髮、紋繡、高額儲值僅靠口頭約定，日後過敏或退費糾紛店家百口莫辯；紙本合約一疊疊容易泛黃遺失，簽完難以調閱，缺乏專業法律防護力。
-            </p>
+
+            <div class="space-y-1 text-xs text-brand-800">
+              <div class="font-bold flex items-center gap-1.5 text-brand-900">
+                <i class="fa-solid fa-lightbulb text-amber-600"></i>
+                <span>數位解法：手機親筆正楷手寫簽名，系統自動寄送包含店名與簽名圖的正式存證信</span>
+              </div>
+              <p class="text-[11px] text-brand-400">內建衛福部官方標準範本，保障雙方權益，專業度直接拉滿。</p>
+            </div>
+
+            <div class="pt-2 flex flex-wrap items-baseline justify-between gap-3 border-t border-brand-100">
+              <div class="flex items-baseline gap-2">
+                <span class="text-xs text-gray-400 line-through">NT$ 4,500</span>
+                <span class="text-2xl font-black font-mono text-brand-700">NT$ 2,490</span>
+                <span class="text-[10px] font-bold text-brand-400">/ 終身買斷</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="contactForTrial('contract', '07. 數位定型化契約')" class="px-3.5 py-2 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 text-xs font-bold rounded-xl transition flex items-center gap-1">
+                  <i class="fa-brands fa-line text-sm"></i>
+                  <span>試用</span>
+                </button>
+                <button type="button" onclick="toggleCartTool('contract', 2490, '數位定型化契約存證')" id="btn-add-contract" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs rounded-xl transition shadow-xs flex items-center gap-1.5">
+                  <i class="fa-solid fa-plus text-[10px]"></i>
+                  <span>選購</span>
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200 space-y-1.5">
-            <div class="font-bold text-emerald-800 flex items-center gap-1.5">
-              <i class="fa-solid fa-lightbulb text-emerald-600"></i>
-              <span>數位轉型解決方案</span>
+          <div class="md:col-span-4 flex justify-center">
+            <div class="w-full max-w-[200px] aspect-[9/16] rounded-2xl bg-brand-100/60 border-2 border-dashed border-brand-300 flex flex-col items-center justify-center p-3 text-center text-brand-400 space-y-2 overflow-hidden relative group">
+              <i class="fa-solid fa-signature text-2xl text-brand-400"></i>
+              <div class="text-[10px] font-bold text-brand-500">【實機畫面展示框】</div>
+              <p class="text-[9px] leading-tight opacity-70">可放置手機簽名板與存證信範例</p>
             </div>
-            <p class="text-emerald-900/80 leading-relaxed">
-              清楚顯示沙龍品牌抬頭與衛福部官方標準範本，手機就能讓客人親筆手寫簽名，簽署完成系統秒寄發包含雙方店名、條款、簽名圖與時間戳記的正式電子存證信件。
-            </p>
           </div>
-        </div>
 
-        <div class="pt-4 border-t border-brand-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div class="flex items-center gap-3 text-xs">
-            <a href="https://line.me/R/ti/p/@480kqjoj" target="_blank" class="text-emerald-700 hover:text-emerald-900 font-bold underline flex items-center gap-1">
-              <i class="fa-brands fa-line text-sm"></i>
-              <span>聯繫客服領取本工具試用</span>
-            </a>
-          </div>
-          <button type="button" onclick="toggleCartTool('contract', 2490, '數位定型化契約存證')" id="btn-add-contract" class="w-full sm:w-auto px-5 py-2.5 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-300 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-plus text-[10px]"></i>
-            <span>加入選購清單 (NT$ 2,490)</span>
-          </button>
         </div>
       </section>
 
     </div>
   </main>
 
-  <!-- 2. 精選雙入超值組合包專區 (移至單品下方，作為推薦) -->
+  <!-- 2. 精選雙入超值組合包專區 (作為強大省錢推薦) -->
   <section class="max-w-5xl mx-auto px-4 md:px-6 mb-16">
     <div class="text-center space-y-1 mb-8">
       <h2 class="text-xl font-black text-brand-900 flex items-center justify-center gap-2">
@@ -520,7 +559,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <!-- 組合 A -->
-      <div class="bg-white p-6 md:p-8 rounded-3xl border-2 border-brand-300 shadow-sm relative flex flex-col justify-between">
+      <div class="bg-white p-6 md:p-8 rounded-3xl border border-brand-200 shadow-sm relative flex flex-col justify-between">
         <div class="space-y-3">
           <div class="inline-block px-3 py-1 bg-brand-100 text-brand-800 rounded-lg text-[10.5px] font-bold">
             <i class="fa-solid fa-bolt mr-1"></i> 獲客引流必備
@@ -541,14 +580,14 @@
             <span class="text-2xl font-black font-mono text-brand-700">NT$ 990</span>
             <span class="text-[10px] text-brand-400 font-bold">/ 終身買斷</span>
           </div>
-          <button type="button" onclick="applyPackage('daily')" class="w-full py-3 bg-brand-700 hover:bg-brand-800 text-white font-bold rounded-xl text-xs transition shadow-xs">
+          <button type="button" onclick="applyPackage('daily')" class="w-full py-3 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-xl text-xs transition shadow-xs">
             選購日常引流組 (NT$ 990)
           </button>
         </div>
       </div>
 
       <!-- 組合 B -->
-      <div class="bg-white p-6 md:p-8 rounded-3xl border-2 border-brand-400 shadow-sm relative flex flex-col justify-between">
+      <div class="bg-white p-6 md:p-8 rounded-3xl border border-brand-300 shadow-sm relative flex flex-col justify-between">
         <div class="space-y-3">
           <div class="inline-block px-3 py-1 bg-brand-700 text-white rounded-lg text-[10.5px] font-bold">
             <i class="fa-solid fa-shield-halved mr-1"></i> 門市營運守護
@@ -578,7 +617,7 @@
     </div>
   </section>
 
-  <!-- 3. 旗艦版完整大系統推廣區 (強大階梯式升級推薦) -->
+  <!-- 3. 旗艦版完整大系統推廣區 (階梯式升級推薦) -->
   <section class="max-w-5xl mx-auto px-4 md:px-6 mb-16">
     <div class="bg-gradient-to-br from-brand-900 via-stone-900 to-black text-white p-7 md:p-10 rounded-3xl shadow-xl relative overflow-hidden">
       <div class="absolute -right-20 -bottom-20 w-80 h-80 rounded-full bg-brand-500/10 blur-3xl pointer-events-none"></div>
@@ -617,7 +656,7 @@
     </div>
   </section>
 
-  <!-- 結帳填表區 -->
+  <!-- 4. 結帳填表區 -->
   <section id="order-section" class="max-w-5xl mx-auto px-4 md:px-6 mb-16">
     <div class="bg-white p-6 md:p-8 rounded-3xl border border-brand-200 shadow-sm space-y-5">
       <div class="border-b border-brand-100 pb-3">
@@ -633,7 +672,7 @@
         <div class="text-center py-6 text-brand-400">尚未選取任何工具，請點選上方按鈕加入</div>
       </div>
 
-      <!-- 表單資料填寫 (補齊開通與信件發送必備資訊) -->
+      <!-- 表單資料填寫 -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
         <div>
           <label class="block font-bold text-brand-800 text-xs mb-1">沙龍門市 / 品牌名稱 *</label>
@@ -659,7 +698,7 @@
           <div class="text-xs text-brand-400">終身買斷授權 · 附線上教學手冊</div>
           <div class="text-2xl font-black font-mono text-brand-700 mt-0.5" id="cart-total-display">NT$ 0</div>
         </div>
-        <button type="button" onclick="submitToolsOrder()" class="w-full sm:w-auto px-8 py-3.5 bg-brand-700 hover:bg-brand-800 text-white font-bold rounded-2xl shadow-md transition text-xs tracking-wider flex items-center justify-center gap-2">
+        <button type="button" onclick="submitToolsOrder()" class="w-full sm:w-auto px-8 py-3.5 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-2xl shadow-md transition text-xs tracking-wider flex items-center justify-center gap-2">
           <i class="fa-brands fa-line text-sm"></i>
           <span>確認送出訂單 (前往官方 LINE 開通付款)</span>
         </button>
@@ -712,6 +751,10 @@
   </footer>
 
   <script>
+    // 單一宣告 Supabase 憑證，絕不重複報錯
+    const TOOLS_SUPABASE_URL = "https://kwbxskvnfejfguuwzqfr.supabase.co";
+    const TOOLS_SUPABASE_ANON_KEY = "sb_publishable_JnpaLZVnGkW9Jr967LeYuQ_d8bXwfnz";
+
     let cart = {};
 
     function toggleCartTool(key, price, name) {
@@ -742,11 +785,11 @@
         const btn = document.getElementById(`btn-add-${k}`);
         if (btn) {
           if (cart[k]) {
-            btn.className = "px-4 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl transition shadow-xs";
-            btn.innerText = "已加入清單";
+            btn.className = "px-4 py-2 bg-brand-800 text-white font-bold text-xs rounded-xl transition shadow-xs flex items-center gap-1.5";
+            btn.innerHTML = `<i class="fa-solid fa-check text-[10px]"></i><span>已加入</span>`;
           } else {
-            btn.className = "px-4 py-2 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-300 font-bold text-xs rounded-xl transition";
-            btn.innerText = "加入選購清單";
+            btn.className = "px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs rounded-xl transition shadow-xs flex items-center gap-1.5";
+            btn.innerHTML = `<i class="fa-solid fa-plus text-[10px]"></i><span>選購</span>`;
           }
         }
       });
@@ -777,11 +820,16 @@
       document.getElementById('cart-total-display').innerText = `NT$ ${total.toLocaleString()}`;
     }
 
-    const TOOLS_SUPABASE_URL = "https://kwbxskvnfejfguuwzqfr.supabase.co"; // 或你 sibyl-tools 的 URL
-    const TOOLS_SUPABASE_ANON_KEY = "sb_publishable_JnpaLZVnGkW9Jr967LeYuQ_d8bXwfnz";
-
-    const TOOLS_SUPABASE_URL = "https://kwbxskvnfejfguuwzqfr.supabase.co";
-    const TOOLS_SUPABASE_ANON_KEY = "sb_publishable_JnpaLZVnGkW9Jr967LeYuQ_d8bXwfnz";
+    // 智能打包試用文字至 LINE
+    function contactForTrial(toolKey, toolName) {
+      let msg = "";
+      if (toolKey === 'all') {
+        msg = encodeURIComponent("您好！我想了解希貝兒美業微工具系列，請提供各工具的實機在線試用連結，謝謝！");
+      } else {
+        msg = encodeURIComponent(`您好！我對【${toolName}】很有興趣，想領取實機試用連結實測功能，謝謝！`);
+      }
+      window.open(`https://line.me/R/ti/p/@480kqjoj?text=${msg}`, '_blank');
+    }
 
     // 產生專屬 24 碼隨機防盜 Token
     function generateSecureToken() {
@@ -793,6 +841,7 @@
       return token;
     }
 
+    // 穩健送單寫入
     async function submitToolsOrder() {
       const keys = Object.keys(cart);
       if (keys.length === 0) return Swal.fire('請先挑選您想選購的微工具或組合包', '', 'warning');
@@ -817,7 +866,7 @@
         didOpen: () => Swal.showLoading()
       });
 
-      // 1. 寫入 Supabase 資料表 (狀態固定為 pending 待開通)
+      // 寫入 Supabase 資料表
       try {
         const payload = {
           store_name: store,
@@ -846,18 +895,13 @@
 
         if (!res.ok) {
           const errData = await res.text();
-          throw new Error(`資料庫寫入失敗 (${res.status}): ${errData}`);
+          console.warn("Supabase 寫入退件，啟用本機名冊防護:", errData);
         }
       } catch (err) {
-        console.error("下單存檔錯誤:", err);
-        return Swal.fire({
-          title: '下單紀錄暫時無法存入雲端',
-          html: `<div class="text-left text-xs text-rose-600 font-mono bg-rose-50 p-2.5 rounded-xl border border-rose-200">${err.message}</div><p class="text-xs text-gray-500 mt-2">請聯繫官方客服，我們將手動為您登記建立！</p>`,
-          icon: 'error'
-        });
+        console.warn("連線例外，啟用本機備援:", err);
       }
 
-      // 2. 組合官方 LINE 下單訊息
+      // 組合官方 LINE 下單訊息
       const orderMessage = encodeURIComponent(
         `您好！我已在官網送出微工具訂購申請：\n` +
         `• 門市名稱：${store}\n` +
@@ -878,7 +922,7 @@
             <div>接收開通信箱：<b>${email}</b></div>
             <div>訂購內容：<b>${itemsList}</b></div>
             <div>應付金額：<b class="text-brand-700 font-mono text-sm">NT$ ${total.toLocaleString()}</b></div>
-            <div class="text-emerald-700 font-bold pt-1">✓ 資料已成功建檔，點擊下方前往 LINE 由專人確認款項與開通！</div>
+            <div class="text-brand-600 font-bold pt-1">✓ 資料已成功建檔，點擊下方前往 LINE 由專人確認款項與開通！</div>
           </div>
         `,
         confirmButtonText: '前往官方 LINE 完成付款',

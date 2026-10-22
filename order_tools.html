@@ -865,38 +865,47 @@
       });
 
       // 1. 前端直接寫入 Supabase tool_stores
-      try {
-        const payload = {
-          store_name: store,
-          owner_phone: phone,
-          owner_line_name: lineName || '',
-          owner_email: email,
-          contact_info: `${phone} (${lineName || 'LINE'})`,
-          purchased_tools: keys,
-          total_paid: total,
-          is_active: false,
-          plan_status: 'pending',
-          admin_pin: '8888',
-          admin_token: secureToken
-        };
+      // 寫入 Supabase 資料表 (tool_stores)
+try {
+  const payload = {
+    store_name: store,
+    owner_phone: phone,
+    owner_line_name: lineName || '',
+    owner_email: email,
+    contact_info: `${phone} (${lineName || 'LINE'})`,
+    purchased_tools: keys,
+    total_paid: total,
+    is_active: false,
+    plan_status: 'pending',
+    admin_pin: '8888',
+    admin_token: secureToken
+  };
 
-        const res = await fetch(`${TOOLS_SUPABASE_URL}/rest/v1/tool_stores`, {
-          method: "POST",
-          headers: {
-            "apikey": TOOLS_SUPABASE_ANON_KEY,
-            "Authorization": `Bearer ${TOOLS_SUPABASE_ANON_KEY}`,
-            "Content-Type": "application/json",
-            "Prefer": "return=representation"
-          },
-          body: JSON.stringify(payload)
-        });
+  const res = await fetch(`${TOOLS_SUPABASE_URL}/rest/v1/tool_stores`, {
+    method: "POST",
+    headers: {
+      "apikey": TOOLS_SUPABASE_ANON_KEY,
+      "Authorization": `Bearer ${TOOLS_SUPABASE_ANON_KEY}`,
+      "Content-Type": "application/json",
+      "Prefer": "return=representation"
+    },
+    body: JSON.stringify(payload)
+  });
 
-        if (!res.ok) {
-          console.warn("Supabase 前端寫入回應:", await res.text());
-        }
-      } catch (err) {
-        console.warn("前端寫入連線異常:", err);
-      }
+  if (!res.ok) {
+    const errText = await res.text();
+    console.error("Supabase 寫入失敗！原因：", errText);
+    alert("資料庫寫入失敗：" + errText); // ★ 這裡如果跳出警告，就代表資料庫欄位或權限有問題！
+    return; // 寫入失敗就不應該往下走
+  } else {
+    const insertedData = await res.json();
+    console.log("Supabase 寫入成功！新增的店家：", insertedData);
+  }
+} catch (err) {
+  console.error("連線錯誤：", err);
+  alert("連線到資料庫發生錯誤：" + err.message);
+  return;
+}
 
       // 2. 呼叫 GAS：發送信件一（下單成功確認信）+ GAS 伺服器端備援建檔
       const GAS_API_URL = "https://script.google.com/macros/s/AKfycby44GCzrpN8ZpGSTNcVkI3IFMbyO7XhyE_Bf-cKMCTzDBbfYxDVaFD-pVcyc0vTykI-/exec";

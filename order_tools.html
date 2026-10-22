@@ -737,9 +737,9 @@
   </footer>
 
   <script>
-    // 1. Supabase 與 Resend API 設定 (單一宣告)
+    // 1. Supabase 與 Resend API 設定 (對齊新專案 tzqpfnrpnfzzubofoqlt)
     const TOOLS_SUPABASE_URL = "https://tzqpfnrpnfzzubofoqlt.supabase.co";
-const TOOLS_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6cXBmbnJwbmZ6enVib2ZvcWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1ODQ5ODYsImV4cCI6MjEwODE2MDk4Nn0.B-ub7DCpzF3b2gjpTrM9jdW0SLOqRPillZTmoXPuNgk";
+    const TOOLS_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6cXBmbnJwbmZ6enVib2ZvcWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1ODQ5ODYsImV4cCI6MjEwODE2MDk4Nn0.B-ub7DCpzF3b2gjpTrM9jdW0SLOqRPillZTmoXPuNgk";
     const RESEND_API_KEY = "re_GszR3BKh_HPVeDFxaubykqCV62TeGCk9u";
 
     // 2. 購物車資料結構 (支援多選複選)
@@ -810,7 +810,6 @@ const TOOLS_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOi
       document.getElementById('cart-total-display').innerText = `NT$ ${total.toLocaleString()}`;
     }
 
-    // LINE 打包諮詢文字
     function contactForTrial(toolKey, toolName) {
       let msg = "";
       if (toolKey === 'all') {
@@ -821,7 +820,6 @@ const TOOLS_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOi
       window.open(`https://line.me/R/ti/p/@480kqjoj?text=${msg}`, '_blank');
     }
 
-    // 產生專屬 24 碼隨機防盜 Token
     function generateSecureToken() {
       const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
       let token = 'adm_';
@@ -831,7 +829,7 @@ const TOOLS_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOi
       return token;
     }
 
-    // 下單送單函式 (雙保險寫入 ＋ 雙軌信件分流)
+    // 下單送單函式 (雙軌建檔：前台直寫 ＋ GAS 備援)
     async function submitToolsOrder() {
       const keys = Object.keys(cart);
       if (keys.length === 0) return Swal.fire('請先挑選您想選購的微工具或組合包', '', 'warning');
@@ -849,7 +847,6 @@ const TOOLS_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOi
       const itemsList = Object.values(cart).map(i => i.name).join('、');
       const secureToken = generateSecureToken();
 
-      // 產生前台展示連結 (僅供顧客體驗，絕不暴露後台)
       const frontendPreviewHtml = keys.map(k => {
         const fileMap = { slot: 'studio_slot.html', pos: 'pos.html', quote: 'quote.html', loyalty: 'loyalty.html', reminder: 'reminder.gs', overview: 'overview.html', contract: 'contract.html' };
         const nameMap = { slot: 'IG限動生圖', pos: '極簡收銀', quote: '報價試算', loyalty: 'VIP會員存摺', reminder: 'LINE防放鳥', overview: '排程總覽', contract: '定型化契約' };
@@ -895,10 +892,10 @@ const TOOLS_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOi
           console.warn("Supabase 寫入提醒:", await res.text());
         }
       } catch (err) {
-        console.warn("前端直連異常，改由 GAS 後端備援建檔:", err);
+        console.warn("前端直連異常，改由 GAS 備援:", err);
       }
 
-      // 2. 呼叫 GAS：寄發【下單確認信】(不含後台網址) ＋ 伺服器端備援建檔
+      // 2. 呼叫 GAS 伺服端發送確認信
       const GAS_API_URL = "https://script.google.com/macros/s/AKfycby44GCzrpN8ZpGSTNcVkI3IFMbyO7XhyE_Bf-cKMCTzDBbfYxDVaFD-pVcyc0vTykI-/exec";
       try {
         fetch(GAS_API_URL, {
@@ -922,7 +919,7 @@ const TOOLS_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOi
         console.warn("GAS 郵件呼叫略過:", e);
       }
 
-      // 3. 打包 LINE 訂購訊息跳轉
+      // 3. 跳轉 LINE
       const orderMessage = encodeURIComponent(
         `您好！我已在官網送出微工具訂購申請：\n` +
         `• 門市名稱：${store}\n` +

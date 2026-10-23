@@ -26,39 +26,40 @@
   <style>
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
     /* SweetAlert2 全域確認按鈕統一套用系統質感棕色 */
-.swal2-styled.swal2-confirm {
-  background-color: #8C7355 !important;
-  color: #ffffff !important;
-  box-shadow: 0 2px 6px rgba(140, 115, 85, 0.35) !important;
-  border: none !important;
-  border-radius: 0.875rem !important;
-  font-weight: 700 !important;
-  padding: 0.625rem 1.5rem !important;
-  font-size: 0.8125rem !important;
-}
+    .swal2-styled.swal2-confirm {
+      background-color: #8C7355 !important;
+      color: #ffffff !important;
+      box-shadow: 0 2px 6px rgba(140, 115, 85, 0.35) !important;
+      border: none !important;
+      border-radius: 0.875rem !important;
+      font-weight: 700 !important;
+      padding: 0.625rem 1.5rem !important;
+      font-size: 0.8125rem !important;
+    }
 
-.swal2-styled.swal2-confirm:hover {
-  background-color: #7A6246 !important;
-}
+    .swal2-styled.swal2-confirm:hover {
+      background-color: #7A6246 !important;
+    }
 
-.swal2-styled.swal2-confirm:focus {
-  box-shadow: 0 0 0 3px rgba(140, 115, 85, 0.3) !important;
-}
+    .swal2-styled.swal2-confirm:focus {
+      box-shadow: 0 0 0 3px rgba(140, 115, 85, 0.3) !important;
+    }
 
-/* 取消按鈕同步美化為質感米灰 */
-.swal2-styled.swal2-cancel {
-  background-color: #EBE5DF !important;
-  color: #5C4B3C !important;
-  border-radius: 0.875rem !important;
-  font-weight: 700 !important;
-  padding: 0.625rem 1.25rem !important;
-  font-size: 0.8125rem !important;
-}
+    /* 取消按鈕同步美化為質感米灰 */
+    .swal2-styled.swal2-cancel {
+      background-color: #EBE5DF !important;
+      color: #5C4B3C !important;
+      border-radius: 0.875rem !important;
+      font-weight: 700 !important;
+      padding: 0.625rem 1.25rem !important;
+      font-size: 0.8125rem !important;
+    }
 
-.swal2-styled.swal2-cancel:hover {
-  background-color: #D5C7BC !important;
-}
+    .swal2-styled.swal2-cancel:hover {
+      background-color: #D5C7BC !important;
+    }
   </style>
 </head>
 <body class="bg-brand-50 text-brand-900 antialiased min-h-screen pb-24 selection:bg-brand-200 select-none">
@@ -91,12 +92,12 @@
 
   <main class="max-w-6xl mx-auto p-3 sm:p-4 space-y-4">
 
-    <!-- 1. 頂部日期橫向滑動膠囊與專員篩選 (對齊圖二) -->
+    <!-- 1. 頂部日期橫向滑動膠囊與專員篩選 -->
     <section class="bg-white p-4 rounded-3xl border border-brand-200 shadow-sm space-y-3">
       <!-- 14天滑動膠囊 -->
       <div class="flex gap-2 overflow-x-auto no-scrollbar py-1" id="date-capsules-bar"></div>
 
-      <!-- 檢視切換與專員過濾膠囊 -->
+      <!-- 專員過濾膠囊 -->
       <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-brand-100 text-xs">
         <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" id="staff-filter-bar"></div>
         <div class="hidden lg:flex items-center gap-3 text-[10.5px]">
@@ -111,26 +112,20 @@
     <section class="bg-white rounded-3xl border border-brand-200 shadow-md overflow-hidden">
       <div class="overflow-x-auto no-scrollbar">
         <div class="min-w-[680px]">
-          
           <!-- 表頭：專員列表 -->
           <div class="grid border-b border-brand-200 bg-brand-50/70" id="gantt-header-row"></div>
-
-          <!-- 表身：時間刻度與各專員欄位網格 (內嵌整點水印) -->
+          <!-- 表身：時間刻度與各專員欄位網格 -->
           <div class="relative bg-white" id="gantt-body-container"></div>
-
         </div>
       </div>
     </section>
 
   </main>
 
-  <!-- ========================================================================= -->
-  <!-- 快速插單模態視窗 (點選空白格子立即開啟，支援微調時間與排休) -->
-  <!-- ========================================================================= -->
+  <!-- 快速插單模態視窗 -->
   <div id="booking-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 text-xs">
       
-      <!-- 彈窗抬頭 -->
       <div class="flex justify-between items-center pb-2 border-b border-brand-100">
         <div class="flex items-center gap-2">
           <div class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
@@ -146,7 +141,7 @@
         </button>
       </div>
 
-      <!-- 模式切換：顧客預約 vs 專員休假 -->
+      <!-- 模式切換 -->
       <div class="flex p-1 bg-brand-100/60 rounded-xl gap-1 font-bold">
         <button type="button" id="btn-mode-booking" onclick="switchBookingMode('booking')" class="flex-1 py-1.5 rounded-lg bg-white shadow-2xs text-[#8C7355]">
           <i class="fa-solid fa-user-plus mr-1"></i>顧客預約排程
@@ -156,15 +151,23 @@
         </button>
       </div>
 
-      <!-- [時間微調輸入] -->
-      <div class="p-2.5 bg-brand-50 rounded-xl border border-brand-200 flex items-center justify-between">
-        <label class="font-bold text-brand-800 text-[11px] flex items-center gap-1">
-          <i class="fa-regular fa-clock text-[#8C7355]"></i> 開始時間 (可微調)：
-        </label>
-        <input type="time" id="book-start-time" class="p-1.5 bg-white border border-brand-200 rounded-lg font-mono font-bold text-xs outline-none text-center">
+      <!-- 時間微調 -->
+      <div class="p-2.5 bg-brand-50 rounded-xl border border-brand-200 space-y-2">
+        <div class="flex items-center justify-between">
+          <label class="font-bold text-brand-800 text-[11px] flex items-center gap-1">
+            <i class="fa-regular fa-clock text-[#8C7355]"></i> 開始時間：
+          </label>
+          <div class="flex items-center gap-1 text-[10px]">
+            <span class="text-brand-400">間隔:</span>
+            <button type="button" onclick="setSlotStep(15)" id="btn-step-15" class="px-1.5 py-0.5 rounded border border-brand-200 bg-white font-mono font-bold">15分</button>
+            <button type="button" onclick="setSlotStep(30)" id="btn-step-30" class="px-1.5 py-0.5 rounded border border-[#8C7355] bg-[#8C7355] text-white font-mono font-bold">30分</button>
+            <button type="button" onclick="setSlotStep(60)" id="btn-step-60" class="px-1.5 py-0.5 rounded border border-brand-200 bg-white font-mono font-bold">60分</button>
+          </div>
+        </div>
+        <select id="book-start-time" class="w-full p-2 bg-white border border-brand-200 rounded-lg font-mono font-bold text-xs outline-none text-center"></select>
       </div>
 
-      <!-- [表單 A] 顧客預約區塊 -->
+      <!-- 顧客預約表單 -->
       <div id="box-booking-mode" class="space-y-3">
         <div class="space-y-2">
           <label class="block font-bold text-brand-800">顧客手機號碼 * (輸入自動帶入)：</label>
@@ -197,7 +200,7 @@
         </div>
       </div>
 
-      <!-- [表單 B] 專員休假專用區塊 -->
+      <!-- 專員休假表單 -->
       <div id="box-off-mode" class="space-y-3 hidden">
         <div>
           <label class="block font-bold text-brand-700 text-[10.5px] mb-1">休假長度：</label>
@@ -228,9 +231,7 @@
     </div>
   </div>
 
-  <!-- ========================================================================= -->
-  <!-- 店長專區模態視窗 (PIN 驗證後開啟：排序、增刪、顧客庫) -->
-  <!-- ========================================================================= -->
+  <!-- 店長專區模態視窗 -->
   <div id="manager-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
     <div class="bg-white w-full sm:max-w-2xl max-h-[92vh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
       
@@ -272,7 +273,7 @@
       <!-- 滾動內容區域 -->
       <div class="p-5 overflow-y-auto space-y-4 text-xs">
 
-        <!-- [新增分頁] 營業時間、時段間隔與公休日配置 -->
+        <!-- 營業時間與公休日配置 -->
         <div id="tab-business-settings" class="mgr-pane space-y-4">
           <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 space-y-3">
             <span class="font-bold text-brand-900 block border-b border-brand-200 pb-1.5">
@@ -314,7 +315,7 @@
             </div>
           </div>
 
-          <!-- 指定日期公休日 (特定節慶、店休) -->
+          <!-- 指定日期公休日 -->
           <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 space-y-2">
             <span class="font-bold text-brand-900 block border-b border-brand-200 pb-1.5">
               <i class="fa-solid fa-mug-hot text-[#8C7355] mr-1"></i> 指定日期店休 (特殊單日排休)
@@ -333,8 +334,8 @@
           </button>
         </div>
 
-        <!-- [分頁 1] 專員名冊管理 (上下排序 ＋ 增刪) -->
-        <div id="tab-staff" class="mgr-pane space-y-3">
+        <!-- 專員名冊 -->
+        <div id="tab-staff" class="mgr-pane space-y-3 hidden">
           <div class="flex justify-between items-center">
             <span class="font-bold text-brand-900">專員名冊 (點擊 ▲/▼ 調整甘特畫布欄位順序)：</span>
             <button type="button" onclick="openAddStaffModal()" class="px-2.5 py-1.5 bg-[#8C7355] text-white rounded-lg font-bold text-[11px] shadow-2xs">
@@ -344,7 +345,7 @@
           <div class="space-y-2" id="admin-staff-list"></div>
         </div>
 
-        <!-- [分頁 2] 服務項目管理 (上下排序 ＋ 增刪) -->
+        <!-- 服務項目 -->
         <div id="tab-services" class="mgr-pane space-y-3 hidden">
           <div class="flex justify-between items-center">
             <span class="font-bold text-brand-900">服務主檔 (含大分類、Group A/B、設備連動)：</span>
@@ -355,7 +356,7 @@
           <div class="space-y-2 max-h-60 overflow-y-auto" id="admin-services-list"></div>
         </div>
 
-        <!-- [分頁 3] 席位防撞容量管理 -->
+        <!-- 席位設備容量 -->
         <div id="tab-resources" class="mgr-pane space-y-3 hidden">
           <div class="flex justify-between items-center">
             <span class="font-bold text-brand-900">店內硬體限制設備容量 (防撞核心)：</span>
@@ -366,7 +367,7 @@
           <div class="space-y-2" id="admin-resources-list"></div>
         </div>
 
-        <!-- [分頁 4] 顧客小資料庫 -->
+        <!-- 顧客小資料庫 -->
         <div id="tab-clients" class="mgr-pane space-y-3 hidden">
           <div class="flex gap-2">
             <input type="text" id="cust-search-input" oninput="filterCustomerList()" placeholder="輸入手機、顧客姓名或 LINE 暱稱搜尋..." class="flex-1 p-2.5 bg-brand-50 rounded-xl border border-brand-200 text-xs outline-none focus:border-brand-500">
@@ -429,22 +430,22 @@
     let selectedDate = getTodayDateStr();
     let pendingSlotInsert = null;
     let activeFilterStaffId = 'ALL';
-    let currentBookingMode = 'booking'; // 'booking' 或 'off'
+    let currentBookingMode = 'booking';
 
     let custCurrentPage = 1;
     const CUST_PAGE_SIZE = 10;
     let filteredCustList = [];
 
-    // 莫蘭迪質感高級色票庫 (同項目同顏色)
+    // 莫蘭迪色票庫
     const MORANDI_PALETTE = [
-      { bg: '#8FA89B', border: '#7E988B' }, // 0. 鼠尾草綠
-      { bg: '#D98A8A', border: '#C87979' }, // 1. 煙燻粉紅
-      { bg: '#D4A373', border: '#C39262' }, // 2. 焦糖奶杏
-      { bg: '#8A9EA7', border: '#798D96' }, // 3. 霧霾灰藍
-      { bg: '#A68A9F', border: '#95798E' }, // 4. 丁香灰紫
-      { bg: '#C2A68C', border: '#B1957B' }, // 5. 燕麥暖咖
-      { bg: '#6B8E8E', border: '#5A7D7D' }, // 6. 湖水灰綠
-      { bg: '#C97A63', border: '#B86952' }  // 7. 陶土暖磚
+      { bg: '#8FA89B', border: '#7E988B' },
+      { bg: '#D98A8A', border: '#C87979' },
+      { bg: '#D4A373', border: '#C39262' },
+      { bg: '#8A9EA7', border: '#798D96' },
+      { bg: '#A68A9F', border: '#95798E' },
+      { bg: '#C2A68C', border: '#B1957B' },
+      { bg: '#6B8E8E', border: '#5A7D7D' },
+      { bg: '#C97A63', border: '#B86952' }
     ];
 
     window.addEventListener('DOMContentLoaded', async () => {
@@ -498,6 +499,7 @@
           if (cfg.storeResources) storeResources = cfg.storeResources;
           if (cfg.scheduleConfig) {
             scheduleConfig = Object.assign(scheduleConfig, cfg.scheduleConfig);
+            scheduleConfig.interval = Number(scheduleConfig.interval) || 30;
           }
         }
       } catch (e) {
@@ -506,6 +508,20 @@
     }
 
     function loadLocalMockDataIfEmpty() {
+      const localCfg = localStorage.getItem('overview_local_config');
+      if (localCfg) {
+        try {
+          const parsed = JSON.parse(localCfg);
+          if (parsed.scheduleConfig) {
+            scheduleConfig = Object.assign(scheduleConfig, parsed.scheduleConfig);
+            scheduleConfig.interval = Number(scheduleConfig.interval) || 30;
+          }
+          if (parsed.staffList) staffList = parsed.staffList;
+          if (parsed.serviceCatalog) serviceCatalog = parsed.serviceCatalog;
+          if (parsed.storeResources) storeResources = parsed.storeResources;
+        } catch (e) {}
+      }
+
       const storedBookings = localStorage.getItem('overview_bookings_data');
       if (storedBookings) {
         bookingsDb = JSON.parse(storedBookings);
@@ -646,7 +662,6 @@
       const interval = Number(scheduleConfig.interval) || 30;
       const slotHeight = getSlotHeightPx();
 
-      // 安全防呆：避免結束時間小於開始時間造成無窮迴圈
       const safeEndMins = (totalEndMins > totalStartMins) ? totalEndMins : (totalStartMins + 720);
 
       const timeSlots = [];
@@ -775,12 +790,59 @@
       });
     }
 
-    // 4. 插單排程操作
+    // 4. 插單排程操作與 15/30/60 分鐘間隔切換
+    let currentSlotStep = 30;
+
+    function setSlotStep(step) {
+      currentSlotStep = Number(step);
+      [15, 30, 60].forEach(s => {
+        const btn = document.getElementById(`btn-step-${s}`);
+        if (!btn) return;
+        if (s === currentSlotStep) {
+          btn.className = "px-1.5 py-0.5 rounded border border-[#8C7355] bg-[#8C7355] text-white font-mono font-bold";
+        } else {
+          btn.className = "px-1.5 py-0.5 rounded border border-brand-200 bg-white font-mono font-bold text-brand-700";
+        }
+      });
+      const curSelectedTime = document.getElementById('book-start-time').value;
+      populateTimeSelectOptions(curSelectedTime);
+    }
+
+    function populateTimeSelectOptions(targetTimeStr) {
+      const selectEl = document.getElementById('book-start-time');
+      if (!selectEl) return;
+
+      const [startH, startM] = (scheduleConfig.startTime || "09:00").split(':').map(Number);
+      const [endH, endM] = (scheduleConfig.endTime || "21:00").split(':').map(Number);
+      const totalStartMins = startH * 60 + (startM || 0);
+      const totalEndMins = endH * 60 + (endM || 0);
+
+      let html = '';
+      for (let m = totalStartMins; m <= totalEndMins; m += currentSlotStep) {
+        const hh = String(Math.floor(m / 60)).padStart(2, '0');
+        const mm = String(m % 60).padStart(2, '0');
+        const tStr = `${hh}:${mm}`;
+        html += `<option value="${tStr}">${tStr}</option>`;
+      }
+      selectEl.innerHTML = html;
+
+      if (targetTimeStr) {
+        selectEl.value = targetTimeStr;
+        if (!selectEl.value) {
+          const opt = new Option(targetTimeStr, targetTimeStr, true, true);
+          selectEl.add(opt);
+          selectEl.value = targetTimeStr;
+        }
+      }
+    }
+
     function onEmptySlotClicked(staffId, staffName, timeStr) {
       pendingSlotInsert = { staffId, staffName, timeStr };
       document.getElementById('modal-slot-title').innerText = `${selectedDate} 快速排程`;
       document.getElementById('modal-slot-meta').innerText = `指定專員：${staffName} (${staffId})`;
-      document.getElementById('book-start-time').value = timeStr;
+
+      setSlotStep(scheduleConfig.interval || 30);
+      populateTimeSelectOptions(timeStr);
 
       document.getElementById('book-phone').value = '';
       document.getElementById('book-name').value = '';
@@ -1033,7 +1095,7 @@
     function syncBusinessHoursForm() {
       document.getElementById('cfg-open-start').value = scheduleConfig.startTime || "09:00";
       document.getElementById('cfg-open-end').value = scheduleConfig.endTime || "21:00";
-      document.getElementById('cfg-slot-interval').value = scheduleConfig.interval || 30;
+      document.getElementById('cfg-slot-interval').value = String(scheduleConfig.interval || 30);
 
       document.querySelectorAll('.cfg-weekly-cb').forEach(cb => {
         cb.checked = (scheduleConfig.weeklyOff || []).includes(Number(cb.value));
@@ -1077,7 +1139,7 @@
       }
     }
 
-    // 儲存營業時間與公休至雲端（修復卡死問題）
+    // 儲存營業時間與公休至雲端
     async function saveBusinessSettings() {
       const startVal = document.getElementById('cfg-open-start').value;
       const endVal = document.getElementById('cfg-open-end').value;
@@ -1088,7 +1150,7 @@
 
       scheduleConfig.startTime = startVal;
       scheduleConfig.endTime = endVal;
-      scheduleConfig.interval = Number(document.getElementById('cfg-slot-interval').value);
+      scheduleConfig.interval = Number(document.getElementById('cfg-slot-interval').value) || 30;
 
       const weekly = [];
       document.querySelectorAll('.cfg-weekly-cb:checked').forEach(cb => weekly.push(Number(cb.value)));
@@ -1105,20 +1167,31 @@
         initDateCapsulesBar();
         renderGanttCanvas();
         Swal.fire({
-          title: '營業時間與公休已更新！',
+          title: `營業時間與公休已更新（間隔 ${scheduleConfig.interval} 分鐘）！`,
           icon: 'success',
           timer: 1000,
           showConfirmButton: false
         });
       } catch (err) {
-        Swal.fire('儲存失敗', err.message || '請檢查網路連線', 'error');
+        Swal.fire('儲存失敗', err.message || '請檢查連線狀態', 'error');
       }
     }
 
-    // 6. 雲端同步核心（增量合併，絕不卡死、絕不覆蓋其他工具設定）
+    // 6. 雲端同步核心（帶有 UUID 防呆與本地離線 Fallback）
     async function saveOverviewConfigToCloud() {
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(currentStore.id);
+
+      if (!isUuid || currentStore.id === "default-store") {
+        localStorage.setItem('overview_local_config', JSON.stringify({
+          staffList,
+          serviceCatalog,
+          storeResources,
+          scheduleConfig
+        }));
+        return;
+      }
+
       try {
-        // 先讀取現有雲端設定以利安全合併
         let existingConfig = {};
         try {
           const fetchRes = await fetch(`${SUPABASE_URL}/rest/v1/tool_settings?store_id=eq.${currentStore.id}&select=slot_config`, {
@@ -1161,7 +1234,7 @@
       }
     }
 
-    // 專員管理 (▲/▼ 排序 ＋ 增刪)
+    // 專員管理
     function renderAdminStaffList() {
       const container = document.getElementById('admin-staff-list');
       container.innerHTML = staffList.map((s, idx) => `
@@ -1209,7 +1282,7 @@
       }
     }
 
-    // 服務項目管理 (▲/▼ 排序 ＋ 增刪)
+    // 服務項目管理
     function renderAdminServicesList() {
       const container = document.getElementById('admin-services-list');
       container.innerHTML = serviceCatalog.map((svc, idx) => `
@@ -1287,7 +1360,7 @@
       }
     }
 
-    // 席位容量管理 (▲/▼ 排序 ＋ 增刪)
+    // 席位容量管理
     function renderAdminResourcesList() {
       const container = document.getElementById('admin-resources-list');
       container.innerHTML = storeResources.map((r, idx) => `
@@ -1336,7 +1409,7 @@
       }
     }
 
-    // 顧客資料庫 (10筆分頁)
+    // 顧客資料庫
     function updateFilteredCustList() {
       filteredCustList = Object.values(customerDb);
       renderCustomerTable();
@@ -1442,6 +1515,6 @@
     function formatYearMonthDay(d) {
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
-</script>
+  </script>
 </body>
 </html>

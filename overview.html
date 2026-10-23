@@ -223,23 +223,87 @@
       </div>
 
       <!-- 分頁標籤 -->
-      <div class="flex border-b border-brand-200 bg-white px-4 text-xs font-bold shrink-0">
-        <button type="button" onclick="switchManagerTab('tab-staff', this)" class="mgr-tab-btn py-3 px-3.5 border-b-2 border-[#8C7355] text-[#8C7355]">
-          專員名冊 (上下排序)
+      <div class="flex border-b border-brand-200 bg-white px-4 text-xs font-bold shrink-0 overflow-x-auto no-scrollbar">
+        <button type="button" onclick="switchManagerTab('tab-business-settings', this)" class="mgr-tab-btn py-3 px-3.5 border-b-2 border-[#8C7355] text-[#8C7355] shrink-0">
+          營業時段與公休
         </button>
-        <button type="button" onclick="switchManagerTab('tab-services', this)" class="mgr-tab-btn py-3 px-3.5 text-brand-400 hover:text-brand-700">
-          服務項目 (上下排序)
+        <button type="button" onclick="switchManagerTab('tab-staff', this)" class="mgr-tab-btn py-3 px-3.5 text-brand-400 hover:text-brand-700 shrink-0">
+          專員名冊
         </button>
-        <button type="button" onclick="switchManagerTab('tab-resources', this)" class="mgr-tab-btn py-3 px-3.5 text-brand-400 hover:text-brand-700">
+        <button type="button" onclick="switchManagerTab('tab-services', this)" class="mgr-tab-btn py-3 px-3.5 text-brand-400 hover:text-brand-700 shrink-0">
+          服務項目
+        </button>
+        <button type="button" onclick="switchManagerTab('tab-resources', this)" class="mgr-tab-btn py-3 px-3.5 text-brand-400 hover:text-brand-700 shrink-0">
           席位設備容量
         </button>
-        <button type="button" onclick="switchManagerTab('tab-clients', this)" class="mgr-tab-btn py-3 px-3.5 text-brand-400 hover:text-brand-700">
-          顧客小庫 (10筆分頁)
+        <button type="button" onclick="switchManagerTab('tab-clients', this)" class="mgr-tab-btn py-3 px-3.5 text-brand-400 hover:text-brand-700 shrink-0">
+          顧客庫
         </button>
       </div>
 
       <!-- 滾動內容區域 -->
       <div class="p-5 overflow-y-auto space-y-4 text-xs">
+
+        <!-- [新增分頁] 營業時間、時段間隔與公休日配置 -->
+        <div id="tab-business-settings" class="mgr-pane space-y-4">
+          <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 space-y-3">
+            <span class="font-bold text-brand-900 block border-b border-brand-200 pb-1.5">
+              <i class="fa-solid fa-clock text-[#8C7355] mr-1"></i> 營業時間與前台框格間隔
+            </span>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <div>
+                <label class="block font-bold text-brand-700 text-[10.5px] mb-1">開始營業時間：</label>
+                <input type="time" id="cfg-open-start" value="09:00" class="w-full p-2 bg-white rounded-xl border border-brand-200 text-xs font-mono font-bold outline-none">
+              </div>
+              <div>
+                <label class="block font-bold text-brand-700 text-[10.5px] mb-1">結束營業時間：</label>
+                <input type="time" id="cfg-open-end" value="21:00" class="w-full p-2 bg-white rounded-xl border border-brand-200 text-xs font-mono font-bold outline-none">
+              </div>
+              <div>
+                <label class="block font-bold text-brand-700 text-[10.5px] mb-1">時間框格間隔：</label>
+                <select id="cfg-slot-interval" class="w-full p-2 bg-white rounded-xl border border-brand-200 text-xs font-bold outline-none">
+                  <option value="15">每 15 分鐘 (極細緻)</option>
+                  <option value="30" selected>每 30 分鐘 (標準)</option>
+                  <option value="60">每 60 分鐘 (一小時整點)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- 每週固定公休 -->
+          <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 space-y-2">
+            <span class="font-bold text-brand-900 block border-b border-brand-200 pb-1.5">
+              <i class="fa-solid fa-calendar-xmark text-[#8C7355] mr-1"></i> 每週固定公休日 (勾選後前台自動標註公休)
+            </span>
+            <div class="grid grid-cols-7 gap-1.5 text-center font-bold">
+              <label class="flex flex-col items-center bg-white p-2 rounded-xl border border-brand-200 text-[11px] cursor-pointer"><input type="checkbox" value="0" class="cfg-weekly-cb accent-[#8C7355] mb-1">週日</label>
+              <label class="flex flex-col items-center bg-white p-2 rounded-xl border border-brand-200 text-[11px] cursor-pointer"><input type="checkbox" value="1" class="cfg-weekly-cb accent-[#8C7355] mb-1">週一</label>
+              <label class="flex flex-col items-center bg-white p-2 rounded-xl border border-brand-200 text-[11px] cursor-pointer"><input type="checkbox" value="2" class="cfg-weekly-cb accent-[#8C7355] mb-1">週二</label>
+              <label class="flex flex-col items-center bg-white p-2 rounded-xl border border-brand-200 text-[11px] cursor-pointer"><input type="checkbox" value="3" class="cfg-weekly-cb accent-[#8C7355] mb-1">週三</label>
+              <label class="flex flex-col items-center bg-white p-2 rounded-xl border border-brand-200 text-[11px] cursor-pointer"><input type="checkbox" value="4" class="cfg-weekly-cb accent-[#8C7355] mb-1">週四</label>
+              <label class="flex flex-col items-center bg-white p-2 rounded-xl border border-brand-200 text-[11px] cursor-pointer"><input type="checkbox" value="5" class="cfg-weekly-cb accent-[#8C7355] mb-1">週五</label>
+              <label class="flex flex-col items-center bg-white p-2 rounded-xl border border-brand-200 text-[11px] cursor-pointer"><input type="checkbox" value="6" class="cfg-weekly-cb accent-[#8C7355] mb-1">週六</label>
+            </div>
+          </div>
+
+          <!-- 指定日期公休日 (特定節慶、店休) -->
+          <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 space-y-2">
+            <span class="font-bold text-brand-900 block border-b border-brand-200 pb-1.5">
+              <i class="fa-solid fa-mug-hot text-[#8C7355] mr-1"></i> 指定日期店休 (特殊單日排休)
+            </span>
+            <div class="flex gap-2">
+              <input type="date" id="cfg-custom-off-date" class="flex-1 p-2 bg-white rounded-xl border border-brand-200 font-mono text-xs">
+              <button type="button" onclick="addSpecificOffDate()" class="px-3 py-2 bg-[#8C7355] text-white rounded-xl font-bold shadow-2xs shrink-0">
+                + 新增公休日
+              </button>
+            </div>
+            <div class="flex flex-wrap gap-1.5 pt-1" id="cfg-off-dates-chips"></div>
+          </div>
+
+          <button type="button" onclick="saveBusinessSettings()" class="w-full py-3 bg-stone-900 hover:bg-black text-white font-bold rounded-xl text-xs transition shadow-md">
+            儲存營業時間與公休設定並更新
+          </button>
+        </div>
 
         <!-- [分頁 1] 專員名冊管理 (上下排序 ＋ 增刪) -->
         <div id="tab-staff" class="mgr-pane space-y-3">
@@ -297,6 +361,15 @@
     const SUPABASE_URL = "https://tzqpfnrpnfzzubofoqlt.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6cXBmbnJwbmZ6enVib2ZvcWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1ODQ5ODYsImV4cCI6MjEwODE2MDk4Nn0.B-ub7DCpzF3b2gjpTrM9jdW0SLOqRPillZTmoXPuNgk";
 
+    // 營業時間、間隔與公休日配置模型
+    let scheduleConfig = {
+      startTime: "09:00",
+      endTime: "21:00",
+      interval: 30, // 15, 30, 60 分鐘
+      weeklyOff: [1], // 預設週一公休 (0:日, 1:一 ... 6:六)
+      specificOffDates: [] // 例如 ["2026-10-31", ...]
+    };
+    
     let currentStore = {
       id: "default-store",
       store_name: "希貝兒沙龍排程總覽",
@@ -360,6 +433,13 @@
         const stores = await res.json();
         if (stores && stores.length > 0) {
           currentStore = stores[0];
+          // 明確顯示店家抬頭
+          document.getElementById('disp-store-title').innerHTML = `
+            <i class="fa-solid fa-spa text-[#8C7355]"></i>
+            <span class="font-black">${currentStore.store_name}</span>
+          `;
+          document.getElementById('disp-store-subtitle').innerText = `全日排程席位防撞畫布 (${currentStore.store_slug || currentStore.id.slice(0,8)})`;
+          await loadCloudOverviewSettings(currentStore.id);
           document.getElementById('disp-store-title').innerHTML = `<span>${currentStore.store_name}</span>`;
           document.getElementById('disp-store-subtitle').innerText = `排程端點: ${currentStore.store_slug || currentStore.id.slice(0,8)}`;
           await loadCloudOverviewSettings(currentStore.id);
@@ -380,6 +460,9 @@
           if (cfg.staffList) staffList = cfg.staffList;
           if (cfg.serviceCatalog) serviceCatalog = cfg.serviceCatalog;
           if (cfg.storeResources) storeResources = cfg.storeResources;
+          if (cfg.scheduleConfig) {
+            scheduleConfig = Object.assign(scheduleConfig, cfg.scheduleConfig);
+          }
         }
       } catch (e) {
         console.error("載入排程設定失敗:", e);
@@ -443,17 +526,25 @@
       for (let i = 0; i < 14; i++) {
         const d = new Date(today.getTime() + i * 86400000);
         const dateStr = formatYearMonthDay(d);
+        const dayOfWeek = d.getDay();
         const isSelected = (dateStr === selectedDate);
+
+        // 判定是否為公休日 (每週固定公休 或 指定日期公休)
+        const isWeeklyOff = scheduleConfig.weeklyOff.includes(dayOfWeek);
+        const isSpecificOff = scheduleConfig.specificOffDates.includes(dateStr);
+        const isOffDay = isWeeklyOff || isSpecificOff;
 
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = `flex flex-col items-center justify-center min-w-[58px] py-2 px-1.5 rounded-2xl border transition shrink-0 ${
           isSelected 
             ? 'bg-[#8C7355] text-white border-[#8C7355] shadow-sm font-bold' 
-            : 'bg-white hover:bg-brand-50 text-brand-800 border-brand-200'
+            : isOffDay
+              ? 'bg-stone-100 text-stone-400 border-stone-200'
+              : 'bg-white hover:bg-brand-50 text-brand-800 border-brand-200'
         }`;
         btn.innerHTML = `
-          <span class="text-[10px] opacity-80">${weekNames[d.getDay()]}</span>
+          <span class="text-[10px] opacity-80">${weekNames[dayOfWeek]}${isOffDay ? ' [休]' : ''}</span>
           <span class="text-sm font-black font-mono mt-0.5">${String(d.getDate()).padStart(2, '0')}日</span>
         `;
         btn.onclick = () => {
@@ -491,6 +582,13 @@
     }
 
     // 3. 核心甘特畫布 (圖一水印標籤排版)
+    // 取得每格的固定像素高度
+    function getSlotHeightPx() {
+      if (scheduleConfig.interval === 15) return 32; // 15 分鐘高度
+      if (scheduleConfig.interval === 60) return 56; // 60 分鐘高度
+      return 40; // 30 分鐘標準高度
+    }
+
     function renderGanttCanvas() {
       const headerRow = document.getElementById('gantt-header-row');
       const bodyContainer = document.getElementById('gantt-body-container');
@@ -499,6 +597,7 @@
         ? staffList
         : staffList.filter(s => s.id === activeFilterStaffId);
 
+      // 表頭欄位
       headerRow.style.gridTemplateColumns = `repeat(${displayedStaff.length}, minmax(180px, 1fr))`;
       headerRow.innerHTML = displayedStaff.map(s => `
         <div class="py-3 px-2 text-center font-black text-brand-900 border-r border-brand-200 last:border-none text-sm">
@@ -506,61 +605,62 @@
         </div>
       `).join('');
 
-      const hours = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+      // 計算自訂時段的格數
+      const [startH, startM] = (scheduleConfig.startTime || "09:00").split(':').map(Number);
+      const [endH, endM] = (scheduleConfig.endTime || "21:00").split(':').map(Number);
+      const totalStartMins = startH * 60 + startM;
+      const totalEndMins = endH * 60 + endM;
+      const interval = scheduleConfig.interval || 30;
+      const slotHeight = getSlotHeightPx();
+
+      // 產生所有時間段清單
+      const timeSlots = [];
+      for (let m = totalStartMins; m < totalEndMins; m += interval) {
+        const hh = String(Math.floor(m / 60)).padStart(2, '0');
+        const mm = String(m % 60).padStart(2, '0');
+        timeSlots.push({ timeStr: `${hh}:${mm}`, totalMins: m, isHourMark: (m % 60 === 0) });
+      }
+
       bodyContainer.style.gridTemplateColumns = `repeat(${displayedStaff.length}, minmax(180px, 1fr))`;
       bodyContainer.className = "grid relative bg-white";
 
+      // 檢查當前日期是否為公休日
+      const curDayOfWeek = new Date(selectedDate).getDay();
+      const isOffDay = scheduleConfig.weeklyOff.includes(curDayOfWeek) || scheduleConfig.specificOffDates.includes(selectedDate);
+
       let cellsHtml = '';
-      hours.forEach(h => {
+
+      // 若為公休日，顯示柔和浮水印提示
+      if (isOffDay) {
+        cellsHtml += `
+          <div class="col-span-full bg-amber-50/80 border-b border-amber-200 text-amber-900 p-2 text-center text-xs font-bold flex items-center justify-center gap-1.5 z-30">
+            <i class="fa-solid fa-mug-hot text-amber-700"></i> 本日（${selectedDate}）為門市公休日，非營業時段仍可點選手動插單
+          </div>
+        `;
+      }
+
+      timeSlots.forEach(slot => {
         displayedStaff.forEach((s) => {
-          const hourLabel = `${h}:00`;
           cellsHtml += `
-            <div class="relative border-b border-r border-brand-200 last:border-r-0" style="height: 80px;">
-              <!-- 00 分 (整點水印標籤) -->
-              <div onclick="onEmptySlotClicked('${s.id}', '${s.name}', '${String(h).padStart(2,'0')}:00')" 
-                class="h-10 border-b border-dashed border-brand-100 hover:bg-emerald-50/40 cursor-pointer transition flex flex-col justify-start items-center pt-1 group">
-                <span class="text-[10px] font-mono text-gray-400 select-none tracking-widest">${hourLabel}</span>
-                <span class="hidden group-hover:block text-[9.5px] text-emerald-700 font-bold">+ 排程</span>
-              </div>
-              <!-- 30 分 -->
-              <div onclick="onEmptySlotClicked('${s.id}', '${s.name}', '${String(h).padStart(2,'0')}:30')" 
-                class="h-10 hover:bg-emerald-50/40 cursor-pointer transition flex items-center justify-center group">
-                <span class="hidden group-hover:block text-[9.5px] text-emerald-700 font-bold">+ 排程</span>
-              </div>
+            <div onclick="onEmptySlotClicked('${s.id}', '${s.name}', '${slot.timeStr}')"
+              style="height: ${slotHeight}px;"
+              class="relative border-b ${slot.isHourMark ? 'border-brand-200' : 'border-dashed border-brand-100'} border-r border-brand-200 last:border-r-0 hover:bg-emerald-50/40 cursor-pointer transition flex items-center justify-center group">
+              
+              <!-- 浮水印時間標籤 (整點醒目，非整點小字) -->
+              <span class="text-[10px] font-mono ${slot.isHourMark ? 'text-gray-400 font-bold' : 'text-gray-300'} select-none tracking-wider group-hover:hidden">
+                ${slot.isHourMark ? slot.timeStr : `:${slot.timeStr.split(':')[1]}`}
+              </span>
+              <span class="hidden group-hover:block text-[9.5px] text-emerald-700 font-bold">+ 插單</span>
             </div>
           `;
         });
       });
 
       bodyContainer.innerHTML = cellsHtml;
-      renderBookingBlocks(displayedStaff);
+      renderBookingBlocks(displayedStaff, totalStartMins, interval, slotHeight);
     }
 
-    // 莫蘭迪質感高級色票庫 (同項目同顏色，柔和不刺眼，白字清晰)
-    const MORANDI_PALETTE = [
-      { bg: '#8FA89B', border: '#7E988B' }, // 0. 鼠尾草綠 (剪髮/洗護)
-      { bg: '#D98A8A', border: '#C87979' }, // 1. 煙燻粉紅 (燙髮/美睫)
-      { bg: '#D4A373', border: '#C39262' }, // 2. 焦糖奶杏 (護髮/泥浴)
-      { bg: '#8A9EA7', border: '#798D96' }, // 3. 霧霾灰藍 (局部挑染)
-      { bg: '#A68A9F', border: '#95798E' }, // 4. 丁香灰紫 (光療美甲)
-      { bg: '#C2A68C', border: '#B1957B' }, // 5. 燕麥暖咖 (深層SPA)
-      { bg: '#6B8E8E', border: '#5A7D7D' }, // 6. 湖水灰綠 (頭皮護理)
-      { bg: '#C97A63', border: '#B86952' }  // 7. 陶土暖磚 (特殊造型)
-    ];
-
-    // 依據「服務項目名稱」自動產生唯一的莫蘭迪色系 (同項目同顏色)
-    function getMorandiColorByService(serviceName) {
-      if (!serviceName) return MORANDI_PALETTE[0];
-      let hash = 0;
-      for (let i = 0; i < serviceName.length; i++) {
-        hash = serviceName.charCodeAt(i) + ((hash << 5) - hash);
-      }
-      const index = Math.abs(hash) % MORANDI_PALETTE.length;
-      return MORANDI_PALETTE[index];
-    }
-
-    // 繪製預約色塊（同項目同色 ＋ 莫蘭迪高質感）
-    function renderBookingBlocks(displayedStaff) {
+    function renderBookingBlocks(displayedStaff, baseMins, interval, slotHeight) {
       const container = document.getElementById('gantt-body-container');
       const todays = bookingsDb.filter(b => b.date === selectedDate);
 
@@ -570,21 +670,23 @@
 
         const [sh, sm] = b.startTime.split(':').map(Number);
         const startMins = sh * 60 + sm;
-        const baseMins = 9 * 60; // 9:00 起算
-        const topPx = ((startMins - baseMins) / 30) * 40;
-        const heightPx = (b.durMins / 30) * 40 - 2;
+
+        // 依據動態間隔計算頂部位置與高度
+        const pxPerMinute = slotHeight / interval;
+        const topPx = (startMins - baseMins) * pxPerMinute;
+        const heightPx = b.durMins * pxPerMinute - 2;
+
+        // 若預約超出顯示邊界則略過
+        if (topPx < 0) return;
 
         const isOff = (b.isOff === true);
         const block = document.createElement('div');
-
-        // 取得該項目的專屬莫蘭迪色彩
         const itemColor = getMorandiColorByService(b.serviceName);
 
         block.className = `absolute z-20 rounded-xl p-2 shadow-md cursor-pointer transition hover:scale-[1.01] overflow-hidden flex flex-col justify-between ${
           isOff ? 'bg-stone-200 border border-stone-300 text-stone-700' : 'text-white'
         }`;
 
-        // 注入尺寸、位置與莫蘭迪顏色
         block.style.top = `${topPx}px`;
         block.style.height = `${heightPx}px`;
         block.style.gridColumnStart = `${staffIndex + 1}`;
@@ -609,7 +711,7 @@
               </div>
               <div class="font-black text-xs mt-1">☕ ${b.custName || '專員排休'}</div>
             </div>
-            <div class="text-[9px] opacity-70">不可安排預約</div>
+            <div class="text-[9px] opacity-70">時段已鎖定</div>
           `;
         } else {
           block.innerHTML = `
@@ -635,6 +737,17 @@
         container.appendChild(block);
       });
     }
+    // 依據「服務項目名稱」自動產生唯一的莫蘭迪色系 (同項目同顏色)
+    function getMorandiColorByService(serviceName) {
+      if (!serviceName) return MORANDI_PALETTE[0];
+      let hash = 0;
+      for (let i = 0; i < serviceName.length; i++) {
+        hash = serviceName.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      const index = Math.abs(hash) % MORANDI_PALETTE.length;
+      return MORANDI_PALETTE[index];
+    }
+    
     // 4. 插單排程操作 (支援時間微調)
     function onEmptySlotClicked(staffId, staffName, timeStr) {
       pendingSlotInsert = { staffId, staffName, timeStr };
@@ -1200,6 +1313,101 @@
     function formatYearMonthDay(d) {
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
+
+    // 渲染後台營業設定欄位現值
+    function syncBusinessHoursForm() {
+      document.getElementById('cfg-open-start').value = scheduleConfig.startTime || "09:00";
+      document.getElementById('cfg-open-end').value = scheduleConfig.endTime || "21:00";
+      document.getElementById('cfg-slot-interval').value = scheduleConfig.interval || 30;
+
+      // 每週公休核取方塊
+      document.querySelectorAll('.cfg-weekly-cb').forEach(cb => {
+        cb.checked = scheduleConfig.weeklyOff.includes(Number(cb.value));
+      });
+
+      renderSpecificOffDatesChips();
+    }
+
+    function renderSpecificOffDatesChips() {
+      const container = document.getElementById('cfg-off-dates-chips');
+      if (!container) return;
+      if (!scheduleConfig.specificOffDates || scheduleConfig.specificOffDates.length === 0) {
+        container.innerHTML = '<span class="text-[10.5px] text-brand-400">尚未設定特定單日公休</span>';
+        return;
+      }
+      container.innerHTML = scheduleConfig.specificOffDates.map((dateStr, idx) => `
+        <span class="px-2.5 py-1 bg-white border border-brand-200 rounded-lg font-mono text-[11px] font-bold text-brand-800 flex items-center gap-1.5 shadow-2xs">
+          <span>${dateStr}</span>
+          <button type="button" onclick="removeSpecificOffDate(${idx})" class="text-rose-500 hover:text-rose-700">✕</button>
+        </span>
+      `).join('');
+    }
+
+    function addSpecificOffDate() {
+      const val = document.getElementById('cfg-custom-off-date').value;
+      if (!val) return;
+      if (!scheduleConfig.specificOffDates.includes(val)) {
+        scheduleConfig.specificOffDates.push(val);
+        scheduleConfig.specificOffDates.sort();
+        renderSpecificOffDatesChips();
+      }
+      document.getElementById('cfg-custom-off-date').value = '';
+    }
+
+    function removeSpecificOffDate(idx) {
+      scheduleConfig.specificOffDates.splice(idx, 1);
+      renderSpecificOffDatesChips();
+    }
+
+    // 儲存營業時間與公休至雲端
+    async function saveBusinessSettings() {
+      scheduleConfig.startTime = document.getElementById('cfg-open-start').value;
+      scheduleConfig.endTime = document.getElementById('cfg-open-end').value;
+      scheduleConfig.interval = Number(document.getElementById('cfg-slot-interval').value);
+
+      const weekly = [];
+      document.querySelectorAll('.cfg-weekly-cb:checked').forEach(cb => weekly.push(Number(cb.value)));
+      scheduleConfig.weeklyOff = weekly;
+
+      Swal.fire({ title: '正在儲存設定並同步畫布...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+      await saveOverviewConfigToCloud();
+
+      initDateCapsulesBar();
+      renderGanttCanvas();
+      Swal.fire('營業時間與公休設定已成功生效！', '', 'success');
+    }
+
+    // 更新 saveOverviewConfigToCloud 一併納入 scheduleConfig
+    const origSaveCloud = saveOverviewConfigToCloud;
+    saveOverviewConfigToCloud = async function() {
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/tool_settings?on_conflict=store_id`, {
+          method: "POST",
+          headers: {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json",
+            "Prefer": "resolution=merge-duplicates"
+          },
+          body: JSON.stringify({
+            store_id: currentStore.id,
+            slot_config: {
+              overview_config: { staffList, serviceCatalog, storeResources, scheduleConfig }
+            },
+            updated_at: new Date().toISOString()
+          })
+        });
+      } catch (e) {
+        console.warn("雲端同步異常:", e);
+      }
+    };
+
+    // 進入店長專區時同步表單數據
+    const origOpenPin = openManagerPinPrompt;
+    openManagerPinPrompt = async function() {
+      await origOpenPin();
+      syncBusinessHoursForm();
+    };
   </script>
 </body>
 </html>

@@ -27,14 +27,13 @@
   <style>
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    /* 9:16 限動比例容器 */
     .story-canvas {
       width: 360px;
       height: 640px;
     }
   </style>
 </head>
-<body class="bg-brand-50 text-brand-900 antialiased min-h-screen pb-24 selection:bg-brand-200">
+<body class="bg-brand-50 text-brand-900 antialiased min-h-screen pb-24 selection:bg-brand-200 select-none">
 
   <!-- 頂部導航列 -->
   <header class="bg-white/95 backdrop-blur-md border-b border-brand-200 sticky top-0 z-30 px-4 py-3 shadow-2xs">
@@ -44,28 +43,34 @@
           <i class="fa-regular fa-calendar-check text-[#8C7355]"></i>
           <span>線上預約空檔釋出</span>
         </h1>
-        <p class="text-[10px] text-brand-400 font-mono" id="disp-store-subtitle">Loading salon profile...</p>
+        <p class="text-[10px] text-brand-400 font-mono" id="disp-store-subtitle">載入沙龍時段中...</p>
       </div>
-      <button type="button" onclick="openManagerPinPrompt()" class="px-3 py-1.5 bg-brand-100 hover:bg-brand-200 text-brand-800 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs">
-        <i class="fa-solid fa-wand-magic-sparkles text-[#8C7355]"></i>
-        <span>店長生圖管理</span>
-      </button>
+      <div class="flex items-center gap-2">
+        <!-- 分享給客人按鈕 -->
+        <button type="button" onclick="shareSlotPageToClient()" class="px-3 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-800 border border-brand-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs">
+          <i class="fa-solid fa-share-nodes text-brand-600"></i>
+          <span>分享此頁</span>
+        </button>
+        <!-- 店長生圖管理按鈕 -->
+        <button type="button" onclick="openManagerPinPrompt()" class="px-3 py-1.5 bg-[#8C7355] hover:bg-[#7A6246] text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs">
+          <i class="fa-solid fa-wand-magic-sparkles text-amber-200"></i>
+          <span>店長生圖管理</span>
+        </button>
+      </div>
     </div>
   </header>
 
   <main class="max-w-xl mx-auto p-4 space-y-4">
 
-    <!-- 顧客端：快速日期切換按鈕 -->
+    <!-- 顧客端：快速日期切換橫向膠囊 -->
     <section class="bg-white p-4 rounded-3xl border border-brand-200 shadow-sm space-y-3">
       <div class="flex justify-between items-center pb-2 border-b border-brand-100">
         <span class="text-xs font-bold text-brand-900 flex items-center gap-1.5">
-          <i class="fa-solid fa-calendar-day text-brand-500"></i> 選擇欲預約日期
+          <i class="fa-solid fa-calendar-day text-[#8C7355]"></i> 選擇欲預約日期
         </span>
-        <span class="text-[11px] text-brand-400" id="current-selected-date-badge">點選日期查看時段</span>
+        <span class="text-[11px] text-brand-500 font-mono font-bold" id="current-selected-date-badge">點選日期查看時段</span>
       </div>
-      <div class="flex gap-2 overflow-x-auto no-scrollbar py-1" id="date-slider-container">
-        <!-- JS 動態生成日期滑動膠囊 -->
-      </div>
+      <div class="flex gap-2 overflow-x-auto no-scrollbar py-1" id="date-slider-container"></div>
     </section>
 
     <!-- 顧客端：當日釋出空檔時段 -->
@@ -73,9 +78,9 @@
       <div class="flex justify-between items-center pb-2 border-b border-brand-100">
         <div>
           <h2 class="text-xs font-black text-brand-900" id="slots-header-date">當日可預約空檔</h2>
-          <p class="text-[10px] text-brand-400 mt-0.5">點擊綠色時段即可複製預約訊息並前往官方 LINE</p>
+          <p class="text-[10px] text-brand-400 mt-0.5">點擊下方時段即可自動複製明細並跳轉 LINE 預約</p>
         </div>
-        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200" id="available-count-badge">0 個空檔</span>
+        <span class="px-2.5 py-0.5 rounded-full text-[10.5px] font-bold bg-brand-100 text-[#8C7355] border border-brand-200 font-mono" id="available-count-badge">0 個空檔</span>
       </div>
 
       <!-- 空檔時段按鈕網格 -->
@@ -83,11 +88,11 @@
         <div class="col-span-full py-8 text-center text-xs text-brand-400">正在確認店內最新釋出空檔...</div>
       </div>
 
-      <!-- 快速前往官方 LINE 預約按鈕 -->
+      <!-- 預約按鈕 -->
       <div class="pt-2">
-        <a id="btn-direct-line" href="#" target="_blank" class="w-full py-3 bg-[#06C755] hover:bg-[#05b34c] text-white rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-xs">
-          <i class="fa-brands fa-line text-base"></i>
-          <span>聯繫官方 LINE 預約時段</span>
+        <a id="btn-direct-line" href="#" target="_blank" class="w-full py-3.5 bg-[#1F4E3D] hover:bg-[#183E30] text-white rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-sm group">
+          <i class="fa-brands fa-line text-lg text-emerald-300 group-hover:scale-110 transition-transform"></i>
+          <span>聯繫官方 LINE 預約保留時段</span>
         </a>
       </div>
     </section>
@@ -97,14 +102,14 @@
       <div class="font-bold flex items-center gap-1 text-brand-900">
         <i class="fa-solid fa-circle-info text-[#8C7355]"></i> 預約須知：
       </div>
-      <p>1. 時段採優先預約確認制，點選時段後請回傳店名或時間完成保留。</p>
-      <p>2. 如需取消或更改日期，請於前一日透過官方 LINE 告知，謝謝您的配合。</p>
+      <p>1. 時段採優先預約確認制，點選時段後請直接回傳訊息完成登記保留。</p>
+      <p>2. 如需取消或更改日期，請提前透過官方 LINE 告知，感謝您的體諒與配合。</p>
     </section>
 
   </main>
 
   <!-- ========================================================================= -->
-  <!-- 店長專屬管理 ＆ 限動生圖抽屜 (PIN 碼驗證後開啟) -->
+  <!-- 店長專屬管理 ＆ 限動生圖抽屜 -->
   <!-- ========================================================================= -->
   <div id="manager-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
     <div class="bg-white w-full sm:max-w-2xl max-h-[92vh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
@@ -117,7 +122,7 @@
           </div>
           <div>
             <div class="text-xs font-bold text-brand-900">店長排程釋出與 9:16 限動生圖中心</div>
-            <div class="text-[10px] text-brand-400">即時配置空檔，一鍵下載 IG 滿版美圖</div>
+            <div class="text-[10px] text-brand-400">多日區間排程 · 限動美圖生成 · 雲端即時同步</div>
           </div>
         </div>
         <button type="button" onclick="closeManagerModal()" class="w-8 h-8 rounded-full bg-white border border-brand-200 text-brand-400 hover:text-brand-900 flex items-center justify-center">
@@ -125,10 +130,26 @@
         </button>
       </div>
 
-      <!-- 抽屜主體 (滾動區域) -->
+      <!-- 抽屜主體滾動區域 -->
       <div class="p-5 overflow-y-auto space-y-5 text-xs">
 
-        <!-- [分段 A] 基礎營業時段與間隔設定 -->
+        <!-- [分段 A] 門市管理設定 ＆ PIN 碼展示修改 -->
+        <div class="p-4 bg-brand-50/70 rounded-2xl border border-brand-200 space-y-3">
+          <div class="flex justify-between items-center border-b border-brand-200 pb-1.5">
+            <span class="font-bold text-brand-900 flex items-center gap-1.5">
+              <i class="fa-solid fa-key text-[#8C7355]"></i> 店長前台管理密碼 (PIN 碼)
+            </span>
+            <button type="button" onclick="changeAdminPinModal()" class="px-2.5 py-1 bg-white border border-brand-200 text-blue-600 rounded-lg text-[10.5px] font-bold hover:bg-brand-50">
+              修改密碼
+            </button>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-brand-600 text-[11px]">當前店長解鎖密碼：</span>
+            <code class="px-3 py-1 bg-white border border-brand-200 rounded-xl font-mono font-black text-sm text-[#8C7355]" id="disp-manager-pin">8888</code>
+          </div>
+        </div>
+
+        <!-- [分段 B] 營業時間、間隔與公休設定 -->
         <div class="p-4 bg-brand-50/70 rounded-2xl border border-brand-200 space-y-3">
           <span class="font-bold text-brand-900 block border-b border-brand-200 pb-1.5 flex items-center gap-1.5">
             <i class="fa-solid fa-clock text-[#8C7355]"></i> 1. 設定每日營業時段與時段間隔
@@ -144,9 +165,9 @@
             </div>
             <div>
               <label class="block text-[10.5px] font-bold text-brand-700 mb-1">時段間隔</label>
-              <select id="cfg-interval" class="w-full p-2 bg-white rounded-xl border border-brand-200 text-xs font-bold outline-none">
+              <select id="cfg-interval" class="w-full p-2 bg-white rounded-xl border border-brand-200 text-xs font-bold outline-none" onchange="renderAdminSlotsMatrix()">
                 <option value="15">15 分鐘 (極細緻)</option>
-                <option value="30" selected>30 分鐘 (推薦)</option>
+                <option value="30" selected>30 分鐘 (標準)</option>
                 <option value="60">60 分鐘 (一小時)</option>
               </select>
             </div>
@@ -161,87 +182,98 @@
             </div>
           </div>
           <div>
-            <label class="block text-[10.5px] font-bold text-brand-700 mb-1">官方 LINE 預約跳轉網址</label>
+            <label class="block text-[10.5px] font-bold text-brand-700 mb-1">官方 LINE 預約連結</label>
             <input type="url" id="cfg-line-url" placeholder="https://line.me/R/ti/p/@480kqjoj" class="w-full p-2 bg-white rounded-xl border border-brand-200 text-xs outline-none font-mono font-medium">
           </div>
         </div>
 
-        <!-- [分段 B] 釋出日期範圍與可約時段切換 -->
+        <!-- [分段 C] 日期區間連選多日 ＆ 時段矩陣釋出 -->
         <div class="p-4 bg-brand-50/70 rounded-2xl border border-brand-200 space-y-3">
-          <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-brand-200 pb-1.5">
+          <div class="border-b border-brand-200 pb-2 space-y-2">
             <span class="font-bold text-brand-900 flex items-center gap-1.5">
-              <i class="fa-solid fa-calendar-check text-[#8C7355]"></i> 2. 選擇編輯日期並勾選釋出空檔
+              <i class="fa-solid fa-calendar-days text-[#8C7355]"></i> 2. 選擇日期區間並勾選釋出時段
             </span>
-            <div class="flex items-center gap-2">
-              <input type="date" id="admin-target-date" onchange="switchAdminDate(this.value)" class="p-1.5 bg-white border border-brand-200 rounded-lg text-xs font-mono font-bold outline-none">
-              <button type="button" onclick="batchToggleSlots(true)" class="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-md font-bold text-[10.5px]">全選可約</button>
-              <button type="button" onclick="batchToggleSlots(false)" class="px-2 py-1 bg-gray-200 text-gray-700 rounded-md font-bold text-[10.5px]">全部清空</button>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10.5px] text-brand-600 shrink-0 font-bold">起始日：</span>
+                <input type="date" id="admin-range-start" onchange="syncAdminRangeDates()" class="w-full p-1.5 bg-white border border-brand-200 rounded-lg text-xs font-mono font-bold outline-none">
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10.5px] text-brand-600 shrink-0 font-bold">結束日：</span>
+                <input type="date" id="admin-range-end" onchange="syncAdminRangeDates()" class="w-full p-1.5 bg-white border border-brand-200 rounded-lg text-xs font-mono font-bold outline-none">
+              </div>
+            </div>
+            <!-- 區間內快速選取當前編輯日標籤 -->
+            <div class="flex items-center justify-between pt-1">
+              <span class="text-[10.5px] text-brand-500 font-bold">目前編輯中日期：<b class="text-[#8C7355] font-mono text-xs" id="disp-admin-editing-date">--</b></span>
+              <div class="flex gap-1.5">
+                <button type="button" onclick="batchApplyToAllRangeDays()" class="px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-md font-bold text-[10.5px]">
+                  套用此時段至整段區間
+                </button>
+                <button type="button" onclick="batchToggleSlots(true)" class="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-md font-bold text-[10.5px]">全選</button>
+                <button type="button" onclick="batchToggleSlots(false)" class="px-2 py-1 bg-gray-200 text-gray-700 rounded-md font-bold text-[10.5px]">清空</button>
+              </div>
             </div>
           </div>
 
-          <p class="text-[10.5px] text-brand-400">點擊切換綠色（代表釋出該時段供預約）、灰色（代表已被約走或休假）：</p>
-          
-          <!-- 後台可切換之格子列表 -->
-          <div class="grid grid-cols-3 sm:grid-cols-5 gap-2" id="admin-slots-matrix">
-            <!-- JS 動態生成 -->
-          </div>
+          <!-- 區間日期的橫向切換滑軌 -->
+          <div class="flex gap-1.5 overflow-x-auto no-scrollbar py-1" id="admin-range-day-chips"></div>
+
+          <!-- 後台可點選之時段按鈕 -->
+          <div class="grid grid-cols-3 sm:grid-cols-5 gap-2 pt-1" id="admin-slots-matrix"></div>
         </div>
 
-        <!-- [分段 C] 9:16 IG 限動美圖生成區 -->
+        <!-- 戰鬥雙大按鈕：生成限動圖 ＆ 立即更新前台 (已移至美圖預覽上方) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+          <button type="button" onclick="exportStoryImage()" class="py-3.5 bg-gradient-to-r from-rose-500 to-amber-600 hover:opacity-90 text-white font-bold rounded-xl text-xs transition shadow-md flex items-center justify-center gap-2">
+            <i class="fa-solid fa-download"></i>
+            <span>一鍵生成 9:16 IG 限動美圖</span>
+          </button>
+          <button type="button" onclick="saveStoreSettingsToCloud()" class="py-3.5 bg-stone-900 hover:bg-black text-white font-bold rounded-xl text-xs transition shadow-md flex items-center justify-center gap-2">
+            <i class="fa-solid fa-cloud-arrow-up text-amber-300"></i>
+            <span>儲存並即時更新前台空檔</span>
+          </button>
+        </div>
+
+        <!-- [分段 D] 9:16 IG 限動生圖預覽 ＆ 風格設定 -->
         <div class="p-4 bg-amber-50/60 rounded-2xl border border-amber-200 space-y-3">
           <div class="flex justify-between items-center border-b border-amber-200 pb-1.5">
             <span class="font-bold text-amber-950 flex items-center gap-1.5">
-              <i class="fa-brands fa-instagram text-rose-500"></i> 3. 產出 9:16 限動釋出美圖
+              <i class="fa-brands fa-instagram text-rose-500"></i> 3. 9:16 直式限動美圖預覽
             </span>
             <div class="flex items-center gap-1.5">
-              <span class="text-[10px] text-amber-800 font-bold">限動色票：</span>
-              <button type="button" onclick="changeTheme('almond')" class="w-5 h-5 rounded-full bg-[#F5ECE3] border border-amber-300"></button>
-              <button type="button" onclick="changeTheme('caramel')" class="w-5 h-5 rounded-full bg-[#8C7355] border border-amber-300"></button>
-              <button type="button" onclick="changeTheme('dark')" class="w-5 h-5 rounded-full bg-[#2A231C] border border-amber-300"></button>
-              <button type="button" onclick="changeTheme('rose')" class="w-5 h-5 rounded-full bg-[#E8D7D3] border border-amber-300"></button>
+              <span class="text-[10px] text-amber-800 font-bold">風格色票：</span>
+              <button type="button" onclick="changeTheme('almond')" class="w-5 h-5 rounded-full bg-[#F5ECE3] border border-amber-300" title="杏仁沙龍"></button>
+              <button type="button" onclick="changeTheme('caramel')" class="w-5 h-5 rounded-full bg-[#8C7355] border border-amber-300" title="焦糖摩卡"></button>
+              <button type="button" onclick="changeTheme('dark')" class="w-5 h-5 rounded-full bg-[#2A231C] border border-amber-300" title="尊榮深夜"></button>
+              <button type="button" onclick="changeTheme('rose')" class="w-5 h-5 rounded-full bg-[#E8D7D3] border border-amber-300" title="柔粉玫瑰"></button>
             </div>
           </div>
 
-          <!-- 隱藏但繪製用的 9:16 直式限動卡片 (360x640 等比例，產出 1080x1920) -->
+          <!-- 9:16 預覽容器 -->
           <div class="flex justify-center p-2 bg-gray-900/10 rounded-2xl overflow-hidden">
             <div id="story-export-node" class="story-canvas p-6 flex flex-col justify-between rounded-3xl shadow-xl transition-all select-none" style="background-color: #F5ECE3; color: #3D3126;">
-              <!-- 頂部店名與標題 -->
               <div class="space-y-1 text-center">
                 <div class="text-[10px] tracking-[0.25em] uppercase font-mono opacity-60">RESERVATION AVAILABLE</div>
                 <div class="text-xl font-bold font-serif" id="story-node-store">沙龍門市名稱</div>
                 <div class="inline-block px-3 py-1 bg-white/70 backdrop-blur-xs rounded-full text-xs font-bold font-mono mt-1" id="story-node-date">
-                  2026-10-24 空檔時段釋出
+                  空檔時段釋出
                 </div>
               </div>
 
-              <!-- 中間空檔清單清單展示 -->
               <div class="p-4 bg-white/80 backdrop-blur-md rounded-2xl border border-white/60 space-y-2">
                 <div class="text-[11px] font-bold border-b border-black/10 pb-1 text-center flex items-center justify-center gap-1.5">
-                  <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span class="w-2 h-2 rounded-full bg-[#8C7355]"></span>
                   <span>OPEN SLOTS AVAILABLE</span>
                 </div>
-                <div class="grid grid-cols-2 gap-2 text-center font-mono font-bold text-sm" id="story-node-slots-grid">
-                  <!-- 動態填入 -->
-                </div>
+                <div class="grid grid-cols-2 gap-2 text-center font-mono font-bold text-sm" id="story-node-slots-grid"></div>
               </div>
 
-              <!-- 底部指引提示 -->
               <div class="text-center space-y-1">
                 <div class="text-[11px] font-bold">點擊個人首頁連結，直接前往預約</div>
                 <div class="text-[9.5px] opacity-60 font-mono">POWERED BY SIBYL TOOLS</div>
               </div>
             </div>
-          </div>
-
-          <div class="flex gap-2">
-            <button type="button" onclick="exportStoryImage()" class="flex-1 py-3 bg-[#8C7355] hover:bg-[#7A6246] text-white font-bold rounded-xl text-xs transition shadow-md flex items-center justify-center gap-1.5">
-              <i class="fa-solid fa-download"></i>
-              <span>一鍵生成並下載 9:16 IG 限動圖片</span>
-            </button>
-            <button type="button" onclick="saveStoreSettingsToCloud()" class="px-5 py-3 bg-stone-900 hover:bg-black text-white font-bold rounded-xl text-xs transition shadow-md flex items-center gap-1.5">
-              <i class="fa-solid fa-cloud-arrow-up"></i>
-              <span>儲存空檔設定</span>
-            </button>
           </div>
         </div>
 
@@ -250,49 +282,42 @@
   </div>
 
   <script>
-    // 核心 Supabase 連線常數 (對齊新專案 tzqpfnrpnfzzubofoqlt)
     const SUPABASE_URL = "https://tzqpfnrpnfzzubofoqlt.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6cXBmbnJwbmZ6enVib2ZvcWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1ODQ5ODYsImV4cCI6MjEwODE2MDk4Nn0.B-ub7DCpzF3b2gjpTrM9jdW0SLOqRPillZTmoXPuNgk";
 
-    // 預設資料模型
     let currentStore = {
       id: "default-store",
-      store_name: "希貝兒示範美睫沙龍",
+      store_name: "希貝兒沙龍美學工作室",
       admin_pin: "8888",
-      owner_phone: "0912345678"
+      store_slug: ""
     };
 
-    // 空檔設定核心結構
     let slotConfig = {
       startTime: "10:00",
       endTime: "20:00",
       interval: 30,
-      weeklyOff: 1, // 預設週一公休
+      weeklyOff: 1,
       lineUrl: "https://line.me/R/ti/p/@480kqjoj",
       theme: "almond",
-      // 日期與釋出時間記錄 { "YYYY-MM-DD": ["10:00", "14:30"] }
       schedule: {}
     };
 
     let selectedDate = UtilitiesFormatDate(new Date());
+    let adminEditingDate = selectedDate;
 
-    // 1. 初始化頁面：解析短代碼並載入雲端設定
+    // 1. 初始化頁面
     window.addEventListener('DOMContentLoaded', async () => {
       await loadStoreByUrlParams();
       initDateSlider();
       renderClientSlots();
       syncAdminInputs();
+      initAdminDateRangePicker();
     });
 
-    // 支援 ?s=slug 或 ?store_id=UUID 雙向載入
     async function loadStoreByUrlParams() {
       const urlParams = new URLSearchParams(window.location.search);
       const storeParam = urlParams.get('s') || urlParams.get('store') || urlParams.get('store_id');
-
-      if (!storeParam) {
-        console.log("未指定店家代碼，採用離線展示模式");
-        return;
-      }
+      if (!storeParam) return;
 
       const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(storeParam);
       const queryUrl = isUuid
@@ -309,16 +334,15 @@
           document.getElementById('disp-store-title').innerHTML = `<i class="fa-regular fa-calendar-check text-[#8C7355]"></i> ${currentStore.store_name}`;
           document.getElementById('disp-store-subtitle').innerText = `專屬代碼: ${currentStore.store_slug || currentStore.id.slice(0,8)}`;
           document.getElementById('story-node-store').innerText = currentStore.store_name;
+          document.getElementById('disp-manager-pin').innerText = currentStore.admin_pin || "8888";
 
-          // 讀取該店專屬時段設定 (tool_settings)
           await loadCloudSettings(currentStore.id);
         }
       } catch (err) {
-        console.warn("載入雲端店家設定異常:", err);
+        console.warn("載入雲端設定異常:", err);
       }
     }
 
-    // 載入 tool_settings 中的 slot_config
     async function loadCloudSettings(storeId) {
       try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_settings?store_id=eq.${storeId}&select=*`, {
@@ -328,33 +352,67 @@
         if (data && data.length > 0 && data[0].slot_config) {
           slotConfig = Object.assign(slotConfig, data[0].slot_config);
           if (data[0].store_pin) currentStore.admin_pin = data[0].store_pin;
+          document.getElementById('disp-manager-pin').innerText = currentStore.admin_pin || "8888";
         }
       } catch (e) {
         console.error("載入小工具設定異常:", e);
       }
     }
 
-    // 2. 生成前台橫向滑動的 14 天日期膠囊
+    // 2. 前台「一鍵打包分享給客人」按鈕功能
+    async function shareSlotPageToClient() {
+      const shareUrl = window.location.href;
+      const shareText = 
+        `✨【${currentStore.store_name}】最新線上可預約空檔表釋出囉！\n\n` +
+        `📅 您可以直接點擊以下專屬連結，隨時查看各日即刻可約的時段：\n` +
+        `👉 ${shareUrl}\n\n` +
+        `點選喜歡的時段即可一鍵回傳 LINE 完成登記預約，期待為您服務！💕`;
+
+      try {
+        await navigator.clipboard.writeText(shareText);
+        Swal.fire({
+          title: '已為您複製分享打包訊息！',
+          html: `
+            <div class="text-left text-xs bg-brand-50 p-3 rounded-xl border border-brand-200 text-brand-800 space-y-1 font-sans leading-relaxed">
+              <div><b>已複製文案內容：</b></div>
+              <div class="whitespace-pre-wrap font-mono text-[11px] text-brand-700 bg-white p-2 rounded-lg border">${shareText}</div>
+              <div class="text-emerald-700 font-bold pt-1">✓ 可直接貼至 LINE 群組、官方帳號或 IG 私訊回覆客人！</div>
+            </div>
+          `,
+          icon: 'success',
+          confirmButtonColor: '#8C7355',
+          confirmButtonText: '我知道了'
+        });
+      } catch (e) {
+        Swal.fire({
+          title: '分享專屬連結',
+          html: `<textarea readonly class="w-full p-2 text-xs border rounded-xl font-mono">${shareText}</textarea>`,
+          confirmButtonColor: '#8C7355'
+        });
+      }
+    }
+
+    // 3. 前台 14 天橫向滑動膠囊
     function initDateSlider() {
       const container = document.getElementById('date-slider-container');
       container.innerHTML = '';
       const today = new Date();
+      const weekNames = ['日', '一', '二', '三', '四', '五', '六'];
 
       for (let i = 0; i < 14; i++) {
         const d = new Date(today.getTime() + i * 86400000);
         const dateStr = UtilitiesFormatDate(d);
-        const dayOfWeek = d.getDay(); // 0=週日, 1=週一
-        const weekNames = ['日', '一', '二', '三', '四', '五', '六'];
+        const dayOfWeek = d.getDay();
         const isOff = (Number(slotConfig.weeklyOff) === dayOfWeek);
-
         const isSelected = (dateStr === selectedDate);
+
         const card = document.createElement('button');
         card.type = 'button';
         card.className = `flex flex-col items-center justify-center min-w-[56px] py-2 px-1.5 rounded-2xl transition border shrink-0 ${
           isSelected 
             ? 'bg-[#8C7355] text-white border-[#8C7355] shadow-xs' 
             : isOff 
-              ? 'bg-gray-100/60 text-gray-400 border-gray-200' 
+              ? 'bg-gray-100/70 text-gray-400 border-gray-200' 
               : 'bg-brand-50 hover:bg-brand-100 text-brand-800 border-brand-200'
         }`;
 
@@ -373,7 +431,7 @@
       }
     }
 
-    // 3. 渲染前台顧客端時段按鈕
+    // 4. 前台顧客時段按鈕
     function renderClientSlots() {
       const grid = document.getElementById('client-slots-grid');
       const badge = document.getElementById('current-selected-date-badge');
@@ -385,11 +443,10 @@
       headerDate.innerText = `${selectedDate} 釋出可約時段`;
       directLineBtn.href = slotConfig.lineUrl || "https://line.me/R/ti/p/@480kqjoj";
 
-      // 檢查當日是否公休
       const currentDayOfWeek = new Date(selectedDate).getDay();
       if (Number(slotConfig.weeklyOff) === currentDayOfWeek) {
-        grid.innerHTML = '<div class="col-span-full py-8 text-center text-xs text-rose-500 font-bold">本日為固定公休日，未開放線上預約</div>';
-        countBadge.innerText = '公休中';
+        grid.innerHTML = '<div class="col-span-full py-8 text-center text-xs text-rose-500 font-bold">本日為固定公休日，未開放線上時段</div>';
+        countBadge.innerText = '公休日';
         return;
       }
 
@@ -397,43 +454,40 @@
       countBadge.innerText = `${availableSlots.length} 個時段開放`;
 
       if (availableSlots.length === 0) {
-        grid.innerHTML = '<div class="col-span-full py-8 text-center text-xs text-brand-400">本日預約已滿，或尚未釋出時段。請直接聯繫官方 LINE 洽詢！</div>';
+        grid.innerHTML = '<div class="col-span-full py-8 text-center text-xs text-brand-400">本日預約已滿，或尚未釋出時段。請點擊下方直接私訊官方 LINE 洽詢！</div>';
         return;
       }
 
       grid.innerHTML = availableSlots.map(timeStr => `
-        <button type="button" onclick="selectSlotToBook('${selectedDate}', '${timeStr}')" class="py-3 px-2 bg-emerald-50 hover:bg-emerald-600 hover:text-white border border-emerald-300 text-emerald-900 rounded-2xl font-mono font-bold text-xs transition shadow-2xs flex flex-col items-center justify-center gap-0.5">
-          <span class="text-sm tracking-wider">${timeStr}</span>
-          <span class="text-[9.5px] font-sans opacity-70">預約可點</span>
+        <button type="button" onclick="selectSlotToBook('${selectedDate}', '${timeStr}')" class="py-3 px-2 bg-brand-50 hover:bg-[#8C7355] hover:text-white border border-brand-200 text-brand-900 rounded-2xl font-mono font-bold text-xs transition shadow-2xs flex flex-col items-center justify-center gap-0.5 group">
+          <span class="text-sm tracking-wider font-black">${timeStr}</span>
+          <span class="text-[9px] font-sans text-brand-400 group-hover:text-amber-200">可約 · 點選</span>
         </button>
       `).join('');
     }
 
-    // 顧客點選空檔直接跳轉預約確認
     function selectSlotToBook(date, time) {
-      const msg = encodeURIComponent(`您好！我在【${currentStore.store_name}】空檔表看到 ${date} ${time}，想預約這個時段施作！`);
+      const msg = encodeURIComponent(`您好！我在【${currentStore.store_name}】預約表中選定了 ${date} ${time}，想預約此時段施作！`);
       const lineUrl = (slotConfig.lineUrl || "https://line.me/R/ti/p/@480kqjoj") + `?text=${msg}`;
 
       Swal.fire({
         title: `確認預約 ${date} ${time}？`,
-        text: '點擊確定將為您複製預約文字並前往官方 LINE 發送！',
+        text: '點擊確定將為您複製預約文字並前往官方 LINE！',
         icon: 'question',
         showCancelButton: true,
-        confirmButtonText: '前往 LINE 送出預約',
-        confirmButtonColor: '#06C755',
-        cancelButtonText: '再看看'
+        confirmButtonText: '前往官方 LINE 送出預約',
+        confirmButtonColor: '#1F4E3D',
+        cancelButtonText: '返回'
       }).then(r => {
-        if (r.isConfirmed) {
-          window.open(lineUrl, '_blank');
-        }
+        if (r.isConfirmed) window.open(lineUrl, '_blank');
       });
     }
 
-    // 4. 店長管理模態視窗與 PIN 碼驗證
+    // 5. 店長安全驗證與密碼修改
     async function openManagerPinPrompt() {
       const { value: pin } = await Swal.fire({
         title: '店長安全驗證',
-        text: '請輸入專屬管理 PIN 碼以進入時段釋出與限動生圖中心',
+        text: '請輸入專屬管理 PIN 碼進入時段釋出中心',
         input: 'password',
         inputPlaceholder: '預設 8888',
         showCancelButton: true,
@@ -441,13 +495,32 @@
         confirmButtonColor: '#8C7355'
       });
 
-      if (pin === currentStore.admin_pin || pin === "8888" || pin === "888") {
+      if (pin === (currentStore.admin_pin || "8888") || pin === "8888" || pin === "888") {
         document.getElementById('manager-modal').classList.remove('hidden');
-        document.getElementById('admin-target-date').value = selectedDate;
+        adminEditingDate = selectedDate;
+        renderAdminRangeDays();
         renderAdminSlotsMatrix();
         refreshStoryNode();
       } else if (pin) {
         Swal.fire('密碼錯誤！', '請輸入正確的店長管理 PIN 碼', 'error');
+      }
+    }
+
+    async function changeAdminPinModal() {
+      const { value: newPin } = await Swal.fire({
+        title: '修改店長管理 PIN 碼',
+        input: 'password',
+        inputPlaceholder: '請輸入新的 4~6 碼數字密碼',
+        showCancelButton: true,
+        confirmButtonText: '確認儲存',
+        confirmButtonColor: '#8C7355',
+        inputValidator: v => (!v || v.length < 4 ? '密碼長度至少需 4 碼！' : null)
+      });
+      if (newPin && newPin.trim()) {
+        currentStore.admin_pin = newPin.trim();
+        document.getElementById('disp-manager-pin').innerText = currentStore.admin_pin;
+        await saveStoreSettingsToCloud(true);
+        Swal.fire('PIN 碼修改成功！', `下次請使用新密碼：${currentStore.admin_pin}`, 'success');
       }
     }
 
@@ -457,23 +530,76 @@
       renderClientSlots();
     }
 
-    // 5. 後台時間矩陣動態生成
+    // 6. 後台日期區間連選多日邏輯
+    function initAdminDateRangePicker() {
+      const today = new Date();
+      const end = new Date(today.getTime() + 6 * 86400000);
+      document.getElementById('admin-range-start').value = UtilitiesFormatDate(today);
+      document.getElementById('admin-range-end').value = UtilitiesFormatDate(end);
+    }
+
+    function syncAdminRangeDates() {
+      renderAdminRangeDays();
+      renderAdminSlotsMatrix();
+      refreshStoryNode();
+    }
+
+    function renderAdminRangeDays() {
+      const container = document.getElementById('admin-range-day-chips');
+      const sVal = document.getElementById('admin-range-start').value;
+      const eVal = document.getElementById('admin-range-end').value;
+      if (!sVal || !eVal) return;
+
+      container.innerHTML = '';
+      let cur = new Date(sVal);
+      const end = new Date(eVal);
+      const weekNames = ['日', '一', '二', '三', '四', '五', '六'];
+
+      while (cur <= end) {
+        const dStr = UtilitiesFormatDate(cur);
+        const dayOfWeek = cur.getDay();
+        const isOff = (Number(slotConfig.weeklyOff) === dayOfWeek);
+        const isCurrentEdit = (dStr === adminEditingDate);
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `px-3 py-1.5 rounded-xl border text-xs font-bold shrink-0 transition flex items-center gap-1 ${
+          isCurrentEdit 
+            ? 'bg-[#8C7355] text-white border-[#8C7355] shadow-xs' 
+            : isOff 
+              ? 'bg-gray-100 text-gray-400 border-gray-200' 
+              : 'bg-white border-brand-200 text-brand-800 hover:bg-brand-50'
+        }`;
+        btn.innerHTML = `<span>${dStr.slice(5)} (${weekNames[dayOfWeek]})</span>${isOff ? '<span class="text-[9px] opacity-75">[休]</span>' : ''}`;
+        btn.onclick = () => {
+          adminEditingDate = dStr;
+          renderAdminRangeDays();
+          renderAdminSlotsMatrix();
+          refreshStoryNode();
+        };
+        container.appendChild(btn);
+        cur.setDate(cur.getDate() + 1);
+      }
+
+      document.getElementById('disp-admin-editing-date').innerText = adminEditingDate;
+    }
+
+    // 7. 後台時段矩陣勾選
     function renderAdminSlotsMatrix() {
       const matrix = document.getElementById('admin-slots-matrix');
-      const targetDate = document.getElementById('admin-target-date').value;
-      const start = slotConfig.startTime || "10:00";
-      const end = slotConfig.endTime || "20:00";
-      const interval = Number(slotConfig.interval || 30);
+      const start = document.getElementById('cfg-start-time').value || "10:00";
+      const end = document.getElementById('cfg-end-time').value || "20:00";
+      const interval = Number(document.getElementById('cfg-interval').value || 30);
 
-      const allPossibleSlots = generateDaySlots(start, end, interval);
-      const activeSlots = slotConfig.schedule[targetDate] || [];
+      const allSlots = generateDaySlots(start, end, interval);
+      const activeList = slotConfig.schedule[adminEditingDate] || [];
 
-      matrix.innerHTML = allPossibleSlots.map(timeStr => {
-        const isChecked = activeSlots.includes(timeStr);
+      matrix.innerHTML = allSlots.map(timeStr => {
+        const isChecked = activeList.includes(timeStr);
         return `
-          <button type="button" onclick="toggleSlotForDate('${targetDate}', '${timeStr}', this)" class="py-2.5 px-1.5 rounded-xl border text-xs font-mono font-bold transition flex items-center justify-center gap-1 ${
+          <button type="button" onclick="toggleAdminSlot('${timeStr}', this)" class="py-2.5 px-1.5 rounded-xl border text-xs font-mono font-bold transition flex items-center justify-center gap-1 ${
             isChecked 
-              ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs' 
+              ? 'bg-[#8C7355] text-white border-[#8C7355] shadow-xs' 
               : 'bg-white text-gray-400 border-brand-200 hover:bg-brand-50'
           }">
             <i class="fa-solid ${isChecked ? 'fa-check' : 'fa-plus'} text-[10px]"></i>
@@ -483,41 +609,62 @@
       }).join('');
     }
 
-    function toggleSlotForDate(date, timeStr, btn) {
-      if (!slotConfig.schedule[date]) slotConfig.schedule[date] = [];
-      const list = slotConfig.schedule[date];
-      const index = list.indexOf(timeStr);
+    function toggleAdminSlot(timeStr, btn) {
+      if (!slotConfig.schedule[adminEditingDate]) slotConfig.schedule[adminEditingDate] = [];
+      const list = slotConfig.schedule[adminEditingDate];
+      const idx = list.indexOf(timeStr);
 
-      if (index > -1) {
-        list.splice(index, 1);
+      if (idx > -1) {
+        list.splice(idx, 1);
         btn.className = "py-2.5 px-1.5 rounded-xl border text-xs font-mono font-bold transition flex items-center justify-center gap-1 bg-white text-gray-400 border-brand-200 hover:bg-brand-50";
         btn.innerHTML = `<i class="fa-solid fa-plus text-[10px]"></i><span>${timeStr}</span>`;
       } else {
         list.push(timeStr);
         list.sort();
-        btn.className = "py-2.5 px-1.5 rounded-xl border text-xs font-mono font-bold transition flex items-center justify-center gap-1 bg-emerald-600 text-white border-emerald-600 shadow-xs";
+        btn.className = "py-2.5 px-1.5 rounded-xl border text-xs font-mono font-bold transition flex items-center justify-center gap-1 bg-[#8C7355] text-white border-[#8C7355] shadow-xs";
         btn.innerHTML = `<i class="fa-solid fa-check text-[10px]"></i><span>${timeStr}</span>`;
       }
       refreshStoryNode();
     }
 
     function batchToggleSlots(isAll) {
-      const targetDate = document.getElementById('admin-target-date').value;
-      const start = slotConfig.startTime || "10:00";
-      const end = slotConfig.endTime || "20:00";
-      const interval = Number(slotConfig.interval || 30);
-
-      slotConfig.schedule[targetDate] = isAll ? generateDaySlots(start, end, interval) : [];
+      const start = document.getElementById('cfg-start-time').value || "10:00";
+      const end = document.getElementById('cfg-end-time').value || "20:00";
+      const interval = Number(document.getElementById('cfg-interval').value || 30);
+      slotConfig.schedule[adminEditingDate] = isAll ? generateDaySlots(start, end, interval) : [];
       renderAdminSlotsMatrix();
       refreshStoryNode();
     }
 
-    function switchAdminDate(newDate) {
-      renderAdminSlotsMatrix();
-      refreshStoryNode();
+    function batchApplyToAllRangeDays() {
+      const sVal = document.getElementById('admin-range-start').value;
+      const eVal = document.getElementById('admin-range-end').value;
+      if (!sVal || !eVal) return;
+
+      const currentSlots = slotConfig.schedule[adminEditingDate] || [];
+      let cur = new Date(sVal);
+      const end = new Date(eVal);
+      let count = 0;
+
+      while (cur <= end) {
+        const dStr = UtilitiesFormatDate(cur);
+        const dayOfWeek = cur.getDay();
+        if (Number(slotConfig.weeklyOff) !== dayOfWeek) {
+          slotConfig.schedule[dStr] = [...currentSlots];
+          count++;
+        }
+        cur.setDate(cur.getDate() + 1);
+      }
+
+      Swal.fire({
+        title: '已批次套用！',
+        text: `已將此時段設定同步複製至區間內 ${count} 個上班日`,
+        icon: 'success',
+        timer: 1000,
+        showConfirmButton: false
+      });
     }
 
-    // 產生時間點字串陣列
     function generateDaySlots(startStr, endStr, intervalMins) {
       const slots = [];
       let [sh, sm] = startStr.split(':').map(Number);
@@ -534,15 +681,14 @@
       return slots;
     }
 
-    // 6. 9:16 IG 限動預覽節點更新
+    // 8. 9:16 IG 限動預覽與生圖
     function refreshStoryNode() {
-      const targetDate = document.getElementById('admin-target-date').value;
-      const activeSlots = slotConfig.schedule[targetDate] || [];
+      const activeSlots = slotConfig.schedule[adminEditingDate] || [];
       const slotsGrid = document.getElementById('story-node-slots-grid');
-      document.getElementById('story-node-date').innerText = `${targetDate} 空檔釋出`;
+      document.getElementById('story-node-date').innerText = `${adminEditingDate} 空檔釋出`;
 
       if (activeSlots.length === 0) {
-        slotsGrid.innerHTML = '<div class="col-span-2 py-4 text-xs opacity-60">本日無空檔或尚未排入</div>';
+        slotsGrid.innerHTML = '<div class="col-span-2 py-4 text-xs opacity-60">本日尚未開放或時段已滿</div>';
         return;
       }
 
@@ -551,7 +697,6 @@
       `).join('');
     }
 
-    // 切換限動色票風格
     function changeTheme(themeName) {
       slotConfig.theme = themeName;
       const node = document.getElementById('story-export-node');
@@ -566,32 +711,24 @@
       node.style.color = cur.text;
     }
 
-    // 7. 一鍵生成高畫質 1080x1920 IG 限動圖下載
     async function exportStoryImage() {
-      const targetDate = document.getElementById('admin-target-date').value;
       const node = document.getElementById('story-export-node');
-
       Swal.fire({
-        title: '正在產生 9:16 限動美圖...',
+        title: '正在生成 9:16 限動美圖...',
         allowOutsideClick: false,
         didOpen: () => Swal.showLoading()
       });
 
       try {
-        const canvas = await html2canvas(node, {
-          scale: 3, // 360x640 放大 3 倍即為 1080x1920 IG 滿版標準解析度
-          useCORS: true,
-          backgroundColor: null
-        });
-
+        const canvas = await html2canvas(node, { scale: 3, useCORS: true });
         const link = document.createElement('a');
-        link.download = `${currentStore.store_name}_${targetDate}_限動空檔.png`;
+        link.download = `${currentStore.store_name}_${adminEditingDate}_IG限動空檔.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
 
         Swal.fire({
           title: '限動圖片已成功下載！',
-          text: '可直接發布至 Instagram 限時動態，讓顧客隨開隨看！',
+          text: '可直接發布至 IG 限時動態，並附上您的專屬空檔連結！',
           icon: 'success',
           confirmButtonColor: '#8C7355'
         });
@@ -600,21 +737,29 @@
       }
     }
 
-    // 8. 儲存店家時段配置至 Supabase (tool_settings)
-    async function saveStoreSettingsToCloud() {
+    // 9. 儲存設定至 Supabase 雲端
+    async function saveStoreSettingsToCloud(isSilent = false) {
       slotConfig.startTime = document.getElementById('cfg-start-time').value;
       slotConfig.endTime = document.getElementById('cfg-end-time').value;
       slotConfig.interval = Number(document.getElementById('cfg-interval').value);
       slotConfig.weeklyOff = Number(document.getElementById('cfg-weekly-off').value);
       slotConfig.lineUrl = document.getElementById('cfg-line-url').value.trim();
 
-      Swal.fire({
-        title: '正在儲存設定至雲端...',
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading()
-      });
+      if (!isSilent) {
+        Swal.fire({
+          title: '正在同步儲存至雲端...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        });
+      }
 
       try {
+        await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?id=eq.${currentStore.id}`, {
+          method: "PATCH",
+          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ admin_pin: currentStore.admin_pin })
+        });
+
         await fetch(`${SUPABASE_URL}/rest/v1/tool_settings`, {
           method: "POST",
           headers: {
@@ -626,14 +771,21 @@
           body: JSON.stringify({
             store_id: currentStore.id,
             slot_config: slotConfig,
+            store_pin: currentStore.admin_pin,
             updated_at: new Date().toISOString()
           })
         });
 
-        Swal.fire('雲端時段設定已成功儲存！', '前台空檔已即時同步更新', 'success');
-        renderAdminSlotsMatrix();
+        if (!isSilent) {
+          Swal.fire({
+            title: '空檔時段已即時發布更新！',
+            text: '顧客前台已同步生效。',
+            icon: 'success',
+            confirmButtonColor: '#8C7355'
+          });
+        }
       } catch (err) {
-        Swal.fire('儲存失敗', err.message, 'error');
+        if (!isSilent) Swal.fire('儲存失敗', err.message, 'error');
       }
     }
 

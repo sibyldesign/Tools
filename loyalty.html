@@ -485,17 +485,52 @@
     }
 
     // 2. 顧客端手機號碼查詢
-    function searchMemberProfile() {
-      const phone = document.getElementById('search-phone-input').value.trim();
+    // [工具標籤: loyalty.html 支援跨手機雲端同步之會員查詢]
+    async function searchMemberProfile() {
+      const inputEl = document.getElementById('search-phone-input');
+      if (!inputEl) return;
+      const phone = inputEl.value.trim();
+
       if (!phone || phone.length < 9) {
         return Swal.fire('請輸入正確的手機號碼', '', 'warning');
       }
 
+      Swal.fire({
+        title: '正在查詢 VIP 存摺...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      // 1. 優先由 Supabase 雲端更新全體會員最新資料 (解決顧客手機查不到店家紀錄的問題)
+      try {
+        const fetchRes = await fetch(`${SUPABASE_URL}/rest/v1/tool_settings?store_id=eq.${currentStore.id}&select=slot_config`, {
+          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` }
+        });
+        const cloudData = await fetchRes.json();
+        if (cloudData && cloudData.length > 0 && cloudData[0].slot_config && cloudData[0].slot_config.loyalty_members) {
+          loyaltyDb = Object.assign(loyaltyDb, cloudData[0].slot_config.loyalty_members);
+          saveLoyaltyDb(); // 同步至本地快取
+        }
+      } catch (e) {
+        console.warn("雲端讀取異常，改用本地快取:", e);
+      }
+
+      Swal.close();
+
+      // 2. 舊客即刻展開存摺
       if (loyaltyDb[phone]) {
         activeClient = loyaltyDb[phone];
         renderActiveClientProfile();
-        Swal.fire({ title: `歡迎貴賓 ${activeClient.name}！`, text: '已為您帶出會員存摺權益', icon: 'success', timer: 1000, showConfirmButton: false });
-      } else {
+        Swal.fire({
+          title: `歡迎貴賓 ${activeClient.name}！`,
+          text: '已為您帶出 VIP 存摺與往來明細',
+          icon: 'success',
+          timer: 1000,
+          showConfirmButton: false
+        });
+      } 
+      // 3. 全新貴賓引導開卡建檔
+      else {
         Swal.fire({
           title: '查無此會員手機，是否立即建立存摺？',
           text: '首次建檔即可享有貴賓專屬權益！',
@@ -508,12 +543,13 @@
           showCancelButton: true,
           confirmButtonText: '確定開立存摺',
           confirmButtonColor: '#8C7355',
+          cancelButtonText: '取消',
           preConfirm: () => {
             const name = document.getElementById('swal-new-name').value.trim();
             if (!name) return Swal.showValidationMessage('請填寫姓名！');
             return { name, line: document.getElementById('swal-new-line').value.trim() };
           }
-        }).then(r => {
+        }).then(async (r) => {
           if (r.isConfirmed && r.value) {
             activeClient = {
               phone: phone,
@@ -525,10 +561,15 @@
               packages: [],
               logs: [{ time: formatNowTime(), action: "新會員開卡", detail: "開立數位會員存摺 (第 1 張卡)" }]
             };
+
             loyaltyDb[phone] = activeClient;
             saveLoyaltyDb();
             renderActiveClientProfile();
             updateFilteredClients();
+
+            // 即時同步至雲端 (背景執行)
+            saveLoyaltySettingsToCloud(true);
+
             Swal.fire('會員存摺建立成功！', '', 'success');
           }
         });

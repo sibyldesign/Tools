@@ -28,7 +28,7 @@
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-brand-50 text-brand-900 antialiased min-h-screen pb-24 selection:bg-brand-200">
+<body class="bg-brand-50 text-brand-900 antialiased min-h-screen pb-24 selection:bg-brand-200 select-none">
 
   <!-- 頂部抬頭 -->
   <header class="bg-white/95 backdrop-blur-md border-b border-brand-200 sticky top-0 z-40 px-4 py-3 shadow-2xs">
@@ -48,8 +48,8 @@
         <button type="button" onclick="renderGanttCanvas()" class="p-2 text-brand-500 hover:bg-brand-50 rounded-xl transition" title="重新整理">
           <i class="fa-solid fa-rotate-right text-xs"></i>
         </button>
-        <button type="button" onclick="openManagerPinPrompt()" class="px-3 py-1.5 bg-brand-100 hover:bg-brand-200 text-brand-800 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs">
-          <i class="fa-solid fa-gear text-[#8C7355]"></i>
+        <button type="button" onclick="openManagerPinPrompt()" class="px-3 py-1.5 bg-[#8C7355] hover:bg-[#7A6246] text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs">
+          <i class="fa-solid fa-gear text-amber-200"></i>
           <span>店長專區</span>
         </button>
       </div>
@@ -58,9 +58,9 @@
 
   <main class="max-w-6xl mx-auto p-3 sm:p-4 space-y-4">
 
-    <!-- 1. 頂部日期滑動膠囊與專員篩選 -->
+    <!-- 1. 頂部日期橫向滑動膠囊與專員篩選 (對齊圖二) -->
     <section class="bg-white p-4 rounded-3xl border border-brand-200 shadow-sm space-y-3">
-      <!-- 14天滑動膠囊 (對齊圖二) -->
+      <!-- 14天滑動膠囊 -->
       <div class="flex gap-2 overflow-x-auto no-scrollbar py-1" id="date-capsules-bar"></div>
 
       <!-- 檢視切換與專員過濾膠囊 -->
@@ -70,9 +70,7 @@
             <i class="fa-solid fa-arrows-left-right text-[10px] mr-1"></i>滑動檢視
           </button>
         </div>
-        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" id="staff-filter-bar">
-          <!-- JS 動態生成：全體 (N)、專員按鈕 -->
-        </div>
+        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" id="staff-filter-bar"></div>
         <div class="hidden lg:flex items-center gap-3 text-[10.5px]">
           <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-amber-500"></span> Group A (可插單)</span>
           <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-[#8C7355]"></span> Group B (全程專屬)</span>
@@ -87,14 +85,10 @@
         <div class="min-w-[680px]">
           
           <!-- 表頭：專員列表 -->
-          <div class="grid border-b border-brand-200 bg-brand-50/70" id="gantt-header-row">
-            <!-- JS 動態生成專員欄位 -->
-          </div>
+          <div class="grid border-b border-brand-200 bg-brand-50/70" id="gantt-header-row"></div>
 
           <!-- 表身：時間刻度與各專員欄位網格 (內嵌整點水印) -->
-          <div class="relative bg-white" id="gantt-body-container">
-            <!-- JS 動態生成網格與色塊 -->
-          </div>
+          <div class="relative bg-white" id="gantt-body-container"></div>
 
         </div>
       </div>
@@ -103,7 +97,7 @@
   </main>
 
   <!-- ========================================================================= -->
-  <!-- 快速插單模態視窗 (點選空白格子立即開啟) -->
+  <!-- 快速插單模態視窗 (點選空白格子立即開啟，支援微調時間與排休) -->
   <!-- ========================================================================= -->
   <div id="booking-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
     <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 text-xs">
@@ -116,7 +110,7 @@
           </div>
           <div>
             <span class="font-bold text-sm text-brand-900" id="modal-slot-title">時段快速排程</span>
-            <div class="text-[10px] text-brand-400 font-mono" id="modal-slot-meta">專員：未選 ｜ 時間：--:--</div>
+            <div class="text-[10px] text-brand-400 font-mono" id="modal-slot-meta">專員：未選</div>
           </div>
         </div>
         <button type="button" onclick="closeBookingModal()" class="w-7 h-7 rounded-full bg-brand-50 text-brand-400 hover:text-brand-900 flex items-center justify-center">
@@ -134,10 +128,18 @@
         </button>
       </div>
 
+      <!-- [時間微調輸入] -->
+      <div class="p-2.5 bg-brand-50 rounded-xl border border-brand-200 flex items-center justify-between">
+        <label class="font-bold text-brand-800 text-[11px] flex items-center gap-1">
+          <i class="fa-regular fa-clock text-[#8C7355]"></i> 開始時間 (可微調)：
+        </label>
+        <input type="time" id="book-start-time" class="p-1.5 bg-white border border-brand-200 rounded-lg font-mono font-bold text-xs outline-none text-center">
+      </div>
+
       <!-- [表單 A] 顧客預約區塊 -->
       <div id="box-booking-mode" class="space-y-3">
         <div class="space-y-2">
-          <label class="block font-bold text-brand-800">顧客手機號碼 * (輸入自動比對帶入)：</label>
+          <label class="block font-bold text-brand-800">顧客手機號碼 * (輸入自動帶入)：</label>
           <input type="tel" id="book-phone" maxlength="10" placeholder="0912345678" onblur="lookupCustomer(this.value)" class="w-full p-2.5 bg-brand-50/60 rounded-xl border border-brand-200 font-mono font-bold outline-none focus:border-brand-500">
           <div class="grid grid-cols-2 gap-2">
             <div>
@@ -174,6 +176,7 @@
           <select id="off-duration-select" class="w-full p-2.5 bg-brand-50/60 rounded-xl border border-brand-200 font-bold outline-none">
             <option value="30">休息 30 分鐘</option>
             <option value="60" selected>休息 1 小時</option>
+            <option value="90">休息 1.5 小時</option>
             <option value="120">休息 2 小時</option>
             <option value="240">半日休假 (4 小時)</option>
             <option value="480">全日公休 (8 小時)</option>
@@ -198,18 +201,19 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- 店長專區模態視窗 (PIN 碼驗證後開啟) -->
+  <!-- 店長專區模態視窗 (PIN 驗證後開啟：排序、增刪、顧客庫) -->
   <!-- ========================================================================= -->
   <div id="manager-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
     <div class="bg-white w-full sm:max-w-2xl max-h-[92vh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
       
+      <!-- 抬頭 -->
       <div class="p-4 bg-brand-50 border-b border-brand-200 flex justify-between items-center shrink-0">
         <div class="flex items-center gap-2">
           <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xs">
             <i class="fa-solid fa-sliders"></i>
           </div>
           <div>
-            <div class="text-xs font-bold text-brand-900">店長後台配置中心 · 專員與防撞資源庫</div>
+            <div class="text-xs font-bold text-brand-900">店長排程後台 · 專員與服務防撞管理</div>
             <div class="text-[10px] text-brand-400">專員代號排序 · 服務項目管理 · 席位容量鎖定</div>
           </div>
         </div>
@@ -218,52 +222,52 @@
         </button>
       </div>
 
-      <!-- 分頁列 -->
+      <!-- 分頁標籤 -->
       <div class="flex border-b border-brand-200 bg-white px-4 text-xs font-bold shrink-0">
         <button type="button" onclick="switchManagerTab('tab-staff', this)" class="mgr-tab-btn py-3 px-3.5 border-b-2 border-[#8C7355] text-[#8C7355]">
           專員名冊 (上下排序)
         </button>
         <button type="button" onclick="switchManagerTab('tab-services', this)" class="mgr-tab-btn py-3 px-3.5 text-brand-400 hover:text-brand-700">
-          服務項目 (Group A/B)
+          服務項目 (上下排序)
         </button>
         <button type="button" onclick="switchManagerTab('tab-resources', this)" class="mgr-tab-btn py-3 px-3.5 text-brand-400 hover:text-brand-700">
-          限制席位容量
+          席位設備容量
         </button>
         <button type="button" onclick="switchManagerTab('tab-clients', this)" class="mgr-tab-btn py-3 px-3.5 text-brand-400 hover:text-brand-700">
           顧客小庫 (10筆分頁)
         </button>
       </div>
 
-      <!-- 滾動區域 -->
+      <!-- 滾動內容區域 -->
       <div class="p-5 overflow-y-auto space-y-4 text-xs">
 
-        <!-- [分頁 1] 專員名冊管理 -->
+        <!-- [分頁 1] 專員名冊管理 (上下排序 ＋ 增刪) -->
         <div id="tab-staff" class="mgr-pane space-y-3">
           <div class="flex justify-between items-center">
-            <span class="font-bold text-brand-900">排程專員列表 (點擊上下箭頭調整排程顯示順序)：</span>
-            <button type="button" onclick="openAddStaffModal()" class="px-2.5 py-1 bg-[#8C7355] text-white rounded-lg font-bold text-[11px] shadow-2xs">
+            <span class="font-bold text-brand-900">專員名冊 (點擊 ▲/▼ 調整甘特畫布欄位順序)：</span>
+            <button type="button" onclick="openAddStaffModal()" class="px-2.5 py-1.5 bg-[#8C7355] text-white rounded-lg font-bold text-[11px] shadow-2xs">
               + 新增專員
             </button>
           </div>
           <div class="space-y-2" id="admin-staff-list"></div>
         </div>
 
-        <!-- [分頁 2] 服務項目管理 -->
+        <!-- [分頁 2] 服務項目管理 (上下排序 ＋ 增刪) -->
         <div id="tab-services" class="mgr-pane space-y-3 hidden">
           <div class="flex justify-between items-center">
-            <span class="font-bold text-brand-900">服務項目主檔 (含插單屬性與設備關聯)：</span>
-            <button type="button" onclick="openAddServiceModal()" class="px-2.5 py-1 bg-[#8C7355] text-white rounded-lg font-bold text-[11px] shadow-2xs">
+            <span class="font-bold text-brand-900">服務主檔 (含大分類、Group A/B、設備連動)：</span>
+            <button type="button" onclick="openAddServiceModal()" class="px-2.5 py-1.5 bg-[#8C7355] text-white rounded-lg font-bold text-[11px] shadow-2xs">
               + 新增服務
             </button>
           </div>
-          <div class="space-y-2 max-h-56 overflow-y-auto" id="admin-services-list"></div>
+          <div class="space-y-2 max-h-60 overflow-y-auto" id="admin-services-list"></div>
         </div>
 
         <!-- [分頁 3] 席位防撞容量管理 -->
         <div id="tab-resources" class="mgr-pane space-y-3 hidden">
           <div class="flex justify-between items-center">
             <span class="font-bold text-brand-900">店內硬體限制設備容量 (防撞核心)：</span>
-            <button type="button" onclick="openAddResourceModal()" class="px-2.5 py-1 bg-[#8C7355] text-white rounded-lg font-bold text-[11px] shadow-2xs">
+            <button type="button" onclick="openAddResourceModal()" class="px-2.5 py-1.5 bg-[#8C7355] text-white rounded-lg font-bold text-[11px] shadow-2xs">
               + 新增設備
             </button>
           </div>
@@ -392,10 +396,11 @@
             id: "b-101",
             date: selectedDate,
             staffId: "S01",
-            startTime: "10:30",
+            startTime: "10:00",
             durMins: 60,
-            custName: "林小姐",
+            custName: "林小美",
             custPhone: "0912345678",
+            custLine: "May",
             serviceName: "美睫嫁接 120根",
             type: "Group_B",
             resource: "none"
@@ -406,8 +411,9 @@
             staffId: "S02",
             startTime: "14:00",
             durMins: 90,
-            custName: "陳小姐",
+            custName: "陳詩詩",
             custPhone: "0988776655",
+            custLine: "Alice",
             serviceName: "深層頭皮 SPA 護理",
             type: "Group_A",
             resource: "沖水椅"
@@ -419,7 +425,7 @@
       customerDb = JSON.parse(localStorage.getItem('overview_customers_db') || '{}');
       bookingsDb.forEach(b => {
         if (b.custPhone && b.custPhone !== '專員排休' && !customerDb[b.custPhone]) {
-          customerDb[b.custPhone] = { phone: b.custPhone, name: b.custName, line: '', visits: 1 };
+          customerDb[b.custPhone] = { phone: b.custPhone, name: b.custName, line: b.custLine || '', visits: 1 };
         }
       });
       saveCustomerDb();
@@ -493,7 +499,6 @@
         ? staffList
         : staffList.filter(s => s.id === activeFilterStaffId);
 
-      // 表頭欄位
       headerRow.style.gridTemplateColumns = `repeat(${displayedStaff.length}, minmax(180px, 1fr))`;
       headerRow.innerHTML = displayedStaff.map(s => `
         <div class="py-3 px-2 text-center font-black text-brand-900 border-r border-brand-200 last:border-none text-sm">
@@ -501,7 +506,6 @@
         </div>
       `).join('');
 
-      // 9:00 至 21:00 (共 12 個小時區間)
       const hours = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
       bodyContainer.style.gridTemplateColumns = `repeat(${displayedStaff.length}, minmax(180px, 1fr))`;
       bodyContainer.className = "grid relative bg-white";
@@ -512,7 +516,7 @@
           const hourLabel = `${h}:00`;
           cellsHtml += `
             <div class="relative border-b border-r border-brand-200 last:border-r-0" style="height: 80px;">
-              <!-- 00 分 (整點水印帶虛線) -->
+              <!-- 00 分 (整點水印標籤) -->
               <div onclick="onEmptySlotClicked('${s.id}', '${s.name}', '${String(h).padStart(2,'0')}:00')" 
                 class="h-10 border-b border-dashed border-brand-100 hover:bg-emerald-50/40 cursor-pointer transition flex flex-col justify-start items-center pt-1 group">
                 <span class="text-[10px] font-mono text-gray-400 select-none tracking-widest">${hourLabel}</span>
@@ -570,10 +574,10 @@
           block.innerHTML = `
             <div>
               <div class="text-[9.5px] font-mono font-bold flex justify-between">
-                <span>${b.startTime} - ${endTimeStr}</span>
-                <span>[休假鎖定]</span>
+                <span>${b.startTime} - ${endTimeStr} (${b.durMins}分)</span>
+                <span>[休假]</span>
               </div>
-              <div class="font-black text-xs mt-1">☕ ${b.custName || '專員公休'}</div>
+              <div class="font-black text-xs mt-1">☕ ${b.custName || '專員排休'}</div>
             </div>
             <div class="text-[9px] opacity-70">不可安排預約</div>
           `;
@@ -582,12 +586,14 @@
             <div>
               <div class="flex justify-between items-center text-[9.5px] font-mono opacity-90 pb-0.5 border-b border-white/20">
                 <span>${b.startTime} - ${endTimeStr}</span>
-                <span class="font-bold">${b.type === 'Group_A' ? 'A (可插單)' : 'B (全程專屬)'}</span>
+                <span class="font-bold bg-black/20 px-1 rounded">${b.durMins}分鐘</span>
               </div>
-              <div class="font-bold text-xs truncate mt-1">${b.custName} <span class="font-normal font-mono text-[9.5px]">(${b.custPhone})</span></div>
+              <div class="font-bold text-xs truncate mt-1">
+                ${b.custName} <span class="font-normal font-mono text-[9.5px]">(${b.custPhone.slice(-4)})</span>
+              </div>
               <div class="text-[10px] truncate opacity-95">${b.serviceName}</div>
             </div>
-            ${b.resource && b.resource !== 'none' ? `<div class="text-[9px] bg-black/20 rounded px-1 py-0.5 inline-block truncate">設備: ${b.resource}</div>` : ''}
+            ${b.resource && b.resource !== 'none' ? `<div class="text-[9px] bg-black/25 rounded px-1 py-0.5 inline-block truncate"><i class="fa-solid fa-chair text-[8px] mr-0.5"></i>${b.resource}</div>` : ''}
           `;
         }
 
@@ -600,12 +606,13 @@
       });
     }
 
-    // 4. 插單彈窗操作
+    // 4. 插單排程操作 (支援時間微調)
     function onEmptySlotClicked(staffId, staffName, timeStr) {
       pendingSlotInsert = { staffId, staffName, timeStr };
       document.getElementById('modal-slot-title').innerText = `${selectedDate} 快速排程`;
-      document.getElementById('modal-slot-meta').innerText = `指定專員：${staffName} (${staffId}) ｜ 開始時間：${timeStr}`;
+      document.getElementById('modal-slot-meta').innerText = `指定專員：${staffName} (${staffId})`;
 
+      document.getElementById('book-start-time').value = timeStr;
       document.getElementById('book-phone').value = '';
       document.getElementById('book-name').value = '';
       document.getElementById('book-line').value = '';
@@ -641,7 +648,7 @@
         const c = customerDb[p];
         document.getElementById('book-name').value = c.name;
         document.getElementById('book-line').value = c.line || '';
-        hint.innerText = `✓ 舊客檔案帶入：${c.name} (累計預約 ${c.visits || 1} 次)`;
+        hint.innerText = `✓ 舊客帶入：${c.name} ${c.line ? `(LINE: ${c.line})` : ''} ｜ 累計 ${c.visits || 1} 次預約`;
         hint.classList.remove('hidden');
       } else {
         hint.classList.add('hidden');
@@ -666,8 +673,11 @@
       `;
     }
 
+    // 確認插單寫入 (讀取微調後的時間)
     function confirmBookingInsert() {
-      // 專員休假登記
+      const customTime = document.getElementById('book-start-time').value || pendingSlotInsert.timeStr;
+
+      // 專員排休
       if (currentBookingMode === 'off') {
         const dur = Number(document.getElementById('off-duration-select').value);
         const reason = document.getElementById('off-reason').value.trim() || '專員休假';
@@ -676,10 +686,11 @@
           id: `off-${Date.now().toString().slice(-5)}`,
           date: selectedDate,
           staffId: pendingSlotInsert.staffId,
-          startTime: pendingSlotInsert.timeStr,
+          startTime: customTime,
           durMins: dur,
           custName: reason,
           custPhone: '專員排休',
+          custLine: '',
           serviceName: '時段封鎖',
           isOff: true,
           type: 'Group_B',
@@ -703,14 +714,14 @@
         return Swal.fire('請完整填寫手機、顧客姓名並挑選項目！', '', 'warning');
       }
 
-      // 專員衝突防撞
-      if (checkStaffConflict(pendingSlotInsert.staffId, selectedDate, pendingSlotInsert.timeStr, s.dur)) {
+      // 專員防撞
+      if (checkStaffConflict(pendingSlotInsert.staffId, selectedDate, customTime, s.dur)) {
         return Swal.fire('排程衝突！', '該時段專員已有鎖定預約，請選擇其他空檔。', 'error');
       }
 
       // 設備容量防撞
       if (s.resource && s.resource !== 'none') {
-        if (checkResourceCapacity(s.resource, selectedDate, pendingSlotInsert.timeStr, s.dur)) {
+        if (checkResourceCapacity(s.resource, selectedDate, customTime, s.dur)) {
           return Swal.fire('席位設備防撞警報！', `店內【${s.resource}】在該時段已達全店容量上限！`, 'warning');
         }
       }
@@ -719,7 +730,7 @@
         id: `b-${Date.now().toString().slice(-5)}`,
         date: selectedDate,
         staffId: pendingSlotInsert.staffId,
-        startTime: pendingSlotInsert.timeStr,
+        startTime: customTime,
         durMins: s.dur,
         custName: name,
         custPhone: phone,
@@ -732,6 +743,7 @@
       });
       saveBookingsDb();
 
+      // 顧客小庫覆寫更新
       if (!customerDb[phone]) {
         customerDb[phone] = { phone: phone, name: name, line: line, visits: 1 };
       } else {
@@ -744,7 +756,7 @@
 
       closeBookingModal();
       renderGanttCanvas();
-      Swal.fire({ title: '插單成功！', text: `已排入 ${pendingSlotInsert.staffName} ${pendingSlotInsert.timeStr}`, icon: 'success', timer: 900, showConfirmButton: false });
+      Swal.fire({ title: '插單成功！', text: `已排入 ${pendingSlotInsert.staffName} ${customTime}`, icon: 'success', timer: 900, showConfirmButton: false });
     }
 
     function checkStaffConflict(staffId, date, startTime, durMins) {
@@ -783,25 +795,28 @@
       return activeResCount >= resObj.capacity;
     }
 
+    // 排程卡片詳情 (完整顯示 LINE 名稱)
     function viewBookingDetail(bookingId) {
       const b = bookingsDb.find(item => item.id === bookingId);
       if (!b) return;
 
       Swal.fire({
-        title: `排程卡片詳情`,
+        title: `排程預約詳情卡片`,
         html: `
           <div class="text-left text-xs bg-brand-50 p-3.5 rounded-2xl border border-brand-200 space-y-1.5 font-sans leading-relaxed">
-            <div>對象：<b>${b.custName}</b> (${b.custPhone})</div>
+            <div>顧客姓名：<b>${b.custName}</b></div>
+            <div>聯絡電話：<span class="font-mono font-bold">${b.custPhone}</span></div>
+            <div>LINE 稱呼：<b class="text-emerald-700 font-bold">${b.custLine || '未填寫'}</b></div>
             <div>指定專員：<b>${b.staffId}</b></div>
-            <div>時段：<b>${b.date} ${b.startTime}</b> (${b.durMins} 分鐘)</div>
-            <div>項目：<b>${b.serviceName}</b></div>
-            <div>屬性：<span class="font-bold text-amber-800">${b.type}</span> ｜ 設備: <b>${b.resource}</b></div>
-            ${b.note ? `<div>備註：${b.note}</div>` : ''}
+            <div>預約時段：<b>${b.date} ${b.startTime}</b> (施作耗時：<b>${b.durMins}</b> 分鐘)</div>
+            <div>施作項目：<b>${b.serviceName}</b></div>
+            <div>插單屬性：<span class="font-bold text-amber-800">${b.type}</span> ｜ 佔用設備: <b>${b.resource}</b></div>
+            ${b.note ? `<div>現場備註：${b.note}</div>` : ''}
           </div>
         `,
         showCancelButton: true,
         showDenyButton: true,
-        confirmButtonText: '關閉',
+        confirmButtonText: '關閉保留',
         confirmButtonColor: '#8C7355',
         denyButtonText: '刪除此筆排程色塊',
         denyButtonColor: '#e11d48'
@@ -825,7 +840,7 @@
         confirmButtonText: '驗證進入',
         confirmButtonColor: '#8C7355'
       });
-      if (pin === currentStore.admin_pin || pin === "8888" || pin === "888") {
+      if (pin === (currentStore.admin_pin || "8888") || pin === "8888" || pin === "888") {
         document.getElementById('manager-modal').classList.remove('hidden');
         renderAdminStaffList();
         renderAdminServicesList();
@@ -851,7 +866,7 @@
       btn.className = "mgr-tab-btn py-3 px-3.5 border-b-2 border-[#8C7355] text-[#8C7355]";
     }
 
-    // 專員管理 (排序)
+    // 專員管理 (▲/▼ 排序 ＋ 增刪)
     function renderAdminStaffList() {
       const container = document.getElementById('admin-staff-list');
       container.innerHTML = staffList.map((s, idx) => `
@@ -899,7 +914,7 @@
       }
     }
 
-    // 服務項目管理 (排序)
+    // 服務項目管理 (▲/▼ 排序 ＋ 增刪)
     function renderAdminServicesList() {
       const container = document.getElementById('admin-services-list');
       container.innerHTML = serviceCatalog.map((svc, idx) => `
@@ -962,7 +977,7 @@
           </div>
         `,
         preConfirm: () => ({
-          category: document.getElementById('as-cat').value.trim() || '現場服務',
+          category: document.getElementById('as-cat').value.trim() || '現場主要服務',
           name: document.getElementById('as-name').value.trim(),
           price: Number(document.getElementById('as-price').value || 0),
           dur: Number(document.getElementById('as-dur').value || 60),
@@ -977,15 +992,29 @@
       }
     }
 
-    // 席位容量管理
+    // 席位容量管理 (▲/▼ 排序 ＋ 增刪)
     function renderAdminResourcesList() {
       const container = document.getElementById('admin-resources-list');
-      container.innerHTML = storeResources.map(r => `
+      container.innerHTML = storeResources.map((r, idx) => `
         <div class="p-2.5 bg-white rounded-xl border border-brand-200 flex justify-between items-center text-xs shadow-2xs">
-          <span>設備名稱：<b>${r.name}</b> ｜ 容量上限：<b class="font-mono text-[#8C7355] text-sm">${r.capacity}</b> 組席位</span>
-          <button type="button" onclick="deleteResourceById('${r.id}')" class="w-6 h-6 rounded bg-rose-50 text-rose-600 flex items-center justify-center">✕</button>
+          <span>設備：<b>${r.name}</b> ｜ 容量上限：<b class="font-mono text-[#8C7355] text-sm">${r.capacity}</b> 組席位</span>
+          <div class="flex items-center gap-1">
+            <button type="button" onclick="moveResourceOrder(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 border flex items-center justify-center font-bold">▲</button>
+            <button type="button" onclick="moveResourceOrder(${idx}, 1)" ${idx === storeResources.length - 1 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 border flex items-center justify-center font-bold">▼</button>
+            <button type="button" onclick="deleteResourceById('${r.id}')" class="w-6 h-6 rounded bg-rose-50 text-rose-600 flex items-center justify-center ml-1">✕</button>
+          </div>
         </div>
       `).join('');
+    }
+
+    function moveResourceOrder(idx, dir) {
+      const target = idx + dir;
+      if (target < 0 || target >= storeResources.length) return;
+      const tmp = storeResources[idx];
+      storeResources[idx] = storeResources[target];
+      storeResources[target] = tmp;
+      renderAdminResourcesList();
+      saveOverviewConfigToCloud();
     }
 
     function deleteResourceById(id) {
@@ -1058,7 +1087,7 @@
         <div class="p-3 bg-white rounded-2xl border border-brand-200 flex justify-between items-center text-xs shadow-2xs">
           <div>
             <div class="font-bold text-brand-900">${c.name} <span class="font-mono text-gray-400 font-normal ml-1">(${c.phone})</span></div>
-            <div class="text-[10px] text-brand-500 mt-0.5">LINE: ${c.line || '未填'} ｜ 累計排程預約：<b>${c.visits || 1}</b> 次</div>
+            <div class="text-[10px] text-brand-500 mt-0.5">LINE: <b>${c.line || '未填'}</b> ｜ 累計排程預約：<b>${c.visits || 1}</b> 次</div>
           </div>
           <button type="button" onclick="selectCustToBook('${c.phone}')" class="px-3 py-1.5 bg-[#8C7355] text-white rounded-xl text-xs font-bold hover:bg-[#7A6246] transition">
             帶入預約
@@ -1103,7 +1132,7 @@
       document.body.removeChild(a);
     }
 
-    // 6. 雲端同步
+    // 6. 雲端同步與輔助
     async function saveOverviewConfigToCloud() {
       try {
         await fetch(`${SUPABASE_URL}/rest/v1/tool_settings`, {

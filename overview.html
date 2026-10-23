@@ -536,6 +536,30 @@
       renderBookingBlocks(displayedStaff);
     }
 
+    // 莫蘭迪質感高級色票庫 (同項目同顏色，柔和不刺眼，白字清晰)
+    const MORANDI_PALETTE = [
+      { bg: '#8FA89B', border: '#7E988B' }, // 0. 鼠尾草綠 (剪髮/洗護)
+      { bg: '#D98A8A', border: '#C87979' }, // 1. 煙燻粉紅 (燙髮/美睫)
+      { bg: '#D4A373', border: '#C39262' }, // 2. 焦糖奶杏 (護髮/泥浴)
+      { bg: '#8A9EA7', border: '#798D96' }, // 3. 霧霾灰藍 (局部挑染)
+      { bg: '#A68A9F', border: '#95798E' }, // 4. 丁香灰紫 (光療美甲)
+      { bg: '#C2A68C', border: '#B1957B' }, // 5. 燕麥暖咖 (深層SPA)
+      { bg: '#6B8E8E', border: '#5A7D7D' }, // 6. 湖水灰綠 (頭皮護理)
+      { bg: '#C97A63', border: '#B86952' }  // 7. 陶土暖磚 (特殊造型)
+    ];
+
+    // 依據「服務項目名稱」自動產生唯一的莫蘭迪色系 (同項目同顏色)
+    function getMorandiColorByService(serviceName) {
+      if (!serviceName) return MORANDI_PALETTE[0];
+      let hash = 0;
+      for (let i = 0; i < serviceName.length; i++) {
+        hash = serviceName.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      const index = Math.abs(hash) % MORANDI_PALETTE.length;
+      return MORANDI_PALETTE[index];
+    }
+
+    // 繪製預約色塊（同項目同色 ＋ 莫蘭迪高質感）
     function renderBookingBlocks(displayedStaff) {
       const container = document.getElementById('gantt-body-container');
       const todays = bookingsDb.filter(b => b.date === selectedDate);
@@ -552,20 +576,26 @@
 
         const isOff = (b.isOff === true);
         const block = document.createElement('div');
+
+        // 取得該項目的專屬莫蘭迪色彩
+        const itemColor = getMorandiColorByService(b.serviceName);
+
         block.className = `absolute z-20 rounded-xl p-2 shadow-md cursor-pointer transition hover:scale-[1.01] overflow-hidden flex flex-col justify-between ${
-          isOff 
-            ? 'bg-stone-200 border border-stone-300 text-stone-700' 
-            : b.type === 'Group_A' 
-              ? 'bg-amber-600 border border-amber-400 text-white' 
-              : 'bg-[#8C7355] border border-[#7A6246] text-white'
+          isOff ? 'bg-stone-200 border border-stone-300 text-stone-700' : 'text-white'
         }`;
 
+        // 注入尺寸、位置與莫蘭迪顏色
         block.style.top = `${topPx}px`;
         block.style.height = `${heightPx}px`;
         block.style.gridColumnStart = `${staffIndex + 1}`;
         block.style.gridColumnEnd = `${staffIndex + 2}`;
         block.style.marginLeft = '4px';
         block.style.marginRight = '4px';
+
+        if (!isOff) {
+          block.style.backgroundColor = itemColor.bg;
+          block.style.border = `1px solid ${itemColor.border}`;
+        }
 
         const endMins = startMins + b.durMins;
         const endTimeStr = `${String(Math.floor(endMins/60)).padStart(2,'0')}:${String(endMins%60).padStart(2,'0')}`;
@@ -591,7 +621,7 @@
               <div class="font-bold text-xs truncate mt-1">
                 ${b.custName} <span class="font-normal font-mono text-[9.5px]">(${b.custPhone.slice(-4)})</span>
               </div>
-              <div class="text-[10px] truncate opacity-95">${b.serviceName}</div>
+              <div class="text-[10px] truncate font-medium opacity-95">${b.serviceName}</div>
             </div>
             ${b.resource && b.resource !== 'none' ? `<div class="text-[9px] bg-black/25 rounded px-1 py-0.5 inline-block truncate"><i class="fa-solid fa-chair text-[8px] mr-0.5"></i>${b.resource}</div>` : ''}
           `;
@@ -605,7 +635,6 @@
         container.appendChild(block);
       });
     }
-
     // 4. 插單排程操作 (支援時間微調)
     function onEmptySlotClicked(staffId, staffName, timeStr) {
       pendingSlotInsert = { staffId, staffName, timeStr };

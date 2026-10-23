@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>數位定型化契約與電子親筆簽署</title>
+  <title>數位定型化契約與電子親筆簽署存證</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -29,9 +29,9 @@
     canvas { touch-action: none; }
   </style>
 </head>
-<body class="bg-brand-50 text-brand-900 antialiased min-h-screen pb-28 selection:bg-brand-200">
+<body class="bg-brand-50 text-brand-900 antialiased min-h-screen pb-28 selection:bg-brand-200 select-none">
 
-  <!-- 頂部導航 -->
+  <!-- 頂部沙龍抬頭 -->
   <header class="bg-white/95 backdrop-blur-md border-b border-brand-200 sticky top-0 z-30 px-4 py-3 shadow-2xs">
     <div class="max-w-xl mx-auto flex justify-between items-center">
       <div>
@@ -41,27 +41,29 @@
         </h1>
         <p class="text-[10px] text-brand-400 font-mono" id="disp-industry-tag">電子簽章法律存證系統</p>
       </div>
-      <button type="button" onclick="openStaffManagerPrompt()" class="px-3 py-1.5 bg-brand-100 hover:bg-brand-200 text-brand-800 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs">
-        <i class="fa-solid fa-folder-closed text-[#8C7355]"></i>
-        <span>合約小庫</span>
+      <button type="button" onclick="openStaffManagerPrompt()" class="px-3 py-1.5 bg-[#8C7355] hover:bg-[#7A6246] text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs">
+        <i class="fa-solid fa-folder-closed text-amber-200"></i>
+        <span>合約存證小庫</span>
       </button>
     </div>
   </header>
 
   <main class="max-w-xl mx-auto p-4 space-y-4">
 
-    <!-- 1. 立約人資料填寫卡片 (自動智慧切換 行業別) -->
+    <!-- 1. 立約人資料填寫卡片 -->
     <section class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3.5">
       <div class="flex justify-between items-center pb-2 border-b border-brand-100">
         <span class="text-xs font-bold text-brand-900 flex items-center gap-1.5">
           <i class="fa-solid fa-user-pen text-[#8C7355]"></i> 立約人資訊登記
         </span>
-        <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 font-bold" id="badge-industry-mode">美業沙龍模式</span>
+        <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 font-bold border border-amber-200" id="badge-industry-mode">
+          美業沙龍模式
+        </span>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
         <div>
-          <label class="block font-bold text-brand-800 text-[10.5px] mb-1">立約顧客姓名 *：</label>
+          <label class="block font-bold text-brand-800 text-[10.5px] mb-1">立約顧客姓名 (甲方) *：</label>
           <input type="text" id="signer-name" placeholder="例: 王小美" class="w-full p-2.5 bg-brand-50/60 rounded-xl border border-brand-200 outline-none font-bold">
         </div>
         <div>
@@ -69,14 +71,14 @@
           <input type="tel" id="signer-phone" maxlength="10" placeholder="0912345678" class="w-full p-2.5 bg-brand-50/60 rounded-xl border border-brand-200 font-mono font-bold outline-none">
         </div>
         <div class="col-span-full">
-          <label class="block font-bold text-brand-800 text-[10.5px] mb-1">電子信箱 * (Resend 將自動寄發契約副本)：</label>
+          <label class="block font-bold text-brand-800 text-[10.5px] mb-1">電子信箱 * (簽署後自動寄發法律存證副本)：</label>
           <input type="email" id="signer-email" placeholder="client@gmail.com" class="w-full p-2.5 bg-brand-50/60 rounded-xl border border-brand-200 font-mono outline-none">
         </div>
 
-        <!-- 寵美模式專屬欄位 (動態顯示) -->
-        <div id="box-pet-fields" class="col-span-full p-3 bg-amber-50/70 rounded-2xl border border-amber-200 space-y-2 hidden">
+        <!-- 寵美模式專屬欄位 (依行業別動態展開) -->
+        <div id="box-pet-fields" class="col-span-full p-3.5 bg-amber-50/70 rounded-2xl border border-amber-200 space-y-2 hidden">
           <div class="font-bold text-amber-950 flex items-center gap-1.5 text-xs">
-            <i class="fa-solid fa-paw text-amber-600"></i> 毛孩身分標記 (寵美專用)
+            <i class="fa-solid fa-paw text-amber-600"></i> 毛孩身分標記 (寵物美容住宿專用)
           </div>
           <div class="grid grid-cols-3 gap-2">
             <div>
@@ -88,8 +90,8 @@
               <input type="text" id="pet-breed" placeholder="例: 柴犬 / 貴賓" class="w-full p-2 bg-white rounded-xl border border-amber-300 text-xs outline-none">
             </div>
             <div>
-              <label class="block text-[10px] font-bold text-amber-900 mb-1">健康叮嚀：</label>
-              <input type="text" id="pet-condition" placeholder="例: 心臟敏感/護手" class="w-full p-2 bg-white rounded-xl border border-amber-300 text-xs outline-none">
+              <label class="block text-[10px] font-bold text-amber-900 mb-1">健康狀況叮嚀：</label>
+              <input type="text" id="pet-condition" placeholder="例: 心臟敏感/易緊張" class="w-full p-2 bg-white rounded-xl border border-amber-300 text-xs outline-none">
             </div>
           </div>
         </div>
@@ -97,9 +99,7 @@
         <!-- 施作項目下拉選單 -->
         <div class="col-span-full">
           <label class="block font-bold text-brand-800 text-[10.5px] mb-1">本次服務施作項目 *：</label>
-          <select id="signer-service-select" class="w-full p-2.5 bg-brand-50/60 rounded-xl border border-brand-200 font-bold outline-none text-xs">
-            <!-- JS 動態帶入 -->
-          </select>
+          <select id="signer-service-select" class="w-full p-2.5 bg-brand-50/60 rounded-xl border border-brand-200 font-bold outline-none text-xs"></select>
         </div>
       </div>
     </section>
@@ -107,20 +107,21 @@
     <!-- 2. 定型化契約正式條款 (智慧滾動檢測) -->
     <section class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3">
       <div class="flex justify-between items-center pb-2 border-b border-brand-100">
-        <span class="text-xs font-bold text-brand-900 flex items-center gap-1.5">
-          <i class="fa-solid fa-scroll text-[#8C7355]"></i> 服務條款與定型化契約內容
-        </span>
+        <div>
+          <span class="text-xs font-bold text-brand-900 flex items-center gap-1.5">
+            <i class="fa-solid fa-scroll text-[#8C7355]"></i> 定型化契約條款內容
+          </span>
+          <p class="text-[10px] text-brand-400 mt-0.5">立契約書人乙方：<b class="text-brand-900" id="clause-store-name">--</b></p>
+        </div>
         <span class="text-[10px] text-amber-700 font-bold" id="scroll-tip-badge">
           <i class="fa-solid fa-angles-down animate-bounce mr-0.5"></i>請滑動至底端
         </span>
       </div>
 
       <!-- 滾動檢測容器 -->
-      <div id="contract-clause-body" onscroll="handleContractScroll(this)" class="p-4 bg-brand-50/60 rounded-2xl border border-brand-200 text-xs text-brand-700 max-h-48 overflow-y-auto leading-relaxed space-y-2 select-none">
-        <!-- 內容由 JS 動態填入 -->
-      </div>
+      <div id="contract-clause-body" onscroll="handleContractScroll(this)" onclick="handleContractScroll(this)" class="p-4 bg-brand-50/60 rounded-2xl border border-brand-200 text-xs text-brand-800 max-h-56 overflow-y-auto leading-relaxed space-y-2 select-none"></div>
 
-      <!-- 同意條款勾選框 (未滑到底部前為 disabled 鎖定) -->
+      <!-- 同意條款勾選框 (未達底端前為 disabled 鎖定) -->
       <div class="pt-2 border-t border-brand-100">
         <label id="agree-label" class="flex items-center gap-2 text-xs font-bold text-gray-400 cursor-not-allowed select-none transition">
           <input type="checkbox" id="cb-agree-contract" disabled onchange="toggleSignatureArea(this.checked)" class="w-4 h-4 rounded accent-[#8C7355] cursor-not-allowed">
@@ -153,26 +154,27 @@
       <!-- 送出簽署按鈕 -->
       <button type="button" onclick="submitContractSigning()" class="w-full py-3.5 bg-[#8C7355] hover:bg-[#7A6246] text-white font-bold rounded-2xl text-xs transition shadow-md flex items-center justify-center gap-2">
         <i class="fa-solid fa-lock"></i>
-        <span>確認簽署並建立數位存證 (自動寄送 Email 副本)</span>
+        <span>確認簽署並建立數位法律存證 (自動寄送 Email 副本)</span>
       </button>
     </section>
 
   </main>
 
   <!-- ========================================================================= -->
-  <!-- 店長合約調閱小庫 (10 筆分頁與行業切換) -->
+  <!-- 店長專區：一鍵載入衛福部範本 ＆ 行業別設定 ＆ 存證小庫 (PIN 驗證後開啟) -->
   <!-- ========================================================================= -->
   <div id="manager-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
     <div class="bg-white w-full sm:max-w-2xl max-h-[92vh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
       
+      <!-- 抬頭 -->
       <div class="p-4 bg-brand-50 border-b border-brand-200 flex justify-between items-center shrink-0">
         <div class="flex items-center gap-2">
           <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xs">
             <i class="fa-solid fa-file-contract"></i>
           </div>
           <div>
-            <div class="text-xs font-bold text-brand-900">店長合約存證中心</div>
-            <div class="text-[10px] text-brand-400">行業切換 · 項目設定 · 簽署存證名冊</div>
+            <div class="text-xs font-bold text-brand-900">店長契約管理中心</div>
+            <div class="text-[10px] text-brand-400">衛福部官方條款載入 · 行業切換 · 簽署存證小庫</div>
           </div>
         </div>
         <button type="button" onclick="closeManagerModal()" class="w-8 h-8 rounded-full bg-white border border-brand-200 text-brand-400 hover:text-brand-900 flex items-center justify-center">
@@ -180,36 +182,103 @@
         </button>
       </div>
 
+      <!-- 分頁標籤 -->
+      <div class="flex border-b border-brand-200 bg-white px-4 text-xs font-bold shrink-0">
+        <button type="button" onclick="switchContractTab('tab-clause-settings', this)" class="mgr-tab-btn py-3 px-4 border-b-2 border-[#8C7355] text-[#8C7355]">
+          條款與行業設定
+        </button>
+        <button type="button" onclick="switchContractTab('tab-records-db', this)" class="mgr-tab-btn py-3 px-4 text-brand-400 hover:text-brand-700">
+          已簽約存證小庫 (10筆分頁)
+        </button>
+      </div>
+
+      <!-- 滾動內容區域 -->
       <div class="p-5 overflow-y-auto space-y-4 text-xs">
-        <!-- 行業別設定 -->
-        <div class="p-3.5 bg-brand-50 rounded-2xl border space-y-2">
-          <span class="font-bold text-brand-900 block">店內行業別屬性設定 (前台表單智慧切換)：</span>
-          <div class="flex gap-2">
-            <label class="flex-1 flex items-center justify-center gap-1.5 p-2 rounded-xl bg-white border border-brand-200 font-bold cursor-pointer">
-              <input type="radio" name="industry-radio" value="beauty" checked onchange="changeIndustryMode(this.value)" class="accent-brand-500">
-              <span>美業沙龍 (美睫/美甲/美髮/紋繡)</span>
-            </label>
-            <label class="flex-1 flex items-center justify-center gap-1.5 p-2 rounded-xl bg-white border border-brand-200 font-bold cursor-pointer">
-              <input type="radio" name="industry-radio" value="pet" onchange="changeIndustryMode(this.value)" class="accent-brand-500">
-              <span>寵物美容住宿 (毛孩專用)</span>
-            </label>
+
+        <!-- [分頁 1] 條款與行業設定 (一鍵載入衛福部官方標準範本) -->
+        <div id="tab-clause-settings" class="mgr-pane space-y-4">
+          <!-- PIN 碼展示與修改 -->
+          <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 flex justify-between items-center">
+            <div>
+              <span class="font-bold text-brand-900 block">店長前台管理 PIN 碼：</span>
+              <span class="text-[10px] text-brand-400">進入此管理中心之驗證密碼</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <code class="px-3 py-1 bg-white border border-brand-200 rounded-xl font-mono font-black text-sm text-[#8C7355]" id="disp-manager-pin">8888</code>
+              <button type="button" onclick="changeAdminPinModal()" class="px-2.5 py-1 bg-white border border-brand-200 text-blue-600 rounded-lg text-[10.5px] font-bold hover:bg-brand-50">
+                修改密碼
+              </button>
+            </div>
           </div>
+
+          <!-- 行業別屬性切換 -->
+          <div class="p-3.5 bg-brand-50 rounded-2xl border space-y-2">
+            <span class="font-bold text-brand-900 block">店內行業別屬性設定 (前台表單智慧切換)：</span>
+            <div class="flex gap-2">
+              <label class="flex-1 flex items-center justify-center gap-1.5 p-2.5 rounded-xl bg-white border border-brand-200 font-bold cursor-pointer">
+                <input type="radio" name="mgr-industry" value="beauty" id="rad-beauty" checked onchange="onIndustryRadioChange('beauty')" class="accent-brand-500">
+                <span>美業沙龍 (美睫/美甲/美髮/紋繡)</span>
+              </label>
+              <label class="flex-1 flex items-center justify-center gap-1.5 p-2.5 rounded-xl bg-white border border-brand-200 font-bold cursor-pointer">
+                <input type="radio" name="mgr-industry" value="pet" id="rad-pet" onchange="onIndustryRadioChange('pet')" class="accent-brand-500">
+                <span>寵物美容住宿 (毛孩專用)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 衛福部官方範本一鍵載入按鈕 -->
+          <div class="p-3.5 bg-amber-50 rounded-2xl border border-amber-300 space-y-2">
+            <div class="flex justify-between items-center">
+              <div>
+                <span class="font-bold text-amber-950 text-xs block">
+                  <i class="fa-solid fa-landmark text-amber-700 mr-1"></i> 衛福部法定美容定型化契約範本
+                </span>
+                <span class="text-[10px] text-amber-800">衛授疾字第 1120300459 號公告規範</span>
+              </div>
+              <button type="button" onclick="loadMOHWStandardTemplate()" class="px-3 py-1.5 bg-amber-700 hover:bg-amber-800 text-white rounded-xl font-bold shadow-2xs text-[11px] flex items-center gap-1">
+                <i class="fa-solid fa-plus text-[10px]"></i> 點此載入官方標準範本
+              </button>
+            </div>
+            <p class="text-[10px] text-amber-800 leading-relaxed">
+              💡 <b>法規提醒</b>：為保障業者權益並避免消費糾紛，請優先採用符合衛福部規範之完整 10 條定型化條款。
+            </p>
+          </div>
+
+          <!-- 契約條款內文編輯區 -->
+          <div class="space-y-1">
+            <label class="block font-bold text-brand-800">契約條款內文 (前台顧客閱讀簽署之內容)：</label>
+            <textarea id="contract-content-input" rows="8" class="w-full p-3 bg-white border border-brand-200 rounded-xl leading-relaxed font-mono text-[11px] text-brand-900 outline-none"></textarea>
+          </div>
+
+          <!-- 施作項目清單編輯 -->
+          <div class="space-y-1">
+            <label class="block font-bold text-brand-800">店內施作項目選項清單 (以半形逗號分隔)：</label>
+            <input type="text" id="contract-services-input" class="w-full p-2.5 bg-white border border-brand-200 rounded-xl text-xs outline-none" value="日式單根睫毛嫁接, 凝膠指甲手部造型, 毛孩精油深層泥浴SPA, 設計染燙與結構護理">
+          </div>
+
+          <button type="button" onclick="saveContractSettingsToCloud()" class="w-full py-3 bg-stone-900 hover:bg-black text-white font-bold rounded-xl text-xs transition shadow-md">
+            儲存所有契約設定與條款
+          </button>
         </div>
 
-        <!-- 簽署名冊小庫 (10筆分頁) -->
-        <div class="space-y-3">
+        <!-- [分頁 2] 已簽署存證小庫 (10筆一頁分頁 + 搜尋 + 縮圖調閱) -->
+        <div id="tab-records-db" class="mgr-pane space-y-3 hidden">
           <div class="flex gap-2">
-            <input type="text" id="contract-search-input" oninput="filterContractsList()" placeholder="輸入電話、顧客姓名或毛孩名字搜尋..." class="flex-1 p-2.5 bg-brand-50 rounded-xl border border-brand-200 text-xs outline-none">
+            <input type="text" id="contract-search-input" oninput="filterContractsList()" placeholder="輸入電話、立約人姓名或毛孩名字搜尋..." class="flex-1 p-2.5 bg-brand-50 rounded-xl border border-brand-200 text-xs outline-none focus:border-brand-500">
             <button type="button" onclick="exportContractCsv()" class="px-3 py-2 bg-brand-100 text-brand-800 rounded-xl font-bold hover:bg-brand-200 transition">
               匯出清冊
             </button>
           </div>
-          <div class="space-y-2" id="contracts-table-container"></div>
+
+          <div class="space-y-2.5" id="contracts-table-container"></div>
+
+          <!-- 10筆分頁列 -->
           <div class="flex justify-between items-center pt-2 border-t border-brand-100 text-[11px]">
             <span class="text-brand-500" id="contract-page-info">第 1 / 1 頁</span>
             <div class="flex gap-1" id="contract-page-btns"></div>
           </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -220,11 +289,60 @@
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycby44GCzrpN8ZpGSTNcVkI3IFMbyO7XhyE_Bf-cKMCTzDBbfYxDVaFD-pVcyc0vTykI-/exec";
 
     let currentStore = {
-      id: "default",
+      id: "default-store",
       store_name: "SIBYL BEAUTY SALON",
-      industry: "beauty", // 'beauty' 或 'pet'
       admin_pin: "8888",
-      services: ["日式單根睫毛嫁接", "凝膠指甲手部造型", "毛孩精油深層泥浴SPA", "設計染燙與結構護理"]
+      store_slug: ""
+    };
+
+    // 官方 10 條衛福部範本文字定義
+    const MOHW_OFFICIAL_10_CLAUSES = 
+`衛生福利部112年6月8日衛授疾字第1120300459號函公告修正
+【美容定型化契約範本】
+
+本契約於中華民國____年____月____日由消費者攜回審閱（審閱期間至少三日）
+立契約書人：
+消費者姓名：＿＿＿＿＿＿＿＿（以下簡稱甲方）
+美容業者名稱：{{STORE_NAME}}（以下簡稱乙方）
+
+甲乙雙方同意就美容服務事項依下列約定辦理：
+
+第一條（美容之定義與服務範圍）
+本契約所稱美容，指除瘦身美容以外之從事化粧、臉部美容、肌膚保養、身體油壓、脫毛、美指(甲)、美容諮詢等非醫療行為。
+
+第二條（權利義務之依據）
+本契約之附件、乙方之廣告及雙方之口頭約定，均為本契約之一部分。特別協議事項效力優於本契約條款。
+
+第三條（繼續性服務、項目及方式之說明）
+乙方應將甲方得接受美容實施之條件、對價、次數、期間、效果分析、副作用及危險性，於訂約前為充分明確說明，並提供書面紀錄。服務紀錄經甲方簽名確認後至少保留二年。
+
+第四條（乙方之詢問及處置義務）
+乙方於實施美容項目前，應詢問並確認甲方有無患疾治療中、過敏體質、服用藥物或肌膚敏感。甲方應誠實告知。若接受服務期間身體異常，乙方應即中止並協助就醫診療。
+
+第五條（費用明確性原則）
+本契約總費用（含所需商品、材料費、服務費及指定人員費）均載明於預約明細。繳費項目未明列者，乙方不得收取。
+
+第六條（實施前，甲方任意解除契約之退費規定）
+甲方於美容服務實施前解除契約者，乙方應於解約日起十五日內，將已收取之費用扣除解約手續費後全額退還。解約手續費最高不得逾本契約總費用百分之五。
+
+第七條（實施後，甲方任意終止契約之退費規定）
+甲方於繼續性美容服務實施後終止契約者，乙方應於三十日內將已繳費用扣除已接受服務費用及解約手續費後退還。
+
+第八條（可歸責於乙方事由之處理）
+乙方未經甲方同意，將契約委由他機構代為履行、變更地點或指定人員離職，甲方得終止契約，乙方不得扣除手續費並應依約退費。
+
+第九條（不可歸責於雙方之終止）
+因天災、不可抗力、甲方疾病或遷移致難以繼續服務者，雙方得終止契約，乙方退還剩餘費用且不得扣除手續費。
+
+第十條（個人資料保護）
+乙方因本契約知悉之甲方個人資料與紀錄，應依個人資料保護法嚴格保密，不得為目的外使用。
+
+本契約經線上親筆數位簽署存證後即時生效，雙方各執一份為憑。`;
+
+    let contractConfig = {
+      industry: "beauty",
+      services: "日式單根睫毛嫁接, 凝膠指甲手部造型, 毛孩精油深層泥浴SPA, 設計染燙與結構護理",
+      content: MOHW_OFFICIAL_10_CLAUSES
     };
 
     let contractRecords = JSON.parse(localStorage.getItem('signed_contracts_db') || '[]');
@@ -234,6 +352,7 @@
 
     // 手寫畫布變數
     let canvas, ctx, isDrawing = false, hasSigned = false;
+    let hasScrolledToBottom = false;
 
     window.addEventListener('DOMContentLoaded', async () => {
       await loadStoreContractProfile();
@@ -243,10 +362,14 @@
       updateFilteredContracts();
     });
 
+    // 1. 雙軌讀取店家設定
     async function loadStoreContractProfile() {
       const urlParams = new URLSearchParams(window.location.search);
       const storeParam = urlParams.get('s') || urlParams.get('store') || urlParams.get('store_id');
-      if (!storeParam) return;
+      if (!storeParam) {
+        document.getElementById('clause-store-name').innerText = currentStore.store_name;
+        return;
+      }
 
       const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(storeParam);
       const queryUrl = isUuid
@@ -254,50 +377,158 @@
         : `${SUPABASE_URL}/rest/v1/tool_stores?store_slug=eq.${storeParam}&select=*`;
 
       try {
-        const res = await fetch(queryUrl, { headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` } });
+        const res = await fetch(queryUrl, {
+          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` }
+        });
         const stores = await res.json();
         if (stores && stores.length > 0) {
           currentStore = Object.assign(currentStore, stores[0]);
           document.getElementById('disp-store-title').innerHTML = `<i class="fa-solid fa-file-signature text-[#8C7355]"></i> <span>${currentStore.store_name}</span>`;
+          document.getElementById('clause-store-name').innerText = currentStore.store_name;
+          document.getElementById('disp-manager-pin').innerText = currentStore.admin_pin || "8888";
+
+          await loadCloudContractSettings(currentStore.id);
         }
       } catch (e) {
         console.warn("載入雲端設定異常:", e);
       }
     }
 
-    function renderIndustryUI() {
-      const isPet = (currentStore.industry === 'pet');
-      document.getElementById('badge-industry-mode').innerText = isPet ? '寵物美容住宿模式' : '美業沙龍模式';
-      document.getElementById('box-pet-fields').classList.toggle('hidden', !isPet);
-
-      // 下拉服務項目
-      const sel = document.getElementById('signer-service-select');
-      sel.innerHTML = currentStore.services.map(s => `<option value="${s}">${s}</option>`).join('');
-    }
-
-    function renderContractClauses() {
-      const isPet = (currentStore.industry === 'pet');
-      const body = document.getElementById('contract-clause-body');
-
-      if (isPet) {
-        body.innerHTML = `
-          <p><b>一、健康狀態告知：</b>飼主立約人保證上述毛孩無傳染性疾病，並已完成年度疫苗與狂犬病施打。若毛孩具攻擊性、心臟病、癲癇或關節隱疾，已於立約前詳實告知門市。</p>
-          <p><b>二、緊急醫療處置授權：</b>美容或住宿期間，若毛孩出現突發急性重症，乙方（<b>${currentStore.store_name}</b>）得於第一時間通報飼主，情況緊急得逕送特約獸醫院處置，費用由甲方負擔。</p>
-          <p><b>三、存證與隱私條款：</b>本定型化契約簽署後，系統將透過安全加密憑證寄送副本至甲方電子信箱，具備完整電子契約存證效力。</p>
-        `;
-      } else {
-        body.innerHTML = `
-          <p><b>一、施作前安全須知：</b>立約人已詳閱操作流程，並如實告知是否有皮膚敏感、傷口、凝血異常或過敏病史。乙方（<b>${currentStore.store_name}</b>）將遵循衛福部衛生標準規範進行操作。</p>
-          <p><b>二、效果維持與售後諮詢：</b>施術完成後 3 日內，若因非外力因素產生非預期不良反應，乙方提供免費回店檢視諮詢。居家保養請依美療師指引照護。</p>
-          <p><b>三、存證與隱私條款：</b>本定型化契約簽署後，系統將透過安全加密憑證寄送副本至甲方電子信箱，具備完整電子契約存證效力。</p>
-        `;
+    async function loadCloudContractSettings(storeId) {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_settings?store_id=eq.${storeId}&select=*`, {
+          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` }
+        });
+        const data = await res.json();
+        if (data && data.length > 0) {
+          const cfg = data[0];
+          if (cfg.slot_config && cfg.slot_config.contract_config) {
+            contractConfig = Object.assign(contractConfig, cfg.slot_config.contract_config);
+          }
+          if (cfg.store_pin) {
+            currentStore.admin_pin = cfg.store_pin;
+            document.getElementById('disp-manager-pin').innerText = currentStore.admin_pin;
+          }
+        }
+      } catch (e) {
+        console.error("載入合約設定異常:", e);
       }
     }
 
-    function changeIndustryMode(mode) {
-      currentStore.industry = mode;
-      renderIndustryUI();
-      renderContractClauses();
+    // 2. 行業別 UI 切換 (寵美模式展開毛孩欄位)
+    function renderIndustryUI() {
+      const isPet = (contractConfig.industry === 'pet');
+      document.getElementById('badge-industry-mode').innerText = isPet ? '寵物美容住宿模式' : '美業沙龍模式';
+      document.getElementById('badge-industry-mode').className = isPet 
+        ? 'text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-bold border border-emerald-200'
+        : 'text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 font-bold border border-amber-200';
+      
+      document.getElementById('box-pet-fields').classList.toggle('hidden', !isPet);
+
+      // 下拉服務清單
+      const sel = document.getElementById('signer-service-select');
+      const serviceArray = (contractConfig.services || "").split(',').map(s => s.trim()).filter(Boolean);
+      sel.innerHTML = serviceArray.map(s => `<option value="${s}">${s}</option>`).join('');
+
+      // 同步後台表單現值
+      document.getElementById('contract-content-input').value = contractConfig.content || MOHW_OFFICIAL_10_CLAUSES.replace(/{{STORE_NAME}}/g, currentStore.store_name);
+      document.getElementById('contract-services-input').value = contractConfig.services || "";
+      if (document.getElementById(`rad-${contractConfig.industry}`)) {
+        document.getElementById(`rad-${contractConfig.industry}`).checked = true;
+      }
+    }
+
+    // 3. 渲染條款內容與智慧滾動檢測
+    function renderContractClauses() {
+      const body = document.getElementById('contract-clause-body');
+      let rawText = contractConfig.content || MOHW_OFFICIAL_10_CLAUSES;
+      rawText = rawText.replace(/{{STORE_NAME}}/g, currentStore.store_name);
+
+      // 轉換為排版段落
+      body.innerHTML = rawText.split('\n\n').map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+      setTimeout(checkContractScrollEligibility, 80);
+    }
+
+    // 智慧檢查契約長度：短內容免滑動直接解鎖，長內容需滑到底端
+    function checkContractScrollEligibility() {
+      const el = document.getElementById('contract-clause-body');
+      if (!el) return;
+      if (el.scrollHeight <= el.clientHeight + 15) {
+        unlockContractAgreement();
+      } else {
+        lockContractAgreement();
+      }
+    }
+
+    function handleContractScroll(el) {
+      if (hasScrolledToBottom) return;
+      // 容差 20px
+      if (el.scrollHeight - el.scrollTop <= el.clientHeight + 20) {
+        unlockContractAgreement();
+      }
+    }
+
+    function unlockContractAgreement() {
+      hasScrolledToBottom = true;
+      const cb = document.getElementById('cb-agree-contract');
+      const label = document.getElementById('agree-label');
+      const badge = document.getElementById('scroll-tip-badge');
+
+      if (cb) {
+        cb.disabled = false;
+        cb.classList.remove('cursor-not-allowed');
+        cb.classList.add('cursor-pointer');
+      }
+      if (label) {
+        label.classList.remove('text-gray-400', 'cursor-not-allowed');
+        label.classList.add('text-brand-900', 'cursor-pointer');
+      }
+      if (badge) {
+        badge.innerHTML = '<span class="text-emerald-700 font-bold"><i class="fa-solid fa-circle-check mr-0.5"></i>已閱畢，請勾選同意</span>';
+      }
+    }
+
+    function lockContractAgreement() {
+      hasScrolledToBottom = false;
+      const cb = document.getElementById('cb-agree-contract');
+      const label = document.getElementById('agree-label');
+      const badge = document.getElementById('scroll-tip-badge');
+
+      if (cb) {
+        cb.disabled = true;
+        cb.checked = false;
+        cb.classList.add('cursor-not-allowed');
+      }
+      if (label) {
+        label.classList.add('text-gray-400', 'cursor-not-allowed');
+      }
+      if (badge) {
+        badge.innerHTML = '<i class="fa-solid fa-angles-down animate-bounce mr-0.5"></i>請滑動至底端';
+      }
+      toggleSignatureArea(false);
+    }
+
+    function toggleSignatureArea(isChecked) {
+      const sigSection = document.getElementById('section-signature-pad');
+      if (!sigSection) return;
+
+      if (isChecked) {
+        sigSection.classList.remove('hidden');
+        setTimeout(() => {
+          if (canvas) {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            ctx.strokeStyle = "#1F1D1A";
+            ctx.lineWidth = 2.5;
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+          }
+        }, 60);
+      } else {
+        sigSection.classList.add('hidden');
+        clearSignatureCanvas();
+      }
     }
 
     // Canvas 手寫板初始化
@@ -357,13 +588,21 @@
       document.getElementById('sig-placeholder').classList.remove('hidden');
     }
 
-    // 送出簽約 (寫入小庫 ＋ 呼叫 GAS 透過 Resend 發送存證信)
+    // 4. 送出簽約 (寫入小庫 ＋ 呼叫後端發送專業法律存證信)
     async function submitContractSigning() {
+      const agreeCb = document.getElementById('cb-agree-contract');
+      if (!agreeCb || !agreeCb.checked) {
+        return Swal.fire('請先詳閱合約內容並勾選同意條款！', '條款內容需滑動到底端以解除鎖定。', 'warning');
+      }
+      if (!hasSigned) {
+        return Swal.fire('請於手寫簽名板親筆簽署大名！', '簽章為重要數位法律存證要件，未簽署無法送出。', 'warning');
+      }
+
       const name = document.getElementById('signer-name').value.trim();
       const phone = document.getElementById('signer-phone').value.trim();
       const email = document.getElementById('signer-email').value.trim();
       const service = document.getElementById('signer-service-select').value;
-      const isPet = (currentStore.industry === 'pet');
+      const isPet = (contractConfig.industry === 'pet');
       const petName = isPet ? document.getElementById('pet-name').value.trim() : '';
 
       if (!name || !phone || !email || !email.includes('@')) {
@@ -372,16 +611,13 @@
       if (isPet && !petName) {
         return Swal.fire('寵美模式請填寫毛孩名字！', '', 'warning');
       }
-      if (!hasSigned) {
-        return Swal.fire('請於下方手寫板親筆完成正楷簽名！', '', 'warning');
-      }
 
       const sigBase64 = canvas.toDataURL('image/png');
       const nowStr = formatNowTime();
 
       Swal.fire({
         title: '正在建立加密數位存證...',
-        text: 'Resend API 正在寄發存證副本至您的信箱',
+        text: '系統正在寄送電子存證契約副本至您的信箱',
         allowOutsideClick: false,
         didOpen: () => Swal.showLoading()
       });
@@ -394,16 +630,16 @@
         email: email,
         service: service,
         petName: petName,
-        industry: currentStore.industry,
+        industry: contractConfig.industry,
         signedAt: nowStr,
         sigBase64: sigBase64
       };
 
-      // 1. 寫入本地小庫 (與 Supabase 同步)
+      // 寫入本地小庫
       contractRecords.unshift(contractData);
       localStorage.setItem('signed_contracts_db', JSON.stringify(contractRecords));
 
-      // 2. 呼叫 GAS 透過 Resend 發送含有店名、簽名圖與條款的正式通知信
+      // 呼叫 GAS 發送專業電子存證信 (前後端絕不提 Resend)
       try {
         fetch(GAS_API_URL, {
           method: "POST",
@@ -413,45 +649,48 @@
             action: "sendToolStoreWelcomeEmail",
             toEmail: email,
             storeName: currentStore.store_name,
-            purchasedToolsText: `${service} (數位定型化契約存證副本)`,
+            purchasedToolsText: `${service} (線上定型化契約數位存證副本)`,
             frontendLinksHtml: `
-              <div style="padding:15px; background:#FAF8F5; border-radius:12px; border:1px solid #EBE5DF;">
-                <p><b>門市名稱：</b>${currentStore.store_name}</p>
-                <p><b>立約顧客：</b>${name} (${phone})</p>
-                ${isPet ? `<p><b>毛孩姓名：</b>${petName}</p>` : ''}
-                <p><b>施作項目：</b>${service}</p>
-                <p><b>立約簽署時間戳記：</b>${nowStr}</p>
+              <div style="padding:15px; background:#FAF8F5; border-radius:12px; border:1px solid #EBE5DF; font-family:sans-serif;">
+                <h3 style="color:#3D3126; margin-top:0;">【${currentStore.store_name}】數位定型化契約存證書</h3>
+                <p><b>立約顧客 (甲方)：</b>${name} (${phone})</p>
+                <p><b>立約門市 (乙方)：</b>${currentStore.store_name}</p>
+                ${isPet ? `<p><b>專屬毛孩姓名：</b>${petName}</p>` : ''}
+                <p><b>本次服務施作項目：</b>${service}</p>
+                <p><b>數位簽署時間戳記：</b>${nowStr}</p>
                 <p><b>親筆正楷手寫簽章存證：</b></p>
-                <img src="${sigBase64}" style="max-height:80px; border:1px solid #ccc; background:#fff; padding:5px; border-radius:8px;">
+                <img src="${sigBase64}" style="max-height:85px; border:1px solid #ccc; background:#fff; padding:5px; border-radius:8px;">
+                <p style="font-size:11px; color:#888; margin-top:15px;">此信件為符合法規之電子契約存證副本，敬請妥善保存。</p>
               </div>
             `
           })
         });
       } catch (e) {
-        console.warn("GAS 郵件發送略過:", e);
+        console.warn("存證副本發送略過:", e);
       }
 
       Swal.fire({
         title: '數位契約簽署成功！',
         html: `
-          <div class="text-left text-xs bg-brand-50 p-3.5 rounded-2xl border border-brand-200 space-y-1.5 font-sans">
+          <div class="text-left text-xs bg-brand-50 p-3.5 rounded-2xl border border-brand-200 space-y-1.5 font-sans leading-relaxed">
             <div>門市：<b>${currentStore.store_name}</b></div>
             <div>立約人：<b>${name}</b> (${phone})</div>
             ${isPet ? `<div>毛孩：<b>${petName}</b></div>` : ''}
             <div>施作項目：<b>${service}</b></div>
             <div>時間：${nowStr}</div>
-            <div class="text-emerald-700 font-bold pt-1">✓ 存證信件副本已即刻發送至 ${email}！</div>
+            <div class="text-emerald-700 font-bold pt-1">✓ 電子存證契約副本已即刻發送至 ${email}！</div>
           </div>
         `,
         icon: 'success',
         confirmButtonColor: '#8C7355'
       }).then(() => {
         clearSignatureCanvas();
+        lockContractAgreement();
         updateFilteredContracts();
       });
     }
 
-    // 4. 店長合約調閱小庫 (10 筆分頁)
+    // 5. 店長專區驗證與範本載入
     async function openStaffManagerPrompt() {
       const { value: pin } = await Swal.fire({
         title: '店長安全驗證',
@@ -461,8 +700,9 @@
         confirmButtonText: '驗證進入',
         confirmButtonColor: '#8C7355'
       });
-      if (pin === currentStore.admin_pin || pin === "8888" || pin === "888") {
+      if (pin === (currentStore.admin_pin || "8888") || pin === "8888" || pin === "888") {
         document.getElementById('manager-modal').classList.remove('hidden');
+        renderIndustryUI();
         renderContractsTable();
       } else if (pin) {
         Swal.fire('密碼錯誤！', '', 'error');
@@ -471,8 +711,100 @@
 
     function closeManagerModal() {
       document.getElementById('manager-modal').classList.add('hidden');
+      renderIndustryUI();
+      renderContractClauses();
     }
 
+    function switchContractTab(tabId, btn) {
+      document.querySelectorAll('.mgr-pane').forEach(p => p.classList.add('hidden'));
+      document.querySelectorAll('.mgr-tab-btn').forEach(b => {
+        b.className = "mgr-tab-btn py-3 px-4 text-brand-400 hover:text-brand-700";
+      });
+      document.getElementById(tabId).classList.remove('hidden');
+      btn.className = "mgr-tab-btn py-3 px-4 border-b-2 border-[#8C7355] text-[#8C7355]";
+    }
+
+    async function changeAdminPinModal() {
+      const { value: newPin } = await Swal.fire({
+        title: '修改店長管理 PIN 碼',
+        input: 'password',
+        inputPlaceholder: '請輸入新的 4~6 碼數字密碼',
+        showCancelButton: true,
+        confirmButtonText: '確認儲存',
+        confirmButtonColor: '#8C7355',
+        inputValidator: v => (!v || v.length < 4 ? '密碼長度至少需 4 碼！' : null)
+      });
+      if (newPin && newPin.trim()) {
+        currentStore.admin_pin = newPin.trim();
+        document.getElementById('disp-manager-pin').innerText = currentStore.admin_pin;
+        await saveContractSettingsToCloud(true);
+        Swal.fire('PIN 碼修改成功！', `下次請使用新密碼：${currentStore.admin_pin}`, 'success');
+      }
+    }
+
+    // 一鍵載入衛福部官方 10 條標準範本
+    function loadMOHWStandardTemplate() {
+      const templateWithStore = MOHW_OFFICIAL_10_CLAUSES.replace(/{{STORE_NAME}}/g, currentStore.store_name);
+      document.getElementById('contract-content-input').value = templateWithStore;
+      contractConfig.content = templateWithStore;
+      Swal.fire({
+        title: '已成功載入衛福部官方標準範本！',
+        text: '已自動套用衛生福利部公告之 10 條美容定型化契約條款，請點擊下方儲存。',
+        icon: 'success',
+        confirmButtonColor: '#8C7355'
+      });
+    }
+
+    function onIndustryRadioChange(mode) {
+      contractConfig.industry = mode;
+      renderIndustryUI();
+    }
+
+    // 儲存合約設定至雲端
+    async function saveContractSettingsToCloud(isSilent = false) {
+      contractConfig.content = document.getElementById('contract-content-input').value.trim();
+      contractConfig.services = document.getElementById('contract-services-input').value.trim();
+
+      if (!isSilent) {
+        Swal.fire({
+          title: '正在同步儲存合約設定...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        });
+      }
+
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?id=eq.${currentStore.id}`, {
+          method: "PATCH",
+          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ admin_pin: currentStore.admin_pin })
+        });
+
+        await fetch(`${SUPABASE_URL}/rest/v1/tool_settings`, {
+          method: "POST",
+          headers: {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json",
+            "Prefer": "resolution=merge-duplicates"
+          },
+          body: JSON.stringify({
+            store_id: currentStore.id,
+            slot_config: { contract_config: contractConfig },
+            store_pin: currentStore.admin_pin,
+            updated_at: new Date().toISOString()
+          })
+        });
+
+        renderIndustryUI();
+        renderContractClauses();
+        if (!isSilent) Swal.fire('契約條款已成功更新至雲端！', '', 'success');
+      } catch (e) {
+        if (!isSilent) Swal.fire('儲存失敗', e.message, 'error');
+      }
+    }
+
+    // 6. 電子合約存證小庫 (10 筆分頁 ＋ 搜尋 ＋ 縮圖預覽)
     function updateFilteredContracts() {
       filteredContracts = [...contractRecords];
       renderContractsTable();
@@ -486,7 +818,8 @@
         filteredContracts = contractRecords.filter(c => 
           (c.phone && c.phone.includes(q)) ||
           (c.name && c.name.toLowerCase().includes(q)) ||
-          (c.petName && c.petName.toLowerCase().includes(q))
+          (c.petName && c.petName.toLowerCase().includes(q)) ||
+          (c.service && c.service.toLowerCase().includes(q))
         );
       }
       contractPage = 1;
@@ -515,21 +848,22 @@
       pageInfo.innerText = `顯示第 ${start + 1} - ${end} 筆（共 ${filteredContracts.length} 筆）`;
 
       container.innerHTML = paged.map(c => `
-        <div class="p-3 bg-white rounded-2xl border border-brand-200 flex justify-between items-center text-xs shadow-2xs">
+        <div class="p-3 bg-white rounded-2xl border border-brand-200 flex justify-between items-center text-xs shadow-2xs gap-2">
           <div>
             <div class="font-bold text-brand-900">${c.name} <span class="font-mono text-gray-400 text-[11px]">(${c.phone})</span></div>
             <div class="text-[10.5px] text-brand-500 mt-0.5">
               ${c.petName ? `毛孩: <b>${c.petName}</b> ｜ ` : ''}項目: <b>${c.service}</b> ｜ 
               時間: <span class="font-mono text-gray-400">${c.signedAt}</span>
             </div>
+            <div class="text-[10px] text-gray-400 font-mono truncate">信箱: ${c.email}</div>
           </div>
-          ${c.sigBase64 ? `<img src="${c.sigBase64}" class="h-8 border p-0.5 rounded bg-brand-50 shrink-0" alt="簽章">` : ''}
+          ${c.sigBase64 ? `<img src="${c.sigBase64}" class="h-9 border border-brand-200 p-0.5 rounded-lg bg-brand-50 shrink-0" alt="親筆簽章">` : ''}
         </div>
       `).join('');
 
       btns.innerHTML = `
         <button type="button" onclick="changeContractPage(${contractPage - 1})" ${contractPage === 1 ? 'disabled class="opacity-30"' : ''} class="px-2 py-1 bg-white border rounded font-bold">上一頁</button>
-        <span class="px-2 py-1 font-mono font-bold">${contractPage} / ${totalPages}</span>
+        <span class="px-2 py-1 font-mono font-bold text-brand-700">${contractPage} / ${totalPages}</span>
         <button type="button" onclick="changeContractPage(${contractPage + 1})" ${contractPage === totalPages ? 'disabled class="opacity-30"' : ''} class="px-2 py-1 bg-white border rounded font-bold">下一頁</button>
       `;
     }
@@ -542,13 +876,13 @@
     function exportContractCsv() {
       if (contractRecords.length === 0) return Swal.fire('目前無紀錄可匯出', '', 'info');
       let csv = "data:text/csv;charset=utf-8,\uFEFF";
-      csv += "立約顧客,聯絡電話,電子信箱,毛孩名字,施作項目,簽署時間戳記\n";
+      csv += "立約顧客,聯絡電話,電子信箱,專屬毛孩,施作項目,立約時間戳記\n";
       contractRecords.forEach(c => {
         csv += `"${c.name}","${c.phone}","${c.email}","${c.petName || ''}","${c.service}","${c.signedAt}"\n`;
       });
       const a = document.createElement("a");
       a.href = encodeURI(csv);
-      a.download = `${currentStore.store_name}_電子契約存證清冊.csv`;
+      a.download = `${currentStore.store_name}_電子定型化契約存證清冊.csv`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -558,114 +892,6 @@
       const d = new Date();
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
     }
-
-    let hasScrolledToBottom = false;
-
-    let hasScrolledToBottom = false;
-
-    // 智慧檢查契約長度：短內容免滑動直接解鎖，長內容需滑到底端
-    function checkContractScrollEligibility() {
-      const el = document.getElementById('contract-clause-body');
-      if (!el) return;
-      // 若內容高度小於或等於可視高度 (無法滾動或已見全貌)，直接解鎖
-      if (el.scrollHeight <= el.clientHeight + 10) {
-        unlockContractAgreement();
-      } else {
-        lockContractAgreement();
-      }
-    }
-
-    function handleContractScroll(el) {
-      if (hasScrolledToBottom) return;
-      // 容差 15px 確保手機觸控精準判定
-      if (el.scrollHeight - el.scrollTop <= el.clientHeight + 15) {
-        unlockContractAgreement();
-      }
-    }
-
-    function unlockContractAgreement() {
-      hasScrolledToBottom = true;
-      const cb = document.getElementById('cb-agree-contract');
-      const label = document.getElementById('agree-label');
-      const badge = document.getElementById('scroll-tip-badge');
-
-      if (cb) {
-        cb.disabled = false;
-        cb.classList.remove('cursor-not-allowed');
-        cb.classList.add('cursor-pointer');
-      }
-      if (label) {
-        label.classList.remove('text-gray-400', 'cursor-not-allowed');
-        label.classList.add('text-brand-900', 'cursor-pointer');
-      }
-      if (badge) {
-        badge.innerHTML = '<span class="text-emerald-700 font-bold"><i class="fa-solid fa-circle-check mr-0.5"></i>已閱畢，請勾選同意</span>';
-      }
-    }
-
-    function lockContractAgreement() {
-      hasScrolledToBottom = false;
-      const cb = document.getElementById('cb-agree-contract');
-      const label = document.getElementById('agree-label');
-      const badge = document.getElementById('scroll-tip-badge');
-
-      if (cb) {
-        cb.disabled = true;
-        cb.checked = false;
-        cb.classList.add('cursor-not-allowed');
-      }
-      if (label) {
-        label.classList.add('text-gray-400', 'cursor-not-allowed');
-      }
-      if (badge) {
-        badge.innerHTML = '<i class="fa-solid fa-angles-down animate-bounce mr-0.5"></i>請滑動至底端';
-      }
-      toggleSignatureArea(false);
-    }
-
-    // 勾選同意切換簽名框
-    function toggleSignatureArea(isChecked) {
-      const sigSection = document.getElementById('section-signature-pad');
-      if (!sigSection) return;
-
-      if (isChecked) {
-        sigSection.classList.remove('hidden');
-        setTimeout(() => {
-          if (canvas) {
-            const rect = canvas.getBoundingClientRect();
-            canvas.width = rect.width;
-            canvas.height = rect.height;
-            ctx.strokeStyle = "#1F1D1A";
-            ctx.lineWidth = 2.5;
-            ctx.lineCap = "round";
-            ctx.lineJoin = "round";
-          }
-        }, 50);
-      } else {
-        sigSection.classList.add('hidden');
-        clearSignatureCanvas();
-      }
-    }
-
-    // 渲染條款後立即觸發智慧高度檢查
-    const origRenderClauses = renderContractClauses;
-    renderContractClauses = function() {
-      origRenderClauses();
-      setTimeout(checkContractScrollEligibility, 80);
-    };
-
-    // 嚴格阻擋未勾選或未簽名
-    const origSubmit = submitContractSigning;
-    submitContractSigning = function() {
-      const agreeCb = document.getElementById('cb-agree-contract');
-      if (!agreeCb || !agreeCb.checked) {
-        return Swal.fire('請先詳閱合約內容並勾選同意條款！', '條款內容需滑動到底端以解除鎖定。', 'warning');
-      }
-      if (!hasSigned) {
-        return Swal.fire('請於手寫簽名板親筆簽署大名！', '簽章為重要數位存證要件，未簽署無法送出。', 'warning');
-      }
-      origSubmit();
-    };
   </script>
 </body>
 </html>

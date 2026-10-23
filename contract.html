@@ -27,6 +27,39 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     canvas { touch-action: none; }
+    /* SweetAlert2 全域確認按鈕統一套用系統質感棕色 */
+.swal2-styled.swal2-confirm {
+  background-color: #8C7355 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(140, 115, 85, 0.35) !important;
+  border: none !important;
+  border-radius: 0.875rem !important;
+  font-weight: 700 !important;
+  padding: 0.625rem 1.5rem !important;
+  font-size: 0.8125rem !important;
+}
+
+.swal2-styled.swal2-confirm:hover {
+  background-color: #7A6246 !important;
+}
+
+.swal2-styled.swal2-confirm:focus {
+  box-shadow: 0 0 0 3px rgba(140, 115, 85, 0.3) !important;
+}
+
+/* 取消按鈕同步美化為質感米灰 */
+.swal2-styled.swal2-cancel {
+  background-color: #EBE5DF !important;
+  color: #5C4B3C !important;
+  border-radius: 0.875rem !important;
+  font-weight: 700 !important;
+  padding: 0.625rem 1.25rem !important;
+  font-size: 0.8125rem !important;
+}
+
+.swal2-styled.swal2-cancel:hover {
+  background-color: #D5C7BC !important;
+}
   </style>
 </head>
 <body class="bg-brand-50 text-brand-900 antialiased min-h-screen pb-28 selection:bg-brand-200 select-none">

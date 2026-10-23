@@ -26,6 +26,39 @@
   <style>
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    /* SweetAlert2 全域確認按鈕統一套用系統質感棕色 */
+.swal2-styled.swal2-confirm {
+  background-color: #8C7355 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(140, 115, 85, 0.35) !important;
+  border: none !important;
+  border-radius: 0.875rem !important;
+  font-weight: 700 !important;
+  padding: 0.625rem 1.5rem !important;
+  font-size: 0.8125rem !important;
+}
+
+.swal2-styled.swal2-confirm:hover {
+  background-color: #7A6246 !important;
+}
+
+.swal2-styled.swal2-confirm:focus {
+  box-shadow: 0 0 0 3px rgba(140, 115, 85, 0.3) !important;
+}
+
+/* 取消按鈕同步美化為質感米灰 */
+.swal2-styled.swal2-cancel {
+  background-color: #EBE5DF !important;
+  color: #5C4B3C !important;
+  border-radius: 0.875rem !important;
+  font-weight: 700 !important;
+  padding: 0.625rem 1.25rem !important;
+  font-size: 0.8125rem !important;
+}
+
+.swal2-styled.swal2-cancel:hover {
+  background-color: #D5C7BC !important;
+}
   </style>
 </head>
 <body class="bg-brand-50 text-brand-900 antialiased min-h-screen pb-24 selection:bg-brand-200 select-none">
@@ -65,11 +98,6 @@
 
       <!-- 檢視切換與專員過濾膠囊 -->
       <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-brand-100 text-xs">
-        <div class="flex items-center gap-1.5 p-1 bg-brand-50 rounded-2xl border border-brand-200">
-          <button type="button" class="px-3 py-1 bg-white shadow-2xs rounded-xl font-bold text-brand-900">
-            <i class="fa-solid fa-arrows-left-right text-[10px] mr-1"></i>滑動檢視
-          </button>
-        </div>
         <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" id="staff-filter-bar"></div>
         <div class="hidden lg:flex items-center gap-3 text-[10.5px]">
           <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-amber-500"></span> Group A (可插單)</span>
@@ -367,7 +395,7 @@
       endTime: "21:00",
       interval: 30, // 15, 30, 60 分鐘
       weeklyOff: [1], // 預設週一公休 (0:日, 1:一 ... 6:六)
-      specificOffDates: [] // 例如 ["2026-10-31", ...]
+      specificOffDates: [] // 例如 ["2026-10-31"]
     };
     
     let currentStore = {
@@ -407,6 +435,18 @@
     const CUST_PAGE_SIZE = 10;
     let filteredCustList = [];
 
+    // 莫蘭迪質感高級色票庫 (同項目同顏色)
+    const MORANDI_PALETTE = [
+      { bg: '#8FA89B', border: '#7E988B' }, // 0. 鼠尾草綠
+      { bg: '#D98A8A', border: '#C87979' }, // 1. 煙燻粉紅
+      { bg: '#D4A373', border: '#C39262' }, // 2. 焦糖奶杏
+      { bg: '#8A9EA7', border: '#798D96' }, // 3. 霧霾灰藍
+      { bg: '#A68A9F', border: '#95798E' }, // 4. 丁香灰紫
+      { bg: '#C2A68C', border: '#B1957B' }, // 5. 燕麥暖咖
+      { bg: '#6B8E8E', border: '#5A7D7D' }, // 6. 湖水灰綠
+      { bg: '#C97A63', border: '#B86952' }  // 7. 陶土暖磚
+    ];
+
     window.addEventListener('DOMContentLoaded', async () => {
       await loadStoreByUrlParams();
       loadLocalMockDataIfEmpty();
@@ -415,7 +455,7 @@
       populateServiceSelect();
     });
 
-    // 1. 雙軌讀取店家設定
+    // 1. 讀取店家與雲端排程設定
     async function loadStoreByUrlParams() {
       const urlParams = new URLSearchParams(window.location.search);
       const storeParam = urlParams.get('s') || urlParams.get('store') || urlParams.get('store_id');
@@ -433,15 +473,11 @@
         const stores = await res.json();
         if (stores && stores.length > 0) {
           currentStore = stores[0];
-          // 明確顯示店家抬頭
           document.getElementById('disp-store-title').innerHTML = `
             <i class="fa-solid fa-spa text-[#8C7355]"></i>
             <span class="font-black">${currentStore.store_name}</span>
           `;
           document.getElementById('disp-store-subtitle').innerText = `全日排程席位防撞畫布 (${currentStore.store_slug || currentStore.id.slice(0,8)})`;
-          await loadCloudOverviewSettings(currentStore.id);
-          document.getElementById('disp-store-title').innerHTML = `<span>${currentStore.store_name}</span>`;
-          document.getElementById('disp-store-subtitle').innerText = `排程端點: ${currentStore.store_slug || currentStore.id.slice(0,8)}`;
           await loadCloudOverviewSettings(currentStore.id);
         }
       } catch (err) {
@@ -515,7 +551,7 @@
       updateFilteredCustList();
     }
 
-    // 2. 頂部 14 天日期膠囊 (圖二)
+    // 2. 頂部 14 天日期膠囊
     function initDateCapsulesBar() {
       const container = document.getElementById('date-capsules-bar');
       if (!container) return;
@@ -529,9 +565,8 @@
         const dayOfWeek = d.getDay();
         const isSelected = (dateStr === selectedDate);
 
-        // 判定是否為公休日 (每週固定公休 或 指定日期公休)
-        const isWeeklyOff = scheduleConfig.weeklyOff.includes(dayOfWeek);
-        const isSpecificOff = scheduleConfig.specificOffDates.includes(dateStr);
+        const isWeeklyOff = (scheduleConfig.weeklyOff || []).includes(dayOfWeek);
+        const isSpecificOff = (scheduleConfig.specificOffDates || []).includes(dateStr);
         const isOffDay = isWeeklyOff || isSpecificOff;
 
         const btn = document.createElement('button');
@@ -581,12 +616,12 @@
       renderGanttCanvas();
     }
 
-    // 3. 核心甘特畫布 (圖一水印標籤排版)
-    // 取得每格的固定像素高度
+    // 3. 核心甘特畫布
     function getSlotHeightPx() {
-      if (scheduleConfig.interval === 15) return 32; // 15 分鐘高度
-      if (scheduleConfig.interval === 60) return 56; // 60 分鐘高度
-      return 40; // 30 分鐘標準高度
+      const intv = Number(scheduleConfig.interval) || 30;
+      if (intv === 15) return 32;
+      if (intv === 60) return 56;
+      return 40;
     }
 
     function renderGanttCanvas() {
@@ -597,7 +632,6 @@
         ? staffList
         : staffList.filter(s => s.id === activeFilterStaffId);
 
-      // 表頭欄位
       headerRow.style.gridTemplateColumns = `repeat(${displayedStaff.length}, minmax(180px, 1fr))`;
       headerRow.innerHTML = displayedStaff.map(s => `
         <div class="py-3 px-2 text-center font-black text-brand-900 border-r border-brand-200 last:border-none text-sm">
@@ -605,17 +639,18 @@
         </div>
       `).join('');
 
-      // 計算自訂時段的格數
       const [startH, startM] = (scheduleConfig.startTime || "09:00").split(':').map(Number);
       const [endH, endM] = (scheduleConfig.endTime || "21:00").split(':').map(Number);
-      const totalStartMins = startH * 60 + startM;
-      const totalEndMins = endH * 60 + endM;
-      const interval = scheduleConfig.interval || 30;
+      const totalStartMins = startH * 60 + (startM || 0);
+      const totalEndMins = endH * 60 + (endM || 0);
+      const interval = Number(scheduleConfig.interval) || 30;
       const slotHeight = getSlotHeightPx();
 
-      // 產生所有時間段清單
+      // 安全防呆：避免結束時間小於開始時間造成無窮迴圈
+      const safeEndMins = (totalEndMins > totalStartMins) ? totalEndMins : (totalStartMins + 720);
+
       const timeSlots = [];
-      for (let m = totalStartMins; m < totalEndMins; m += interval) {
+      for (let m = totalStartMins; m < safeEndMins; m += interval) {
         const hh = String(Math.floor(m / 60)).padStart(2, '0');
         const mm = String(m % 60).padStart(2, '0');
         timeSlots.push({ timeStr: `${hh}:${mm}`, totalMins: m, isHourMark: (m % 60 === 0) });
@@ -624,17 +659,14 @@
       bodyContainer.style.gridTemplateColumns = `repeat(${displayedStaff.length}, minmax(180px, 1fr))`;
       bodyContainer.className = "grid relative bg-white";
 
-      // 檢查當前日期是否為公休日
       const curDayOfWeek = new Date(selectedDate).getDay();
-      const isOffDay = scheduleConfig.weeklyOff.includes(curDayOfWeek) || scheduleConfig.specificOffDates.includes(selectedDate);
+      const isOffDay = (scheduleConfig.weeklyOff || []).includes(curDayOfWeek) || (scheduleConfig.specificOffDates || []).includes(selectedDate);
 
       let cellsHtml = '';
-
-      // 若為公休日，顯示柔和浮水印提示
       if (isOffDay) {
         cellsHtml += `
           <div class="col-span-full bg-amber-50/80 border-b border-amber-200 text-amber-900 p-2 text-center text-xs font-bold flex items-center justify-center gap-1.5 z-30">
-            <i class="fa-solid fa-mug-hot text-amber-700"></i> 本日（${selectedDate}）為門市公休日，非營業時段仍可點選手動插單
+            <i class="fa-solid fa-mug-hot text-amber-700"></i> 本日（${selectedDate}）為門市公休日，非營業時段仍可點選插單
           </div>
         `;
       }
@@ -645,8 +677,6 @@
             <div onclick="onEmptySlotClicked('${s.id}', '${s.name}', '${slot.timeStr}')"
               style="height: ${slotHeight}px;"
               class="relative border-b ${slot.isHourMark ? 'border-brand-200' : 'border-dashed border-brand-100'} border-r border-brand-200 last:border-r-0 hover:bg-emerald-50/40 cursor-pointer transition flex items-center justify-center group">
-              
-              <!-- 浮水印時間標籤 (整點醒目，非整點小字) -->
               <span class="text-[10px] font-mono ${slot.isHourMark ? 'text-gray-400 font-bold' : 'text-gray-300'} select-none tracking-wider group-hover:hidden">
                 ${slot.isHourMark ? slot.timeStr : `:${slot.timeStr.split(':')[1]}`}
               </span>
@@ -660,6 +690,16 @@
       renderBookingBlocks(displayedStaff, totalStartMins, interval, slotHeight);
     }
 
+    function getMorandiColorByService(serviceName) {
+      if (!serviceName) return MORANDI_PALETTE[0];
+      let hash = 0;
+      for (let i = 0; i < serviceName.length; i++) {
+        hash = serviceName.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      const index = Math.abs(hash) % MORANDI_PALETTE.length;
+      return MORANDI_PALETTE[index];
+    }
+
     function renderBookingBlocks(displayedStaff, baseMins, interval, slotHeight) {
       const container = document.getElementById('gantt-body-container');
       const todays = bookingsDb.filter(b => b.date === selectedDate);
@@ -670,13 +710,10 @@
 
         const [sh, sm] = b.startTime.split(':').map(Number);
         const startMins = sh * 60 + sm;
-
-        // 依據動態間隔計算頂部位置與高度
         const pxPerMinute = slotHeight / interval;
         const topPx = (startMins - baseMins) * pxPerMinute;
         const heightPx = b.durMins * pxPerMinute - 2;
 
-        // 若預約超出顯示邊界則略過
         if (topPx < 0) return;
 
         const isOff = (b.isOff === true);
@@ -737,24 +774,14 @@
         container.appendChild(block);
       });
     }
-    // 依據「服務項目名稱」自動產生唯一的莫蘭迪色系 (同項目同顏色)
-    function getMorandiColorByService(serviceName) {
-      if (!serviceName) return MORANDI_PALETTE[0];
-      let hash = 0;
-      for (let i = 0; i < serviceName.length; i++) {
-        hash = serviceName.charCodeAt(i) + ((hash << 5) - hash);
-      }
-      const index = Math.abs(hash) % MORANDI_PALETTE.length;
-      return MORANDI_PALETTE[index];
-    }
-    
-    // 4. 插單排程操作 (支援時間微調)
+
+    // 4. 插單排程操作
     function onEmptySlotClicked(staffId, staffName, timeStr) {
       pendingSlotInsert = { staffId, staffName, timeStr };
       document.getElementById('modal-slot-title').innerText = `${selectedDate} 快速排程`;
       document.getElementById('modal-slot-meta').innerText = `指定專員：${staffName} (${staffId})`;
-
       document.getElementById('book-start-time').value = timeStr;
+
       document.getElementById('book-phone').value = '';
       document.getElementById('book-name').value = '';
       document.getElementById('book-line').value = '';
@@ -815,11 +842,9 @@
       `;
     }
 
-    // 確認插單寫入 (讀取微調後的時間)
     function confirmBookingInsert() {
       const customTime = document.getElementById('book-start-time').value || pendingSlotInsert.timeStr;
 
-      // 專員排休
       if (currentBookingMode === 'off') {
         const dur = Number(document.getElementById('off-duration-select').value);
         const reason = document.getElementById('off-reason').value.trim() || '專員休假';
@@ -845,7 +870,6 @@
         return;
       }
 
-      // 顧客預約排程
       const phone = document.getElementById('book-phone').value.trim();
       const name = document.getElementById('book-name').value.trim();
       const line = document.getElementById('book-line').value.trim();
@@ -856,12 +880,10 @@
         return Swal.fire('請完整填寫手機、顧客姓名並挑選項目！', '', 'warning');
       }
 
-      // 專員防撞
       if (checkStaffConflict(pendingSlotInsert.staffId, selectedDate, customTime, s.dur)) {
         return Swal.fire('排程衝突！', '該時段專員已有鎖定預約，請選擇其他空檔。', 'error');
       }
 
-      // 設備容量防撞
       if (s.resource && s.resource !== 'none') {
         if (checkResourceCapacity(s.resource, selectedDate, customTime, s.dur)) {
           return Swal.fire('席位設備防撞警報！', `店內【${s.resource}】在該時段已達全店容量上限！`, 'warning');
@@ -885,7 +907,6 @@
       });
       saveBookingsDb();
 
-      // 顧客小庫覆寫更新
       if (!customerDb[phone]) {
         customerDb[phone] = { phone: phone, name: name, line: line, visits: 1 };
       } else {
@@ -937,7 +958,6 @@
       return activeResCount >= resObj.capacity;
     }
 
-    // 排程卡片詳情 (完整顯示 LINE 名稱)
     function viewBookingDetail(bookingId) {
       const b = bookingsDb.find(item => item.id === bookingId);
       if (!b) return;
@@ -984,6 +1004,7 @@
       });
       if (pin === (currentStore.admin_pin || "8888") || pin === "8888" || pin === "888") {
         document.getElementById('manager-modal').classList.remove('hidden');
+        syncBusinessHoursForm();
         renderAdminStaffList();
         renderAdminServicesList();
         renderAdminResourcesList();
@@ -995,6 +1016,7 @@
 
     function closeManagerModal() {
       document.getElementById('manager-modal').classList.add('hidden');
+      initDateCapsulesBar();
       renderGanttCanvas();
       populateServiceSelect();
     }
@@ -1002,10 +1024,141 @@
     function switchManagerTab(tabId, btn) {
       document.querySelectorAll('.mgr-pane').forEach(p => p.classList.add('hidden'));
       document.querySelectorAll('.mgr-tab-btn').forEach(b => {
-        b.className = "mgr-tab-btn py-3 px-3.5 text-brand-400 hover:text-brand-700";
+        b.className = "mgr-tab-btn py-3 px-3.5 text-brand-400 hover:text-brand-700 shrink-0";
       });
       document.getElementById(tabId).classList.remove('hidden');
-      btn.className = "mgr-tab-btn py-3 px-3.5 border-b-2 border-[#8C7355] text-[#8C7355]";
+      btn.className = "mgr-tab-btn py-3 px-3.5 border-b-2 border-[#8C7355] text-[#8C7355] shrink-0";
+    }
+
+    function syncBusinessHoursForm() {
+      document.getElementById('cfg-open-start').value = scheduleConfig.startTime || "09:00";
+      document.getElementById('cfg-open-end').value = scheduleConfig.endTime || "21:00";
+      document.getElementById('cfg-slot-interval').value = scheduleConfig.interval || 30;
+
+      document.querySelectorAll('.cfg-weekly-cb').forEach(cb => {
+        cb.checked = (scheduleConfig.weeklyOff || []).includes(Number(cb.value));
+      });
+
+      renderSpecificOffDatesChips();
+    }
+
+    function renderSpecificOffDatesChips() {
+      const container = document.getElementById('cfg-off-dates-chips');
+      if (!container) return;
+      const dates = scheduleConfig.specificOffDates || [];
+      if (dates.length === 0) {
+        container.innerHTML = '<span class="text-[10.5px] text-brand-400">尚未設定特定單日公休</span>';
+        return;
+      }
+      container.innerHTML = dates.map((dateStr, idx) => `
+        <span class="px-2.5 py-1 bg-white border border-brand-200 rounded-lg font-mono text-[11px] font-bold text-brand-800 flex items-center gap-1.5 shadow-2xs">
+          <span>${dateStr}</span>
+          <button type="button" onclick="removeSpecificOffDate(${idx})" class="text-rose-500 hover:text-rose-700">✕</button>
+        </span>
+      `).join('');
+    }
+
+    function addSpecificOffDate() {
+      const val = document.getElementById('cfg-custom-off-date').value;
+      if (!val) return;
+      if (!scheduleConfig.specificOffDates) scheduleConfig.specificOffDates = [];
+      if (!scheduleConfig.specificOffDates.includes(val)) {
+        scheduleConfig.specificOffDates.push(val);
+        scheduleConfig.specificOffDates.sort();
+        renderSpecificOffDatesChips();
+      }
+      document.getElementById('cfg-custom-off-date').value = '';
+    }
+
+    function removeSpecificOffDate(idx) {
+      if (scheduleConfig.specificOffDates) {
+        scheduleConfig.specificOffDates.splice(idx, 1);
+        renderSpecificOffDatesChips();
+      }
+    }
+
+    // 儲存營業時間與公休至雲端（修復卡死問題）
+    async function saveBusinessSettings() {
+      const startVal = document.getElementById('cfg-open-start').value;
+      const endVal = document.getElementById('cfg-open-end').value;
+
+      if (startVal >= endVal) {
+        return Swal.fire('營業時間有誤', '結束時間必須大於開始營業時間！', 'warning');
+      }
+
+      scheduleConfig.startTime = startVal;
+      scheduleConfig.endTime = endVal;
+      scheduleConfig.interval = Number(document.getElementById('cfg-slot-interval').value);
+
+      const weekly = [];
+      document.querySelectorAll('.cfg-weekly-cb:checked').forEach(cb => weekly.push(Number(cb.value)));
+      scheduleConfig.weeklyOff = weekly;
+
+      Swal.fire({
+        title: '正在儲存設定並同步畫布...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      try {
+        await saveOverviewConfigToCloud();
+        initDateCapsulesBar();
+        renderGanttCanvas();
+        Swal.fire({
+          title: '營業時間與公休已更新！',
+          icon: 'success',
+          timer: 1000,
+          showConfirmButton: false
+        });
+      } catch (err) {
+        Swal.fire('儲存失敗', err.message || '請檢查網路連線', 'error');
+      }
+    }
+
+    // 6. 雲端同步核心（增量合併，絕不卡死、絕不覆蓋其他工具設定）
+    async function saveOverviewConfigToCloud() {
+      try {
+        // 先讀取現有雲端設定以利安全合併
+        let existingConfig = {};
+        try {
+          const fetchRes = await fetch(`${SUPABASE_URL}/rest/v1/tool_settings?store_id=eq.${currentStore.id}&select=slot_config`, {
+            headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` }
+          });
+          const existingData = await fetchRes.json();
+          if (existingData && existingData.length > 0 && existingData[0].slot_config) {
+            existingConfig = existingData[0].slot_config;
+          }
+        } catch (e) {
+          console.warn("無法取得既有設定，直接寫入");
+        }
+
+        existingConfig.overview_config = {
+          staffList,
+          serviceCatalog,
+          storeResources,
+          scheduleConfig
+        };
+
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_settings?on_conflict=store_id`, {
+          method: "POST",
+          headers: {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json",
+            "Prefer": "resolution=merge-duplicates"
+          },
+          body: JSON.stringify({
+            store_id: currentStore.id,
+            slot_config: existingConfig,
+            updated_at: new Date().toISOString()
+          })
+        });
+
+        if (!res.ok) throw new Error(await res.text());
+      } catch (e) {
+        console.error("雲端同步異常:", e);
+        throw e;
+      }
     }
 
     // 專員管理 (▲/▼ 排序 ＋ 增刪)
@@ -1023,7 +1176,7 @@
       `).join('');
     }
 
-    function moveStaffOrder(index, direction) {
+    async function moveStaffOrder(index, direction) {
       const target = index + direction;
       if (target < 0 || target >= staffList.length) return;
       const tmp = staffList[index];
@@ -1031,15 +1184,15 @@
       staffList[target] = tmp;
       renderAdminStaffList();
       initDateCapsulesBar();
-      saveOverviewConfigToCloud();
+      await saveOverviewConfigToCloud();
     }
 
-    function deleteStaffById(id) {
+    async function deleteStaffById(id) {
       if (staffList.length <= 1) return Swal.fire('至少需保留一位排程專員！', '', 'warning');
       staffList = staffList.filter(s => s.id !== id);
       renderAdminStaffList();
       initDateCapsulesBar();
-      saveOverviewConfigToCloud();
+      await saveOverviewConfigToCloud();
     }
 
     async function openAddStaffModal() {
@@ -1052,7 +1205,7 @@
         staffList.push({ id: `S0${staffList.length + 1}`, name: name.trim() });
         renderAdminStaffList();
         initDateCapsulesBar();
-        saveOverviewConfigToCloud();
+        await saveOverviewConfigToCloud();
       }
     }
 
@@ -1074,20 +1227,20 @@
       `).join('');
     }
 
-    function moveServiceOrder(idx, dir) {
+    async function moveServiceOrder(idx, dir) {
       const target = idx + dir;
       if (target < 0 || target >= serviceCatalog.length) return;
       const tmp = serviceCatalog[idx];
       serviceCatalog[idx] = serviceCatalog[target];
       serviceCatalog[target] = tmp;
       renderAdminServicesList();
-      saveOverviewConfigToCloud();
+      await saveOverviewConfigToCloud();
     }
 
-    function deleteServiceById(id) {
+    async function deleteServiceById(id) {
       serviceCatalog = serviceCatalog.filter(s => s.id !== id);
       renderAdminServicesList();
-      saveOverviewConfigToCloud();
+      await saveOverviewConfigToCloud();
     }
 
     async function openAddServiceModal() {
@@ -1130,7 +1283,7 @@
       if (v && v.name) {
         serviceCatalog.push({ id: `srv-${Date.now().toString().slice(-4)}`, ...v });
         renderAdminServicesList();
-        saveOverviewConfigToCloud();
+        await saveOverviewConfigToCloud();
       }
     }
 
@@ -1149,20 +1302,20 @@
       `).join('');
     }
 
-    function moveResourceOrder(idx, dir) {
+    async function moveResourceOrder(idx, dir) {
       const target = idx + dir;
       if (target < 0 || target >= storeResources.length) return;
       const tmp = storeResources[idx];
       storeResources[idx] = storeResources[target];
       storeResources[target] = tmp;
       renderAdminResourcesList();
-      saveOverviewConfigToCloud();
+      await saveOverviewConfigToCloud();
     }
 
-    function deleteResourceById(id) {
+    async function deleteResourceById(id) {
       storeResources = storeResources.filter(r => r.id !== id);
       renderAdminResourcesList();
-      saveOverviewConfigToCloud();
+      await saveOverviewConfigToCloud();
     }
 
     async function openAddResourceModal() {
@@ -1179,7 +1332,7 @@
       if (v && v.name) {
         storeResources.push({ id: `res-${Date.now().toString().slice(-4)}`, ...v });
         renderAdminResourcesList();
-        saveOverviewConfigToCloud();
+        await saveOverviewConfigToCloud();
       }
     }
 
@@ -1274,30 +1427,6 @@
       document.body.removeChild(a);
     }
 
-    // 6. 雲端同步與輔助
-    async function saveOverviewConfigToCloud() {
-      try {
-        await fetch(`${SUPABASE_URL}/rest/v1/tool_settings`, {
-          method: "POST",
-          headers: {
-            "apikey": SUPABASE_ANON_KEY,
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-            "Content-Type": "application/json",
-            "Prefer": "resolution=merge-duplicates"
-          },
-          body: JSON.stringify({
-            store_id: currentStore.id,
-            slot_config: {
-              overview_config: { staffList, serviceCatalog, storeResources }
-            },
-            updated_at: new Date().toISOString()
-          })
-        });
-      } catch (e) {
-        console.warn("雲端同步異常:", e);
-      }
-    }
-
     function saveBookingsDb() {
       localStorage.setItem('overview_bookings_data', JSON.stringify(bookingsDb));
     }
@@ -1313,101 +1442,6 @@
     function formatYearMonthDay(d) {
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
-
-    // 渲染後台營業設定欄位現值
-    function syncBusinessHoursForm() {
-      document.getElementById('cfg-open-start').value = scheduleConfig.startTime || "09:00";
-      document.getElementById('cfg-open-end').value = scheduleConfig.endTime || "21:00";
-      document.getElementById('cfg-slot-interval').value = scheduleConfig.interval || 30;
-
-      // 每週公休核取方塊
-      document.querySelectorAll('.cfg-weekly-cb').forEach(cb => {
-        cb.checked = scheduleConfig.weeklyOff.includes(Number(cb.value));
-      });
-
-      renderSpecificOffDatesChips();
-    }
-
-    function renderSpecificOffDatesChips() {
-      const container = document.getElementById('cfg-off-dates-chips');
-      if (!container) return;
-      if (!scheduleConfig.specificOffDates || scheduleConfig.specificOffDates.length === 0) {
-        container.innerHTML = '<span class="text-[10.5px] text-brand-400">尚未設定特定單日公休</span>';
-        return;
-      }
-      container.innerHTML = scheduleConfig.specificOffDates.map((dateStr, idx) => `
-        <span class="px-2.5 py-1 bg-white border border-brand-200 rounded-lg font-mono text-[11px] font-bold text-brand-800 flex items-center gap-1.5 shadow-2xs">
-          <span>${dateStr}</span>
-          <button type="button" onclick="removeSpecificOffDate(${idx})" class="text-rose-500 hover:text-rose-700">✕</button>
-        </span>
-      `).join('');
-    }
-
-    function addSpecificOffDate() {
-      const val = document.getElementById('cfg-custom-off-date').value;
-      if (!val) return;
-      if (!scheduleConfig.specificOffDates.includes(val)) {
-        scheduleConfig.specificOffDates.push(val);
-        scheduleConfig.specificOffDates.sort();
-        renderSpecificOffDatesChips();
-      }
-      document.getElementById('cfg-custom-off-date').value = '';
-    }
-
-    function removeSpecificOffDate(idx) {
-      scheduleConfig.specificOffDates.splice(idx, 1);
-      renderSpecificOffDatesChips();
-    }
-
-    // 儲存營業時間與公休至雲端
-    async function saveBusinessSettings() {
-      scheduleConfig.startTime = document.getElementById('cfg-open-start').value;
-      scheduleConfig.endTime = document.getElementById('cfg-open-end').value;
-      scheduleConfig.interval = Number(document.getElementById('cfg-slot-interval').value);
-
-      const weekly = [];
-      document.querySelectorAll('.cfg-weekly-cb:checked').forEach(cb => weekly.push(Number(cb.value)));
-      scheduleConfig.weeklyOff = weekly;
-
-      Swal.fire({ title: '正在儲存設定並同步畫布...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-      await saveOverviewConfigToCloud();
-
-      initDateCapsulesBar();
-      renderGanttCanvas();
-      Swal.fire('營業時間與公休設定已成功生效！', '', 'success');
-    }
-
-    // 更新 saveOverviewConfigToCloud 一併納入 scheduleConfig
-    const origSaveCloud = saveOverviewConfigToCloud;
-    saveOverviewConfigToCloud = async function() {
-      try {
-        await fetch(`${SUPABASE_URL}/rest/v1/tool_settings?on_conflict=store_id`, {
-          method: "POST",
-          headers: {
-            "apikey": SUPABASE_ANON_KEY,
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-            "Content-Type": "application/json",
-            "Prefer": "resolution=merge-duplicates"
-          },
-          body: JSON.stringify({
-            store_id: currentStore.id,
-            slot_config: {
-              overview_config: { staffList, serviceCatalog, storeResources, scheduleConfig }
-            },
-            updated_at: new Date().toISOString()
-          })
-        });
-      } catch (e) {
-        console.warn("雲端同步異常:", e);
-      }
-    };
-
-    // 進入店長專區時同步表單數據
-    const origOpenPin = openManagerPinPrompt;
-    openManagerPinPrompt = async function() {
-      await origOpenPin();
-      syncBusinessHoursForm();
-    };
-  </script>
+</script>
 </body>
 </html>

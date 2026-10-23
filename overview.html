@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>全日排程總覽 | Schedule Overview</title>
+  <title>全日排程席位防撞總覽</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -14,7 +14,7 @@
         extend: {
           colors: {
             brand: {
-              50: '#FDFBF7', 100: '#F5ECE3', 200: '#EBE5DF', 300: '#D5C7BC',
+              50: '#FAF8F5', 100: '#F5ECE3', 200: '#EBE5DF', 300: '#D5C7BC',
               400: '#BCA38F', 500: '#8C7355', 600: '#7A6246', 700: '#68523A',
               800: '#5C4B3C', 900: '#3D3126',
             }
@@ -26,352 +26,1084 @@
   <style>
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    /* 時間軸每半小時高度固定 40px */
+    .slot-cell {
+      height: 40px;
+      min-height: 40px;
+    }
   </style>
 </head>
-<body class="bg-brand-50 text-brand-900 antialiased min-h-screen p-3 md:p-6 pb-24">
+<body class="bg-brand-50 text-brand-900 antialiased min-h-screen pb-24 selection:bg-brand-200">
 
-  <div class="max-w-5xl mx-auto space-y-4">
-    <!-- 頂部面板 -->
-    <div class="bg-white p-4 md:p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-brand-100 gap-2">
+  <!-- 頂部沙龍抬頭 -->
+  <header class="bg-white/95 backdrop-blur-md border-b border-brand-200 sticky top-0 z-40 px-4 py-3 shadow-2xs">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-xl bg-brand-100 text-[#8C7355] flex items-center justify-center font-bold text-xs shadow-2xs">
+          <i class="fa-solid fa-table-cells"></i>
+        </div>
+        <div>
+          <h1 class="text-sm font-bold text-brand-900 flex items-center gap-1.5" id="disp-store-title">
+            <span>全日排程席位防撞總覽</span>
+          </h1>
+          <p class="text-[10px] text-brand-400 font-mono" id="disp-store-subtitle">Sibyl Schedule Canvas</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="renderGanttCanvas()" class="p-2 text-brand-500 hover:bg-brand-50 rounded-xl transition" title="重新整理">
+          <i class="fa-solid fa-rotate-right text-xs"></i>
+        </button>
+        <button type="button" onclick="openManagerPinPrompt()" class="px-3 py-1.5 bg-brand-100 hover:bg-brand-200 text-brand-800 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs">
+          <i class="fa-solid fa-gear text-[#8C7355]"></i>
+          <span>店長專區</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto p-3 sm:p-4 space-y-4">
+
+    <!-- 1. 日期快速滑動切換列 -->
+    <section class="bg-white p-3.5 rounded-3xl border border-brand-200 shadow-sm flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="shiftDay(-1)" class="w-8 h-8 rounded-xl border border-brand-200 hover:bg-brand-50 flex items-center justify-center text-xs font-bold transition">
+          <i class="fa-solid fa-chevron-left text-[10px]"></i>
+        </button>
+        <div class="flex items-center gap-1.5">
+          <i class="fa-regular fa-calendar text-[#8C7355]"></i>
+          <input type="date" id="current-date-picker" onchange="onDateChanged(this.value)" class="p-1 bg-transparent font-bold text-sm outline-none font-mono cursor-pointer">
+        </div>
+        <button type="button" onclick="shiftDay(1)" class="w-8 h-8 rounded-xl border border-brand-200 hover:bg-brand-50 flex items-center justify-center text-xs font-bold transition">
+          <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        </button>
+      </div>
+
+      <!-- 圖例說明 -->
+      <div class="hidden sm:flex items-center gap-3 text-[10.5px]">
+        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-amber-500"></span> Group A (可插單)</span>
+        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-[#8C7355]"></span> Group B (全程專屬)</span>
+        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> 空性格子 (點擊秒插單)</span>
+      </div>
+    </section>
+
+    <!-- 2. 全日排程甘特畫布 (核心畫布) -->
+    <section class="bg-white rounded-3xl border border-brand-200 shadow-md overflow-hidden">
+      <!-- 畫布滾動容器 -->
+      <div class="overflow-x-auto no-scrollbar">
+        <div class="min-w-[680px]">
+          
+          <!-- 表頭：專員列表 -->
+          <div class="grid border-b border-brand-200 bg-brand-50/70" id="gantt-header-row">
+            <!-- JS 動態生成專員欄位 -->
+          </div>
+
+          <!-- 表身：時間刻度與各專員欄位網格 -->
+          <div class="relative" id="gantt-body-container">
+            <!-- JS 動態生成網格與色塊 -->
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- 快速插單模態視窗 (點選空白格子立即開啟) -->
+  <!-- ========================================================================= -->
+  <div id="booking-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 text-xs">
+      <div class="flex justify-between items-center pb-2 border-b border-brand-100">
         <div class="flex items-center gap-2">
-          <span class="w-8 h-8 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-sm">
-            <i class="fa-solid fa-table-cells"></i>
-          </span>
+          <div class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+            <i class="fa-solid fa-calendar-plus text-xs"></i>
+          </div>
           <div>
-            <h1 class="text-xs font-black text-brand-900">全日排程與穿插預約總覽</h1>
-            <p class="text-[10px] text-brand-400">左右滑動切換日期 · 點擊空白格快速插單 · 席位防撞</p>
+            <span class="font-bold text-sm text-brand-900" id="modal-slot-title">時段快速插單</span>
+            <div class="text-[10px] text-brand-400 font-mono" id="modal-slot-meta">專員：未選 ｜ 時間：--:--</div>
           </div>
         </div>
-        <div class="flex items-center gap-2">
-          <button type="button" onclick="openStaffServiceConfigModal()" class="px-3 py-1.5 bg-brand-50 hover:bg-brand-100 border border-brand-200 text-brand-800 rounded-xl text-xs font-bold transition flex items-center gap-1">
-            <i class="fa-solid fa-sliders text-[10px]"></i> 專員與服務管理
-          </button>
-          <div class="inline-flex p-1 bg-brand-100/70 rounded-xl border border-brand-200 text-xs font-bold">
-            <button type="button" id="btn-zoom-scroll" onclick="setOverviewZoom('scroll')" class="px-3 py-1 rounded-lg bg-white text-brand-900 shadow-xs">滑動檢視</button>
-            <button type="button" id="btn-zoom-fit" onclick="setOverviewZoom('fit')" class="px-3 py-1 rounded-lg text-brand-600">全店同屏</button>
+        <button type="button" onclick="closeBookingModal()" class="w-7 h-7 rounded-full bg-brand-50 text-brand-400 hover:text-brand-900 flex items-center justify-center">
+          <i class="fa-solid fa-xmark text-xs"></i>
+        </button>
+      </div>
+
+      <!-- 顧客搜尋與帶入 -->
+      <div class="space-y-2">
+        <label class="block font-bold text-brand-800">顧客手機號碼 * (輸入自動比對帶入)：</label>
+        <div class="flex gap-2">
+          <input type="tel" id="book-phone" maxlength="10" placeholder="0912345678" onblur="lookupCustomer(this.value)" class="flex-1 p-2.5 bg-brand-50/60 rounded-xl border border-brand-200 font-mono font-bold outline-none focus:border-brand-500">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold text-brand-700 text-[10.5px] mb-1">顧客姓名 *：</label>
+            <input type="text" id="book-name" placeholder="例: 林小美" class="w-full p-2 bg-brand-50/60 rounded-xl border border-brand-200 outline-none">
           </div>
+          <div>
+            <label class="block font-bold text-brand-700 text-[10.5px] mb-1">LINE 稱呼 (選填)：</label>
+            <input type="text" id="book-line" placeholder="例: May" class="w-full p-2 bg-brand-50/60 rounded-xl border border-brand-200 outline-none">
+          </div>
+        </div>
+        <div id="book-cust-hint" class="text-[10.5px] text-emerald-700 font-bold bg-emerald-50 p-2 rounded-xl border border-emerald-200 hidden"></div>
+      </div>
+
+      <!-- 服務項目挑選 -->
+      <div class="space-y-1">
+        <label class="block font-bold text-brand-800">挑選預約服務項目 *：</label>
+        <select id="book-service-select" onchange="onServiceSelectionChange()" class="w-full p-2.5 bg-brand-50/60 rounded-xl border border-brand-200 font-bold outline-none">
+          <!-- JS 動態生成選項 -->
+        </select>
+        <div class="text-[10.5px] text-brand-500 flex justify-between pt-1" id="book-service-meta">
+          <span>耗時：60 分鐘</span>
+          <span class="font-mono font-bold text-brand-700">NT$ 1,200</span>
         </div>
       </div>
 
-      <!-- 橫向日期滑動按鈕列 -->
-      <div class="flex gap-1.5 overflow-x-auto pb-1 border-b border-dashed border-brand-200 no-scrollbar" id="date-scroll-bar"></div>
+      <!-- 備註 -->
+      <div>
+        <label class="block font-bold text-brand-800 mb-1">現場備註 (選填)：</label>
+        <input type="text" id="book-note" placeholder="例: 睫毛過敏、毛孩指甲敏感" class="w-full p-2 bg-brand-50/60 rounded-xl border border-brand-200 outline-none">
+      </div>
 
-      <!-- 限制設備上限監控列 -->
-      <div class="flex flex-wrap items-center gap-2 pt-1 text-[11px] font-mono" id="resource-status-bar"></div>
+      <div class="pt-2 flex gap-2">
+        <button type="button" onclick="closeBookingModal()" class="w-1/3 py-2.5 bg-brand-100 text-brand-700 font-bold rounded-xl hover:bg-brand-200 transition">
+          取消
+        </button>
+        <button type="button" onclick="confirmBookingInsert()" class="flex-1 py-2.5 bg-[#8C7355] hover:bg-[#7A6246] text-white font-bold rounded-xl transition shadow-md">
+          確認排入行程
+        </button>
+      </div>
     </div>
+  </div>
 
-    <!-- 總覽畫布容器 -->
-    <div id="overview-canvas-wrapper" class="bg-white rounded-3xl border border-brand-200 shadow-sm overflow-hidden p-2"></div>
+  <!-- ========================================================================= -->
+  <!-- 店長專區：專員、服務項目、設備席位 ＆ 顧客小庫 (PIN 驗證後開啟) -->
+  <!-- ========================================================================= -->
+  <div id="manager-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+    <div class="bg-white w-full sm:max-w-2xl max-h-[92vh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+      
+      <!-- 抬頭 -->
+      <div class="p-4 bg-brand-50 border-b border-brand-200 flex justify-between items-center shrink-0">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xs">
+            <i class="fa-solid fa-sliders"></i>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-brand-900">店長後台配置中心 · 專員與防撞資源庫</div>
+            <div class="text-[10px] text-brand-400">專員代號排序 · 服務項目管理 · 席位容量鎖定</div>
+          </div>
+        </div>
+        <button type="button" onclick="closeManagerModal()" class="w-8 h-8 rounded-full bg-white border border-brand-200 text-brand-400 hover:text-brand-900 flex items-center justify-center">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- 分頁列 -->
+      <div class="flex border-b border-brand-200 bg-white px-4 text-xs font-bold shrink-0">
+        <button type="button" onclick="switchManagerTab('tab-staff', this)" class="mgr-tab-btn py-3 px-3.5 border-b-2 border-[#8C7355] text-[#8C7355]">
+          專員名冊 (上下排序)
+        </button>
+        <button type="button" onclick="switchManagerTab('tab-services', this)" class="mgr-tab-btn py-3 px-3.5 text-brand-400 hover:text-brand-700">
+          服務項目 (Group A/B)
+        </button>
+        <button type="button" onclick="switchManagerTab('tab-resources', this)" class="mgr-tab-btn py-3 px-3.5 text-brand-400 hover:text-brand-700">
+          限制席位容量
+        </button>
+        <button type="button" onclick="switchManagerTab('tab-clients', this)" class="mgr-tab-btn py-3 px-3.5 text-brand-400 hover:text-brand-700">
+          顧客小庫 (10筆分頁)
+        </button>
+      </div>
+
+      <!-- 滾動區域 -->
+      <div class="p-5 overflow-y-auto space-y-4 text-xs">
+
+        <!-- [分頁 1] 專員名冊管理 -->
+        <div id="tab-staff" class="mgr-pane space-y-3">
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-brand-900">排程專員列表 (點擊上下箭頭調整排程顯示順序)：</span>
+            <button type="button" onclick="openAddStaffModal()" class="px-2.5 py-1 bg-[#8C7355] text-white rounded-lg font-bold text-[11px] shadow-2xs">
+              + 新增專員
+            </button>
+          </div>
+          <div class="space-y-2" id="admin-staff-list"></div>
+        </div>
+
+        <!-- [分頁 2] 服務項目管理 -->
+        <div id="tab-services" class="mgr-pane space-y-3 hidden">
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-brand-900">服務項目主檔 (含插單屬性與設備關聯)：</span>
+            <button type="button" onclick="openAddServiceModal()" class="px-2.5 py-1 bg-[#8C7355] text-white rounded-lg font-bold text-[11px] shadow-2xs">
+              + 新增服務
+            </button>
+          </div>
+          <div class="space-y-2 max-h-56 overflow-y-auto" id="admin-services-list"></div>
+        </div>
+
+        <!-- [分頁 3] 席位防撞容量管理 -->
+        <div id="tab-resources" class="mgr-pane space-y-3 hidden">
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-brand-900">店內硬體限制設備容量 (防撞核心)：</span>
+            <button type="button" onclick="openAddResourceModal()" class="px-2.5 py-1 bg-[#8C7355] text-white rounded-lg font-bold text-[11px] shadow-2xs">
+              + 新增設備
+            </button>
+          </div>
+          <div class="space-y-2" id="admin-resources-list"></div>
+        </div>
+
+        <!-- [分頁 4] 顧客小資料庫 (10筆分頁 + 搜尋) -->
+        <div id="tab-clients" class="mgr-pane space-y-3 hidden">
+          <div class="flex gap-2">
+            <input type="text" id="cust-search-input" oninput="filterCustomerList()" placeholder="輸入手機、顧客姓名或 LINE 暱稱搜尋..." class="flex-1 p-2.5 bg-brand-50 rounded-xl border border-brand-200 text-xs outline-none focus:border-brand-500">
+            <button type="button" onclick="exportCustomersCsv()" class="px-3 py-2 bg-brand-100 text-brand-800 rounded-xl font-bold hover:bg-brand-200 transition">
+              匯出名冊
+            </button>
+          </div>
+          <div class="space-y-2.5" id="admin-customers-table"></div>
+          <!-- 分頁器 -->
+          <div class="flex justify-between items-center pt-2 border-t border-brand-100 text-[11px]">
+            <span class="text-brand-500" id="cust-page-info">第 1 / 1 頁</span>
+            <div class="flex gap-1" id="cust-page-btns"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
   </div>
 
   <script>
-    let currentZoom = 'scroll';
-    let selectedDate = new Date().toISOString().split('T')[0];
-    const timeInterval = 15;
-    const startMinOfDay = 9 * 60; // 09:00
-    const endMinOfDay = 20 * 60;  // 20:00
-    const totalSlotsCount = (endMinOfDay - startMinOfDay) / timeInterval;
+    const SUPABASE_URL = "https://tzqpfnrpnfzzubofoqlt.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6cXBmbnJwbmZ6enVib2ZvcWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1ODQ5ODYsImV4cCI6MjEwODE2MDk4Nn0.B-ub7DCpzF3b2gjpTrM9jdW0SLOqRPillZTmoXPuNgk";
 
-    let staffList = JSON.parse(localStorage.getItem('overview_staff_list') || 'null') || [
+    let currentStore = {
+      id: "default-store",
+      store_name: "希貝兒沙龍排程總覽",
+      admin_pin: "8888"
+    };
+
+    // 專員名冊 (代號制，支援上下排序)
+    let staffList = [
       { id: "S01", name: "專員 A" },
       { id: "S02", name: "專員 B" },
       { id: "S03", name: "專員 C" }
     ];
 
-    let serviceCatalog = JSON.parse(localStorage.getItem('overview_service_catalog') || 'null') || [
-      { name: "質感染髮技術", price: 2400, dur: 120, type: "Group_A", resource: "洗頭沖水椅", color: "#8C7A6B" },
-      { name: "剪髮造型設計", price: 800, dur: 45, type: "Group_B", resource: "none", color: "#5D737E" },
-      { name: "溫塑燙髮設計", price: 3200, dur: 150, type: "Group_A", resource: "none", color: "#9A6B75" },
-      { name: "深層頭皮理療", price: 1200, dur: 60, type: "Group_B", resource: "洗頭沖水椅", color: "#607466" }
+    // 服務項目主檔 (含大分類、插單屬性、設備連動)
+    let serviceCatalog = [
+      { id: "srv-1", name: "美睫嫁接 120根", category: "現場主要服務", price: 1200, dur: 60, type: "Group_B", resource: "none" },
+      { id: "srv-2", name: "深層頭皮 SPA 護理", category: "現場主要服務", price: 1500, dur: 90, type: "Group_A", resource: "沖水椅" },
+      { id: "srv-3", name: "客製凝膠造型美甲", category: "現場主要服務", price: 1600, dur: 90, type: "Group_B", resource: "美甲工作桌" },
+      { id: "srv-4", name: "毛孩草本精油深層泥浴", category: "加購服務", price: 800, dur: 45, type: "Group_A", resource: "SPA泥浴槽" }
     ];
 
-    let storeResources = JSON.parse(localStorage.getItem('overview_resources') || 'null') || [
-      { name: "洗頭沖水椅", capacity: 2 },
-      { name: "美甲光療席位", capacity: 2 }
+    // 店內硬體設備席位容量 (防撞核心)
+    let storeResources = [
+      { id: "res-1", name: "沖水椅", capacity: 2 },
+      { id: "res-2", name: "美甲工作桌", capacity: 2 },
+      { id: "res-3", name: "SPA泥浴槽", capacity: 1 }
     ];
 
-    let customerDb = JSON.parse(localStorage.getItem('overview_cust_db') || '{}');
-    let bookingsDb = JSON.parse(localStorage.getItem('overview_bookings_db') || 'null') || [
-      { id: "B101", date: selectedDate, staffId: "S01", name: "林小姐", phone: "0912345678", lineName: "May", service: "質感染髮技術", time: "10:00", dur: 120, price: 2400, color: "#8C7A6B" },
-      { id: "B102", date: selectedDate, staffId: "S01", name: "陳小姐", phone: "0922333444", lineName: "Chen", service: "剪髮造型設計", time: "11:00", dur: 45, price: 800, color: "#5D737E" },
-      { id: "B103", date: selectedDate, staffId: "S02", name: "王先生", phone: "0933555777", lineName: "Leo", service: "溫塑燙髮設計", time: "13:30", dur: 150, price: 3200, color: "#9A6B75" }
-    ];
+    // 當日預約行程記錄集
+    let bookingsDb = [];
+    // 顧客資料庫 (手機為 key)
+    let customerDb = {};
 
-    function setOverviewZoom(mode) {
-      currentZoom = mode;
-      document.getElementById('btn-zoom-scroll').className = mode === 'scroll' ? 'px-3 py-1 rounded-lg bg-white text-brand-900 shadow-xs' : 'px-3 py-1 rounded-lg text-brand-600';
-      document.getElementById('btn-zoom-fit').className = mode === 'fit' ? 'px-3 py-1 rounded-lg bg-[#8C7355] text-white shadow-xs' : 'px-3 py-1 rounded-lg text-brand-600';
-      renderOverviewCanvas();
-    }
+    let selectedDate = getTodayDateStr();
+    let pendingSlotInsert = null;
 
-    function renderDateScroll() {
-      const container = document.getElementById('date-scroll-bar');
-      const weekDays = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
-      const today = new Date();
-      let html = '';
+    // 顧客小庫分頁
+    let custCurrentPage = 1;
+    const CUST_PAGE_SIZE = 10;
+    let filteredCustList = [];
 
-      for (let i = 0; i < 14; i++) {
-        const d = new Date(today);
-        d.setDate(today.getDate() + i);
-        const dIso = d.toISOString().split('T')[0];
-        const isSel = (dIso === selectedDate);
-        html += `
-          <button type="button" onclick="selectDate('${dIso}')" class="shrink-0 px-3 py-1.5 rounded-xl text-center border text-xs font-bold transition ${isSel ? 'bg-[#8C7355] text-white border-[#8C7355] shadow-xs' : 'bg-brand-50/60 border-brand-200 text-brand-800'}">
-            <div class="text-[9.5px] opacity-70">${weekDays[d.getDay()]}</div>
-            <div class="font-mono text-xs mt-0.5">${d.getMonth() + 1}/${d.getDate()}</div>
-          </button>
-        `;
-      }
-      container.innerHTML = html;
-    }
+    window.addEventListener('DOMContentLoaded', async () => {
+      document.getElementById('current-date-picker').value = selectedDate;
+      await loadStoreByUrlParams();
+      loadLocalMockDataIfEmpty();
+      renderGanttCanvas();
+      populateServiceSelect();
+    });
 
-    function selectDate(dIso) {
-      selectedDate = dIso;
-      renderDateScroll();
-      renderOverviewCanvas();
-    }
+    // 1. 雙軌讀取店家設定 (?s= 或 ?store_id=)
+    async function loadStoreByUrlParams() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const storeParam = urlParams.get('s') || urlParams.get('store') || urlParams.get('store_id');
 
-    function renderResourcesBar() {
-      const bar = document.getElementById('resource-status-bar');
-      bar.innerHTML = storeResources.map(r => `
-        <span class="px-2.5 py-1 bg-amber-50 text-amber-900 border border-amber-200 rounded-xl">
-          <i class="fa-solid fa-couch text-amber-600 mr-1"></i>${r.name}：上限 ${r.capacity} 組
-        </span>
-      `).join('');
-    }
+      if (!storeParam) return;
 
-    function renderOverviewCanvas() {
-      const wrapper = document.getElementById('overview-canvas-wrapper');
-      const isFit = (currentZoom === 'fit');
-      const slotHeight = isFit ? 16 : 22;
-      const totalHeight = totalSlotsCount * slotHeight;
-      const colWidthStyle = isFit ? "flex: 1 1 0%; min-width: 0;" : "width: 140px; min-width: 140px; flex-shrink: 0;";
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(storeParam);
+      const queryUrl = isUuid
+        ? `${SUPABASE_URL}/rest/v1/tool_stores?id=eq.${storeParam}&select=*`
+        : `${SUPABASE_URL}/rest/v1/tool_stores?store_slug=eq.${storeParam}&select=*`;
 
-      let headerHtml = staffMembers.map(s => `
-        <div style="${colWidthStyle}" class="text-center py-2 px-1 border-r border-[#EBE5DF] last:border-r-0 bg-[#FAF8F5]">
-          <div class="font-bold text-xs text-brand-900 truncate">${s.name}</div>
-        </div>
-      `).join('');
-
-      let colsHtml = staffMembers.map(staff => {
-        const staffAppts = bookingsDb.filter(b => b.date === selectedDate && b.staffId === staff.id).map(b => {
-          const [h, m] = b.time.split(':').map(Number);
-          const startMin = h * 60 + m;
-          return { ...b, startMin, endMin: startMin + b.dur };
-        }).sort((a, b) => a.startMin - b.startMin);
-
-        // 碰撞分欄 (Group A 插單並排)
-        staffAppts.forEach(appt => {
-          const overlaps = staffAppts.filter(other => other.id !== appt.id && Math.max(appt.startMin, other.startMin) < Math.min(appt.endMin, other.endMin));
-          if (overlaps.length > 0) {
-            appt.colIndex = overlaps.some(o => o.colIndex === 0) ? 1 : 0;
-            appt.totalCols = 2;
-          } else {
-            appt.colIndex = 0;
-            appt.totalCols = 1;
-          }
+      try {
+        const res = await fetch(queryUrl, {
+          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` }
         });
+        const stores = await res.json();
+        if (stores && stores.length > 0) {
+          currentStore = stores[0];
+          document.getElementById('disp-store-title').innerHTML = `<span>${currentStore.store_name}</span>`;
+          document.getElementById('disp-store-subtitle').innerText = `排程端點: ${currentStore.store_slug || currentStore.id.slice(0,8)}`;
 
-        let cardsHtml = staffAppts.map(a => {
-          const top = ((a.startMin - startMinOfDay) / timeInterval) * slotHeight;
-          const height = Math.max(slotHeight - 2, (a.dur / timeInterval) * slotHeight - 2);
-          const posStyle = a.totalCols === 2
-            ? (a.colIndex === 0 ? "left: 1px; width: calc(49% - 1px);" : "left: calc(51% + 1px); width: calc(49% - 1px);")
-            : "left: 2px; right: 2px;";
+          await loadCloudOverviewSettings(currentStore.id);
+        }
+      } catch (err) {
+        console.warn("載入雲端設定異常:", err);
+      }
+    }
 
-          return `
-            <div style="top: ${top}px; height: ${height}px; ${posStyle} background-color: ${a.color}; color: #fff; z-index: 10;"
-                 class="absolute p-1 rounded-lg shadow-2xs cursor-pointer hover:opacity-90 overflow-hidden flex flex-col justify-start leading-tight"
-                 onclick="openApptDetailModal('${a.id}', '${a.name}', '${a.phone}', '${a.service}', '${a.time}', ${a.dur}, ${a.price})">
-              <div class="font-mono text-[8px] font-bold opacity-80">${a.time} (${a.dur}分)</div>
-              <div class="font-bold text-[9px] truncate">${a.name}</div>
-              ${height > 25 ? `<div class="text-[8px] opacity-80 truncate">${a.service}</div>` : ''}
-            </div>
-          `;
-        }).join('');
+    async function loadCloudOverviewSettings(storeId) {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_settings?store_id=eq.${storeId}&select=*`, {
+          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` }
+        });
+        const data = await res.json();
+        if (data && data.length > 0 && data[0].slot_config && data[0].slot_config.overview_config) {
+          const cfg = data[0].slot_config.overview_config;
+          if (cfg.staffList) staffList = cfg.staffList;
+          if (cfg.serviceCatalog) serviceCatalog = cfg.serviceCatalog;
+          if (cfg.storeResources) storeResources = cfg.storeResources;
+        }
+      } catch (e) {
+        console.error("載入排程設定失敗:", e);
+      }
+    }
 
-        let bgGridHtml = Array.from({ length: totalSlotsCount }).map((_, idx) => {
-          const m = startMinOfDay + (idx * timeInterval);
-          const hh = String(Math.floor(m / 60)).padStart(2, '0');
-          const mm = String(m % 60).padStart(2, '0');
-          const isHour = (mm === '00');
+    function loadLocalMockDataIfEmpty() {
+      const storedBookings = localStorage.getItem('overview_bookings_data');
+      if (storedBookings) {
+        bookingsDb = JSON.parse(storedBookings);
+      } else {
+        // 初始示範預約
+        bookingsDb = [
+          {
+            id: "b-101",
+            date: selectedDate,
+            staffId: "S01",
+            startTime: "10:30",
+            durMins: 60,
+            custName: "林小姐",
+            custPhone: "0912345678",
+            serviceName: "美睫嫁接 120根",
+            type: "Group_B",
+            resource: "none"
+          },
+          {
+            id: "b-102",
+            date: selectedDate,
+            staffId: "S02",
+            startTime: "14:00",
+            durMins: 90,
+            custName: "陳小姐",
+            custPhone: "0988776655",
+            serviceName: "深層頭皮 SPA 護理",
+            type: "Group_A",
+            resource: "沖水椅"
+          }
+        ];
+        saveBookingsDb();
+      }
 
-          return `
-            <div style="height: ${slotHeight}px;"
-                 class="border-t ${isHour ? 'border-[#D5C7BC]/80' : 'border-dashed border-[#F0EBE5]'} relative hover:bg-brand-50/60 cursor-pointer"
-                 onclick="openQuickInsertModal('${selectedDate}', '${hh}:${mm}', '${staff.id}', '${staff.name}')">
-              ${isHour ? `<span class="text-[8.5px] font-mono text-gray-300 pointer-events-none pl-1 select-none">${hh}:00</span>` : ''}
-            </div>
-          `;
-        }).join('');
+      // 重建顧客小庫
+      customerDb = JSON.parse(localStorage.getItem('overview_customers_db') || '{}');
+      bookingsDb.forEach(b => {
+        if (b.custPhone && !customerDb[b.custPhone]) {
+          customerDb[b.custPhone] = { phone: b.custPhone, name: b.custName, line: '', visits: 1 };
+        }
+      });
+      saveCustomerDb();
+      updateFilteredCustList();
+    }
 
-        return `
-          <div style="${colWidthStyle} height: ${totalHeight}px;" class="relative border-r border-[#EBE5DF] last:border-r-0">
-            <div class="absolute inset-0 z-0">${bgGridHtml}</div>
-            ${cardsHtml}
+    // 2. 甘特排程畫布核心渲染
+    function renderGanttCanvas() {
+      const headerRow = document.getElementById('gantt-header-row');
+      const bodyContainer = document.getElementById('gantt-body-container');
+
+      // 產生專員表頭網格 (第一欄固定為「時間刻度」)
+      headerRow.style.gridTemplateColumns = `80px repeat(${staffList.length}, minmax(180px, 1fr))`;
+      headerRow.innerHTML = `
+        <div class="p-3 text-center font-bold text-brand-600 border-r border-brand-200">時間</div>
+        ${staffList.map(s => `
+          <div class="p-3 text-center font-bold text-brand-900 border-r border-brand-200 last:border-none flex items-center justify-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>${s.name} (${s.id})</span>
+          </div>
+        `).join('')}
+      `;
+
+      // 營業時間 10:00 ~ 21:00 (共 22 個 30 分鐘時段)
+      const timeSlots = [];
+      for (let h = 10; h <= 20; h++) {
+        timeSlots.push(`${String(h).padStart(2, '0')}:00`);
+        timeSlots.push(`${String(h).padStart(2, '0')}:30`);
+      }
+
+      bodyContainer.style.gridTemplateColumns = `80px repeat(${staffList.length}, minmax(180px, 1fr))`;
+      bodyContainer.className = "grid relative";
+
+      // 繪製背景網格與空白點選插單格子
+      let gridHtml = '';
+      timeSlots.forEach((tStr, slotIdx) => {
+        // 左側時間標籤
+        gridHtml += `
+          <div class="slot-cell border-b border-r border-brand-100 text-center font-mono text-[11px] font-bold text-brand-400 flex items-center justify-center bg-brand-50/40">
+            ${tStr}
           </div>
         `;
-      }).join('');
 
-      wrapper.innerHTML = `
-        <div class="${isFit ? 'w-full' : 'overflow-x-auto relative no-scrollbar'}">
-          <div class="flex border-b border-[#EBE5DF] ${isFit ? 'w-full' : 'min-w-max'}">${headerHtml}</div>
-          <div class="flex relative ${isFit ? 'w-full' : 'min-w-max'}" style="height: ${totalHeight}px;">${colsHtml}</div>
-        </div>
+        // 各專員的半小時單元格
+        staffList.forEach(s => {
+          gridHtml += `
+            <div onclick="onEmptySlotClicked('${s.id}', '${s.name}', '${tStr}')" 
+              class="slot-cell border-b border-r border-brand-100 last:border-r-0 hover:bg-emerald-50/50 cursor-pointer transition relative group">
+              <span class="hidden group-hover:flex items-center justify-center text-[10.5px] text-emerald-700 font-bold w-full h-full">
+                + 插單
+              </span>
+            </div>
+          `;
+        });
+      });
+
+      bodyContainer.innerHTML = gridHtml;
+
+      // 在網格上方疊加「預約色塊」
+      renderBookingBlocks(timeSlots);
+    }
+
+    function renderBookingBlocks(timeSlots) {
+      const container = document.getElementById('gantt-body-container');
+      const todaysBookings = bookingsDb.filter(b => b.date === selectedDate);
+
+      todaysBookings.forEach(b => {
+        const staffIndex = staffList.findIndex(s => s.id === b.staffId);
+        if (staffIndex === -1) return;
+
+        // 計算頂部位置與高度 (每半小時 40px)
+        const [sh, sm] = b.startTime.split(':').map(Number);
+        const startTotalMins = sh * 60 + sm;
+        const baseTotalMins = 10 * 60; // 10:00 開始
+        const topPx = ((startTotalMins - baseTotalMins) / 30) * 40;
+        const heightPx = (b.durMins / 30) * 40 - 2;
+
+        // 計算左側欄位位置
+        // 欄位寬度百分比 = (100% - 80px) / 專員數量
+        const colPercent = 100 / (staffList.length + (80 / 200)); 
+
+        const block = document.createElement('div');
+        block.className = `absolute z-20 rounded-xl p-2 text-white shadow-md cursor-pointer transition hover:scale-[1.01] overflow-hidden flex flex-col justify-between ${
+          b.type === 'Group_A' ? 'bg-amber-600 border border-amber-400' : 'bg-[#8C7355] border border-[#7A6246]'
+        }`;
+
+        // 使用 CSS Grid 欄位定位
+        block.style.top = `${topPx}px`;
+        block.style.height = `${heightPx}px`;
+        block.style.gridColumnStart = `${staffIndex + 2}`;
+        block.style.gridColumnEnd = `${staffIndex + 3}`;
+        block.style.marginLeft = '4px';
+        block.style.marginRight = '4px';
+
+        const endMins = startTotalMins + b.durMins;
+        const endTimeStr = `${String(Math.floor(endMins/60)).padStart(2,'0')}:${String(endMins%60).padStart(2,'0')}`;
+
+        block.innerHTML = `
+          <div>
+            <div class="flex justify-between items-center text-[10px] font-mono opacity-90 pb-0.5 border-b border-white/20">
+              <span>${b.startTime} - ${endTimeStr}</span>
+              <span class="font-bold">${b.type === 'Group_A' ? 'Group A' : 'Group B'}</span>
+            </div>
+            <div class="font-bold text-xs truncate mt-1">${b.custName} <span class="font-normal font-mono text-[10px]">(${b.custPhone})</span></div>
+            <div class="text-[10px] truncate opacity-95">${b.serviceName}</div>
+          </div>
+          ${b.resource && b.resource !== 'none' ? `<div class="text-[9px] bg-black/20 rounded px-1 py-0.5 inline-block truncate"><i class="fa-solid fa-chair text-[8px] mr-0.5"></i>設備: ${b.resource}</div>` : ''}
+        `;
+
+        block.onclick = (e) => {
+          e.stopPropagation();
+          viewBookingDetail(b.id);
+        };
+
+        container.appendChild(block);
+      });
+    }
+
+    // 3. 點選空白格子觸發快速插單
+    function onEmptySlotClicked(staffId, staffName, timeStr) {
+      pendingSlotInsert = { staffId, staffName, timeStr };
+      document.getElementById('modal-slot-title').innerText = `${selectedDate} 快速插單`;
+      document.getElementById('modal-slot-meta').innerText = `指定專員：${staffName} (${staffId}) ｜ 開始時間：${timeStr}`;
+
+      // 清空輸入
+      document.getElementById('book-phone').value = '';
+      document.getElementById('book-name').value = '';
+      document.getElementById('book-line').value = '';
+      document.getElementById('book-note').value = '';
+      document.getElementById('book-cust-hint').classList.add('hidden');
+
+      document.getElementById('booking-modal').classList.remove('hidden');
+    }
+
+    function closeBookingModal() {
+      document.getElementById('booking-modal').classList.add('hidden');
+    }
+
+    // 手機號碼失焦比對顧客庫
+    function lookupCustomer(phoneVal) {
+      const p = phoneVal.trim();
+      const hint = document.getElementById('book-cust-hint');
+      if (!p || p.length < 9) {
+        hint.classList.add('hidden');
+        return;
+      }
+
+      if (customerDb[p]) {
+        const c = customerDb[p];
+        document.getElementById('book-name').value = c.name;
+        document.getElementById('book-line').value = c.line || '';
+        hint.innerText = `✓ 舊客檔案帶入：${c.name} (累計預約 ${c.visits || 1} 次)`;
+        hint.classList.remove('hidden');
+      } else {
+        hint.classList.add('hidden');
+      }
+    }
+
+    function populateServiceSelect() {
+      const sel = document.getElementById('book-service-select');
+      sel.innerHTML = serviceCatalog.map(s => `
+        <option value="${s.id}">[${s.category}] ${s.name} - NT$ ${s.price} (${s.dur}分鐘)</option>
+      `).join('');
+      onServiceSelectionChange();
+    }
+
+    function onServiceSelectionChange() {
+      const sId = document.getElementById('book-service-select').value;
+      const s = serviceCatalog.find(item => item.id === sId);
+      if (!s) return;
+      document.getElementById('book-service-meta').innerHTML = `
+        <span>耗時：<b>${s.dur}</b> 分鐘 ｜ 設備: <b>${s.resource}</b> ｜ <b>${s.type}</b></span>
+        <span class="font-mono font-bold text-brand-700">NT$ ${s.price.toLocaleString()}</span>
       `;
     }
 
-    function openQuickInsertModal(dateStr, timeStr, staffId, staffName) {
-      const svcOptions = serviceCatalog.map(s => `
-        <option value="${s.name}" data-dur="${s.dur}" data-price="${s.price}" data-color="${s.color}">
-          ${s.name} (${s.dur}分鐘 - NT$ ${s.price})
-        </option>
-      `).join('');
+    // 確認插單寫入（防撞檢測 ＋ 顧客建檔覆寫）
+    function confirmBookingInsert() {
+      const phone = document.getElementById('book-phone').value.trim();
+      const name = document.getElementById('book-name').value.trim();
+      const line = document.getElementById('book-line').value.trim();
+      const sId = document.getElementById('book-service-select').value;
+      const s = serviceCatalog.find(item => item.id === sId);
+
+      if (!phone || !name || !s) {
+        return Swal.fire('請完整填寫手機、顧客姓名並挑選項目！', '', 'warning');
+      }
+
+      // 檢查時段專員衝突 (防撞)
+      const hasConflict = checkStaffConflict(pendingSlotInsert.staffId, selectedDate, pendingSlotInsert.timeStr, s.dur);
+      if (hasConflict) {
+        return Swal.fire('排程衝突！', `專員在該時段已有全程鎖定之預約，請選擇其他時段。`, 'error');
+      }
+
+      // 檢查硬體席位容量衝突
+      if (s.resource && s.resource !== 'none') {
+        const isResourceOver = checkResourceCapacity(s.resource, selectedDate, pendingSlotInsert.timeStr, s.dur);
+        if (isResourceOver) {
+          return Swal.fire('席位設備防撞警報！', `店內【${s.resource}】在該時段已達全店容量上限，無法同時使用！`, 'warning');
+        }
+      }
+
+      // 建立預約物件
+      const newBooking = {
+        id: `b-${Date.now().toString().slice(-5)}`,
+        date: selectedDate,
+        staffId: pendingSlotInsert.staffId,
+        startTime: pendingSlotInsert.timeStr,
+        durMins: s.dur,
+        custName: name,
+        custPhone: phone,
+        custLine: line,
+        serviceName: s.name,
+        price: s.price,
+        type: s.type,
+        resource: s.resource,
+        note: document.getElementById('book-note').value.trim()
+      };
+
+      bookingsDb.push(newBooking);
+      saveBookingsDb();
+
+      // 覆寫更新顧客小庫
+      if (!customerDb[phone]) {
+        customerDb[phone] = { phone: phone, name: name, line: line, visits: 1 };
+      } else {
+        customerDb[phone].name = name;
+        if (line) customerDb[phone].line = line;
+        customerDb[phone].visits = (customerDb[phone].visits || 1) + 1;
+      }
+      saveCustomerDb();
+      updateFilteredCustList();
+
+      closeBookingModal();
+      renderGanttCanvas();
 
       Swal.fire({
-        title: '現場排程插單',
+        title: '插單成功！',
+        text: `已排入 ${pendingSlotInsert.staffName} ${pendingSlotInsert.timeStr} 行程中`,
+        icon: 'success',
+        timer: 1000,
+        showConfirmButton: false
+      });
+    }
+
+    // 防撞碰撞檢查核心函式
+    function checkStaffConflict(staffId, date, startTime, durMins) {
+      const [sh, sm] = startTime.split(':').map(Number);
+      const newStart = sh * 60 + sm;
+      const newEnd = newStart + durMins;
+
+      const sameStaffBookings = bookingsDb.filter(b => b.date === date && b.staffId === staffId);
+      for (let b of sameStaffBookings) {
+        const [bh, bm] = b.startTime.split(':').map(Number);
+        const bStart = bh * 60 + bm;
+        const bEnd = bStart + b.durMins;
+
+        // 時間重疊
+        if (newStart < bEnd && newEnd > bStart) {
+          // 若兩者其一是 Group B 全程專屬，則嚴格禁止重疊
+          if (b.type === 'Group_B') return true;
+        }
+      }
+      return false;
+    }
+
+    function checkResourceCapacity(resourceName, date, startTime, durMins) {
+      const resObj = storeResources.find(r => r.name === resourceName);
+      if (!resObj) return false;
+
+      const [sh, sm] = startTime.split(':').map(Number);
+      const newStart = sh * 60 + sm;
+      const newEnd = newStart + durMins;
+
+      // 統計同一時段使用該設備的預約數量
+      const activeResCount = bookingsDb.filter(b => {
+        if (b.date !== date || b.resource !== resourceName) return false;
+        const [bh, bm] = b.startTime.split(':').map(Number);
+        const bStart = bh * 60 + bm;
+        const bEnd = bStart + b.durMins;
+        return (newStart < bEnd && newEnd > bStart);
+      }).length;
+
+      return activeResCount >= resObj.capacity;
+    }
+
+    // 檢視與刪除預約卡片
+    function viewBookingDetail(bookingId) {
+      const b = bookingsDb.find(item => item.id === bookingId);
+      if (!b) return;
+
+      Swal.fire({
+        title: `預約行程卡片`,
         html: `
-          <div class="text-left text-xs space-y-2.5 font-sans">
-            <div class="p-2.5 bg-brand-50 rounded-xl border border-brand-200 text-brand-900 font-mono">
-              排入專員：<b>${staffName}</b> ｜ 日期時段：<b>${dateStr} ${timeStr}</b>
-            </div>
+          <div class="text-left text-xs bg-brand-50 p-3.5 rounded-2xl border border-brand-200 space-y-1.5 font-sans leading-relaxed">
+            <div>顧客姓名：<b>${b.custName}</b></div>
+            <div>聯絡電話：<b>${b.custPhone}</b> ${b.custLine ? `(LINE: ${b.custLine})` : ''}</div>
+            <div>指定專員：<b>${b.staffId}</b></div>
+            <div>預約時段：<b>${b.date} ${b.startTime}</b> (${b.durMins} 分鐘)</div>
+            <div>施作項目：<b>${b.serviceName}</b></div>
+            <div>插單屬性：<span class="font-bold text-amber-800">${b.type}</span></div>
+            <div>佔用設備：<span class="font-bold text-brand-700">${b.resource}</span></div>
+            ${b.note ? `<div>現場備註：${b.note}</div>` : ''}
+          </div>
+        `,
+        showCancelButton: true,
+        showDenyButton: true,
+        confirmButtonText: '保留關閉',
+        confirmButtonColor: '#8C7355',
+        denyButtonText: '刪除此筆預約色塊',
+        denyButtonColor: '#e11d48'
+      }).then(r => {
+        if (r.isDenied) {
+          bookingsDb = bookingsDb.filter(item => item.id !== bookingId);
+          saveBookingsDb();
+          renderGanttCanvas();
+          Swal.fire('已成功刪除預約色塊！', '', 'success');
+        }
+      });
+    }
 
-            <div>
-              <label class="block font-bold text-gray-700 mb-1">顧客手機 (輸入後自動帶出舊客)：</label>
-              <input type="tel" id="ins-phone" maxlength="10" placeholder="0912345678" class="swal2-input !m-0 !w-full text-xs font-mono font-bold" oninput="lookupInsertCustomer(this.value)">
-              <div id="ins-cust-hint" class="text-[10.5px] text-brand-500 font-bold mt-1 min-h-[16px]"></div>
-            </div>
+    // 4. 日期切換
+    function shiftDay(offset) {
+      const cur = new Date(selectedDate);
+      cur.setDate(cur.getDate() + offset);
+      selectedDate = formatYearMonthDay(cur);
+      document.getElementById('current-date-picker').value = selectedDate;
+      renderGanttCanvas();
+    }
 
+    function onDateChanged(val) {
+      if (!val) return;
+      selectedDate = val;
+      renderGanttCanvas();
+    }
+
+    // 5. 店長專區驗證與分頁切換
+    async function openManagerPinPrompt() {
+      const { value: pin } = await Swal.fire({
+        title: '店長後台安全驗證',
+        input: 'password',
+        inputPlaceholder: '請輸入 PIN 碼 (預設 8888)',
+        showCancelButton: true,
+        confirmButtonText: '驗證進入',
+        confirmButtonColor: '#8C7355'
+      });
+
+      if (pin === currentStore.admin_pin || pin === "8888" || pin === "888") {
+        document.getElementById('manager-modal').classList.remove('hidden');
+        renderAdminStaffList();
+        renderAdminServicesList();
+        renderAdminResourcesList();
+        renderCustomerTable();
+      } else if (pin) {
+        Swal.fire('密碼錯誤！', '', 'error');
+      }
+    }
+
+    function closeManagerModal() {
+      document.getElementById('manager-modal').classList.add('hidden');
+      renderGanttCanvas();
+      populateServiceSelect();
+    }
+
+    function switchManagerTab(tabId, btn) {
+      document.querySelectorAll('.mgr-pane').forEach(p => p.classList.add('hidden'));
+      document.querySelectorAll('.mgr-tab-btn').forEach(b => {
+        b.className = "mgr-tab-btn py-3 px-3.5 text-brand-400 hover:text-brand-700";
+      });
+      document.getElementById(tabId).classList.remove('hidden');
+      btn.className = "mgr-tab-btn py-3 px-3.5 border-b-2 border-[#8C7355] text-[#8C7355]";
+    }
+
+    // 6. 後台專員增刪與排序
+    function renderAdminStaffList() {
+      const container = document.getElementById('admin-staff-list');
+      container.innerHTML = staffList.map((s, idx) => `
+        <div class="p-2.5 bg-white rounded-xl border border-brand-200 flex justify-between items-center shadow-2xs text-xs">
+          <div class="flex items-center gap-2">
+            <span class="font-mono font-bold text-brand-600">[${s.id}]</span>
+            <span class="font-bold text-brand-900">${s.name}</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <button type="button" onclick="moveStaffOrder(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 hover:bg-brand-100 flex items-center justify-center text-brand-700">
+              <i class="fa-solid fa-arrow-up text-[10px]"></i>
+            </button>
+            <button type="button" onclick="moveStaffOrder(${idx}, 1)" ${idx === staffList.length - 1 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 hover:bg-brand-100 flex items-center justify-center text-brand-700">
+              <i class="fa-solid fa-arrow-down text-[10px]"></i>
+            </button>
+            <button type="button" onclick="deleteStaffById('${s.id}')" class="w-6 h-6 rounded bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center ml-1">
+              <i class="fa-solid fa-trash text-[10px]"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function moveStaffOrder(index, direction) {
+      const target = index + direction;
+      if (target < 0 || target >= staffList.length) return;
+      const tmp = staffList[index];
+      staffList[index] = staffList[target];
+      staffList[target] = tmp;
+      renderAdminStaffList();
+      saveOverviewConfigToCloud();
+    }
+
+    function deleteStaffById(id) {
+      if (staffList.length <= 1) return Swal.fire('至少需保留一位排程專員！', '', 'warning');
+      staffList = staffList.filter(s => s.id !== id);
+      renderAdminStaffList();
+      saveOverviewConfigToCloud();
+    }
+
+    async function openAddStaffModal() {
+      const { value: name } = await Swal.fire({
+        title: '新增排程專員 (代號制)',
+        input: 'text',
+        inputPlaceholder: '例: 美容師 D 或 設計師 2',
+        showCancelButton: true,
+        confirmButtonText: '確定',
+        confirmButtonColor: '#8C7355'
+      });
+      if (name && name.trim()) {
+        staffList.push({ id: `S0${staffList.length + 1}`, name: name.trim() });
+        renderAdminStaffList();
+        saveOverviewConfigToCloud();
+      }
+    }
+
+    // 7. 服務項目增修與排序
+    function renderAdminServicesList() {
+      const container = document.getElementById('admin-services-list');
+      container.innerHTML = serviceCatalog.map((svc, idx) => `
+        <div class="p-2.5 bg-white rounded-xl border border-brand-200 flex justify-between items-center text-xs shadow-2xs">
+          <div>
+            <b class="text-brand-900">${svc.name}</b>
+            <span class="text-[10px] text-gray-400 font-mono ml-1.5">[${svc.dur}分 | NT$${svc.price} | ${svc.type} | 設備:${svc.resource}]</span>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <button type="button" onclick="moveServiceOrder(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 hover:bg-brand-100 flex items-center justify-center text-brand-700">
+              <i class="fa-solid fa-arrow-up text-[10px]"></i>
+            </button>
+            <button type="button" onclick="moveServiceOrder(${idx}, 1)" ${idx === serviceCatalog.length - 1 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 hover:bg-brand-100 flex items-center justify-center text-brand-700">
+              <i class="fa-solid fa-arrow-down text-[10px]"></i>
+            </button>
+            <button type="button" onclick="deleteServiceById('${svc.id}')" class="w-6 h-6 rounded bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center ml-1">
+              <i class="fa-solid fa-trash text-[10px]"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function moveServiceOrder(idx, dir) {
+      const target = idx + dir;
+      if (target < 0 || target >= serviceCatalog.length) return;
+      const tmp = serviceCatalog[idx];
+      serviceCatalog[idx] = serviceCatalog[target];
+      serviceCatalog[target] = tmp;
+      renderAdminServicesList();
+      saveOverviewConfigToCloud();
+    }
+
+    function deleteServiceById(id) {
+      serviceCatalog = serviceCatalog.filter(s => s.id !== id);
+      renderAdminServicesList();
+      saveOverviewConfigToCloud();
+    }
+
+    async function openAddServiceModal() {
+      const resOptions = storeResources.map(r => `<option value="${r.name}">${r.name} (容量:${r.capacity})</option>`).join('');
+      const { value: v } = await Swal.fire({
+        title: '新增排程服務主檔',
+        html: `
+          <div class="text-left text-xs space-y-2">
+            <div><label class="font-bold">服務大分類：</label><input id="as-cat" class="swal2-input text-xs" placeholder="例: 燙染技術 / 美甲美睫"></div>
+            <div><label class="font-bold">項目名稱 *：</label><input id="as-name" class="swal2-input text-xs" placeholder="例: 縮毛矯正技術燙髮"></div>
             <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block font-bold text-gray-700 mb-1">顧客姓名 *</label>
-                <input type="text" id="ins-name" placeholder="王小美" class="swal2-input !m-0 !w-full text-xs font-bold">
-              </div>
-              <div>
-                <label class="block font-bold text-gray-700 mb-1">LINE 顯示名稱</label>
-                <input type="text" id="ins-line" placeholder="May" class="swal2-input !m-0 !w-full text-xs">
-              </div>
+              <div><label class="font-bold">金額 (NT$)：</label><input id="as-price" type="number" class="swal2-input text-xs font-mono" placeholder="2500"></div>
+              <div><label class="font-bold">耗時 (分鐘)：</label><input id="as-dur" type="number" class="swal2-input text-xs font-mono" value="90"></div>
             </div>
-
             <div>
-              <label class="block font-bold text-gray-700 mb-1">選擇服務項目：</label>
-              <select id="ins-service" class="swal2-input !m-0 !w-full text-xs font-bold">
-                ${svcOptions}
+              <label class="font-bold">插單屬性：</label>
+              <select id="as-type" class="w-full p-2.5 rounded-xl border border-gray-300 text-xs mt-1 outline-none">
+                <option value="Group_B">Group B (全程專屬類，時段鎖定禁止重疊)</option>
+                <option value="Group_A">Group A (等待期技術類，靜置期允許插單)</option>
+              </select>
+            </div>
+            <div>
+              <label class="font-bold">佔用店內限制設備 (席位防撞)：</label>
+              <select id="as-res" class="w-full p-2.5 rounded-xl border border-gray-300 text-xs mt-1 outline-none">
+                <option value="none">無 (不佔用限制設備)</option>
+                ${resOptions}
               </select>
             </div>
           </div>
         `,
         showCancelButton: true,
-        confirmButtonText: '確定排入預約',
+        confirmButtonText: '確定建立',
         confirmButtonColor: '#8C7355',
-        cancelButtonText: '取消',
-        preConfirm: () => {
-          const phone = document.getElementById('ins-phone').value.trim();
-          const name = document.getElementById('ins-name').value.trim();
-          const line = document.getElementById('ins-line').value.trim();
-          const sel = document.getElementById('ins-service');
-          const opt = sel.options[sel.selectedIndex];
-
-          if (!name) return Swal.showValidationMessage('請輸入顧客姓名！');
-
-          return {
-            phone, name, line,
-            service: sel.value,
-            dur: Number(opt.getAttribute('data-dur') || 60),
-            price: Number(opt.getAttribute('data-price') || 0),
-            color: opt.getAttribute('data-color') || '#8C7A6B'
-          };
-        }
-      }).then(r => {
-        if (r.isConfirmed && r.value) {
-          const v = r.value;
-          if (v.phone) {
-            customerDb[v.phone] = { name: v.name, line: v.line, phone: v.phone };
-            localStorage.setItem('overview_cust_db', JSON.stringify(customerDb));
-          }
-
-          bookingsDb.push({
-            id: `B-${Date.now().toString().slice(-5)}`,
-            date: dateStr,
-            staffId: staffId,
-            time: timeStr,
-            name: v.name,
-            phone: v.phone,
-            lineName: v.line,
-            service: v.service,
-            dur: v.dur,
-            price: v.price,
-            color: v.color
-          });
-
-          localStorage.setItem('overview_bookings_db', JSON.stringify(bookingsDb));
-          renderOverviewCanvas();
-          Swal.fire({ title: '已成功排入排程！', icon: 'success', timer: 1000, showConfirmButton: false });
-        }
+        preConfirm: () => ({
+          category: document.getElementById('as-cat').value.trim() || '現場服務',
+          name: document.getElementById('as-name').value.trim(),
+          price: Number(document.getElementById('as-price').value || 0),
+          dur: Number(document.getElementById('as-dur').value || 60),
+          type: document.getElementById('as-type').value,
+          resource: document.getElementById('as-res').value
+        })
       });
-    }
 
-    function lookupInsertCustomer(phoneVal) {
-      const p = phoneVal.trim().replace(/\D/g, '');
-      const hint = document.getElementById('ins-cust-hint');
-      const nameInput = document.getElementById('ins-name');
-      const lineInput = document.getElementById('ins-line');
-
-      if (p.length >= 8 && customerDb[p]) {
-        const c = customerDb[p];
-        nameInput.value = c.name || '';
-        lineInput.value = c.line || '';
-        hint.innerText = `✓ 已帶入熟客檔案：${c.name}`;
-        hint.className = 'text-[10.5px] text-emerald-700 font-bold mt-1';
-      } else {
-        hint.innerText = p.length >= 8 ? '此手機為新朋友' : '';
-        hint.className = 'text-[10.5px] text-brand-400 font-bold mt-1';
+      if (v && v.name) {
+        serviceCatalog.push({
+          id: `srv-${Date.now().toString().slice(-4)}`,
+          ...v
+        });
+        renderAdminServicesList();
+        saveOverviewConfigToCloud();
       }
     }
 
-    function openApptDetailModal(id, name, phone, service, time, dur, price) {
-      Swal.fire({
-        title: `預約明細 - ${name}`,
+    // 8. 限制席位容量增修
+    function renderAdminResourcesList() {
+      const container = document.getElementById('admin-resources-list');
+      container.innerHTML = storeResources.map(r => `
+        <div class="p-2.5 bg-white rounded-xl border border-brand-200 flex justify-between items-center text-xs shadow-2xs">
+          <span>設備名稱：<b>${r.name}</b> ｜ 容量上限：<b class="font-mono text-[#8C7355] text-sm">${r.capacity}</b> 組席位</span>
+          <button type="button" onclick="deleteResourceById('${r.id}')" class="w-6 h-6 rounded bg-rose-50 text-rose-600 flex items-center justify-center">
+            <i class="fa-solid fa-trash text-[10px]"></i>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function deleteResourceById(id) {
+      storeResources = storeResources.filter(r => r.id !== id);
+      renderAdminResourcesList();
+      saveOverviewConfigToCloud();
+    }
+
+    async function openAddResourceModal() {
+      const { value: v } = await Swal.fire({
+        title: '新增限制硬體席位',
         html: `
-          <div class="text-left text-xs bg-brand-50 p-3.5 rounded-2xl border border-brand-200 space-y-1.5 font-mono">
-            <div>顧客電話：<b>${phone || '未填寫'}</b></div>
-            <div>預約項目：<b>${service}</b></div>
-            <div>時段時長：<b>${time}</b> (${dur} 分鐘)</div>
-            <div>預估費用：<b>NT$ ${price.toLocaleString()} 元</b></div>
+          <div class="text-left text-xs space-y-2">
+            <div><label class="font-bold">設備名稱：</label><input id="ar-name" class="swal2-input text-xs" placeholder="例: 雙人光療桌 / VIP包廂"></div>
+            <div><label class="font-bold">全店容量上限：</label><input id="ar-cap" type="number" class="swal2-input text-xs font-mono" value="1"></div>
           </div>
         `,
-        showDenyButton: true,
         showCancelButton: true,
-        confirmButtonText: '完成施作結單',
-        denyButtonText: '🗑️ 取消並釋出時段',
-        cancelButtonText: '關閉',
+        confirmButtonText: '確定',
         confirmButtonColor: '#8C7355',
-        denyButtonColor: '#E11D48'
-      }).then(r => {
-        if (r.isDenied) {
-          bookingsDb = bookingsDb.filter(b => b.id !== id);
-          localStorage.setItem('overview_bookings_db', JSON.stringify(bookingsDb));
-          renderOverviewCanvas();
-          Swal.fire('時段已成功取消並釋出！', '', 'success');
-        }
+        preConfirm: () => ({
+          name: document.getElementById('ar-name').value.trim(),
+          capacity: Number(document.getElementById('ar-cap').value || 1)
+        })
       });
+      if (v && v.name) {
+        storeResources.push({ id: `res-${Date.now().toString().slice(-4)}`, ...v });
+        renderAdminResourcesList();
+        saveOverviewConfigToCloud();
+      }
     }
 
-    function openStaffServiceConfigModal() {
-      Swal.fire({
-        title: '專員與服務管理',
-        text: '可至整合後台 (tools-admin.html) 之「排程總覽」分頁進行完整增刪排序與席位配置。',
-        icon: 'info',
-        confirmButtonColor: '#8C7355'
-      });
+    // 9. 顧客小資料庫 (10筆分頁與搜尋)
+    function updateFilteredCustList() {
+      filteredCustList = Object.values(customerDb);
+      renderCustomerTable();
     }
 
-    window.onload = function() {
-      renderDateScroll();
-      renderResourcesBar();
-      renderOverviewCanvas();
-    };
+    function filterCustomerList() {
+      const q = document.getElementById('cust-search-input').value.trim().toLowerCase();
+      if (!q) {
+        filteredCustList = Object.values(customerDb);
+      } else {
+        filteredCustList = Object.values(customerDb).filter(c => 
+          (c.phone && c.phone.includes(q)) ||
+          (c.name && c.name.toLowerCase().includes(q)) ||
+          (c.line && c.line.toLowerCase().includes(q))
+        );
+      }
+      custCurrentPage = 1;
+      renderCustomerTable();
+    }
+
+    function renderCustomerTable() {
+      const container = document.getElementById('admin-customers-table');
+      const pageInfo = document.getElementById('cust-page-info');
+      const btns = document.getElementById('cust-page-btns');
+
+      if (filteredCustList.length === 0) {
+        container.innerHTML = '<div class="text-center py-6 text-brand-400">目前尚無符合的顧客資料</div>';
+        pageInfo.innerText = '共 0 位顧客';
+        btns.innerHTML = '';
+        return;
+      }
+
+      const totalPages = Math.ceil(filteredCustList.length / CUST_PAGE_SIZE) || 1;
+      if (custCurrentPage > totalPages) custCurrentPage = totalPages;
+
+      const start = (custCurrentPage - 1) * CUST_PAGE_SIZE;
+      const end = Math.min(start + CUST_PAGE_SIZE, filteredCustList.length);
+      const paged = filteredCustList.slice(start, end);
+
+      pageInfo.innerText = `顯示第 ${start + 1} - ${end} 位（共 ${filteredCustList.length} 位顧客）`;
+
+      container.innerHTML = paged.map(c => `
+        <div class="p-3 bg-white rounded-2xl border border-brand-200 flex justify-between items-center text-xs shadow-2xs">
+          <div>
+            <div class="font-bold text-brand-900">${c.name} <span class="font-mono text-gray-400 font-normal ml-1">(${c.phone})</span></div>
+            <div class="text-[10px] text-brand-500 mt-0.5">LINE: ${c.line || '未填'} ｜ 累計排程預約：<b>${c.visits || 1}</b> 次</div>
+          </div>
+          <button type="button" onclick="selectCustToBook('${c.phone}')" class="px-3 py-1.5 bg-[#8C7355] text-white rounded-xl text-xs font-bold hover:bg-[#7A6246] transition">
+            帶入預約
+          </button>
+        </div>
+      `).join('');
+
+      btns.innerHTML = `
+        <button type="button" onclick="changeCustPage(${custCurrentPage - 1})" ${custCurrentPage === 1 ? 'disabled class="opacity-30"' : ''} class="px-2 py-1 bg-white border rounded text-[11px] font-bold">上一頁</button>
+        <span class="px-2 py-1 font-mono font-bold text-brand-700">${custCurrentPage} / ${totalPages}</span>
+        <button type="button" onclick="changeCustPage(${custCurrentPage + 1})" ${custCurrentPage === totalPages ? 'disabled class="opacity-30"' : ''} class="px-2 py-1 bg-white border rounded text-[11px] font-bold">下一頁</button>
+      `;
+    }
+
+    function changeCustPage(p) {
+      custCurrentPage = p;
+      renderCustomerTable();
+    }
+
+    function selectCustToBook(phone) {
+      if (customerDb[phone]) {
+        closeManagerModal();
+        // 預設指定第一位專員 11:00 插單
+        onEmptySlotClicked(staffList[0].id, staffList[0].name, '11:00');
+        document.getElementById('book-phone').value = phone;
+        lookupCustomer(phone);
+      }
+    }
+
+    function exportCustomersCsv() {
+      const list = Object.values(customerDb);
+      if (list.length === 0) return Swal.fire('尚無顧客名冊可匯出', '', 'info');
+      let csv = "data:text/csv;charset=utf-8,\uFEFF";
+      csv += "顧客姓名,手機號碼,LINE稱呼,累計排程次數\n";
+      list.forEach(c => {
+        csv += `"${c.name}","${c.phone}","${c.line || ''}",${c.visits || 1}\n`;
+      });
+      const a = document.createElement("a");
+      a.href = encodeURI(csv);
+      a.download = `${currentStore.store_name}_排程顧客名冊.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    // 10. 雲端同步與本地儲存
+    async function saveOverviewConfigToCloud() {
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/tool_settings`, {
+          method: "POST",
+          headers: {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json",
+            "Prefer": "resolution=merge-duplicates"
+          },
+          body: JSON.stringify({
+            store_id: currentStore.id,
+            slot_config: {
+              overview_config: { staffList, serviceCatalog, storeResources }
+            },
+            updated_at: new Date().toISOString()
+          })
+        });
+      } catch (e) {
+        console.warn("雲端同步異常:", e);
+      }
+    }
+
+    function saveBookingsDb() {
+      localStorage.setItem('overview_bookings_data', JSON.stringify(bookingsDb));
+    }
+
+    function saveCustomerDb() {
+      localStorage.setItem('overview_customers_db', JSON.stringify(customerDb));
+    }
+
+    function getTodayDateStr() {
+      return formatYearMonthDay(new Date());
+    }
+
+    function formatYearMonthDay(d) {
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
   </script>
 </body>
 </html>

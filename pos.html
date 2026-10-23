@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>極簡收銀小幫手與顧客庫</title>
+  <title>極簡快速收銀小幫手與營收看板</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -28,7 +28,7 @@
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-brand-50 text-brand-900 antialiased min-h-screen pb-24 select-none">
+<body class="bg-brand-50 text-brand-900 antialiased min-h-screen pb-28 selection:bg-brand-200 select-none">
 
   <!-- 頂部導航 -->
   <header class="bg-white/95 backdrop-blur-md border-b border-brand-200 sticky top-0 z-30 px-4 py-3 shadow-2xs">
@@ -38,14 +38,14 @@
           <i class="fa-solid fa-cash-register text-[#8C7355]"></i>
           <span>極簡收銀小幫手</span>
         </h1>
-        <p class="text-[10px] text-brand-400 font-mono" id="disp-store-subtitle">載入店內專屬配置中...</p>
+        <p class="text-[10px] text-brand-400 font-mono" id="disp-store-subtitle">門市收銀端點載入中...</p>
       </div>
       <div class="flex items-center gap-2">
         <a id="header-line-link" href="#" target="_blank" class="p-2 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition" title="官方 LINE">
           <i class="fa-brands fa-line text-sm"></i>
         </a>
-        <button type="button" onclick="openManagerPinPrompt()" class="px-3 py-1.5 bg-brand-100 hover:bg-brand-200 text-brand-800 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs">
-          <i class="fa-solid fa-gear text-[#8C7355]"></i>
+        <button type="button" onclick="openManagerPinPrompt()" class="px-3 py-1.5 bg-[#8C7355] hover:bg-[#7A6246] text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs">
+          <i class="fa-solid fa-gear text-amber-200"></i>
           <span>店長專區</span>
         </button>
       </div>
@@ -54,13 +54,39 @@
 
   <main class="max-w-xl mx-auto p-4 space-y-4">
 
-    <!-- 顧客快速帶入卡片 -->
+    <!-- 1. 前台常駐展示：本日營業額 ＆ 本月營業額看板 (老闆最愛) -->
+    <section class="grid grid-cols-2 gap-3">
+      <!-- 本日營收 -->
+      <div class="bg-white p-4 rounded-3xl border border-brand-200 shadow-sm relative overflow-hidden flex flex-col justify-between">
+        <div class="flex justify-between items-center text-[11px] font-bold text-brand-600">
+          <span class="flex items-center gap-1"><i class="fa-solid fa-calendar-day text-[#8C7355]"></i> 本日實收營收</span>
+          <span class="text-[10px] font-mono text-brand-400" id="stat-today-count">0 筆</span>
+        </div>
+        <div class="mt-2">
+          <div class="text-2xl font-black font-mono text-[#8C7355]" id="stat-today-revenue">NT$ 0</div>
+          <div class="text-[9.5px] text-brand-400 mt-0.5">即時結帳自動累計</div>
+        </div>
+      </div>
+      <!-- 本月營收 -->
+      <div class="bg-gradient-to-br from-stone-900 to-[#3D3126] text-white p-4 rounded-3xl shadow-sm relative overflow-hidden flex flex-col justify-between">
+        <div class="flex justify-between items-center text-[11px] font-bold text-amber-200/80">
+          <span class="flex items-center gap-1"><i class="fa-solid fa-chart-line text-amber-400"></i> 本月累計營收</span>
+          <span class="text-[10px] font-mono opacity-60" id="stat-month-label">當月</span>
+        </div>
+        <div class="mt-2">
+          <div class="text-2xl font-black font-mono text-amber-300" id="stat-month-revenue">NT$ 0</div>
+          <div class="text-[9.5px] text-stone-300 mt-0.5">全月營收總覽</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. 顧客手機快速帶入卡片 -->
     <section class="bg-white p-4 rounded-3xl border border-brand-200 shadow-sm space-y-3">
       <div class="flex justify-between items-center pb-2 border-b border-brand-100">
         <span class="text-xs font-bold text-brand-900 flex items-center gap-1.5">
-          <i class="fa-solid fa-user-check text-[#8C7355]"></i> 顧客資料 (輸入手機自動比對)
+          <i class="fa-solid fa-user-check text-[#8C7355]"></i> 結帳顧客資料 (輸入手機自動帶入)
         </span>
-        <span class="text-[10px] text-brand-400" id="client-status-badge">新客首結或舊客帶入</span>
+        <span class="text-[10px] text-brand-400 font-mono" id="client-status-badge">新客首結或舊客帶入</span>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
         <div>
@@ -76,51 +102,57 @@
           <input type="text" id="pos-client-line" placeholder="例: May" class="w-full p-2 bg-brand-50/50 rounded-xl border border-brand-200 text-xs outline-none focus:border-brand-500">
         </div>
       </div>
-      <div id="client-history-hint" class="text-[10.5px] text-brand-500 bg-brand-50 p-2 rounded-xl border border-brand-100 hidden"></div>
+      <div id="client-history-hint" class="text-[10.5px] text-brand-700 bg-brand-50 p-2.5 rounded-xl border border-brand-200 hidden leading-relaxed"></div>
     </section>
 
-    <!-- 服務項目與加購選擇區 -->
+    <!-- 3. 服務項目點選區 (分類微大字置頂排版，不隱藏品項) -->
     <section class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-4">
       <div class="flex justify-between items-center pb-2 border-b border-brand-100">
-        <h2 class="text-xs font-black text-brand-900">服務項目與加購點選</h2>
-        <span class="text-[10px] text-brand-400">點選即可加入結帳</span>
+        <div>
+          <h2 class="text-xs font-black text-brand-900">服務項目與加購點選</h2>
+          <p class="text-[10px] text-brand-400 mt-0.5">點擊品項即可快速加入本次結帳清單</p>
+        </div>
+        <button type="button" onclick="clearCart()" class="text-[10.5px] text-rose-500 font-bold hover:underline">清空重選</button>
       </div>
 
-      <!-- 分類標籤滑動條 -->
-      <div class="flex gap-2 overflow-x-auto no-scrollbar" id="category-tabs-container"></div>
+      <!-- 分類微大字容器 (垂直展開各分類區塊) -->
+      <div class="space-y-5" id="pos-categorized-items-container">
+        <!-- JS 動態生成各大分類與按鈕 -->
+      </div>
 
-      <!-- 項目按鈕網格 -->
-      <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5" id="pos-items-grid"></div>
-
-      <!-- 加購選項區塊 -->
-      <div class="pt-2 border-t border-brand-100 space-y-2">
-        <span class="text-[11px] font-bold text-brand-800 block">加購與工藝升級：</span>
+      <!-- 加購與工藝升級 (複選按鈕) -->
+      <div class="pt-3 border-t border-brand-100 space-y-2">
+        <span class="text-xs font-bold text-brand-900 flex items-center gap-1.5">
+          <i class="fa-solid fa-sparkles text-amber-600"></i> 加購與工藝升級 (可多選)：
+        </span>
         <div class="flex flex-wrap gap-2" id="pos-addons-container"></div>
       </div>
     </section>
 
-    <!-- 當前購物清單與結帳計算卡 -->
-    <section class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-4">
+    <!-- 4. 當前開單清單與結帳計算卡片 -->
+    <section class="bg-white p-5 rounded-3xl border border-brand-200 shadow-md space-y-4">
       <div class="flex justify-between items-center pb-2 border-b border-brand-100">
-        <span class="text-xs font-bold text-brand-900">本次開單結帳明細</span>
-        <button type="button" onclick="clearCart()" class="text-[10.5px] text-rose-500 font-bold hover:underline">清空重選</button>
+        <span class="text-xs font-bold text-brand-900 flex items-center gap-1.5">
+          <i class="fa-solid fa-receipt text-[#8C7355]"></i> 本次結帳明細
+        </span>
+        <span class="text-[10.5px] font-mono text-[#8C7355] font-bold" id="cart-items-count-badge">未選品項</span>
       </div>
 
       <div class="space-y-2" id="cart-items-list">
-        <div class="text-center py-4 text-xs text-brand-400">尚未選取任何項目</div>
+        <div class="text-center py-4 text-xs text-brand-400">尚未選取任何服務項目</div>
       </div>
 
-      <!-- 金額小計與快速折扣 -->
-      <div class="p-3 bg-brand-50 rounded-2xl border border-brand-100 space-y-2 text-xs">
+      <!-- 金額小計與快速折讓 -->
+      <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-100 space-y-2 text-xs">
         <div class="flex justify-between items-center">
-          <span class="text-brand-600">原價小計：</span>
+          <span class="text-brand-600 font-medium">原價小計：</span>
           <span class="font-mono font-bold text-brand-800" id="disp-subtotal">NT$ 0</span>
         </div>
         <div class="flex justify-between items-center">
-          <span class="text-brand-600">折扣/折讓金額：</span>
+          <span class="text-brand-600 font-medium">現場折扣 / 折讓金額：</span>
           <div class="flex items-center gap-1">
             <span class="font-bold text-rose-600">- NT$</span>
-            <input type="number" id="pos-discount-input" value="0" min="0" oninput="calculateTotal()" class="w-16 p-1 bg-white rounded-lg border border-brand-200 text-xs font-mono font-bold text-right outline-none">
+            <input type="number" id="pos-discount-input" value="0" min="0" oninput="calculateTotal()" class="w-20 p-1 bg-white rounded-lg border border-brand-200 text-xs font-mono font-bold text-right outline-none">
           </div>
         </div>
       </div>
@@ -131,7 +163,7 @@
           <span class="text-[10px] text-brand-400 block">實收應結金額</span>
           <span class="text-2xl font-black font-mono text-brand-700" id="disp-final-total">NT$ 0</span>
         </div>
-        <button type="button" onclick="submitCheckout()" class="px-7 py-3 bg-[#8C7355] hover:bg-[#7A6246] text-white font-bold rounded-2xl text-xs transition shadow-md flex items-center gap-2">
+        <button type="button" onclick="submitCheckout()" class="px-7 py-3.5 bg-[#8C7355] hover:bg-[#7A6246] text-white font-bold rounded-2xl text-xs transition shadow-md flex items-center gap-2">
           <i class="fa-solid fa-circle-check"></i>
           <span>確認結帳並入帳</span>
         </button>
@@ -141,20 +173,20 @@
   </main>
 
   <!-- ========================================================================= -->
-  <!-- 店長專區：項目配置、順序排序 ＆ 顧客庫大面板 (PIN 驗證後開啟) -->
+  <!-- 店長專區：營業額雙卡 ＆ 項目上下排序 ＆ 顧客資料庫 (PIN 驗證後開啟) -->
   <!-- ========================================================================= -->
   <div id="manager-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
     <div class="bg-white w-full sm:max-w-2xl max-h-[92vh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
       
-      <!-- 抬頭與分頁切換 -->
+      <!-- 抽屜抬頭 -->
       <div class="p-4 bg-brand-50 border-b border-brand-200 flex justify-between items-center shrink-0">
         <div class="flex items-center gap-2">
           <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xs">
             <i class="fa-solid fa-sliders"></i>
           </div>
           <div>
-            <div class="text-xs font-bold text-brand-900">店長營運中心 · 收銀配置與顧客資料庫</div>
-            <div class="text-[10px] text-brand-400">項目上下排序 · 歷史帳目 · 顧客消費歷程</div>
+            <div class="text-xs font-bold text-brand-900">店長收銀後台 · 項目配置與顧客小庫</div>
+            <div class="text-[10px] text-brand-400">項目上下排序 · 密碼管理 · 消費履歷分頁</div>
           </div>
         </div>
         <button type="button" onclick="closeManagerModal()" class="w-8 h-8 rounded-full bg-white border border-brand-200 text-brand-400 hover:text-brand-900 flex items-center justify-center">
@@ -162,57 +194,72 @@
         </button>
       </div>
 
-      <!-- 分頁切換按鈕列 -->
-      <div class="flex border-b border-brand-200 bg-white px-4 text-xs font-bold">
+      <!-- 分頁標籤 -->
+      <div class="flex border-b border-brand-200 bg-white px-4 text-xs font-bold shrink-0">
         <button type="button" onclick="switchManagerSubTab('tab-items', this)" class="mgr-tab-btn py-3 px-4 border-b-2 border-[#8C7355] text-[#8C7355]">
-          收銀項目與加購配置
+          收銀品項管理 (上下排序)
         </button>
         <button type="button" onclick="switchManagerSubTab('tab-clients', this)" class="mgr-tab-btn py-3 px-4 text-brand-400 hover:text-brand-700">
-          顧客資料庫快查
+          顧客資料庫 (10筆分頁)
         </button>
-        <button type="button" onclick="switchManagerSubTab('tab-ledgers', this)" class="mgr-tab-btn py-3 px-4 text-brand-400 hover:text-brand-700">
-          本日/本月營收流水帳
+        <button type="button" onclick="switchManagerSubTab('tab-revenue', this)" class="mgr-tab-btn py-3 px-4 text-brand-400 hover:text-brand-700">
+          營收明細流水帳
         </button>
       </div>
 
-      <!-- 主體滾動區域 -->
+      <!-- 滾動內容區域 -->
       <div class="p-5 overflow-y-auto space-y-4 text-xs">
 
-        <!-- [分頁 1] 項目與加購配置 (支援上下排序) -->
+        <!-- [分頁 1] 項目配置與排序 ＋ PIN 碼管理 -->
         <div id="tab-items" class="mgr-tab-content space-y-4">
-          <div class="flex justify-between items-center">
-            <span class="font-bold text-brand-900">收銀主服務項目管理 (可上下排序)：</span>
-            <button type="button" onclick="openAddItemModal()" class="px-2.5 py-1.5 bg-[#8C7355] text-white rounded-lg font-bold text-[11px] flex items-center gap-1 shadow-2xs">
-              <i class="fa-solid fa-plus text-[10px]"></i> 新增品項
-            </button>
+          <!-- PIN 碼展示與修改 -->
+          <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 flex justify-between items-center">
+            <div>
+              <span class="font-bold text-brand-900 block">店長前台登入 PIN 碼：</span>
+              <span class="text-[10px] text-brand-400">進入此店長專區之驗證密碼</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <code class="px-3 py-1 bg-white border border-brand-200 rounded-xl font-mono font-black text-sm text-[#8C7355]" id="disp-manager-pin">8888</code>
+              <button type="button" onclick="changeAdminPinModal()" class="px-2.5 py-1 bg-white border border-brand-200 text-blue-600 rounded-lg text-[10.5px] font-bold hover:bg-brand-50">
+                修改密碼
+              </button>
+            </div>
           </div>
 
-          <div class="space-y-2" id="admin-items-sortable-list">
-            <!-- JS 動態生成主項目列表 -->
+          <!-- 主項目管理列表 (上下排序) -->
+          <div class="space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-brand-900">服務主品項列表 (點擊 ▲/▼ 調整順序)：</span>
+              <button type="button" onclick="openAddItemModal()" class="px-2.5 py-1.5 bg-[#8C7355] text-white rounded-lg font-bold text-[11px] shadow-2xs">
+                + 新增品項
+              </button>
+            </div>
+            <div class="space-y-2" id="admin-items-sortable-list"></div>
           </div>
 
-          <div class="pt-4 border-t border-brand-100 flex justify-between items-center">
-            <span class="font-bold text-brand-900">加購與升級選項管理：</span>
-            <button type="button" onclick="openAddAddonModal()" class="px-2.5 py-1.5 bg-[#8C7355] text-white rounded-lg font-bold text-[11px] flex items-center gap-1 shadow-2xs">
-              <i class="fa-solid fa-plus text-[10px]"></i> 新增加購
-            </button>
+          <!-- 加購選項管理 (上下排序) -->
+          <div class="pt-3 border-t border-brand-100 space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-brand-900">加購與工藝升級選項：</span>
+              <button type="button" onclick="openAddAddonModal()" class="px-2.5 py-1.5 bg-[#8C7355] text-white rounded-lg font-bold text-[11px] shadow-2xs">
+                + 新增加購
+              </button>
+            </div>
+            <div class="space-y-2" id="admin-addons-sortable-list"></div>
           </div>
 
-          <div class="space-y-2" id="admin-addons-sortable-list">
-            <!-- JS 動態生成加購選項列表 -->
-          </div>
-
-          <div class="pt-4 border-t border-brand-100">
-            <label class="block font-bold text-brand-800 text-xs mb-1">官方 LINE 預約/客服連結：</label>
+          <!-- 官方 LINE 設定 -->
+          <div class="pt-3 border-t border-brand-100">
+            <label class="block font-bold text-brand-800 mb-1">官方 LINE 預約/客服連結：</label>
             <input type="url" id="admin-line-url" placeholder="https://line.me/R/ti/p/@480kqjoj" class="w-full p-2.5 bg-brand-50 rounded-xl border border-brand-200 text-xs font-mono">
           </div>
 
           <button type="button" onclick="saveStoreConfigToCloud()" class="w-full py-3 bg-stone-900 hover:bg-black text-white font-bold rounded-xl text-xs transition shadow-md">
-            儲存所有項目與排序設定
+            儲存所有收銀設定與排序
           </button>
         </div>
 
-        <!-- [分頁 2] 顧客小庫快查 (10筆一頁分頁 + 搜尋 + 展開消費紀錄) -->
+        <!-- [分頁 2] 顧客小資料庫 (10筆分頁 + 搜尋 + 展開消費紀錄) -->
         <div id="tab-clients" class="mgr-tab-content space-y-3 hidden">
           <div class="flex gap-2">
             <div class="relative flex-1">
@@ -220,29 +267,30 @@
               <input type="text" id="client-search-input" oninput="filterClientsList()" placeholder="輸入手機、顧客姓名或 LINE 稱呼搜尋..." class="w-full pl-8 pr-3 py-2 bg-brand-50 rounded-xl border border-brand-200 text-xs outline-none focus:border-brand-500">
             </div>
             <button type="button" onclick="exportClientsCsv()" class="px-3 py-2 bg-brand-100 text-brand-800 rounded-xl font-bold text-xs hover:bg-brand-200 transition">
-              匯出名冊
+              匯出清冊
             </button>
           </div>
 
-          <div class="space-y-2.5" id="clients-list-container">
-            <!-- JS 動態生成 10 筆顧客履歷卡片 -->
-          </div>
+          <div class="space-y-2.5" id="clients-list-container"></div>
 
-          <!-- 分頁控制列 -->
+          <!-- 10筆分頁列 -->
           <div class="flex justify-between items-center pt-2 border-t border-brand-100 text-[11px]">
             <span class="text-brand-500" id="clients-page-info">第 1 / 1 頁</span>
             <div class="flex gap-1" id="clients-pagination-btns"></div>
           </div>
         </div>
 
-        <!-- [分頁 3] 本日營收流水帳 -->
-        <div id="tab-ledgers" class="mgr-tab-content space-y-3 hidden">
-          <div class="flex justify-between items-center pb-2 border-b border-brand-100">
+        <!-- [分頁 3] 本日/本月營收明細流水帳 -->
+        <div id="tab-revenue" class="mgr-tab-content space-y-3 hidden">
+          <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 grid grid-cols-2 gap-2 text-center">
             <div>
-              <span class="font-bold text-brand-900 block">今日實收營業額：</span>
-              <span class="text-xl font-black font-mono text-[#8C7355]" id="today-revenue-badge">NT$ 0</span>
+              <span class="text-[10px] text-brand-400 block font-bold">本日實收總額</span>
+              <span class="text-lg font-black font-mono text-[#8C7355]" id="mgr-stat-today">NT$ 0</span>
             </div>
-            <span class="text-[10.5px] text-brand-400" id="today-orders-count">共 0 筆結帳</span>
+            <div>
+              <span class="text-[10px] text-brand-400 block font-bold">本月累計總額</span>
+              <span class="text-lg font-black font-mono text-brand-900" id="mgr-stat-month">NT$ 0</span>
+            </div>
           </div>
           <div class="space-y-2" id="ledgers-list-container"></div>
         </div>
@@ -262,7 +310,7 @@
       line_url: "https://line.me/R/ti/p/@480kqjoj"
     };
 
-    // 項目與加購結構 (可由後台設定並排序)
+    // 收銀品項設定模型 (可上下排序)
     let posConfig = {
       categories: ["主要美睫", "深層護理", "卸除服務"],
       items: [
@@ -278,33 +326,29 @@
       ]
     };
 
-    // 顧客資料庫 (以手機號碼為主要識別)
-    let clientsDatabase = [];
     let ledgerRecords = [];
+    let clientsDatabase = [];
 
-    // 當前結帳暫存
-    let selectedItem = null;
-    let selectedAddons = [];
-    let activeCategory = "全部";
+    // 當前開單暫存
+    let selectedMainItem = null;
+    let selectedAddonsList = [];
 
-    // 顧客名冊分頁
+    // 顧客小庫分頁
     let clientsCurrentPage = 1;
     const CLIENTS_PAGE_SIZE = 10;
     let filteredClients = [];
 
     window.addEventListener('DOMContentLoaded', async () => {
       await loadStoreByUrlParams();
-      renderCategoryTabs();
-      renderPosItems();
+      renderCategorizedItems();
       renderAddons();
       calculateTotal();
     });
 
-    // 1. 雙軌讀取店家設定
+    // 1. 雙軌解析店家參數
     async function loadStoreByUrlParams() {
       const urlParams = new URLSearchParams(window.location.search);
       const storeParam = urlParams.get('s') || urlParams.get('store') || urlParams.get('store_id');
-
       if (!storeParam) return;
 
       const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(storeParam);
@@ -323,10 +367,9 @@
           document.getElementById('disp-store-subtitle').innerText = `收銀端點: ${currentStore.store_slug || currentStore.id.slice(0,8)}`;
           document.getElementById('header-line-link').href = currentStore.line_url || "https://line.me/R/ti/p/@480kqjoj";
           document.getElementById('admin-line-url').value = currentStore.line_url || "";
+          document.getElementById('disp-manager-pin').innerText = currentStore.admin_pin || "8888";
 
-          // 載入收銀品項設定 (tool_settings)
           await loadCloudPosSettings(currentStore.id);
-          // 載入營收紀錄 (tool_quick_ledger)
           await loadCloudLedgers(currentStore.id);
         }
       } catch (err) {
@@ -340,15 +383,21 @@
           headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` }
         });
         const data = await res.json();
-        if (data && data.length > 0 && data[0].slot_config && data[0].slot_config.pos_config) {
-          posConfig = data[0].slot_config.pos_config;
+        if (data && data.length > 0) {
+          if (data[0].slot_config && data[0].slot_config.pos_config) {
+            posConfig = data[0].slot_config.pos_config;
+          }
+          if (data[0].store_pin) {
+            currentStore.admin_pin = data[0].store_pin;
+            document.getElementById('disp-manager-pin').innerText = currentStore.admin_pin;
+          }
         }
       } catch (e) {
-        console.error("載入收銀品項失敗:", e);
+        console.error("載入收銀設定失敗:", e);
       }
     }
 
-    // 載入該店營收紀錄並彙整出顧客小庫
+    // 載入流水帳 ＆ 同步計算本日與本月營業額
     async function loadCloudLedgers(storeId) {
       try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_quick_ledger?store_id=eq.${storeId}&order=created_at.desc`, {
@@ -357,6 +406,7 @@
         const data = await res.json();
         if (Array.isArray(data)) {
           ledgerRecords = data;
+          updateRevenueStatCards(data);
           rebuildClientsDatabaseFromLedgers(data);
         }
       } catch (e) {
@@ -364,13 +414,48 @@
       }
     }
 
-    // 從每一筆收銀資料中，彙整出顧客履歷 (消費次數、總額、每次明細)
+    // 計算並渲染前台「本日營業額 ＆ 本月營業額」看板
+    function updateRevenueStatCards(records) {
+      const now = new Date();
+      const todayPrefix = now.toISOString().slice(0, 10); // YYYY-MM-DD
+      const monthPrefix = now.toISOString().slice(0, 7);  // YYYY-MM
+
+      let todayTotal = 0, todayCount = 0;
+      let monthTotal = 0;
+
+      records.forEach(r => {
+        const dateStr = r.created_at || '';
+        const paid = Number(r.total_price || 0);
+
+        if (dateStr.startsWith(todayPrefix)) {
+          todayTotal += paid;
+          todayCount++;
+        }
+        if (dateStr.startsWith(monthPrefix)) {
+          monthTotal += paid;
+        }
+      });
+
+      // 前台看板更新
+      document.getElementById('stat-today-revenue').innerText = `NT$ ${todayTotal.toLocaleString()}`;
+      document.getElementById('stat-today-count').innerText = `${todayCount} 筆結帳`;
+      document.getElementById('stat-month-revenue').innerText = `NT$ ${monthTotal.toLocaleString()}`;
+      document.getElementById('stat-month-label').innerText = `${now.getMonth() + 1} 月累積`;
+
+      // 後台流水帳看板更新
+      const mgrToday = document.getElementById('mgr-stat-today');
+      const mgrMonth = document.getElementById('mgr-stat-month');
+      if (mgrToday) mgrToday.innerText = `NT$ ${todayTotal.toLocaleString()}`;
+      if (mgrMonth) mgrMonth.innerText = `NT$ ${monthTotal.toLocaleString()}`;
+    }
+
+    // 從每一筆收銀資料中彙整出顧客履歷 (消費次數、總額、每次明細)
     function rebuildClientsDatabaseFromLedgers(records) {
       const clientMap = {};
 
       records.forEach(r => {
         let meta = {};
-        try { meta = JSON.parse(r.items_summary); } catch (e) { meta = { summary: r.items_summary }; }
+        try { meta = JSON.parse(r.items_summary); } catch (e) { meta = { items_text: r.items_summary }; }
 
         const phone = meta.client_phone || '未留手機';
         const name = r.client_name || '散客';
@@ -390,7 +475,6 @@
           };
         }
 
-        // 保持資料為最新狀態
         if (name && name !== '散客') clientMap[phone].name = name;
         if (line) clientMap[phone].line = line;
 
@@ -423,77 +507,74 @@
       if (found) {
         document.getElementById('pos-client-name').value = found.name;
         document.getElementById('pos-client-line').value = found.line || '';
-        badge.innerHTML = `<span class="text-emerald-700 font-bold">✓ 舊客檔案已帶入 (累計 ${found.visitsCount} 次)</span>`;
-        hint.innerHTML = `🌟 <b>${found.name}</b> VIP紀錄：累計消費 <b>NT$ ${found.totalSpend.toLocaleString()}</b> 元 ｜ 上次造訪：${found.lastVisit}`;
+        badge.innerHTML = `<span class="text-emerald-700 font-bold">✓ 舊客檔案帶入 (累計造訪 ${found.visitsCount} 次)</span>`;
+        hint.innerHTML = `🌟 <b>${found.name}</b> VIP 履歷：累計消費 <b>NT$ ${found.totalSpend.toLocaleString()}</b> 元 ｜ 上次造訪：${found.lastVisit}`;
         hint.classList.remove('hidden');
       } else {
-        badge.innerText = '★ 全新顧客（結帳將建檔入庫）';
+        badge.innerText = '★ 全新顧客 (結帳將自動建檔入庫)';
         hint.classList.add('hidden');
       }
     }
 
-    // 3. 前台分類與品項渲染
-    function renderCategoryTabs() {
-      const container = document.getElementById('category-tabs-container');
-      const categories = ["全部", ...(posConfig.categories || [])];
+    // 3. 前台項目分類「微大字」置頂垂直排版（不隱藏品項）
+    function renderCategorizedItems() {
+      const container = document.getElementById('pos-categorized-items-container');
+      const cats = posConfig.categories || ["主要服務"];
 
-      container.innerHTML = categories.map(cat => `
-        <button type="button" onclick="selectCategory('${cat}')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition shrink-0 ${
-          activeCategory === cat ? 'bg-[#8C7355] text-white shadow-2xs' : 'bg-brand-100 text-brand-700 hover:bg-brand-200'
-        }">
-          ${cat}
-        </button>
-      `).join('');
-    }
+      container.innerHTML = cats.map(cat => {
+        const catItems = posConfig.items.filter(i => i.category === cat);
+        if (catItems.length === 0) return '';
 
-    function selectCategory(cat) {
-      activeCategory = cat;
-      renderCategoryTabs();
-      renderPosItems();
-    }
+        const itemsHtml = catItems.map(item => {
+          const isSelected = selectedMainItem && selectedMainItem.id === item.id;
+          return `
+            <button type="button" onclick="selectMainItem('${item.id}')" class="p-3.5 rounded-2xl border text-left transition flex flex-col justify-between gap-2 shadow-2xs ${
+              isSelected 
+                ? 'bg-[#8C7355] text-white border-[#8C7355] shadow-xs' 
+                : 'bg-brand-50/60 hover:bg-brand-100/60 border-brand-200 text-brand-900'
+            }">
+              <span class="font-bold text-xs leading-snug line-clamp-2">${item.name}</span>
+              <div class="flex justify-between items-center pt-1 border-t ${isSelected ? 'border-white/20' : 'border-brand-200/60'}">
+                <span class="font-mono font-black text-xs ${isSelected ? 'text-amber-200' : 'text-[#8C7355]'}">NT$ ${item.price.toLocaleString()}</span>
+                <span class="text-[9.5px] font-bold ${isSelected ? 'text-white' : 'text-brand-400'}">${isSelected ? '✓ 已選取' : '點選'}</span>
+              </div>
+            </button>
+          `;
+        }).join('');
 
-    function renderPosItems() {
-      const grid = document.getElementById('pos-items-grid');
-      const filtered = (activeCategory === "全部")
-        ? posConfig.items
-        : posConfig.items.filter(i => i.category === activeCategory);
-
-      if (filtered.length === 0) {
-        grid.innerHTML = '<div class="col-span-full py-6 text-center text-xs text-brand-400">此分類目前無項目</div>';
-        return;
-      }
-
-      grid.innerHTML = filtered.map(item => {
-        const isSelected = selectedItem && selectedItem.id === item.id;
         return `
-          <button type="button" onclick="selectMainItem('${item.id}')" class="p-3 rounded-2xl border text-left transition flex flex-col justify-between gap-2 shadow-2xs ${
-            isSelected 
-              ? 'bg-[#8C7355] text-white border-[#8C7355]' 
-              : 'bg-white hover:bg-brand-50 border-brand-200 text-brand-900'
-          }">
-            <span class="font-bold text-xs leading-snug line-clamp-2">${item.name}</span>
-            <span class="font-mono font-black text-xs ${isSelected ? 'text-amber-200' : 'text-brand-600'}">NT$ ${item.price.toLocaleString()}</span>
-          </button>
+          <div class="space-y-2">
+            <!-- 分類微大字標題 -->
+            <div class="flex items-center gap-2 border-b border-brand-100 pb-1 text-brand-900 font-black text-sm">
+              <span class="w-1.5 h-3.5 bg-[#8C7355] rounded-full"></span>
+              <span>${cat}</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+              ${itemsHtml}
+            </div>
+          </div>
         `;
       }).join('');
     }
 
     function selectMainItem(itemId) {
       const found = posConfig.items.find(i => i.id === itemId);
-      selectedItem = found;
-      renderPosItems();
+      selectedMainItem = (selectedMainItem && selectedMainItem.id === itemId) ? null : found;
+
+      renderCategorizedItems();
       renderCartUI();
       calculateTotal();
     }
 
+    // 渲染加購選項 (複選按鈕)
     function renderAddons() {
       const container = document.getElementById('pos-addons-container');
       container.innerHTML = posConfig.addons.map(addon => {
-        const isSelected = selectedAddons.some(a => a.id === addon.id);
+        const isSelected = selectedAddonsList.some(a => a.id === addon.id);
         return `
-          <button type="button" onclick="toggleAddon('${addon.id}')" class="px-3 py-1.5 rounded-xl border text-xs font-bold transition flex items-center gap-1.5 ${
+          <button type="button" onclick="toggleAddonItem('${addon.id}')" class="px-3.5 py-2 rounded-xl border text-xs font-bold transition flex items-center gap-1.5 ${
             isSelected 
-              ? 'bg-stone-900 text-white border-stone-900' 
+              ? 'bg-stone-900 text-white border-stone-900 shadow-2xs' 
               : 'bg-white border-brand-200 text-brand-800 hover:bg-brand-50'
           }">
             <i class="fa-solid ${isSelected ? 'fa-check' : 'fa-plus'} text-[10px]"></i>
@@ -503,43 +584,50 @@
       }).join('');
     }
 
-    function toggleAddon(addonId) {
+    function toggleAddonItem(addonId) {
       const found = posConfig.addons.find(a => a.id === addonId);
-      const index = selectedAddons.findIndex(a => a.id === addonId);
-      if (index > -1) {
-        selectedAddons.splice(index, 1);
+      const idx = selectedAddonsList.findIndex(a => a.id === addonId);
+      if (idx > -1) {
+        selectedAddonsList.splice(idx, 1);
       } else {
-        selectedAddons.push(found);
+        selectedAddonsList.push(found);
       }
       renderAddons();
       renderCartUI();
       calculateTotal();
     }
 
-    // 4. 計算與呈現結帳清單
+    // 4. 結帳清單與金額計算
     function renderCartUI() {
       const container = document.getElementById('cart-items-list');
+      const badge = document.getElementById('cart-items-count-badge');
 
-      if (!selectedItem) {
-        container.innerHTML = '<div class="text-center py-4 text-xs text-brand-400">尚未選取任何項目</div>';
+      if (!selectedMainItem && selectedAddonsList.length === 0) {
+        container.innerHTML = '<div class="text-center py-4 text-xs text-brand-400">尚未選取任何服務項目</div>';
+        badge.innerText = '未選品項';
         return;
       }
 
-      let html = `
-        <div class="flex justify-between items-center p-2.5 bg-brand-50 rounded-xl border border-brand-200 text-xs">
-          <div>
-            <span class="font-bold text-brand-900">• ${selectedItem.name}</span>
-            <span class="text-[10px] text-brand-400 block">${selectedItem.category}</span>
-          </div>
-          <span class="font-mono font-bold text-brand-700">NT$ ${selectedItem.price.toLocaleString()}</span>
-        </div>
-      `;
+      badge.innerText = selectedMainItem ? selectedMainItem.name : '僅選加購';
 
-      selectedAddons.forEach(addon => {
+      let html = '';
+      if (selectedMainItem) {
         html += `
-          <div class="flex justify-between items-center px-2.5 py-1.5 bg-white rounded-lg border border-brand-100 text-[11px]">
+          <div class="flex justify-between items-center p-2.5 bg-brand-50 rounded-xl border border-brand-200 text-xs">
+            <div>
+              <span class="font-bold text-brand-900">• ${selectedMainItem.name}</span>
+              <span class="text-[10px] text-brand-400 block">${selectedMainItem.category}</span>
+            </div>
+            <span class="font-mono font-bold text-brand-700">NT$ ${selectedMainItem.price.toLocaleString()}</span>
+          </div>
+        `;
+      }
+
+      selectedAddonsList.forEach(addon => {
+        html += `
+          <div class="flex justify-between items-center px-3 py-1.5 bg-white rounded-lg border border-brand-100 text-[11px]">
             <span class="text-brand-600">＋ 加購：${addon.name}</span>
-            <span class="font-mono text-brand-600">+ NT$ ${addon.price.toLocaleString()}</span>
+            <span class="font-mono text-brand-600 font-bold">+ NT$ ${addon.price.toLocaleString()}</span>
           </div>
         `;
       });
@@ -549,8 +637,8 @@
 
     function calculateTotal() {
       let subtotal = 0;
-      if (selectedItem) subtotal += selectedItem.price;
-      selectedAddons.forEach(a => subtotal += a.price);
+      if (selectedMainItem) subtotal += selectedMainItem.price;
+      selectedAddonsList.forEach(a => subtotal += a.price);
 
       const discount = Math.max(0, Number(document.getElementById('pos-discount-input').value || 0));
       const finalTotal = Math.max(0, subtotal - discount);
@@ -561,10 +649,10 @@
     }
 
     function clearCart() {
-      selectedItem = null;
-      selectedAddons = [];
+      selectedMainItem = null;
+      selectedAddonsList = [];
       document.getElementById('pos-discount-input').value = 0;
-      renderPosItems();
+      renderCategorizedItems();
       renderAddons();
       renderCartUI();
       calculateTotal();
@@ -576,7 +664,7 @@
       const name = document.getElementById('pos-client-name').value.trim();
       const line = document.getElementById('pos-client-line').value.trim();
 
-      if (!selectedItem) {
+      if (!selectedMainItem) {
         return Swal.fire('請先點選本次施作的主服務項目！', '', 'warning');
       }
       if (!phone || !name) {
@@ -584,7 +672,7 @@
       }
 
       const { subtotal, discount, finalTotal } = calculateTotal();
-      const itemsSummaryText = `${selectedItem.name}` + (selectedAddons.length > 0 ? ` (+${selectedAddons.map(a=>a.name).join('、')})` : '');
+      const itemsSummaryText = `${selectedMainItem.name}` + (selectedAddonsList.length > 0 ? ` (+${selectedAddonsList.map(a=>a.name).join('、')})` : '');
 
       Swal.fire({
         title: '正在建立結帳記錄...',
@@ -622,10 +710,10 @@
           Swal.fire({
             title: '結帳完成！',
             html: `
-              <div class="text-left text-xs bg-brand-50 p-3 rounded-xl border border-brand-200 space-y-1">
+              <div class="text-left text-xs bg-brand-50 p-3.5 rounded-2xl border border-brand-200 space-y-1.5 font-sans leading-relaxed">
                 <div>顧客：<b>${name}</b> (${phone})</div>
                 <div>項目：${itemsSummaryText}</div>
-                <div>實收：<b class="text-brand-700 font-mono text-sm">NT$ ${finalTotal.toLocaleString()}</b></div>
+                <div>實收：<b class="text-[#8C7355] font-mono text-sm">NT$ ${finalTotal.toLocaleString()}</b></div>
                 <div class="text-emerald-700 font-bold pt-1">✓ 資料已自動同步覆寫更新至顧客庫！</div>
               </div>
             `,
@@ -633,7 +721,7 @@
             confirmButtonColor: '#8C7355'
           });
 
-          // 重新抓取帳目與顧客資料
+          // 重新載入流水帳與統計看板
           await loadCloudLedgers(currentStore.id);
           clearCart();
           document.getElementById('pos-client-phone').value = '';
@@ -660,7 +748,7 @@
         confirmButtonColor: '#8C7355'
       });
 
-      if (pin === currentStore.admin_pin || pin === "8888" || pin === "888") {
+      if (pin === (currentStore.admin_pin || "8888") || pin === "8888" || pin === "888") {
         document.getElementById('manager-modal').classList.remove('hidden');
         renderAdminItemsSortable();
         renderAdminAddonsSortable();
@@ -671,10 +759,27 @@
       }
     }
 
+    async function changeAdminPinModal() {
+      const { value: newPin } = await Swal.fire({
+        title: '修改店長管理 PIN 碼',
+        input: 'password',
+        inputPlaceholder: '請輸入新的 4~6 碼數字密碼',
+        showCancelButton: true,
+        confirmButtonText: '確認儲存',
+        confirmButtonColor: '#8C7355',
+        inputValidator: v => (!v || v.length < 4 ? '密碼長度至少需 4 碼！' : null)
+      });
+      if (newPin && newPin.trim()) {
+        currentStore.admin_pin = newPin.trim();
+        document.getElementById('disp-manager-pin').innerText = currentStore.admin_pin;
+        await saveStoreConfigToCloud(true);
+        Swal.fire('PIN 碼修改成功！', `下次請使用新密碼：${currentStore.admin_pin}`, 'success');
+      }
+    }
+
     function closeManagerModal() {
       document.getElementById('manager-modal').classList.add('hidden');
-      renderCategoryTabs();
-      renderPosItems();
+      renderCategorizedItems();
       renderAddons();
     }
 
@@ -726,12 +831,12 @@
     }
 
     async function openAddItemModal() {
-      const catOptions = (posConfig.categories || ["主要服務", "深層護理"]).map(c => `<option value="${c}">${c}</option>`).join('');
+      const catOptions = (posConfig.categories || ["主要服務"]).map(c => `<option value="${c}">${c}</option>`).join('');
       const { value: formValues } = await Swal.fire({
         title: '新增收銀服務品項',
         html: `
           <div class="text-left text-xs space-y-2 p-1">
-            <div><label class="font-bold">品項名稱 *：</label><input id="swal-item-name" class="swal2-input text-xs" placeholder="例: 經典美甲造型"></div>
+            <div><label class="font-bold">品項名稱 *：</label><input id="swal-item-name" class="swal2-input text-xs" placeholder="例: 經典造型設計"></div>
             <div><label class="font-bold">金額 (NT$) *：</label><input id="swal-item-price" type="number" class="swal2-input text-xs font-mono" placeholder="1200"></div>
             <div>
               <label class="font-bold">分類：</label>
@@ -760,9 +865,9 @@
           const price = Number(document.getElementById('swal-item-price').value || 0);
           let cat = document.getElementById('swal-item-cat').value;
           if (cat === '__NEW__') {
-            cat = document.getElementById('swal-new-cat-val').value.trim() || '其他';
+            cat = document.getElementById('swal-new-cat-val').value.trim() || '其他服務';
           }
-          if (!name || price <= 0) return Swal.showValidationMessage('請輸入正確的名稱與金額！');
+          if (!name || price <= 0) return Swal.showValidationMessage('請輸入正確的品項名稱與金額！');
           return { name, price, category: cat };
         }
       });
@@ -833,7 +938,7 @@
         preConfirm: () => {
           const name = document.getElementById('swal-addon-name').value.trim();
           const price = Number(document.getElementById('swal-addon-price').value || 0);
-          if (!name || price <= 0) return Swal.showValidationMessage('請輸入正確的名稱與加價金額！');
+          if (!name || price <= 0) return Swal.showValidationMessage('請輸入正確的加購名稱與金額！');
           return { name, price };
         }
       });
@@ -848,16 +953,24 @@
       }
     }
 
-    async function saveStoreConfigToCloud() {
+    async function saveStoreConfigToCloud(isSilent = false) {
       currentStore.line_url = document.getElementById('admin-line-url').value.trim();
 
-      Swal.fire({
-        title: '正在儲存收銀配置...',
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading()
-      });
+      if (!isSilent) {
+        Swal.fire({
+          title: '正在同步儲存設定...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        });
+      }
 
       try {
+        await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?id=eq.${currentStore.id}`, {
+          method: "PATCH",
+          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ admin_pin: currentStore.admin_pin })
+        });
+
         await fetch(`${SUPABASE_URL}/rest/v1/tool_settings`, {
           method: "POST",
           headers: {
@@ -869,13 +982,14 @@
           body: JSON.stringify({
             store_id: currentStore.id,
             slot_config: { pos_config: posConfig },
+            store_pin: currentStore.admin_pin,
             updated_at: new Date().toISOString()
           })
         });
 
-        Swal.fire('收銀配置已成功儲存！', '', 'success');
+        if (!isSilent) Swal.fire('收銀配置已成功儲存！', '', 'success');
       } catch (e) {
-        Swal.fire('儲存失敗', e.message, 'error');
+        if (!isSilent) Swal.fire('儲存失敗', e.message, 'error');
       }
     }
 
@@ -916,7 +1030,7 @@
 
       pageInfo.innerText = `顯示第 ${startIndex + 1} - ${endIndex} 位（共 ${filteredClients.length} 位顧客）`;
 
-      container.innerHTML = paged.map((c, idx) => {
+      container.innerHTML = paged.map(c => {
         const orderHistoryHtml = c.orders.map(o => `
           <div class="flex justify-between items-center py-1 border-b border-brand-100/60 text-[10.5px]">
             <div>
@@ -943,9 +1057,9 @@
               </div>
             </div>
 
-            <!-- 可折疊之歷史明細 -->
+            <!-- 可折疊之歷次明細 -->
             <details class="text-xs pt-1 border-t border-brand-100">
-              <summary class="cursor-pointer text-brand-500 font-bold text-[10.5px] hover:text-brand-800 select-none">
+              <summary class="cursor-pointer text-[#8C7355] font-bold text-[10.5px] hover:underline select-none">
                 檢視歷次消費明細 (${c.orders.length} 筆)
               </summary>
               <div class="mt-2 p-2 bg-brand-50/60 rounded-xl space-y-1">
@@ -956,7 +1070,7 @@
         `;
       }).join('');
 
-      // 渲染分頁按鈕
+      // 分頁按鈕
       btnsContainer.innerHTML = `
         <button type="button" onclick="changeClientsPage(${clientsCurrentPage - 1})" ${clientsCurrentPage === 1 ? 'disabled class="opacity-30"' : ''} class="px-2 py-1 bg-white border border-brand-200 rounded text-[11px] font-bold">上一頁</button>
         <span class="px-2 py-1 font-mono font-bold text-brand-700">${clientsCurrentPage} / ${totalPages}</span>
@@ -987,32 +1101,22 @@
       document.body.removeChild(link);
     }
 
-    // 9. 今日營收流水帳渲染
+    // 9. 後台流水帳明細列表
     function renderLedgersList() {
       const container = document.getElementById('ledgers-list-container');
-      const revenueBadge = document.getElementById('today-revenue-badge');
-      const countBadge = document.getElementById('today-orders-count');
-
-      const todayStr = new Date().toISOString().slice(0, 10);
-      const todays = ledgerRecords.filter(r => r.created_at && r.created_at.startsWith(todayStr));
-
-      const totalRevenue = todays.reduce((sum, r) => sum + Number(r.total_price || 0), 0);
-      revenueBadge.innerText = `NT$ ${totalRevenue.toLocaleString()}`;
-      countBadge.innerText = `今日共 ${todays.length} 筆開單`;
-
-      if (todays.length === 0) {
-        container.innerHTML = '<div class="text-center py-6 text-brand-400">今日尚無開單結帳紀錄</div>';
+      if (ledgerRecords.length === 0) {
+        container.innerHTML = '<div class="text-center py-6 text-brand-400">目前尚無開單結帳紀錄</div>';
         return;
       }
 
-      container.innerHTML = todays.map(r => {
+      container.innerHTML = ledgerRecords.slice(0, 30).map(r => {
         let meta = {};
         try { meta = JSON.parse(r.items_summary); } catch (e) { meta = { items_text: r.items_summary }; }
-        const time = r.created_at ? r.created_at.substring(11, 16) : '';
+        const dateStr = r.created_at ? r.created_at.replace('T', ' ').substring(0, 16) : '';
         return `
-          <div class="p-3 bg-white rounded-xl border border-brand-200 flex justify-between items-center text-xs">
+          <div class="p-3 bg-white rounded-xl border border-brand-200 flex justify-between items-center text-xs shadow-2xs">
             <div>
-              <div class="font-bold text-brand-900">${r.client_name} <span class="font-mono text-gray-400 font-normal ml-1">(${time})</span></div>
+              <div class="font-bold text-brand-900">${r.client_name} <span class="font-mono text-gray-400 font-normal ml-1">(${dateStr})</span></div>
               <div class="text-[10.5px] text-brand-400">${meta.items_text || r.items_summary}</div>
             </div>
             <span class="font-mono font-bold text-[#8C7355] text-sm">NT$ ${Number(r.total_price || 0).toLocaleString()}</span>

@@ -329,9 +329,9 @@
     let ledgerRecords = [];
     let clientsDatabase = [];
 
-    // 當前開單暫存
-    let selectedMainItem = null;
-    let selectedAddonsList = [];
+    // 當前開單暫存：由單選改為陣列（支援複選）
+    let selectedItemsList = [];    // 主服務項目複選陣列
+    let selectedAddonsList = [];   // 加購項目複選陣列
 
     // 顧客小庫分頁
     let clientsCurrentPage = 1;
@@ -526,17 +526,18 @@
         if (catItems.length === 0) return '';
 
         const itemsHtml = catItems.map(item => {
-          const isSelected = selectedMainItem && selectedMainItem.id === item.id;
+          // 支援多選判定
+          const isSelected = selectedItemsList.some(i => i.id === item.id);
           return `
             <button type="button" onclick="selectMainItem('${item.id}')" class="p-3.5 rounded-2xl border text-left transition flex flex-col justify-between gap-2 shadow-2xs ${
               isSelected 
-                ? 'bg-[#8C7355] text-white border-[#8C7355] shadow-xs' 
+                ? 'bg-[#8C7355] text-white border-[#8C7355] shadow-xs ring-2 ring-[#8C7355]/30' 
                 : 'bg-brand-50/60 hover:bg-brand-100/60 border-brand-200 text-brand-900'
             }">
               <span class="font-bold text-xs leading-snug line-clamp-2">${item.name}</span>
               <div class="flex justify-between items-center pt-1 border-t ${isSelected ? 'border-white/20' : 'border-brand-200/60'}">
                 <span class="font-mono font-black text-xs ${isSelected ? 'text-amber-200' : 'text-[#8C7355]'}">NT$ ${item.price.toLocaleString()}</span>
-                <span class="text-[9.5px] font-bold ${isSelected ? 'text-white' : 'text-brand-400'}">${isSelected ? '✓ 已選取' : '點選'}</span>
+                <span class="text-[9.5px] font-bold ${isSelected ? 'text-white' : 'text-brand-400'}">${isSelected ? '✓ 已選取' : '+ 點選'}</span>
               </div>
             </button>
           `;
@@ -544,7 +545,6 @@
 
         return `
           <div class="space-y-2">
-            <!-- 分類微大字標題 -->
             <div class="flex items-center gap-2 border-b border-brand-100 pb-1 text-brand-900 font-black text-sm">
               <span class="w-1.5 h-3.5 bg-[#8C7355] rounded-full"></span>
               <span>${cat}</span>
@@ -559,7 +559,14 @@
 
     function selectMainItem(itemId) {
       const found = posConfig.items.find(i => i.id === itemId);
-      selectedMainItem = (selectedMainItem && selectedMainItem.id === itemId) ? null : found;
+      if (!found) return;
+
+      const idx = selectedItemsList.findIndex(i => i.id === itemId);
+      if (idx > -1) {
+        selectedItemsList.splice(idx, 1); // 再次點擊取消
+      } else {
+        selectedItemsList.push(found);    // 加入清單（複選）
+      }
 
       renderCategorizedItems();
       renderCartUI();
@@ -602,27 +609,30 @@
       const container = document.getElementById('cart-items-list');
       const badge = document.getElementById('cart-items-count-badge');
 
-      if (!selectedMainItem && selectedAddonsList.length === 0) {
+      const totalItemsCount = selectedItemsList.length + selectedAddonsList.length;
+      if (totalItemsCount === 0) {
         container.innerHTML = '<div class="text-center py-4 text-xs text-brand-400">尚未選取任何服務項目</div>';
         badge.innerText = '未選品項';
         return;
       }
 
-      badge.innerText = selectedMainItem ? selectedMainItem.name : '僅選加購';
+      badge.innerText = `已選 ${totalItemsCount} 項`;
 
       let html = '';
-      if (selectedMainItem) {
+      // 逐筆列出已選之主項目
+      selectedItemsList.forEach(item => {
         html += `
           <div class="flex justify-between items-center p-2.5 bg-brand-50 rounded-xl border border-brand-200 text-xs">
             <div>
-              <span class="font-bold text-brand-900">• ${selectedMainItem.name}</span>
-              <span class="text-[10px] text-brand-400 block">${selectedMainItem.category}</span>
+              <span class="font-bold text-brand-900">• ${item.name}</span>
+              <span class="text-[10px] text-brand-400 block">${item.category}</span>
             </div>
-            <span class="font-mono font-bold text-brand-700">NT$ ${selectedMainItem.price.toLocaleString()}</span>
+            <span class="font-mono font-bold text-brand-700">NT$ ${item.price.toLocaleString()}</span>
           </div>
         `;
-      }
+      });
 
+      // 逐筆列出加購項目
       selectedAddonsList.forEach(addon => {
         html += `
           <div class="flex justify-between items-center px-3 py-1.5 bg-white rounded-lg border border-brand-100 text-[11px]">
@@ -637,8 +647,8 @@
 
     function calculateTotal() {
       let subtotal = 0;
-      if (selectedMainItem) subtotal += selectedMainItem.price;
-      selectedAddonsList.forEach(a => subtotal += a.price);
+      selectedItemsList.forEach(i => subtotal += Number(i.price || 0));
+      selectedAddonsList.forEach(a => subtotal += Number(a.price || 0));
 
       const discount = Math.max(0, Number(document.getElementById('pos-discount-input').value || 0));
       const finalTotal = Math.max(0, subtotal - discount);
@@ -649,7 +659,7 @@
     }
 
     function clearCart() {
-      selectedMainItem = null;
+      selectedItemsList = [];
       selectedAddonsList = [];
       document.getElementById('pos-discount-input').value = 0;
       renderCategorizedItems();
@@ -659,20 +669,31 @@
     }
 
     // 5. 提交結帳：入庫 Supabase ＋ 自動覆寫更新顧客庫
+    // [工具標籤: pos.html 防重複扣款連點之安全結帳函式]
+    let isSubmittingCheckout = false;
+
     async function submitCheckout() {
+      if (isSubmittingCheckout) return;
+
       const phone = document.getElementById('pos-client-phone').value.trim();
       const name = document.getElementById('pos-client-name').value.trim();
       const line = document.getElementById('pos-client-line').value.trim();
 
-      if (!selectedMainItem) {
-        return Swal.fire('請先點選本次施作的主服務項目！', '', 'warning');
+      if (selectedItemsList.length === 0 && selectedAddonsList.length === 0) {
+        return Swal.fire('請先點選欲結帳的服務項目！', '', 'warning');
       }
       if (!phone || !name) {
         return Swal.fire('請完整填寫顧客手機與姓名！', '結帳資訊將自動歸戶入庫。', 'warning');
       }
 
+      isSubmittingCheckout = true;
+
       const { subtotal, discount, finalTotal } = calculateTotal();
-      const itemsSummaryText = `${selectedMainItem.name}` + (selectedAddonsList.length > 0 ? ` (+${selectedAddonsList.map(a=>a.name).join('、')})` : '');
+      
+      // 打包多個品項的摘要文字
+      const mainNames = selectedItemsList.map(i => i.name).join(' ＋ ');
+      const addonNames = selectedAddonsList.length > 0 ? ` (+${selectedAddonsList.map(a => a.name).join('、')})` : '';
+      const itemsSummaryText = (mainNames || '加購項目') + addonNames;
 
       Swal.fire({
         title: '正在建立結帳記錄...',
@@ -721,7 +742,6 @@
             confirmButtonColor: '#8C7355'
           });
 
-          // 重新載入流水帳與統計看板
           await loadCloudLedgers(currentStore.id);
           clearCart();
           document.getElementById('pos-client-phone').value = '';
@@ -734,6 +754,8 @@
         }
       } catch (err) {
         Swal.fire('入帳失敗', err.message, 'error');
+      } finally {
+        isSubmittingCheckout = false;
       }
     }
 

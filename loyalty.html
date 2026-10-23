@@ -49,7 +49,7 @@
     }
   </style>
 </head>
-<body class="bg-brand-50 text-brand-900 antialiased min-h-screen pb-28 selection:bg-brand-200">
+<body class="bg-brand-50 text-brand-900 antialiased min-h-screen pb-28 selection:bg-brand-200 select-none">
 
   <!-- 頂部沙龍導航 -->
   <header class="bg-white/95 backdrop-blur-md border-b border-brand-200 sticky top-0 z-30 px-4 py-3 shadow-2xs">
@@ -65,9 +65,9 @@
         <a id="header-line-link" href="#" target="_blank" class="p-2 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition" title="官方 LINE">
           <i class="fa-brands fa-line text-sm"></i>
         </a>
-        <button type="button" onclick="openStaffManagerPrompt()" class="px-3 py-1.5 bg-brand-100 hover:bg-brand-200 text-brand-800 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs">
-          <i class="fa-solid fa-stamp text-[#8C7355]"></i>
-          <span>店長核銷專區</span>
+        <button type="button" onclick="openStaffManagerPrompt()" class="px-3 py-1.5 bg-[#8C7355] hover:bg-[#7A6246] text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs">
+          <i class="fa-solid fa-stamp text-amber-200"></i>
+          <span>店長專區</span>
         </button>
       </div>
     </div>
@@ -84,7 +84,7 @@
         <span class="text-[10px] text-brand-400">免下載 APP · 手機號碼即會員</span>
       </div>
       <div class="flex gap-2">
-        <input type="tel" id="search-phone-input" maxlength="10" placeholder="請輸入手機號碼 (例: 0912345678)" class="flex-1 p-2.5 bg-brand-50/60 rounded-xl border border-brand-200 text-xs font-mono font-bold outline-none focus:border-brand-500">
+        <input type="tel" id="search-phone-input" maxlength="10" placeholder="請輸入手機號碼 (例: 0912345678)" onkeydown="if(event.key==='Enter') searchMemberProfile()" class="flex-1 p-2.5 bg-brand-50/60 rounded-xl border border-brand-200 text-xs font-mono font-bold outline-none focus:border-brand-500">
         <button type="button" onclick="searchMemberProfile()" class="px-5 py-2.5 bg-stone-900 hover:bg-black text-white text-xs font-bold rounded-xl transition shrink-0 shadow-xs">
           查詢存摺
         </button>
@@ -93,7 +93,7 @@
 
     <!-- 2. 原版灰黑底燙金尊榮 VIP 會員卡片展示 -->
     <section class="vip-card-bg rounded-3xl p-6 text-white relative overflow-hidden shadow-xl">
-      <!-- 背景幾何光澤裝飾 -->
+      <!-- 幾何光澤裝飾 -->
       <div class="absolute -right-12 -top-12 w-48 h-48 rounded-full bg-amber-500/10 blur-2xl pointer-events-none"></div>
       <div class="absolute -left-12 -bottom-12 w-48 h-48 rounded-full bg-amber-500/5 blur-2xl pointer-events-none"></div>
 
@@ -123,16 +123,16 @@
         </div>
       </div>
 
-      <!-- 儲值金與包卡即時數值面板 (兩欄精簡展示) -->
-      <div class="grid grid-cols-2 gap-3 relative z-10">
-        <div class="p-3 rounded-2xl bg-white/5 gold-border backdrop-blur-xs">
+      <!-- 儲值金與包卡即時數值面板 (依後台開關動態呈現) -->
+      <div class="grid grid-cols-2 gap-3 relative z-10" id="card-modules-summary-grid">
+        <div class="p-3 rounded-2xl bg-white/5 gold-border backdrop-blur-xs" id="card-box-deposit">
           <div class="text-[10px] text-amber-200/70 flex items-center gap-1 font-bold">
             <i class="fa-solid fa-wallet text-amber-400"></i> 會員儲值金餘額
           </div>
           <div class="text-xl font-black font-mono gold-gradient-text mt-1" id="card-deposit-balance">NT$ 0</div>
           <div class="text-[9.5px] text-stone-400 mt-0.5">帳號電話共用錢包</div>
         </div>
-        <div class="p-3 rounded-2xl bg-white/5 gold-border backdrop-blur-xs">
+        <div class="p-3 rounded-2xl bg-white/5 gold-border backdrop-blur-xs" id="card-box-package">
           <div class="text-[10px] text-amber-200/70 flex items-center gap-1 font-bold">
             <i class="fa-solid fa-ticket text-amber-400"></i> 專屬包卡套票剩餘
           </div>
@@ -142,28 +142,27 @@
       </div>
     </section>
 
-    <!-- 3. 數位印章集點卡盤面 (經典 10 格印花盤) -->
-    <section class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-4">
+    <!-- 3. 數位印章集點卡盤面 (依開關顯示/隱藏，集滿自動開立新卡) -->
+    <section id="section-stamp-module" class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-4">
       <div class="flex justify-between items-center pb-2 border-b border-brand-100">
         <div>
           <h2 class="text-xs font-black text-brand-900 flex items-center gap-1.5">
             <i class="fa-solid fa-stamp text-[#8C7355]"></i> 會員消費集點卡盤
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-brand-100 text-[#8C7355] font-normal" id="card-stamp-round-badge">第 1 張卡</span>
           </h2>
-          <p class="text-[10px] text-brand-400 mt-0.5">每消費滿額可集 1 點 · 集滿 10 點可折抵消費</p>
+          <p class="text-[10px] text-brand-400 mt-0.5">每消費滿額可集 1 點 · 集滿 10 點現場折抵並發放新卡</p>
         </div>
         <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200" id="stamp-progress-badge">0 / 10 點</span>
       </div>
 
-      <!-- 10 格印花網格 -->
-      <div class="grid grid-cols-5 gap-2.5 py-1" id="stamp-grid-container">
-        <!-- JS 動態生成 10 個印花格子 -->
-      </div>
+      <!-- 10 格印花盤 -->
+      <div class="grid grid-cols-5 gap-2.5 py-1" id="stamp-grid-container"></div>
 
       <!-- 滿額折抵兌換提示與按鈕 -->
       <div class="p-3 bg-brand-50 rounded-2xl border border-brand-100 flex justify-between items-center">
         <div>
           <span class="text-xs font-bold text-brand-900 block" id="stamp-reward-title">滿 10 點折抵 NT$ 300</span>
-          <span class="text-[10px] text-brand-400">核銷時請交由現場專員輸入 PIN 碼蓋章扣除</span>
+          <span class="text-[10px] text-brand-400">核銷折抵後，系統將自動為您開啟全新集點卡</span>
         </div>
         <button type="button" id="btn-redeem-reward" onclick="openStaffActionPrompt('redeem')" disabled class="px-4 py-2 bg-gray-200 text-gray-400 rounded-xl text-xs font-bold transition">
           兌換折抵
@@ -171,8 +170,8 @@
       </div>
     </section>
 
-    <!-- 4. 毛孩/單人專屬次數包卡專區 (落實禁止多隻共用) -->
-    <section class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3.5">
+    <!-- 4. 毛孩/個人專屬次數包卡專區 (依開關顯示/隱藏) -->
+    <section id="section-package-module" class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3.5">
       <div class="flex justify-between items-center pb-2 border-b border-brand-100">
         <div>
           <h2 class="text-xs font-black text-brand-900 flex items-center gap-1.5">
@@ -181,27 +180,28 @@
           <p class="text-[10px] text-brand-400 mt-0.5">為確保服務品質與毛況評估，包卡堂數嚴格綁定單一毛孩或指定貴賓</p>
         </div>
       </div>
-
       <div class="space-y-2.5" id="member-packages-container">
         <div class="text-center py-6 text-xs text-brand-400">輸入手機查詢後顯示持有之專屬包卡套票</div>
       </div>
     </section>
 
-    <!-- 5. 存摺往來異動歷史紀錄 (透明安心) -->
+    <!-- 5. 個人存摺往來與核銷紀錄 (透明公開展示) -->
     <section class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3">
       <div class="flex justify-between items-center pb-2 border-b border-brand-100">
-        <span class="text-xs font-bold text-brand-900">存摺往來與核銷紀錄</span>
-        <span class="text-[10px] text-brand-400">最近 5 筆紀錄</span>
+        <span class="text-xs font-bold text-brand-900 flex items-center gap-1.5">
+          <i class="fa-solid fa-receipt text-[#8C7355]"></i> 本人存摺往來與核銷完整紀錄
+        </span>
+        <span class="text-[10px] text-brand-400 font-mono" id="client-logs-count">0 筆紀錄</span>
       </div>
       <div class="space-y-2 text-xs" id="member-logs-container">
-        <div class="text-center py-4 text-brand-400">目前尚無存摺異動明細</div>
+        <div class="text-center py-6 text-brand-400">請先輸入手機號碼查詢個人 VIP 存摺紀錄</div>
       </div>
     </section>
 
   </main>
 
   <!-- ========================================================================= -->
-  <!-- 店長核銷專區模態面板 (PIN 碼驗證後開啟：蓋章、儲值金扣款、包卡劃卡、顧客小庫) -->
+  <!-- 店長專區：功能開關 ＆ PIN碼眼睛顯隱 ＆ 現場核銷 ＆ 會員履歷庫 -->
   <!-- ========================================================================= -->
   <div id="manager-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
     <div class="bg-white w-full sm:max-w-2xl max-h-[92vh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
@@ -213,8 +213,8 @@
             <i class="fa-solid fa-stamp"></i>
           </div>
           <div>
-            <div class="text-xs font-bold text-brand-900">店長操作中心 · 點數蓋章與權益核銷</div>
-            <div class="text-[10px] text-brand-400">儲值金儲扣 · 毛孩專屬劃卡 · 顧客小庫</div>
+            <div class="text-xs font-bold text-brand-900">店長操作中心 · 會員存摺配置與顧客小庫</div>
+            <div class="text-[10px] text-brand-400">開關控制 · 密碼眼睛顯隱 · 儲扣劃卡 · 全員履歷庫</div>
           </div>
         </div>
         <button type="button" onclick="closeManagerModal()" class="w-8 h-8 rounded-full bg-white border border-brand-200 text-brand-400 hover:text-brand-900 flex items-center justify-center">
@@ -227,21 +227,24 @@
         <button type="button" onclick="switchManagerTab('mgr-tab-action', this)" class="mgr-subtab-btn py-3 px-4 border-b-2 border-[#8C7355] text-[#8C7355]">
           現場核銷與蓋章
         </button>
+        <button type="button" onclick="switchManagerTab('mgr-tab-config', this)" class="mgr-subtab-btn py-3 px-4 text-brand-400 hover:text-brand-700">
+          功能開關與密碼設定
+        </button>
         <button type="button" onclick="switchManagerTab('mgr-tab-clients', this)" class="mgr-subtab-btn py-3 px-4 text-brand-400 hover:text-brand-700">
-          全體 VIP 顧客履歷小庫
+          全體會員履歷小庫
         </button>
       </div>
 
-      <!-- 滾動內容 -->
+      <!-- 滾動內容區域 -->
       <div class="p-5 overflow-y-auto space-y-4 text-xs">
 
-        <!-- [子分頁 1] 現場操作：集點蓋章、儲值扣款/加值、包卡劃卡 -->
+        <!-- [分頁 1] 現場操作：集點蓋章、儲值扣款/加值、包卡劃卡 -->
         <div id="mgr-tab-action" class="mgr-tab-pane space-y-4">
           <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 space-y-2">
             <span class="font-bold text-brand-900 block">目前操作對象：</span>
             <div class="flex justify-between items-center text-sm font-bold">
-              <span id="mgr-target-name">未選定顧客 (請先在首頁搜尋電話)</span>
-              <span class="font-mono text-brand-600" id="mgr-target-phone">09xxxxxxxx</span>
+              <span id="mgr-target-name">示範貴賓</span>
+              <span class="font-mono text-brand-600" id="mgr-target-phone">0912345678</span>
             </div>
           </div>
 
@@ -257,7 +260,7 @@
             </button>
             <button type="button" onclick="executeStaffAction('use_package')" class="p-4 bg-blue-50 hover:bg-blue-100 text-blue-950 border border-blue-300 rounded-2xl font-bold flex flex-col items-center justify-center gap-1.5 shadow-2xs">
               <i class="fa-solid fa-ticket text-blue-600 text-xl"></i>
-              <span>專屬包卡使用劃卡 -1</span>
+              <span>專屬包卡劃卡 -1 堂</span>
             </button>
             <button type="button" onclick="executeStaffAction('add_deposit')" class="p-4 bg-brand-50 hover:bg-brand-100 text-brand-900 border border-brand-300 rounded-2xl font-bold flex flex-col items-center justify-center gap-1.5 shadow-2xs">
               <i class="fa-solid fa-wallet text-[#8C7355] text-xl"></i>
@@ -267,19 +270,76 @@
 
           <!-- 新增專屬包卡給當前顧客 -->
           <div class="pt-3 border-t border-brand-100 space-y-2">
-            <span class="font-bold text-brand-900 block">新開專屬包卡套票（嚴格指定單一毛孩或貴賓）：</span>
+            <span class="font-bold text-brand-900 block">為當前顧客新開專屬包卡（嚴格綁定單一毛孩或個人）：</span>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <input type="text" id="new-pkg-name" placeholder="包卡方案名稱 (例: 深層SPA 5堂)" class="p-2 border rounded-xl bg-brand-50/50">
-              <input type="text" id="new-pkg-pet" placeholder="綁定毛孩/專屬客人姓名 *" class="p-2 border rounded-xl bg-brand-50/50 font-bold">
-              <input type="number" id="new-pkg-times" placeholder="總次數 (例: 5)" value="5" class="p-2 border rounded-xl bg-brand-50/50 font-mono">
+              <input type="text" id="new-pkg-name" placeholder="包卡名稱 (例: 深層SPA 5堂)" class="p-2 border rounded-xl bg-brand-50/50">
+              <input type="text" id="new-pkg-pet" placeholder="綁定毛孩/專人姓名 *" class="p-2 border rounded-xl bg-brand-50/50 font-bold">
+              <input type="number" id="new-pkg-times" placeholder="總次數" value="5" class="p-2 border rounded-xl bg-brand-50/50 font-mono">
             </div>
-            <button type="button" onclick="createPackageForCurrentClient()" class="w-full py-2.5 bg-[#8C7355] text-white rounded-xl font-bold hover:bg-[#7A6246] transition">
+            <button type="button" onclick="createPackageForCurrentClient()" class="w-full py-2.5 bg-[#8C7355] text-white rounded-xl font-bold hover:bg-[#7A6246] transition shadow-xs">
               確認建立並綁定專屬包卡
             </button>
           </div>
         </div>
 
-        <!-- [子分頁 2] 顧客履歷小庫 (10筆一頁分頁 + 搜尋) -->
+        <!-- [分頁 2] 功能開關控制 ＆ PIN 碼眼睛顯隱設定 -->
+        <div id="mgr-tab-config" class="mgr-tab-pane space-y-4 hidden">
+          <!-- 功能開關控制 (集點 / 儲值 / 包卡) -->
+          <div class="p-4 bg-brand-50 rounded-2xl border border-brand-200 space-y-3">
+            <span class="font-bold text-brand-900 block border-b border-brand-200 pb-1.5">
+              <i class="fa-solid fa-toggle-on text-[#8C7355] mr-1"></i> 前台功能模組顯示開關 (開啟才於前台呈現)
+            </span>
+            <div class="space-y-2.5">
+              <label class="flex justify-between items-center p-2.5 bg-white rounded-xl border border-brand-200 cursor-pointer">
+                <div>
+                  <span class="font-bold text-brand-900 block">數位印章集點卡盤面</span>
+                  <span class="text-[10px] text-brand-400">滿 10 點折抵，集滿自動開立新卡</span>
+                </div>
+                <input type="checkbox" id="cfg-switch-stamp" checked class="w-5 h-5 accent-[#8C7355] cursor-pointer">
+              </label>
+
+              <label class="flex justify-between items-center p-2.5 bg-white rounded-xl border border-brand-200 cursor-pointer">
+                <div>
+                  <span class="font-bold text-brand-900 block">會員儲值金錢包</span>
+                  <span class="text-[10px] text-brand-400">依顧客電話共用餘額與現場折抵</span>
+                </div>
+                <input type="checkbox" id="cfg-switch-deposit" checked class="w-5 h-5 accent-[#8C7355] cursor-pointer">
+              </label>
+
+              <label class="flex justify-between items-center p-2.5 bg-white rounded-xl border border-brand-200 cursor-pointer">
+                <div>
+                  <span class="font-bold text-brand-900 block">專屬次數包卡方案</span>
+                  <span class="text-[10px] text-brand-400">單一毛孩或指定個人專屬套票</span>
+                </div>
+                <input type="checkbox" id="cfg-switch-package" checked class="w-5 h-5 accent-[#8C7355] cursor-pointer">
+              </label>
+            </div>
+          </div>
+
+          <!-- PIN 碼管理與眼睛顯隱 -->
+          <div class="p-4 bg-brand-50 rounded-2xl border border-brand-200 space-y-3">
+            <span class="font-bold text-brand-900 block border-b border-brand-200 pb-1.5">
+              <i class="fa-solid fa-key text-[#8C7355] mr-1"></i> 店長管理 PIN 碼安全設定
+            </span>
+            <div class="flex items-center gap-2">
+              <div class="relative flex-1">
+                <input type="password" id="cfg-manager-pin-input" value="8888" maxlength="8" class="w-full p-2.5 pr-10 bg-white rounded-xl border border-brand-200 font-mono font-bold text-sm tracking-widest outline-none">
+                <button type="button" onclick="togglePinVisibility()" class="absolute right-3 top-3 text-brand-400 hover:text-brand-900">
+                  <i class="fa-solid fa-eye" id="pin-eye-icon"></i>
+                </button>
+              </div>
+              <button type="button" onclick="saveNewPinCode()" class="px-4 py-2.5 bg-[#8C7355] text-white rounded-xl font-bold shrink-0 shadow-xs">
+                更新密碼
+              </button>
+            </div>
+          </div>
+
+          <button type="button" onclick="saveLoyaltySettingsToCloud()" class="w-full py-3 bg-stone-900 hover:bg-black text-white font-bold rounded-xl text-xs transition shadow-md">
+            儲存所有模組開關設定
+          </button>
+        </div>
+
+        <!-- [分頁 3] 全體會員履歷小庫 (10筆分頁 ＋ 搜尋 ＋ 歷程展開) -->
         <div id="mgr-tab-clients" class="mgr-tab-pane space-y-3 hidden">
           <div class="flex gap-2">
             <input type="text" id="mgr-client-search" oninput="filterLoyaltyClients()" placeholder="輸入電話、顧客姓名或毛孩名稱搜尋..." class="flex-1 p-2.5 bg-brand-50 rounded-xl border border-brand-200 text-xs outline-none focus:border-brand-500">
@@ -288,11 +348,9 @@
             </button>
           </div>
 
-          <div class="space-y-2.5" id="loyalty-clients-table">
-            <!-- JS 動態生成顧客卡片 -->
-          </div>
+          <div class="space-y-2.5" id="loyalty-clients-table"></div>
 
-          <!-- 分頁器 -->
+          <!-- 10筆分頁列 -->
           <div class="flex justify-between items-center pt-2 border-t border-brand-100 text-[11px]">
             <span class="text-brand-500" id="mgr-clients-page-info">第 1 / 1 頁</span>
             <div class="flex gap-1" id="mgr-clients-page-btns"></div>
@@ -314,17 +372,25 @@
       line_url: "https://line.me/R/ti/p/@480kqjoj"
     };
 
-    // 會員存摺全體資料庫 (儲存在 localStorage 與 Supabase 同步)
+    // 模組開關與全域設定模型
+    let loyaltyConfig = {
+      enableStamp: true,
+      enableDeposit: true,
+      enablePackage: true,
+      pin: "8888",
+      rewardAmount: 300
+    };
+
     let loyaltyDb = JSON.parse(localStorage.getItem('loyalty_members_db') || '{}');
 
-    // 當前檢視的顧客資料模型
+    // 當前檢視的顧客資料模型 (支援卡片輪數 rounds)
     let activeClient = {
       phone: "0912345678",
       name: "示範貴賓",
       line: "May",
       stamps: 3,
+      rounds: 1, // 已開立第幾張集點卡
       depositBalance: 2500,
-      // 包卡嚴格綁定毛孩/專屬名字 [{ id, name, petName, remain, total }]
       packages: [
         { id: "pkg-1", name: "草本精油洗護 5堂", petName: "波比 (柴犬)", remain: 4, total: 5 }
       ],
@@ -335,7 +401,6 @@
       ]
     };
 
-    // 顧客小庫分頁變數
     let clientsCurrentPage = 1;
     const PAGE_SIZE = 10;
     let filteredList = [];
@@ -343,15 +408,15 @@
     window.addEventListener('DOMContentLoaded', async () => {
       await loadStoreByUrlParams();
       initDemoClientIfEmpty();
+      applyModuleSwitchesToUI();
       renderActiveClientProfile();
       updateFilteredClients();
     });
 
-    // 1. 解析短網址與店家資料
+    // 1. 雙軌讀取店家設定
     async function loadStoreByUrlParams() {
       const urlParams = new URLSearchParams(window.location.search);
       const storeParam = urlParams.get('s') || urlParams.get('store') || urlParams.get('store_id');
-
       if (!storeParam) return;
 
       const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(storeParam);
@@ -370,14 +435,46 @@
           document.getElementById('card-store-display').innerText = currentStore.store_name.toUpperCase();
           document.getElementById('header-line-link').href = currentStore.line_url || "https://line.me/R/ti/p/@480kqjoj";
 
-          // 載入該店 PIN 碼
           if (currentStore.admin_pin) {
             currentStore.admin_pin = String(currentStore.admin_pin).trim();
+            loyaltyConfig.pin = currentStore.admin_pin;
           }
+          document.getElementById('cfg-manager-pin-input').value = loyaltyConfig.pin;
+
+          await loadCloudLoyaltySettings(currentStore.id);
         }
       } catch (err) {
         console.warn("載入雲端設定異常:", err);
       }
+    }
+
+    async function loadCloudLoyaltySettings(storeId) {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_settings?store_id=eq.${storeId}&select=*`, {
+          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` }
+        });
+        const data = await res.json();
+        if (data && data.length > 0 && data[0].slot_config && data[0].slot_config.loyalty_config) {
+          loyaltyConfig = Object.assign(loyaltyConfig, data[0].slot_config.loyalty_config);
+          applyModuleSwitchesToUI();
+        }
+      } catch (e) {
+        console.error("載入會員設定失敗:", e);
+      }
+    }
+
+    function applyModuleSwitchesToUI() {
+      // 依開關控制前台各功能展示/隱藏
+      document.getElementById('section-stamp-module').classList.toggle('hidden', !loyaltyConfig.enableStamp);
+      document.getElementById('card-box-deposit').classList.toggle('hidden', !loyaltyConfig.enableDeposit);
+      document.getElementById('card-box-package').classList.toggle('hidden', !loyaltyConfig.enablePackage);
+      document.getElementById('section-package-module').classList.toggle('hidden', !loyaltyConfig.enablePackage);
+
+      // 同步後台開關核取狀態
+      document.getElementById('cfg-switch-stamp').checked = loyaltyConfig.enableStamp;
+      document.getElementById('cfg-switch-deposit').checked = loyaltyConfig.enableDeposit;
+      document.getElementById('cfg-switch-package').checked = loyaltyConfig.enablePackage;
+      document.getElementById('cfg-manager-pin-input').value = loyaltyConfig.pin;
     }
 
     function initDemoClientIfEmpty() {
@@ -399,10 +496,9 @@
         renderActiveClientProfile();
         Swal.fire({ title: `歡迎貴賓 ${activeClient.name}！`, text: '已為您帶出會員存摺權益', icon: 'success', timer: 1000, showConfirmButton: false });
       } else {
-        // 全新貴賓建檔引導
         Swal.fire({
           title: '查無此會員手機，是否立即建立存摺？',
-          text: '首次建檔即可享有消費集點與貴賓權益！',
+          text: '首次建檔即可享有貴賓專屬權益！',
           html: `
             <div class="text-left text-xs space-y-2 p-1">
               <div><label class="font-bold">貴賓姓名 *：</label><input id="swal-new-name" class="swal2-input text-xs" placeholder="例: 王小美"></div>
@@ -424,9 +520,10 @@
               name: r.value.name,
               line: r.value.line,
               stamps: 0,
+              rounds: 1,
               depositBalance: 0,
               packages: [],
-              logs: [{ time: formatNowTime(), action: "新會員開卡", detail: "開立數位會員存摺" }]
+              logs: [{ time: formatNowTime(), action: "新會員開卡", detail: "開立數位會員存摺 (第 1 張卡)" }]
             };
             loyaltyDb[phone] = activeClient;
             saveLoyaltyDb();
@@ -440,33 +537,31 @@
 
     // 3. 渲染主卡面、集點盤面、專屬包卡與異動紀錄
     function renderActiveClientProfile() {
-      // 黑金卡面
       document.getElementById('card-cust-name').innerHTML = `<span>${activeClient.name}</span><span class="text-[10px] font-normal px-2 py-0.5 rounded-full bg-white/10 text-stone-300 font-mono">${activeClient.phone}</span>`;
       document.getElementById('card-deposit-balance').innerText = `NT$ ${Number(activeClient.depositBalance || 0).toLocaleString()}`;
       
       const totalPkgRemain = (activeClient.packages || []).reduce((sum, p) => sum + Number(p.remain || 0), 0);
       document.getElementById('card-package-remain').innerHTML = `${totalPkgRemain} <span class="text-xs font-sans text-stone-300">堂</span>`;
 
-      // 集點盤 (10 格)
       renderStampGrid();
-
-      // 專屬包卡清單
       renderPackagesList();
-
-      // 往來異動歷史
       renderLogsList();
 
-      // 同步更新管理中心顯示
       document.getElementById('mgr-target-name').innerText = activeClient.name;
       document.getElementById('mgr-target-phone').innerText = activeClient.phone;
     }
 
+    // 渲染 10 格印花盤 (集滿解鎖兌換)
     function renderStampGrid() {
       const container = document.getElementById('stamp-grid-container');
       const badge = document.getElementById('stamp-progress-badge');
       const redeemBtn = document.getElementById('btn-redeem-reward');
-      const currentStamps = activeClient.stamps || 0;
+      const roundBadge = document.getElementById('card-stamp-round-badge');
 
+      const currentStamps = activeClient.stamps || 0;
+      const currentRounds = activeClient.rounds || 1;
+
+      roundBadge.innerText = `第 ${currentRounds} 張卡`;
       badge.innerText = `${currentStamps} / 10 點`;
 
       let html = '';
@@ -485,7 +580,6 @@
       }
       container.innerHTML = html;
 
-      // 滿 10 點解鎖折抵按鈕
       if (currentStamps >= 10) {
         redeemBtn.disabled = false;
         redeemBtn.className = "px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-700 text-stone-950 rounded-xl text-xs font-black shadow-md transition animate-bounce cursor-pointer";
@@ -510,7 +604,7 @@
             <div class="font-bold text-xs text-brand-900">${p.name}</div>
             <div class="text-[10.5px] text-amber-800 font-bold mt-0.5 flex items-center gap-1">
               <i class="fa-solid fa-shield-cat text-amber-600"></i>
-              <span>專屬綁定：<b>${p.petName || '專人專屬'}</b>（禁止多隻毛孩共用）</span>
+              <span>專屬綁定：<b>${p.petName || '專人專用'}</b>（禁止多隻毛孩共用）</span>
             </div>
           </div>
           <div class="text-right shrink-0">
@@ -521,27 +615,29 @@
       `).join('');
     }
 
+    // 前台個人存摺往來完整紀錄
     function renderLogsList() {
       const container = document.getElementById('member-logs-container');
-      const logs = (activeClient.logs || []).slice(0, 5);
+      const logs = activeClient.logs || [];
+      document.getElementById('client-logs-count').innerText = `${logs.length} 筆紀錄`;
 
       if (logs.length === 0) {
-        container.innerHTML = '<div class="text-center py-4 text-brand-400">目前尚無存摺異動明細</div>';
+        container.innerHTML = '<div class="text-center py-6 text-brand-400">目前尚無存摺往來與核銷明細</div>';
         return;
       }
 
       container.innerHTML = logs.map(l => `
-        <div class="flex justify-between items-center py-1.5 border-b border-brand-100 last:border-none">
+        <div class="flex justify-between items-center py-2 border-b border-brand-100 last:border-none">
           <div>
-            <span class="font-bold text-brand-900">${l.action}</span>
-            <span class="text-[10px] text-gray-400 font-mono ml-2">${l.time}</span>
+            <span class="font-bold text-brand-900 block">${l.action}</span>
+            <span class="text-[10px] text-gray-400 font-mono">${l.time}</span>
           </div>
-          <span class="font-mono font-bold text-brand-700">${l.detail}</span>
+          <span class="font-mono font-bold text-[#8C7355] text-right">${l.detail}</span>
         </div>
       `).join('');
     }
 
-    // 4. 店長安全驗證與模態視窗
+    // 4. 店長安全驗證與眼睛顯隱
     async function openStaffManagerPrompt() {
       const { value: pin } = await Swal.fire({
         title: '店長安全驗證',
@@ -553,7 +649,7 @@
         confirmButtonColor: '#8C7355'
       });
 
-      if (pin === currentStore.admin_pin || pin === "8888" || pin === "888") {
+      if (pin === (loyaltyConfig.pin || "8888") || pin === "8888" || pin === "888") {
         document.getElementById('manager-modal').classList.remove('hidden');
         renderActiveClientProfile();
         renderLoyaltyClientsTable();
@@ -564,6 +660,7 @@
 
     function closeManagerModal() {
       document.getElementById('manager-modal').classList.add('hidden');
+      applyModuleSwitchesToUI();
       renderActiveClientProfile();
     }
 
@@ -576,10 +673,34 @@
       btn.className = "mgr-subtab-btn py-3 px-4 border-b-2 border-[#8C7355] text-[#8C7355]";
     }
 
-    // 5. 現場店長核銷操作
+    // 密碼眼睛圖示切換
+    function togglePinVisibility() {
+      const input = document.getElementById('cfg-manager-pin-input');
+      const icon = document.getElementById('pin-eye-icon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fa-solid fa-eye-slash text-brand-700';
+      } else {
+        input.type = 'password';
+        icon.className = 'fa-solid fa-eye text-brand-400';
+      }
+    }
+
+    async function saveNewPinCode() {
+      const newPin = document.getElementById('cfg-manager-pin-input').value.trim();
+      if (!newPin || newPin.length < 4) {
+        return Swal.fire('密碼長度至少需 4 碼！', '', 'warning');
+      }
+      loyaltyConfig.pin = newPin;
+      currentStore.admin_pin = newPin;
+      await saveLoyaltySettingsToCloud(true);
+      Swal.fire('PIN 碼修改成功！', `已同步更新至雲端：${newPin}`, 'success');
+    }
+
+    // 5. 現場店長核銷操作 (滿 10 點核銷後「自動開立新卡」)
     async function executeStaffAction(actionType) {
       if (actionType === 'add_stamp') {
-        activeClient.stamps = Math.min(10, (activeClient.stamps || 0) + 1);
+        activeClient.stamps = (activeClient.stamps || 0) + 1;
         activeClient.logs.unshift({ time: formatNowTime(), action: "消費蓋章", detail: `累積至 ${activeClient.stamps} 點` });
         Swal.fire('蓋章成功！', `目前點數：${activeClient.stamps} 點`, 'success');
       } 
@@ -605,7 +726,7 @@
         const { value: amt } = await Swal.fire({
           title: '儲值金儲入加值',
           input: 'number',
-          inputPlaceholder: '請輸入儲值金本金或贈額',
+          inputPlaceholder: '請輸入儲值金金額',
           showCancelButton: true,
           confirmButtonText: '確定加值',
           confirmButtonColor: '#8C7355'
@@ -649,25 +770,37 @@
       updateFilteredClients();
     }
 
-    // 顧客端一鍵兌換滿 10 點
+    // 顧客端滿 10 點兌換 (折抵完自動發放新卡)
     async function openStaffActionPrompt(type) {
       if (type === 'redeem') {
         const { value: pin } = await Swal.fire({
           title: '滿 10 點折抵核銷',
-          text: '請現場美療師或店長輸入 PIN 碼完成折抵',
+          text: '請現場專員輸入 PIN 碼完成折抵，系統將自動開立新卡',
           input: 'password',
           showCancelButton: true,
-          confirmButtonText: '確定折抵',
+          confirmButtonText: '確定折抵並發放新卡',
           confirmButtonColor: '#8C7355'
         });
 
-        if (pin === currentStore.admin_pin || pin === "8888" || pin === "888") {
+        if (pin === (loyaltyConfig.pin || "8888") || pin === "8888" || pin === "888") {
           activeClient.stamps -= 10;
-          activeClient.logs.unshift({ time: formatNowTime(), action: "滿點折抵", detail: "滿10點折抵 $300" });
+          activeClient.rounds = (activeClient.rounds || 1) + 1;
+          activeClient.logs.unshift({ 
+            time: formatNowTime(), 
+            action: "滿點折抵與新卡發放", 
+            detail: `折抵 $300 ｜ 已開啟第 ${activeClient.rounds} 張新集點卡` 
+          });
+
           saveLoyaltyDb();
           renderActiveClientProfile();
           updateFilteredClients();
-          Swal.fire('折抵核銷成功！', '已自集點卡扣除 10 點。', 'success');
+
+          Swal.fire({
+            title: '核銷成功！已自動發放新卡',
+            text: `已折抵 NT$ 300 元，並為 ${activeClient.name} 開啟第 ${activeClient.rounds} 張全新集點卡！`,
+            icon: 'success',
+            confirmButtonColor: '#8C7355'
+          });
         } else if (pin) {
           Swal.fire('PIN 碼錯誤！', '', 'error');
         }
@@ -681,7 +814,7 @@
       const times = Number(document.getElementById('new-pkg-times').value || 5);
 
       if (!name || !pet) {
-        return Swal.fire('請完整填寫包卡名稱與指定毛孩/專人姓名！', '包卡嚴格禁止跨毛孩共用。', 'warning');
+        return Swal.fire('請完整填寫包卡名稱與指定毛孩/個人姓名！', '包卡嚴格禁止跨毛孩共用。', 'warning');
       }
 
       if (!activeClient.packages) activeClient.packages = [];
@@ -703,7 +836,7 @@
       Swal.fire('專屬包卡建立成功！', `已綁定至 ${pet}`, 'success');
     }
 
-    // 6. 全體 VIP 顧客履歷小庫 (10 筆一頁分頁)
+    // 6. 全體 VIP 顧客履歷小庫 (10 筆一頁分頁 + 搜尋 + 歷程展開)
     function updateFilteredClients() {
       filteredList = Object.values(loyaltyDb);
       renderLoyaltyClientsTable();
@@ -745,20 +878,38 @@
 
       pageInfo.innerText = `顯示第 ${start + 1} - ${end} 位（共 ${filteredList.length} 位會員）`;
 
-      container.innerHTML = paged.map(c => `
-        <div class="p-3 bg-white rounded-2xl border border-brand-200 flex justify-between items-center gap-2 shadow-2xs">
-          <div>
-            <div class="font-bold text-brand-900">${c.name} <span class="font-mono text-gray-400 text-xs ml-1 font-normal">${c.phone}</span></div>
-            <div class="text-[10.5px] text-brand-500 mt-0.5">
-              點數: <b>${c.stamps || 0}</b> 點 ｜ 儲值金: <b>NT$ ${(c.depositBalance || 0).toLocaleString()}</b> ｜ 
-              專屬包卡: <b>${(c.packages || []).length}</b> 套
+      container.innerHTML = paged.map(c => {
+        const pkgDetails = (c.packages || []).map(p => `• ${p.petName}: ${p.name} (剩 ${p.remain}/${p.total} 堂)`).join('<br>');
+        const logDetails = (c.logs || []).slice(0, 3).map(l => `${l.time} - ${l.action}: ${l.detail}`).join('<br>');
+
+        return `
+          <div class="p-3 bg-white rounded-2xl border border-brand-200 shadow-2xs space-y-2">
+            <div class="flex justify-between items-start">
+              <div>
+                <div class="font-bold text-brand-900">${c.name} <span class="font-mono text-gray-400 text-xs ml-1 font-normal">${c.phone}</span></div>
+                <div class="text-[10.5px] text-brand-500 mt-0.5">
+                  點數: <b>${c.stamps || 0}</b> 點 (第 ${c.rounds || 1} 張) ｜ 儲值金: <b>NT$ ${(c.depositBalance || 0).toLocaleString()}</b> ｜ 
+                  包卡: <b>${(c.packages || []).length}</b> 套
+                </div>
+              </div>
+              <button type="button" onclick="selectClientToManage('${c.phone}')" class="px-3 py-1.5 bg-[#8C7355] text-white rounded-xl text-xs font-bold hover:bg-[#7A6246] transition shrink-0">
+                選取操作
+              </button>
             </div>
+
+            <!-- 可展開之會員詳細履歷 -->
+            <details class="text-[11px] pt-1 border-t border-brand-100">
+              <summary class="cursor-pointer text-[#8C7355] font-bold hover:underline select-none">
+                檢視此會員專屬包卡與最近往來
+              </summary>
+              <div class="mt-2 p-2.5 bg-brand-50 rounded-xl space-y-1.5 leading-relaxed">
+                <div><b>持有專屬包卡：</b><br>${pkgDetails || '無持有效包卡'}</div>
+                <div class="pt-1 border-t border-brand-200/60"><b>最近往來存摺紀錄：</b><br>${logDetails || '無紀錄'}</div>
+              </div>
+            </details>
           </div>
-          <button type="button" onclick="selectClientToManage('${c.phone}')" class="px-3 py-1.5 bg-[#8C7355] text-white rounded-xl text-xs font-bold hover:bg-[#7A6246] transition shrink-0">
-            選取操作
-          </button>
-        </div>
-      `).join('');
+        `;
+      }).join('');
 
       btns.innerHTML = `
         <button type="button" onclick="changeMgrPage(${clientsCurrentPage - 1})" ${clientsCurrentPage === 1 ? 'disabled class="opacity-30"' : ''} class="px-2 py-1 bg-white border rounded text-[11px] font-bold">上一頁</button>
@@ -786,11 +937,11 @@
       if (list.length === 0) return Swal.fire('尚無名冊可匯出', '', 'info');
 
       let csv = "data:text/csv;charset=utf-8,\uFEFF";
-      csv += "會員電話,會員姓名,LINE名稱,現有點數,儲值金餘額,專屬包卡明細\n";
+      csv += "會員電話,會員姓名,LINE名稱,現有點數,開卡輪次,儲值金餘額,專屬包卡明細\n";
 
       list.forEach(c => {
         const pkgStr = (c.packages || []).map(p => `${p.petName}:${p.name}(剩${p.remain})`).join(';');
-        csv += `"${c.phone}","${c.name}","${c.line || ''}",${c.stamps || 0},${c.depositBalance || 0},"${pkgStr}"\n`;
+        csv += `"${c.phone}","${c.name}","${c.line || ''}",${c.stamps || 0},${c.rounds || 1},${c.depositBalance || 0},"${pkgStr}"\n`;
       });
 
       const uri = encodeURI(csv);
@@ -800,6 +951,50 @@
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+    }
+
+    // 7. 儲存設定至 Supabase 雲端
+    async function saveLoyaltySettingsToCloud(isSilent = false) {
+      loyaltyConfig.enableStamp = document.getElementById('cfg-switch-stamp').checked;
+      loyaltyConfig.enableDeposit = document.getElementById('cfg-switch-deposit').checked;
+      loyaltyConfig.enablePackage = document.getElementById('cfg-switch-package').checked;
+
+      if (!isSilent) {
+        Swal.fire({
+          title: '正在同步儲存設定至雲端...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        });
+      }
+
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?id=eq.${currentStore.id}`, {
+          method: "PATCH",
+          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ admin_pin: currentStore.admin_pin })
+        });
+
+        await fetch(`${SUPABASE_URL}/rest/v1/tool_settings`, {
+          method: "POST",
+          headers: {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json",
+            "Prefer": "resolution=merge-duplicates"
+          },
+          body: JSON.stringify({
+            store_id: currentStore.id,
+            slot_config: { loyalty_config: loyaltyConfig },
+            store_pin: currentStore.admin_pin,
+            updated_at: new Date().toISOString()
+          })
+        });
+
+        applyModuleSwitchesToUI();
+        if (!isSilent) Swal.fire('功能開關設定已儲存！', '前台已同步生效', 'success');
+      } catch (e) {
+        if (!isSilent) Swal.fire('儲存失敗', e.message, 'error');
+      }
     }
 
     function saveLoyaltyDb() {

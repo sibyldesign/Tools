@@ -490,6 +490,57 @@
         <a id="btn-link-overview" href="overview.html" target="_blank" class="px-3 py-1 bg-brand-100 text-brand-800 rounded-lg font-bold text-[11px]">開啟排程總覽 ➔</a>
       </div>
 
+      <!-- [新增] 營業時段、時間間隔與每週固定公休日 -->
+      <div class="p-3.5 bg-brand-50 rounded-2xl border space-y-3">
+        <span class="font-bold text-brand-900 block border-b border-brand-200 pb-1.5">
+          <i class="fa-solid fa-clock text-[#8C7355] mr-1"></i> 營業時段、時間間隔與前台框格設定：
+        </span>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          <div>
+            <label class="block font-bold mb-1 text-[10.5px]">開始營業時間：</label>
+            <input type="time" id="overview-cfg-start" value="09:00" class="w-full p-2 bg-white rounded-xl border border-brand-200 font-mono font-bold text-xs" onchange="markUnsaved()">
+          </div>
+          <div>
+            <label class="block font-bold mb-1 text-[10.5px]">結束營業時間：</label>
+            <input type="time" id="overview-cfg-end" value="21:00" class="w-full p-2 bg-white rounded-xl border border-brand-200 font-mono font-bold text-xs" onchange="markUnsaved()">
+          </div>
+          <div>
+            <label class="block font-bold mb-1 text-[10.5px]">時間框格間隔：</label>
+            <select id="overview-cfg-interval" class="w-full p-2 bg-white rounded-xl border border-brand-200 text-xs font-bold" onchange="markUnsaved()">
+              <option value="15">每 15 分鐘 (極細緻)</option>
+              <option value="30" selected>每 30 分鐘 (標準)</option>
+              <option value="60">每 60 分鐘 (一小時整點)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 每週固定公休日 -->
+        <div class="pt-1">
+          <label class="block font-bold mb-1 text-[10.5px]">每週固定公休日 (勾選後前台自動標註公休)：</label>
+          <div class="grid grid-cols-7 gap-1 text-center font-bold">
+            <label class="flex flex-col items-center bg-white p-1.5 rounded-xl border border-brand-200 text-[10px] cursor-pointer"><input type="checkbox" value="0" class="ov-weekly-cb accent-[#8C7355] mb-0.5" onchange="markUnsaved()">日</label>
+            <label class="flex flex-col items-center bg-white p-1.5 rounded-xl border border-brand-200 text-[10px] cursor-pointer"><input type="checkbox" value="1" class="ov-weekly-cb accent-[#8C7355] mb-0.5" onchange="markUnsaved()">一</label>
+            <label class="flex flex-col items-center bg-white p-1.5 rounded-xl border border-brand-200 text-[10px] cursor-pointer"><input type="checkbox" value="2" class="ov-weekly-cb accent-[#8C7355] mb-0.5" onchange="markUnsaved()">二</label>
+            <label class="flex flex-col items-center bg-white p-1.5 rounded-xl border border-brand-200 text-[10px] cursor-pointer"><input type="checkbox" value="3" class="ov-weekly-cb accent-[#8C7355] mb-0.5" onchange="markUnsaved()">三</label>
+            <label class="flex flex-col items-center bg-white p-1.5 rounded-xl border border-brand-200 text-[10px] cursor-pointer"><input type="checkbox" value="4" class="ov-weekly-cb accent-[#8C7355] mb-0.5" onchange="markUnsaved()">四</label>
+            <label class="flex flex-col items-center bg-white p-1.5 rounded-xl border border-brand-200 text-[10px] cursor-pointer"><input type="checkbox" value="5" class="ov-weekly-cb accent-[#8C7355] mb-0.5" onchange="markUnsaved()">五</label>
+            <label class="flex flex-col items-center bg-white p-1.5 rounded-xl border border-brand-200 text-[10px] cursor-pointer"><input type="checkbox" value="6" class="ov-weekly-cb accent-[#8C7355] mb-0.5" onchange="markUnsaved()">六</label>
+          </div>
+        </div>
+
+        <!-- 指定日期店休清單 -->
+        <div class="pt-1 space-y-1.5">
+          <label class="block font-bold text-[10.5px]">指定日期店休 (特殊單日排休)：</label>
+          <div class="flex gap-2">
+            <input type="date" id="ov-custom-off-date" class="flex-1 p-2 bg-white rounded-xl border border-brand-200 font-mono text-xs">
+            <button type="button" onclick="addOverviewSpecificOffDate()" class="px-3 py-1.5 bg-[#8C7355] text-white rounded-xl font-bold shadow-2xs shrink-0 text-xs">
+              + 新增公休日
+            </button>
+          </div>
+          <div class="flex flex-wrap gap-1.5 pt-1" id="ov-off-dates-chips"></div>
+        </div>
+      </div>
+      
       <!-- 專員名冊 (代號制，支援上下排序) -->
       <div class="p-3.5 bg-brand-50 rounded-2xl border space-y-2">
         <div class="flex justify-between items-center font-bold">
@@ -801,7 +852,14 @@
           { id: "srv-1", name: "質感染髮技術", category: "現場主要服務", price: 2400, dur: 120, type: "Group_A", resource: "洗頭沖水椅" },
           { id: "srv-2", name: "剪髮造型設計", category: "現場主要服務", price: 800, dur: 45, type: "Group_B", resource: "none" }
         ],
-        storeResources: [{ id: "res-1", name: "洗頭沖水椅", capacity: 2 }]
+        storeResources: [{ id: "res-1", name: "洗頭沖水椅", capacity: 2 }],
+        scheduleConfig: {
+          startTime: "09:00",
+          endTime: "21:00",
+          interval: 30,
+          weeklyOff: [1],
+          specificOffDates: []
+        }
       },
       contract_config: {
         industry: "beauty",
@@ -958,6 +1016,17 @@
       allConfig.loyalty_config.enableStamp = document.getElementById('loyalty-switch-stamp').checked;
       allConfig.loyalty_config.enableDeposit = document.getElementById('loyalty-switch-deposit').checked;
       allConfig.loyalty_config.enablePackage = document.getElementById('loyalty-switch-package').checked;
+      // 打包營業時段、間隔與公休設定
+      const weekly = [];
+      document.querySelectorAll('.ov-weekly-cb:checked').forEach(cb => weekly.push(Number(cb.value)));
+      
+      allConfig.overview_config.scheduleConfig = {
+        startTime: document.getElementById('overview-cfg-start').value,
+        endTime: document.getElementById('overview-cfg-end').value,
+        interval: Number(document.getElementById('overview-cfg-interval').value),
+        weeklyOff: weekly,
+        specificOffDates: allConfig.overview_config.scheduleConfig?.specificOffDates || []
+      };
 
       try {
         await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?id=eq.${currentStore.id}`, {
@@ -1407,6 +1476,21 @@
     // [工具 6: overview.html] 專員、服務、席位 (▲/▼)
     // ==========================================
     function renderOverviewAdmin() {
+      // 渲染營業時間與公休日配置
+    const sCfg = allConfig.overview_config.scheduleConfig || {
+      startTime: "09:00", endTime: "21:00", interval: 30, weeklyOff: [1], specificOffDates: []
+    };
+    document.getElementById('overview-cfg-start').value = sCfg.startTime || "09:00";
+    document.getElementById('overview-cfg-end').value = sCfg.endTime || "21:00";
+    document.getElementById('overview-cfg-interval').value = sCfg.interval || 30;
+
+    // 渲染每週固定公休核取方塊
+    document.querySelectorAll('.ov-weekly-cb').forEach(cb => {
+      cb.checked = (sCfg.weeklyOff || []).includes(Number(cb.value));
+    });
+
+    renderOverviewSpecificOffDatesChips();
+      
       // 1. 專員列表
       document.getElementById('overview-staff-admin-list').innerHTML = (allConfig.overview_config.staffList || []).map((s, idx) => `
         <div class="flex justify-between items-center p-2.5 bg-white rounded-xl border text-xs shadow-2xs">
@@ -1444,6 +1528,49 @@
       `).join('') || '<div class="text-gray-400 py-1 text-center">尚未建立限制設備席位</div>';
     }
 
+    function renderOverviewSpecificOffDatesChips() {
+      const container = document.getElementById('ov-off-dates-chips');
+      if (!container) return;
+      const dates = allConfig.overview_config.scheduleConfig?.specificOffDates || [];
+      if (dates.length === 0) {
+        container.innerHTML = '<span class="text-[10px] text-brand-400">尚未設定特定單日店休</span>';
+        return;
+      }
+      container.innerHTML = dates.map((dateStr, idx) => `
+        <span class="px-2 py-0.5 bg-white border border-brand-200 rounded-lg font-mono text-[10.5px] font-bold text-brand-800 flex items-center gap-1.5 shadow-2xs">
+          <span>${dateStr}</span>
+          <button type="button" onclick="removeOverviewSpecificOffDate(${idx})" class="text-rose-500 hover:text-rose-700 font-bold">✕</button>
+        </span>
+      `).join('');
+    }
+
+    function addOverviewSpecificOffDate() {
+      const input = document.getElementById('ov-custom-off-date');
+      const val = input.value;
+      if (!val) return;
+      if (!allConfig.overview_config.scheduleConfig) {
+        allConfig.overview_config.scheduleConfig = { startTime: "09:00", endTime: "21:00", interval: 30, weeklyOff: [1], specificOffDates: [] };
+      }
+      if (!allConfig.overview_config.scheduleConfig.specificOffDates) {
+        allConfig.overview_config.scheduleConfig.specificOffDates = [];
+      }
+      if (!allConfig.overview_config.scheduleConfig.specificOffDates.includes(val)) {
+        allConfig.overview_config.scheduleConfig.specificOffDates.push(val);
+        allConfig.overview_config.scheduleConfig.specificOffDates.sort();
+        renderOverviewSpecificOffDatesChips();
+        markUnsaved();
+      }
+      input.value = '';
+    }
+
+    function removeOverviewSpecificOffDate(idx) {
+      if (allConfig.overview_config.scheduleConfig?.specificOffDates) {
+        allConfig.overview_config.scheduleConfig.specificOffDates.splice(idx, 1);
+        renderOverviewSpecificOffDatesChips();
+        markUnsaved();
+      }
+    }
+    
     function moveOverviewStaff(idx, dir) {
       const list = allConfig.overview_config.staffList;
       const target = idx + dir;

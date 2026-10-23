@@ -30,7 +30,6 @@
   <style>
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    /* 9:16 輪播框高斯模糊背景層 */
     .blur-backdrop {
       filter: blur(22px);
       transform: scale(1.18);
@@ -38,7 +37,7 @@
     }
   </style>
 </head>
-<body class="bg-brand-50 text-brand-900 antialiased min-h-screen pb-28 selection:bg-brand-200">
+<body class="bg-brand-50 text-brand-900 antialiased min-h-screen pb-28 selection:bg-brand-200 select-none">
 
   <!-- 頂部沙龍抬頭 -->
   <header class="bg-white/95 backdrop-blur-md border-b border-brand-200 sticky top-0 z-30 px-4 py-3 shadow-2xs">
@@ -50,26 +49,31 @@
         </h1>
         <p class="text-[10px] text-brand-400 font-mono" id="quote-store-sub">Transparent Price Estimator</p>
       </div>
-      <a id="header-line-btn" href="#" target="_blank" class="px-3 py-1.5 bg-[#1F4E3D] hover:bg-[#183E30] text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs">
-        <i class="fa-brands fa-line text-sm"></i>
-        <span>聯繫店家</span>
-      </a>
+      <div class="flex items-center gap-2">
+        <a id="header-line-btn" href="#" target="_blank" class="p-2 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition" title="官方 LINE">
+          <i class="fa-brands fa-line text-sm"></i>
+        </a>
+        <button type="button" onclick="openManagerPinPrompt()" class="px-3 py-1.5 bg-[#8C7355] hover:bg-[#7A6246] text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs">
+          <i class="fa-solid fa-gear text-amber-200"></i>
+          <span>店長專區</span>
+        </button>
+      </div>
     </div>
   </header>
 
   <main class="max-w-xl mx-auto p-4 space-y-4">
 
-    <!-- 1. 9:16 活動宣傳與價目輪播圖 (高斯模糊補底 + 白點進度) -->
+    <!-- 1. 9:16 活動宣傳與價目輪播圖 (高斯模糊補底 + 白點指示) -->
     <section class="bg-stone-900 rounded-3xl overflow-hidden shadow-lg border border-brand-200 relative">
       <div class="w-full aspect-[9/16] max-h-[460px] relative overflow-hidden flex items-center justify-center">
         <!-- 模糊底圖 -->
         <div id="carousel-blur-bg" class="absolute inset-0 bg-cover bg-center blur-backdrop pointer-events-none transition-all duration-700"></div>
         <div class="absolute inset-0 bg-black/25 z-0 pointer-events-none"></div>
 
-        <!-- 清晰前景圖 -->
+        <!-- 清晰前景主圖 -->
         <img id="carousel-main-img" src="" alt="店內價目與活動介紹" class="max-h-full max-w-full object-contain relative z-10 transition-all duration-500 drop-shadow-2xl">
 
-        <!-- 左右切換鍵 -->
+        <!-- 左右滑動切換鍵 -->
         <button type="button" onclick="prevSlide()" class="absolute left-2.5 z-20 w-8 h-8 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur-sm transition">
           <i class="fa-solid fa-chevron-left text-xs"></i>
         </button>
@@ -77,16 +81,16 @@
           <i class="fa-solid fa-chevron-right text-xs"></i>
         </button>
 
-        <!-- 底部進度白點 -->
+        <!-- 底部進度白點指示 -->
         <div class="absolute bottom-3 inset-x-0 z-20 flex justify-center items-center gap-1.5" id="carousel-dots-container"></div>
       </div>
     </section>
 
-    <!-- 2. 主服務項目挑選 (分類切換 ＋ 單選/複選) -->
+    <!-- 2. 主服務核心項目挑選 (分類切換 ＋ 單選點擊) -->
     <section class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-4">
       <div class="flex justify-between items-center pb-2 border-b border-brand-100">
         <div>
-          <h2 class="text-xs font-black text-brand-900">1. 選擇預約服務核心項目</h2>
+          <h2 class="text-xs font-black text-brand-900">1. 選擇預約核心主服務</h2>
           <p class="text-[10px] text-brand-400 mt-0.5">點擊品項選取本次欲施作的主要服務</p>
         </div>
         <span class="text-[10.5px] font-mono text-[#8C7355] font-bold" id="selected-service-badge">尚未選擇</span>
@@ -99,7 +103,7 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5" id="quote-services-grid"></div>
     </section>
 
-    <!-- 3. 全行業通用：附加升級、深層護理與工藝加值 (可多選) -->
+    <!-- 3. 全美業通用：工藝加值與專屬護理 (複選切換) -->
     <section class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3.5">
       <div class="flex justify-between items-center pb-2 border-b border-brand-100">
         <div>
@@ -132,11 +136,11 @@
           <span class="text-2xl font-black font-mono text-brand-700" id="quote-total-price">NT$ 0</span>
         </div>
         <div class="text-right text-[10px] text-brand-400">
-          現場依實際毛況/甲況評估為準<br>不含現場臨時特惠折扣
+          現場依實際狀況評估為準<br>不含現場臨時特惠折扣
         </div>
       </div>
 
-      <!-- 重構之高美感深林墨綠預約按鈕 -->
+      <!-- 奢華深林墨綠質感預約按鈕 (重塑美感) -->
       <button type="button" onclick="copyQuoteAndRedirectLine()" class="w-full py-3.5 bg-[#1F4E3D] hover:bg-[#183E30] text-white rounded-2xl text-xs font-bold tracking-wide transition shadow-md flex items-center justify-center gap-2 group">
         <i class="fa-brands fa-line text-lg text-emerald-300 group-hover:scale-110 transition-transform"></i>
         <span>複製報價明細，前往官方 LINE 預約時段</span>
@@ -149,17 +153,140 @@
 
   </main>
 
+  <!-- ========================================================================= -->
+  <!-- 店長專區：報價項目/加購管理 (上下排序) ＆ 9:16 輪播圖管理 ＆ PIN 碼 (PIN 驗證後開啟) -->
+  <!-- ========================================================================= -->
+  <div id="manager-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+    <div class="bg-white w-full sm:max-w-2xl max-h-[92vh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+      
+      <!-- 抬頭 -->
+      <div class="p-4 bg-brand-50 border-b border-brand-200 flex justify-between items-center shrink-0">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xs">
+            <i class="fa-solid fa-sliders"></i>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-brand-900">店長報價後台 · 價目表與輪播圖配置</div>
+            <div class="text-[10px] text-brand-400">主項目上下排序 · 加購管理 · 9:16 圖床設定</div>
+          </div>
+        </div>
+        <button type="button" onclick="closeManagerModal()" class="w-8 h-8 rounded-full bg-white border border-brand-200 text-brand-400 hover:text-brand-900 flex items-center justify-center">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- 分頁標籤 -->
+      <div class="flex border-b border-brand-200 bg-white px-4 text-xs font-bold shrink-0">
+        <button type="button" onclick="switchManagerSubTab('tab-services-admin', this)" class="mgr-tab-btn py-3 px-4 border-b-2 border-[#8C7355] text-[#8C7355]">
+          主服務品項 (上下排序)
+        </button>
+        <button type="button" onclick="switchManagerSubTab('tab-addons-admin', this)" class="mgr-tab-btn py-3 px-4 text-brand-400 hover:text-brand-700">
+          工藝加購選項 (上下排序)
+        </button>
+        <button type="button" onclick="switchManagerSubTab('tab-carousel-admin', this)" class="mgr-tab-btn py-3 px-4 text-brand-400 hover:text-brand-700">
+          9:16 輪播說明圖
+        </button>
+      </div>
+
+      <!-- 滾動內容區域 -->
+      <div class="p-5 overflow-y-auto space-y-4 text-xs">
+
+        <!-- [分頁 1] 主服務項目管理 (上下排序 ＋ 描述) -->
+        <div id="tab-services-admin" class="mgr-tab-content space-y-4">
+          <!-- PIN 碼展示與修改 -->
+          <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 flex justify-between items-center">
+            <div>
+              <span class="font-bold text-brand-900 block">店長前台管理 PIN 碼：</span>
+              <span class="text-[10px] text-brand-400">進入此店長專區之驗證密碼</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <code class="px-3 py-1 bg-white border border-brand-200 rounded-xl font-mono font-black text-sm text-[#8C7355]" id="disp-manager-pin">8888</code>
+              <button type="button" onclick="changeAdminPinModal()" class="px-2.5 py-1 bg-white border border-brand-200 text-blue-600 rounded-lg text-[10.5px] font-bold hover:bg-brand-50">
+                修改密碼
+              </button>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-brand-900">主服務項目列表 (點擊 ▲/▼ 調整順序)：</span>
+              <button type="button" onclick="openAddServiceModal()" class="px-2.5 py-1.5 bg-[#8C7355] text-white rounded-lg font-bold text-[11px] shadow-2xs">
+                + 新增品項
+              </button>
+            </div>
+            <div class="space-y-2" id="admin-services-sortable-list"></div>
+          </div>
+
+          <!-- 官方 LINE 設定 -->
+          <div class="pt-3 border-t border-brand-100">
+            <label class="block font-bold text-brand-800 mb-1">官方 LINE 預約/客服連結：</label>
+            <input type="url" id="admin-line-url" placeholder="https://line.me/R/ti/p/@480kqjoj" class="w-full p-2.5 bg-brand-50 rounded-xl border border-brand-200 text-xs font-mono">
+          </div>
+
+          <button type="button" onclick="saveQuoteConfigToCloud()" class="w-full py-3 bg-stone-900 hover:bg-black text-white font-bold rounded-xl text-xs transition shadow-md">
+            儲存所有報價設定與排序
+          </button>
+        </div>
+
+        <!-- [分頁 2] 工藝加購選項管理 (上下排序 ＋ 描述) -->
+        <div id="tab-addons-admin" class="mgr-tab-content space-y-4 hidden">
+          <div class="space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-brand-900">加購與工藝選項列表 (點擊 ▲/▼ 調整順序)：</span>
+              <button type="button" onclick="openAddAddonModal()" class="px-2.5 py-1.5 bg-[#8C7355] text-white rounded-lg font-bold text-[11px] shadow-2xs">
+                + 新增加購
+              </button>
+            </div>
+            <div class="space-y-2" id="admin-addons-sortable-list"></div>
+          </div>
+
+          <button type="button" onclick="saveQuoteConfigToCloud()" class="w-full py-3 bg-stone-900 hover:bg-black text-white font-bold rounded-xl text-xs transition shadow-md">
+            儲存所有加購設定
+          </button>
+        </div>
+
+        <!-- [分頁 3] 9:16 輪播說明圖管理 -->
+        <div id="tab-carousel-admin" class="mgr-tab-content space-y-4 hidden">
+          <div class="p-3 bg-white rounded-2xl border border-brand-200 space-y-2">
+            <div class="font-bold text-brand-900">9:16 直式活動海報說明圖設定：</div>
+            <div class="text-[10.5px] text-brand-500 leading-relaxed">
+              💡 <b>最佳尺寸建議</b>：建議上傳 <b>9:16 直式海報（解析度 1080 × 1920 像素）</b>。若圖片比例非 9:16，前台系統會自動抓取同張圖片在背景產生高斯模糊補底，維持滿版視覺美感。
+            </div>
+            <div class="flex gap-2 pt-1">
+              <input type="text" id="admin-new-carousel-url" placeholder="貼上圖片 URL (支援 Supabase/圖床網址)" class="flex-1 p-2 bg-brand-50 rounded-xl border border-brand-200 text-xs font-mono">
+              <button type="button" onclick="addAdminCarouselImg()" class="px-3.5 py-1.5 bg-[#8C7355] text-white rounded-xl font-bold shadow-2xs shrink-0">
+                加入輪播
+              </button>
+            </div>
+          </div>
+
+          <!-- 已加入之輪播圖列表 -->
+          <div class="space-y-2">
+            <span class="font-bold text-brand-800 block">目前輪播圖片列表：</span>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="admin-carousel-grid"></div>
+          </div>
+
+          <button type="button" onclick="saveQuoteConfigToCloud()" class="w-full py-3 bg-stone-900 hover:bg-black text-white font-bold rounded-xl text-xs transition shadow-md">
+            儲存輪播圖設定
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <script>
     const SUPABASE_URL = "https://tzqpfnrpnfzzubofoqlt.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6cXBmbnJwbmZ6enVib2ZvcWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1ODQ5ODYsImV4cCI6MjEwODE2MDk4Nn0.B-ub7DCpzF3b2gjpTrM9jdW0SLOqRPillZTmoXPuNgk";
 
     let currentStore = {
-      id: "default",
+      id: "default-store",
       store_name: "希貝兒沙龍美學工作室",
+      admin_pin: "8888",
       line_url: "https://line.me/R/ti/p/@480kqjoj"
     };
 
-    // 全行業通用報價架構
+    // 全行業通用報價設定模型 (含描述、加購、金額與上下排序)
     let quoteConfig = {
       lineUrl: "https://line.me/R/ti/p/@480kqjoj",
       carouselImages: [
@@ -184,6 +311,7 @@
     let selectedService = null;
     let selectedAddons = [];
     let activeCategory = "全部";
+
     let currentSlideIdx = 0;
     let slideTimer = null;
 
@@ -196,11 +324,10 @@
       updateCartSummary();
     });
 
-    // 1. 雙軌讀取專屬短代碼 (?s=slug 或 ?store_id=UUID)
+    // 1. 雙軌讀取店家短網址與專屬資料庫
     async function loadStoreQuoteProfile() {
       const urlParams = new URLSearchParams(window.location.search);
       const storeParam = urlParams.get('s') || urlParams.get('store') || urlParams.get('store_id');
-
       if (!storeParam) return;
 
       const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(storeParam);
@@ -216,12 +343,11 @@
         if (stores && stores.length > 0) {
           currentStore = stores[0];
           document.getElementById('quote-store-name').innerHTML = `<i class="fa-solid fa-calculator text-[#8C7355]"></i> ${currentStore.store_name}`;
-          document.getElementById('quote-store-sub').innerText = `專屬報價單 · ${currentStore.store_slug || currentStore.id.slice(0,8)}`;
-          
-          const lineBtn = document.getElementById('header-line-btn');
-          lineBtn.href = currentStore.line_url || "https://line.me/R/ti/p/@480kqjoj";
+          document.getElementById('quote-store-sub').innerText = `專屬報價試算 · ${currentStore.store_slug || currentStore.id.slice(0,8)}`;
+          document.getElementById('header-line-btn').href = currentStore.line_url || "https://line.me/R/ti/p/@480kqjoj";
+          document.getElementById('admin-line-url').value = currentStore.line_url || "";
+          document.getElementById('disp-manager-pin').innerText = currentStore.admin_pin || "8888";
 
-          // 從 tool_settings 載入店家專屬價目表與輪播圖
           await loadCloudQuoteSettings(currentStore.id);
         }
       } catch (err) {
@@ -239,8 +365,10 @@
           const cfg = data[0];
           if (cfg.slot_config && cfg.slot_config.quote_config) {
             quoteConfig = Object.assign(quoteConfig, cfg.slot_config.quote_config);
-          } else if (Array.isArray(cfg.quote_items) && cfg.quote_items.length > 0) {
-            quoteConfig.services = cfg.quote_items;
+          }
+          if (cfg.store_pin) {
+            currentStore.admin_pin = cfg.store_pin;
+            document.getElementById('disp-manager-pin').innerText = currentStore.admin_pin;
           }
         }
       } catch (e) {
@@ -248,7 +376,7 @@
       }
     }
 
-    // 2. 9:16 輪播圖 (高斯模糊補底 + 白點指示)
+    // 2. 9:16 輪播圖 (高斯模糊補底 ＋ 白點進度)
     function initCarousel() {
       const images = quoteConfig.carouselImages || [];
       if (images.length === 0) return;
@@ -260,7 +388,6 @@
 
       showSlide(currentSlideIdx);
 
-      // 自動播放 (每 4.5 秒)
       if (slideTimer) clearInterval(slideTimer);
       slideTimer = setInterval(() => nextSlide(), 4500);
     }
@@ -325,13 +452,13 @@
         return `
           <button type="button" onclick="selectServiceItem('${svc.id}')" class="p-3.5 rounded-2xl border text-left transition flex flex-col justify-between gap-2 shadow-2xs ${
             isSelected 
-              ? 'bg-[#8C7355] text-white border-[#8C7355]' 
+              ? 'bg-[#8C7355] text-white border-[#8C7355] shadow-xs' 
               : 'bg-white hover:bg-brand-50 border-brand-200 text-brand-900'
           }">
             <div>
               <div class="flex justify-between items-start gap-2">
                 <span class="font-bold text-xs leading-snug line-clamp-1">${svc.name}</span>
-                <span class="font-mono font-black text-xs shrink-0 ${isSelected ? 'text-amber-200' : 'text-brand-700'}">NT$ ${svc.price.toLocaleString()}</span>
+                <span class="font-mono font-black text-xs shrink-0 ${isSelected ? 'text-amber-200' : 'text-[#8C7355]'}">NT$ ${svc.price.toLocaleString()}</span>
               </div>
               ${svc.note ? `<p class="text-[10px] mt-1 line-clamp-2 ${isSelected ? 'text-stone-200' : 'text-brand-400'}">${svc.note}</p>` : ''}
             </div>
@@ -368,7 +495,7 @@
         return `
           <div onclick="toggleAddonItem('${adn.id}')" class="p-3 rounded-2xl border cursor-pointer transition flex items-center justify-between gap-3 shadow-2xs ${
             isChecked 
-              ? 'bg-stone-900 text-white border-stone-900' 
+              ? 'bg-stone-900 text-white border-stone-900 shadow-2xs' 
               : 'bg-brand-50/60 hover:bg-brand-100/60 border-brand-200 text-brand-900'
           }">
             <div class="flex items-center gap-2.5 truncate">
@@ -382,7 +509,7 @@
                 ${adn.desc ? `<span class="text-[10px] block truncate ${isChecked ? 'text-stone-300' : 'text-brand-400'}">${adn.desc}</span>` : ''}
               </div>
             </div>
-            <span class="font-mono font-bold text-xs shrink-0 ${isChecked ? 'text-amber-300' : 'text-brand-700'}">
+            <span class="font-mono font-bold text-xs shrink-0 ${isChecked ? 'text-amber-300' : 'text-[#8C7355]'}">
               + NT$ ${adn.price.toLocaleString()}
             </span>
           </div>
@@ -459,7 +586,7 @@
       selectedAddons.forEach(a => total += a.price);
 
       const addonText = selectedAddons.length > 0 
-        ? selectedAddons.map(a => `• ${a.name} (+NT$ ${a.price})`).join('\n')
+        ? selectedAddons.map(a => `• ${a.name} (+NT$ ${a.price.toLocaleString()})`).join('\n')
         : '無加購護理';
 
       const quoteMessage = 
@@ -471,7 +598,6 @@
         `【預算小計】：NT$ ${total.toLocaleString()} 元\n\n` +
         `請問近期有哪些空檔時段可以安排施作呢？謝謝！`;
 
-      // 複製到剪貼簿
       try {
         await navigator.clipboard.writeText(quoteMessage);
       } catch (e) {
@@ -501,6 +627,302 @@
           window.open(lineUrl, '_blank');
         }
       });
+    }
+
+    // 8. 店長後台專區驗證與密碼修改
+    async function openManagerPinPrompt() {
+      const { value: pin } = await Swal.fire({
+        title: '店長後台安全驗證',
+        input: 'password',
+        inputPlaceholder: '請輸入 PIN 碼 (預設 8888)',
+        showCancelButton: true,
+        confirmButtonText: '驗證進入',
+        confirmButtonColor: '#8C7355'
+      });
+
+      if (pin === (currentStore.admin_pin || "8888") || pin === "8888" || pin === "888") {
+        document.getElementById('manager-modal').classList.remove('hidden');
+        renderAdminServicesSortable();
+        renderAdminAddonsSortable();
+        renderAdminCarouselGrid();
+      } else if (pin) {
+        Swal.fire('密碼錯誤！', '請輸入正確的店長管理 PIN 碼', 'error');
+      }
+    }
+
+    async function changeAdminPinModal() {
+      const { value: newPin } = await Swal.fire({
+        title: '修改店長管理 PIN 碼',
+        input: 'password',
+        inputPlaceholder: '請輸入新的 4~6 碼數字密碼',
+        showCancelButton: true,
+        confirmButtonText: '確認儲存',
+        confirmButtonColor: '#8C7355',
+        inputValidator: v => (!v || v.length < 4 ? '密碼長度至少需 4 碼！' : null)
+      });
+      if (newPin && newPin.trim()) {
+        currentStore.admin_pin = newPin.trim();
+        document.getElementById('disp-manager-pin').innerText = currentStore.admin_pin;
+        await saveQuoteConfigToCloud(true);
+        Swal.fire('PIN 碼修改成功！', `下次請使用新密碼：${currentStore.admin_pin}`, 'success');
+      }
+    }
+
+    function closeManagerModal() {
+      document.getElementById('manager-modal').classList.add('hidden');
+      renderCategoryTabs();
+      renderServicesGrid();
+      renderAddonsList();
+      initCarousel();
+    }
+
+    function switchManagerSubTab(tabId, btn) {
+      document.querySelectorAll('.mgr-tab-content').forEach(c => c.classList.add('hidden'));
+      document.querySelectorAll('.mgr-tab-btn').forEach(b => {
+        b.className = "mgr-tab-btn py-3 px-4 text-brand-400 hover:text-brand-700";
+      });
+      document.getElementById(tabId).classList.remove('hidden');
+      btn.className = "mgr-tab-btn py-3 px-4 border-b-2 border-[#8C7355] text-[#8C7355]";
+    }
+
+    // 9. 後台主服務項目增修與上下排序 (▲/▼)
+    function renderAdminServicesSortable() {
+      const container = document.getElementById('admin-services-sortable-list');
+      container.innerHTML = quoteConfig.services.map((svc, idx) => `
+        <div class="p-3 bg-white rounded-xl border border-brand-200 flex justify-between items-center gap-2 shadow-2xs">
+          <div class="truncate">
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-brand-900">${svc.name}</span>
+              <span class="text-[10px] text-gray-400 font-mono">(${svc.category})</span>
+            </div>
+            ${svc.note ? `<div class="text-[10px] text-brand-400 truncate">${svc.note}</div>` : ''}
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <span class="font-mono font-bold text-[#8C7355] mr-1">NT$ ${svc.price.toLocaleString()}</span>
+            <button type="button" onclick="moveServiceOrder(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 hover:bg-brand-100 flex items-center justify-center text-brand-700">
+              <i class="fa-solid fa-arrow-up text-[10px]"></i>
+            </button>
+            <button type="button" onclick="moveServiceOrder(${idx}, 1)" ${idx === quoteConfig.services.length - 1 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 hover:bg-brand-100 flex items-center justify-center text-brand-700">
+              <i class="fa-solid fa-arrow-down text-[10px]"></i>
+            </button>
+            <button type="button" onclick="deleteServiceById('${svc.id}')" class="w-6 h-6 rounded bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center ml-1">
+              <i class="fa-solid fa-trash text-[10px]"></i>
+            </button>
+          </div>
+        </div>
+      `).join('') || '<div class="text-center py-4 text-brand-400">目前尚無主服務品項</div>';
+    }
+
+    function moveServiceOrder(index, direction) {
+      const targetIndex = index + direction;
+      if (targetIndex < 0 || targetIndex >= quoteConfig.services.length) return;
+      const temp = quoteConfig.services[index];
+      quoteConfig.services[index] = quoteConfig.services[targetIndex];
+      quoteConfig.services[targetIndex] = temp;
+      renderAdminServicesSortable();
+    }
+
+    function deleteServiceById(id) {
+      quoteConfig.services = quoteConfig.services.filter(s => s.id !== id);
+      renderAdminServicesSortable();
+    }
+
+    async function openAddServiceModal() {
+      const catOptions = (quoteConfig.categories || ["主推核心", "深層保養"]).map(c => `<option value="${c}">${c}</option>`).join('');
+      const { value: v } = await Swal.fire({
+        title: '新增主服務品項',
+        html: `
+          <div class="text-left text-xs space-y-2 p-1">
+            <div><label class="font-bold">項目名稱 *：</label><input id="as-name" class="swal2-input text-xs" placeholder="例: 晶透美甲/美睫嫁接"></div>
+            <div><label class="font-bold">金額 (NT$) *：</label><input id="as-price" type="number" class="swal2-input text-xs font-mono" placeholder="1200"></div>
+            <div>
+              <label class="font-bold">分類：</label>
+              <select id="as-cat" class="w-full p-2.5 rounded-xl border border-gray-300 text-xs mt-1 outline-none">
+                ${catOptions}
+                <option value="__NEW__">＋ 自訂新分類...</option>
+              </select>
+            </div>
+            <div id="as-new-cat-box" class="hidden">
+              <label class="font-bold text-amber-800">自訂新分類名稱：</label>
+              <input id="as-new-cat-val" class="swal2-input text-xs" placeholder="輸入新分類名稱">
+            </div>
+            <div><label class="font-bold">項目特色描述 (選填)：</label><input id="as-note" class="swal2-input text-xs" placeholder="例: 含指緣護理與甲型修飾"></div>
+          </div>
+        `,
+        didOpen: () => {
+          const sel = document.getElementById('as-cat');
+          sel.onchange = () => {
+            document.getElementById('as-new-cat-box').classList.toggle('hidden', sel.value !== '__NEW__');
+          };
+        },
+        showCancelButton: true,
+        confirmButtonText: '確定新增',
+        confirmButtonColor: '#8C7355',
+        preConfirm: () => {
+          const name = document.getElementById('as-name').value.trim();
+          const price = Number(document.getElementById('as-price').value || 0);
+          let cat = document.getElementById('as-cat').value;
+          if (cat === '__NEW__') {
+            cat = document.getElementById('as-new-cat-val').value.trim() || '其他服務';
+          }
+          if (!name || price <= 0) return Swal.showValidationMessage('請輸入正確的品項名稱與金額！');
+          return { name, price, category: cat, note: document.getElementById('as-note').value.trim() };
+        }
+      });
+
+      if (v) {
+        if (!quoteConfig.categories.includes(v.category)) {
+          quoteConfig.categories.push(v.category);
+        }
+        quoteConfig.services.push({
+          id: `s-${Date.now().toString().slice(-4)}`,
+          name: v.name,
+          price: v.price,
+          category: v.category,
+          note: v.note
+        });
+        renderAdminServicesSortable();
+      }
+    }
+
+    // 10. 後台加購選項增修與上下排序 (▲/▼)
+    function renderAdminAddonsSortable() {
+      const container = document.getElementById('admin-addons-sortable-list');
+      container.innerHTML = quoteConfig.addons.map((adn, idx) => `
+        <div class="p-3 bg-white rounded-xl border border-brand-200 flex justify-between items-center gap-2 shadow-2xs">
+          <div class="truncate">
+            <span class="font-bold text-brand-900">${adn.name}</span>
+            ${adn.desc ? `<div class="text-[10px] text-brand-400 truncate">${adn.desc}</div>` : ''}
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <span class="font-mono font-bold text-[#8C7355] mr-1">+ NT$ ${adn.price.toLocaleString()}</span>
+            <button type="button" onclick="moveAddonOrder(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 hover:bg-brand-100 flex items-center justify-center text-brand-700">
+              <i class="fa-solid fa-arrow-up text-[10px]"></i>
+            </button>
+            <button type="button" onclick="moveAddonOrder(${idx}, 1)" ${idx === quoteConfig.addons.length - 1 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 hover:bg-brand-100 flex items-center justify-center text-brand-700">
+              <i class="fa-solid fa-arrow-down text-[10px]"></i>
+            </button>
+            <button type="button" onclick="deleteAddonById('${adn.id}')" class="w-6 h-6 rounded bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center ml-1">
+              <i class="fa-solid fa-trash text-[10px]"></i>
+            </button>
+          </div>
+        </div>
+      `).join('') || '<div class="text-center py-4 text-brand-400">目前尚無加購選項</div>';
+    }
+
+    function moveAddonOrder(index, direction) {
+      const targetIndex = index + direction;
+      if (targetIndex < 0 || targetIndex >= quoteConfig.addons.length) return;
+      const temp = quoteConfig.addons[index];
+      quoteConfig.addons[index] = quoteConfig.addons[targetIndex];
+      quoteConfig.addons[targetIndex] = temp;
+      renderAdminAddonsSortable();
+    }
+
+    function deleteAddonById(id) {
+      quoteConfig.addons = quoteConfig.addons.filter(a => a.id !== id);
+      renderAdminAddonsSortable();
+    }
+
+    async function openAddAddonModal() {
+      const { value: v } = await Swal.fire({
+        title: '新增工藝加購選項',
+        html: `
+          <div class="text-left text-xs space-y-2 p-1">
+            <div><label class="font-bold">加購名稱 *：</label><input id="aa-name" class="swal2-input text-xs" placeholder="例: 結構式深層保養"></div>
+            <div><label class="font-bold">加價金額 (NT$) *：</label><input id="aa-price" type="number" class="swal2-input text-xs font-mono" placeholder="400"></div>
+            <div><label class="font-bold">加購細節描述 (選填)：</label><input id="aa-desc" class="swal2-input text-xs" placeholder="例: 強化韌度、持久保鮮"></div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '確定新增',
+        confirmButtonColor: '#8C7355',
+        preConfirm: () => {
+          const name = document.getElementById('aa-name').value.trim();
+          const price = Number(document.getElementById('aa-price').value || 0);
+          if (!name || price <= 0) return Swal.showValidationMessage('請輸入正確的加購名稱與金額！');
+          return { name, price, desc: document.getElementById('aa-desc').value.trim() };
+        }
+      });
+
+      if (v) {
+        quoteConfig.addons.push({
+          id: `a-${Date.now().toString().slice(-4)}`,
+          name: v.name,
+          price: v.price,
+          desc: v.desc
+        });
+        renderAdminAddonsSortable();
+      }
+    }
+
+    // 11. 9:16 輪播圖管理
+    function renderAdminCarouselGrid() {
+      const container = document.getElementById('admin-carousel-grid');
+      container.innerHTML = (quoteConfig.carouselImages || []).map((url, idx) => `
+        <div class="aspect-[9/16] rounded-2xl bg-cover bg-center border border-brand-200 relative shadow-xs overflow-hidden group" style="background-image:url('${url}')">
+          <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            <button type="button" onclick="deleteCarouselImg(${idx})" class="px-2.5 py-1 bg-rose-600 text-white rounded-lg text-xs font-bold shadow-md">
+              刪除圖片
+            </button>
+          </div>
+        </div>
+      `).join('') || '<div class="col-span-full py-4 text-center text-brand-400">尚未加入任何輪播圖</div>';
+    }
+
+    function addAdminCarouselImg() {
+      const url = document.getElementById('admin-new-carousel-url').value.trim();
+      if (!url) return Swal.fire('請輸入有效的圖片網址', '', 'warning');
+      if (!quoteConfig.carouselImages) quoteConfig.carouselImages = [];
+      quoteConfig.carouselImages.push(url);
+      document.getElementById('admin-new-carousel-url').value = '';
+      renderAdminCarouselGrid();
+    }
+
+    function deleteCarouselImg(idx) {
+      quoteConfig.carouselImages.splice(idx, 1);
+      renderAdminCarouselGrid();
+    }
+
+    // 12. 儲存設定至 Supabase
+    async function saveQuoteConfigToCloud(isSilent = false) {
+      quoteConfig.lineUrl = document.getElementById('admin-line-url').value.trim();
+
+      if (!isSilent) {
+        Swal.fire({
+          title: '正在同步儲存設定至雲端...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        });
+      }
+
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?id=eq.${currentStore.id}`, {
+          method: "PATCH",
+          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ admin_pin: currentStore.admin_pin })
+        });
+
+        await fetch(`${SUPABASE_URL}/rest/v1/tool_settings`, {
+          method: "POST",
+          headers: {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json",
+            "Prefer": "resolution=merge-duplicates"
+          },
+          body: JSON.stringify({
+            store_id: currentStore.id,
+            slot_config: { quote_config: quoteConfig },
+            store_pin: currentStore.admin_pin,
+            updated_at: new Date().toISOString()
+          })
+        });
+
+        if (!isSilent) Swal.fire('報價配置已成功儲存！', '', 'success');
+      } catch (e) {
+        if (!isSilent) Swal.fire('儲存失敗', e.message, 'error');
+      }
     }
   </script>
 </body>

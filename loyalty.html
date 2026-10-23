@@ -954,10 +954,12 @@
     }
 
     // 7. 儲存設定至 Supabase 雲端
+    // [工具標籤: loyalty.html 會員開關與資料庫雲端儲存]
     async function saveLoyaltySettingsToCloud(isSilent = false) {
       loyaltyConfig.enableStamp = document.getElementById('cfg-switch-stamp').checked;
       loyaltyConfig.enableDeposit = document.getElementById('cfg-switch-deposit').checked;
       loyaltyConfig.enablePackage = document.getElementById('cfg-switch-package').checked;
+      loyaltyConfig.rewardAmount = Number(document.getElementById('loyalty-cfg-reward')?.value || 300);
 
       if (!isSilent) {
         Swal.fire({
@@ -968,13 +970,37 @@
       }
 
       try {
+        // 1. 同步店長 PIN 碼
         await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?id=eq.${currentStore.id}`, {
           method: "PATCH",
-          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json" },
+          headers: {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json"
+          },
           body: JSON.stringify({ admin_pin: currentStore.admin_pin })
         });
 
-        await fetch(`${SUPABASE_URL}/rest/v1/tool_settings`, {
+        // 2. 增量合併：保留其他工具設定
+        let mergedConfig = {};
+        try {
+          const fetchRes = await fetch(`${SUPABASE_URL}/rest/v1/tool_settings?store_id=eq.${currentStore.id}&select=slot_config`, {
+            headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` }
+          });
+          const existingData = await fetchRes.json();
+          if (existingData && existingData.length > 0 && existingData[0].slot_config) {
+            mergedConfig = existingData[0].slot_config;
+          }
+        } catch (readErr) {
+          console.warn("讀取既有設定失敗，將直接寫入:", readErr);
+        }
+
+        // 同步會員模組設定與會員名冊資料庫（讓顧客手機聯網能查到）
+        mergedConfig.loyalty_config = loyaltyConfig;
+        mergedConfig.loyalty_members = loyaltyDb;
+
+        // 3. 安全 Upsert
+        const saveRes = await fetch(`${SUPABASE_URL}/rest/v1/tool_settings?on_conflict=store_id`, {
           method: "POST",
           headers: {
             "apikey": SUPABASE_ANON_KEY,
@@ -984,11 +1010,13 @@
           },
           body: JSON.stringify({
             store_id: currentStore.id,
-            slot_config: { loyalty_config: loyaltyConfig },
+            slot_config: mergedConfig,
             store_pin: currentStore.admin_pin,
             updated_at: new Date().toISOString()
           })
         });
+
+        if (!saveRes.ok) throw new Error(await saveRes.text());
 
         applyModuleSwitchesToUI();
         if (!isSilent) Swal.fire('功能開關設定已儲存！', '前台已同步生效', 'success');
@@ -996,7 +1024,6 @@
         if (!isSilent) Swal.fire('儲存失敗', e.message, 'error');
       }
     }
-
     function saveLoyaltyDb() {
       localStorage.setItem('loyalty_members_db', JSON.stringify(loyaltyDb));
     }

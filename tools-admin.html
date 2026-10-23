@@ -102,7 +102,7 @@
         <span class="font-bold text-brand-900 flex items-center gap-1.5 text-sm">
           <i class="fa-brands fa-line text-emerald-600 text-base"></i> LINE 預約防放鳥推播工具 (reminder.gs)
         </span>
-        <button type="button" onclick="testReminderPush()" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-[11px] transition">測試發送</button>
+        <button type="button" onclick="testReminderPush()" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-[11px] transition">測試推播發送</button>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 font-mono">
         <div>
@@ -130,7 +130,7 @@
           <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
             <i class="fa-solid fa-camera-retro text-amber-600"></i> IG 限動空檔生圖器設定 (studio_slot.html)
           </span>
-          <p class="text-[10.5px] text-brand-400">客端即時查空檔 · 店長 9:16 限動美圖生成</p>
+          <p class="text-[10.5px] text-brand-400">客端即時查空檔 · 9:16 限動美圖生成</p>
         </div>
         <a id="btn-link-slot" href="studio_slot.html" target="_blank" class="px-3 py-1 bg-brand-100 text-brand-800 rounded-lg font-bold text-[11px] hover:bg-brand-200 transition">開啟生圖前台 ➔</a>
       </div>
@@ -138,11 +138,11 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <div>
           <label class="block font-bold mb-1">沙龍店名：</label>
-          <input type="text" id="slot-cfg-store" class="w-full p-2.5 border border-brand-200 rounded-xl bg-brand-50/50 font-bold" value="沙龍工作室">
+          <input type="text" id="slot-cfg-store" class="w-full p-2.5 border border-brand-200 rounded-xl bg-brand-50/50 font-bold">
         </div>
         <div>
           <label class="block font-bold mb-1">官方 LINE 預約連結：</label>
-          <input type="text" id="slot-cfg-line" class="w-full p-2.5 border border-brand-200 rounded-xl bg-brand-50/50 font-mono" value="https://line.me/R/ti/p/@your_line">
+          <input type="text" id="slot-cfg-line" class="w-full p-2.5 border border-brand-200 rounded-xl bg-brand-50/50 font-mono">
         </div>
       </div>
 
@@ -158,9 +158,9 @@
         <div>
           <label class="block font-bold mb-1">營業時間範圍：</label>
           <div class="flex items-center gap-1 font-mono">
-            <input type="number" id="slot-cfg-start" value="10" min="6" max="23" class="w-1/2 p-2 border rounded-xl text-center font-bold" onchange="renderSlotDateRangeChips()">
+            <input type="time" id="slot-cfg-start" value="10:00" class="w-1/2 p-2 border rounded-xl text-center font-bold" onchange="renderSlotDateRangeChips()">
             <span>~</span>
-            <input type="number" id="slot-cfg-end" value="20" min="6" max="23" class="w-1/2 p-2 border rounded-xl text-center font-bold" onchange="renderSlotDateRangeChips()">
+            <input type="time" id="slot-cfg-end" value="20:00" class="w-1/2 p-2 border rounded-xl text-center font-bold" onchange="renderSlotDateRangeChips()">
           </div>
         </div>
       </div>
@@ -205,7 +205,7 @@
           <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
             <i class="fa-solid fa-cash-register text-brand-500"></i> 極簡快速結帳與顧客小資料庫 (pos.html)
           </span>
-          <p class="text-[10.5px] text-brand-400">輸入手機自動帶入舊客檔案 ｜ 結帳自動覆寫更新</p>
+          <p class="text-[10.5px] text-brand-400">輸入手機自動帶入舊客檔案 ｜ 支援項目 ▲/▼ 上下調整排序</p>
         </div>
         <div class="flex items-center gap-1.5">
           <a id="btn-link-pos" href="pos.html" target="_blank" class="px-2.5 py-1 bg-brand-100 text-brand-800 rounded-lg font-bold text-[11px] hover:bg-brand-200 transition">開啟收銀台 ➔</a>
@@ -224,7 +224,7 @@
         <div class="space-y-1.5 max-h-48 overflow-y-auto" id="pos-items-admin-list"></div>
       </div>
 
-      <!-- 顧客小資料庫即時檢視 (10 筆一頁分頁 + 搜尋) -->
+      <!-- 顧客小資料庫即時檢視 (10 筆分頁 + 搜尋) -->
       <div class="p-3.5 bg-brand-50 rounded-2xl border space-y-2.5">
         <div class="flex justify-between items-center">
           <span class="font-bold text-brand-900">顧客快查小資料庫 (依手機、姓名或 LINE 暱稱搜尋)：</span>
@@ -248,11 +248,11 @@
           <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
             <i class="fa-solid fa-calculator text-brand-500"></i> 美業全通用報價試算與 9:16 輪播圖 (quote.html)
           </span>
-          <p class="text-[10.5px] text-brand-400">美髮、美容、美甲、寵美皆通用 ｜ 奢華深林綠按鈕</p>
+          <p class="text-[10.5px] text-brand-400">美髮、美容、美甲、寵美全適用 ｜ 支援項目 ▲/▼ 排序</p>
         </div>
         <div class="flex items-center gap-1.5">
           <a id="btn-link-quote" href="quote.html" target="_blank" class="px-2.5 py-1 bg-brand-100 text-brand-800 rounded-lg font-bold text-[11px] hover:bg-brand-200 transition">開啟報價前台 ➔</a>
-          <button type="button" onclick="openAddQuoteItemModal()" class="px-2.5 py-1 bg-[#8C7355] text-white rounded-lg font-bold text-[11px]">+ 新增報價項目</button>
+          <button type="button" onclick="openAddQuoteItemModal()" class="px-2.5 py-1 bg-[#8C7355] text-white rounded-lg font-bold text-[11px]">+ 新增報價品項</button>
         </div>
       </div>
 
@@ -291,7 +291,7 @@
           <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
             <i class="fa-solid fa-stamp text-amber-600"></i> VIP 數位會員存摺 (原版黑灰燙金卡面)
           </span>
-          <p class="text-[10.5px] text-brand-400">集點盤 ｜ 手機共用儲值金 ｜ 單一毛孩專屬包卡</p>
+          <p class="text-[10.5px] text-brand-400">集點盤 ｜ 手機共用儲值金 ｜ 單一毛孩/專屬個人包卡</p>
         </div>
         <a id="btn-link-loyalty" href="loyalty.html" target="_blank" class="px-3 py-1 bg-brand-100 text-brand-800 rounded-lg font-bold text-[11px]">查看前台卡面 ➔</a>
       </div>
@@ -427,7 +427,6 @@
         </div>
       </div>
 
-      <!-- 店內快速選取服務項目 -->
       <div class="p-3 bg-brand-50 rounded-2xl border space-y-2">
         <div class="flex justify-between items-center font-bold">
           <span>前台快速挑選之項目清單 (逗號分隔)：</span>
@@ -440,7 +439,7 @@
         <textarea id="contract-cfg-content" rows="4" class="w-full p-2.5 border rounded-xl leading-relaxed text-xs"></textarea>
       </div>
 
-      <!-- 顧客已簽約存證小資料庫 (10 筆一頁分頁 + 簽名縮圖調閱) -->
+      <!-- 顧客已簽約存證小資料庫 (10 筆一頁分頁 + 簽名圖存證) -->
       <div class="p-3.5 bg-brand-50 rounded-2xl border space-y-2.5">
         <div class="flex justify-between items-center">
           <span class="font-bold text-brand-900">顧客簽約存證紀錄庫 (姓名 / 電話 / Email / 簽名圖存證)：</span>
@@ -1004,7 +1003,7 @@
         html: `
           <div class="text-left text-xs space-y-2">
             <div><label class="font-bold">包卡名稱：</label><input id="pk-name" class="swal2-input text-xs" placeholder="例: 凝膠手部 10 堂暢遊卡"></div>
-            <div><label class="font-bold">總堂數：</label><input id="pk-times" type="number" class="swal2-input text-xs font-mono" value="10"></div>
+            <div><label class="font-bold">總堂數：</label><input id="pk-times" type="number" class="swal2-input text-xs" value="10"></div>
             <div><label class="font-bold">售價：</label><input id="pk-price" type="number" class="swal2-input text-xs font-mono" value="8800"></div>
           </div>
         `,
@@ -1022,7 +1021,7 @@
       // 專員列表
       document.getElementById('overview-staff-admin-list').innerHTML = (allConfig.overview_config.staffList || []).map((s, idx) => `
         <div class="flex justify-between items-center p-2 bg-white rounded-xl border text-xs">
-          <span class="font-bold">${s.name} (${s.id})</span>
+          <span><b>${s.name}</b> (${s.id})</span>
           <div class="flex gap-1 items-center">
             <button type="button" onclick="moveOverviewStaff(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 border flex items-center justify-center font-bold">▲</button>
             <button type="button" onclick="moveOverviewStaff(${idx}, 1)" ${idx === allConfig.overview_config.staffList.length - 1 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 border flex items-center justify-center font-bold">▼</button>
@@ -1053,11 +1052,12 @@
     }
 
     function moveOverviewStaff(idx, dir) {
+      const list = allConfig.overview_config.staffList;
       const target = idx + dir;
-      if (target < 0 || target >= allConfig.overview_config.staffList.length) return;
-      const tmp = allConfig.overview_config.staffList[idx];
-      allConfig.overview_config.staffList[idx] = allConfig.overview_config.staffList[target];
-      allConfig.overview_config.staffList[target] = tmp;
+      if (target < 0 || target >= list.length) return;
+      const tmp = list[idx];
+      list[idx] = list[target];
+      list[target] = tmp;
       renderOverviewAdmin();
       markUnsaved();
     }
@@ -1076,10 +1076,11 @@
       const { value: name } = await Swal.fire({
         title: '新增排程專員 (代號制)',
         input: 'text',
-        inputPlaceholder: '例: 設計師 C 或 美療師 1'
+        inputPlaceholder: '例: 美容師 1 或 設計師 B'
       });
       if (name && name.trim()) {
-        allConfig.overview_config.staffList.push({ id: `S0${allConfig.overview_config.staffList.length + 1}`, name: name.trim() });
+        const list = allConfig.overview_config.staffList;
+        list.push({ id: `S0${list.length + 1}`, name: name.trim() });
         renderOverviewAdmin();
         markUnsaved();
       }
@@ -1149,7 +1150,7 @@
 
     // 10. Tab 7: contract.html 測試發信
     function testResendEmail() {
-      Swal.fire({ title: 'Resend API 連線正常！', text: '已設定官方金鑰，簽約完成將即時自動發送副本存證信。', icon: 'success' });
+      Swal.fire({ title: 'Resend API 連線正常！', text: '官方金鑰已就緒，簽約完成將即時自動發送副本存證信。', icon: 'success' });
     }
 
     // 11. 大資料庫分頁核心渲染邏輯 (POS、Loyalty、Overview、Contract 全部 10 筆一頁)

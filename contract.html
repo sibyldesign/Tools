@@ -104,7 +104,7 @@
       </div>
     </section>
 
-    <!-- 2. 定型化契約正式條款 (需滑動至底部解鎖勾選) -->
+    <!-- 2. 定型化契約正式條款 (智慧滾動檢測) -->
     <section class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3">
       <div class="flex justify-between items-center pb-2 border-b border-brand-100">
         <span class="text-xs font-bold text-brand-900 flex items-center gap-1.5">
@@ -120,7 +120,7 @@
         <!-- 內容由 JS 動態填入 -->
       </div>
 
-      <!-- 同意條款勾選框 (未滑到底部前為 disabled 灰色鎖定) -->
+      <!-- 同意條款勾選框 (未滑到底部前為 disabled 鎖定) -->
       <div class="pt-2 border-t border-brand-100">
         <label id="agree-label" class="flex items-center gap-2 text-xs font-bold text-gray-400 cursor-not-allowed select-none transition">
           <input type="checkbox" id="cb-agree-contract" disabled onchange="toggleSignatureArea(this.checked)" class="w-4 h-4 rounded accent-[#8C7355] cursor-not-allowed">
@@ -561,39 +561,85 @@
 
     let hasScrolledToBottom = false;
 
-    // 檢測是否滑動至底端
+    let hasScrolledToBottom = false;
+
+    // 智慧檢查契約長度：短內容免滑動直接解鎖，長內容需滑到底端
+    function checkContractScrollEligibility() {
+      const el = document.getElementById('contract-clause-body');
+      if (!el) return;
+      // 若內容高度小於或等於可視高度 (無法滾動或已見全貌)，直接解鎖
+      if (el.scrollHeight <= el.clientHeight + 10) {
+        unlockContractAgreement();
+      } else {
+        lockContractAgreement();
+      }
+    }
+
     function handleContractScroll(el) {
       if (hasScrolledToBottom) return;
-      // 容差 5px 確保手機觸控精準觸發
-      if (el.scrollHeight - el.scrollTop <= el.clientHeight + 5) {
-        hasScrolledToBottom = true;
-        const cb = document.getElementById('cb-agree-contract');
-        const label = document.getElementById('agree-label');
-        const badge = document.getElementById('scroll-tip-badge');
+      // 容差 15px 確保手機觸控精準判定
+      if (el.scrollHeight - el.scrollTop <= el.clientHeight + 15) {
+        unlockContractAgreement();
+      }
+    }
 
+    function unlockContractAgreement() {
+      hasScrolledToBottom = true;
+      const cb = document.getElementById('cb-agree-contract');
+      const label = document.getElementById('agree-label');
+      const badge = document.getElementById('scroll-tip-badge');
+
+      if (cb) {
         cb.disabled = false;
         cb.classList.remove('cursor-not-allowed');
         cb.classList.add('cursor-pointer');
+      }
+      if (label) {
         label.classList.remove('text-gray-400', 'cursor-not-allowed');
         label.classList.add('text-brand-900', 'cursor-pointer');
-        badge.innerHTML = '<span class="text-emerald-700 font-bold">✓ 已閱讀完畢，請勾選同意</span>';
       }
+      if (badge) {
+        badge.innerHTML = '<span class="text-emerald-700 font-bold"><i class="fa-solid fa-circle-check mr-0.5"></i>已閱畢，請勾選同意</span>';
+      }
+    }
+
+    function lockContractAgreement() {
+      hasScrolledToBottom = false;
+      const cb = document.getElementById('cb-agree-contract');
+      const label = document.getElementById('agree-label');
+      const badge = document.getElementById('scroll-tip-badge');
+
+      if (cb) {
+        cb.disabled = true;
+        cb.checked = false;
+        cb.classList.add('cursor-not-allowed');
+      }
+      if (label) {
+        label.classList.add('text-gray-400', 'cursor-not-allowed');
+      }
+      if (badge) {
+        badge.innerHTML = '<i class="fa-solid fa-angles-down animate-bounce mr-0.5"></i>請滑動至底端';
+      }
+      toggleSignatureArea(false);
     }
 
     // 勾選同意切換簽名框
     function toggleSignatureArea(isChecked) {
       const sigSection = document.getElementById('section-signature-pad');
+      if (!sigSection) return;
+
       if (isChecked) {
         sigSection.classList.remove('hidden');
-        // 初始化重置 Canvas 尺寸防形變
         setTimeout(() => {
-          const rect = canvas.getBoundingClientRect();
-          canvas.width = rect.width;
-          canvas.height = rect.height;
-          ctx.strokeStyle = "#1F1D1A";
-          ctx.lineWidth = 2.5;
-          ctx.lineCap = "round";
-          ctx.lineJoin = "round";
+          if (canvas) {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            ctx.strokeStyle = "#1F1D1A";
+            ctx.lineWidth = 2.5;
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+          }
         }, 50);
       } else {
         sigSection.classList.add('hidden');
@@ -601,15 +647,22 @@
       }
     }
 
-    // 嚴格阻擋送出檢查
+    // 渲染條款後立即觸發智慧高度檢查
+    const origRenderClauses = renderContractClauses;
+    renderContractClauses = function() {
+      origRenderClauses();
+      setTimeout(checkContractScrollEligibility, 80);
+    };
+
+    // 嚴格阻擋未勾選或未簽名
     const origSubmit = submitContractSigning;
     submitContractSigning = function() {
       const agreeCb = document.getElementById('cb-agree-contract');
       if (!agreeCb || !agreeCb.checked) {
-        return Swal.fire('請先閱讀合約並勾選同意條款！', '需滑動至條款最下方才能勾選同意。', 'warning');
+        return Swal.fire('請先詳閱合約內容並勾選同意條款！', '條款內容需滑動到底端以解除鎖定。', 'warning');
       }
       if (!hasSigned) {
-        return Swal.fire('請在手寫板完成親筆簽名！', '簽章為重要電子法律存證要件。', 'warning');
+        return Swal.fire('請於手寫簽名板親筆簽署大名！', '簽章為重要數位存證要件，未簽署無法送出。', 'warning');
       }
       origSubmit();
     };

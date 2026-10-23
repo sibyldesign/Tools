@@ -738,6 +738,7 @@
     }
 
     // 9. 儲存設定至 Supabase 雲端
+    // [工具標籤: studio_slot.html 雲端時段增量儲存]
     async function saveStoreSettingsToCloud(isSilent = false) {
       slotConfig.startTime = document.getElementById('cfg-start-time').value;
       slotConfig.endTime = document.getElementById('cfg-end-time').value;
@@ -754,13 +755,42 @@
       }
 
       try {
+        // 1. 同步店長 PIN 碼至店家資料表
         await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?id=eq.${currentStore.id}`, {
           method: "PATCH",
-          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json" },
+          headers: {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json"
+          },
           body: JSON.stringify({ admin_pin: currentStore.admin_pin })
         });
 
-        await fetch(`${SUPABASE_URL}/rest/v1/tool_settings`, {
+        // 2. 增量合併：先撈取既有完整 slot_config，保留其餘工具設定
+        let mergedConfig = {};
+        try {
+          const fetchRes = await fetch(`${SUPABASE_URL}/rest/v1/tool_settings?store_id=eq.${currentStore.id}&select=slot_config`, {
+            headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` }
+          });
+          const existingData = await fetchRes.json();
+          if (existingData && existingData.length > 0 && existingData[0].slot_config) {
+            mergedConfig = existingData[0].slot_config;
+          }
+        } catch (readErr) {
+          console.warn("讀取既有設定失敗，將直接寫入:", readErr);
+        }
+
+        // 僅更新時段相關鍵值
+        mergedConfig.startTime = slotConfig.startTime;
+        mergedConfig.endTime = slotConfig.endTime;
+        mergedConfig.interval = slotConfig.interval;
+        mergedConfig.weeklyOff = slotConfig.weeklyOff;
+        mergedConfig.lineUrl = slotConfig.lineUrl;
+        mergedConfig.schedule = slotConfig.schedule;
+        mergedConfig.theme = slotConfig.theme;
+
+        // 3. 安全 Upsert 至 tool_settings
+        const saveRes = await fetch(`${SUPABASE_URL}/rest/v1/tool_settings?on_conflict=store_id`, {
           method: "POST",
           headers: {
             "apikey": SUPABASE_ANON_KEY,
@@ -770,11 +800,13 @@
           },
           body: JSON.stringify({
             store_id: currentStore.id,
-            slot_config: slotConfig,
+            slot_config: mergedConfig,
             store_pin: currentStore.admin_pin,
             updated_at: new Date().toISOString()
           })
         });
+
+        if (!saveRes.ok) throw new Error(await saveRes.text());
 
         if (!isSilent) {
           Swal.fire({
@@ -788,7 +820,6 @@
         if (!isSilent) Swal.fire('儲存失敗', err.message, 'error');
       }
     }
-
     function syncAdminInputs() {
       document.getElementById('cfg-start-time').value = slotConfig.startTime || "10:00";
       document.getElementById('cfg-end-time').value = slotConfig.endTime || "20:00";

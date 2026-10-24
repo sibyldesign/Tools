@@ -1080,7 +1080,13 @@
           },
           body: JSON.stringify({
             store_id: currentStore.id,
-            slot_config: { pos_config: posConfig },
+            slot_config: { 
+  pos_config: {
+    categories: posConfig.categories,
+    items: posConfig.items,
+    addons: posConfig.addons || []
+  } 
+},
             store_pin: currentStore.admin_pin,
             updated_at: new Date().toISOString()
           })

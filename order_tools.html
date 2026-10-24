@@ -764,9 +764,9 @@
     function contactForTrial(toolKey, toolName) {
       let msg = "";
       if (toolKey === 'all') {
-        msg = encodeURIComponent("您好！我想了解希貝兒美業微工具系列，請提供各工具的實機在線試用連結，謝謝！");
+        msg = encodeURIComponent("您好！我想了解希貝兒美業微工具系列，請提供微工具的試用連結，謝謝！");
       } else {
-        msg = encodeURIComponent(`您好！我對【${toolName}】很有興趣，想領取實機試用連結實測功能，謝謝！`);
+        msg = encodeURIComponent(`您好！我對【${toolName}】很有興趣，想領取微工具的試用連結實測功能，謝謝！`);
       }
       window.open(`https://line.me/R/ti/p/@480kqjoj?text=${msg}`, '_blank');
     }

@@ -952,6 +952,11 @@
       if (currentBookingMode === 'off') {
         const dur = Number(document.getElementById('off-duration-select').value);
         const reason = document.getElementById('off-reason').value.trim() || '專員休假';
+        const nowTs = new Date().toLocaleString('zh-TW', { 
+        year: 'numeric', month: '2-digit', day: '2-digit', 
+        hour: '2-digit', minute: '2-digit', second: '2-digit', 
+        hour12: false 
+      });
 
         bookingsDb.push({
           id: `off-${Date.now().toString().slice(-5)}`,
@@ -965,8 +970,10 @@
           serviceName: '時段封鎖',
           isOff: true,
           type: 'Group_B',
-          resource: 'none'
-        });
+          resource: s.resource,
+        note: document.getElementById('book-note').value.trim(),
+        createdAt: nowTs // [新增] 寫入當下實際時間戳記
+      });
         saveBookingsDb();
         closeBookingModal();
         renderGanttCanvas();
@@ -1606,29 +1613,36 @@
     }
 
     function renderAuditLogsTable() {
-  const container = document.getElementById('admin-audit-table');
-  if (!container) return;
-  if (bookingsDb.length === 0) {
-    container.innerHTML = '<div class="text-center py-6 text-brand-400">目前尚無任何插單紀錄</div>';
-    return;
-  }
-  container.innerHTML = bookingsDb.slice().reverse().map(b => {
-    const staffObj = staffList.find(s => s.id === b.staffId);
-    const sName = staffObj ? `${staffObj.name} (${staffObj.id})` : b.staffId;
-    return `
-      <div class="p-2.5 bg-white rounded-xl border border-brand-200 text-xs shadow-2xs space-y-1">
-        <div class="flex justify-between font-bold">
-          <span class="text-brand-900">${b.date} ${b.startTime} - ${b.serviceName}</span>
-          <span class="text-[#8C7355]">${sName}</span>
-        </div>
-        <div class="text-[10.5px] text-brand-500 flex justify-between">
-          <span>顧客: ${b.custName} (${b.custPhone})</span>
-          <span class="font-mono text-stone-400">ID: ${b.id}</span>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
+      const container = document.getElementById('admin-audit-table');
+      if (!container) return;
+      if (bookingsDb.length === 0) {
+        container.innerHTML = '<div class="text-center py-6 text-brand-400">目前尚無任何插單紀錄</div>';
+        return;
+      }
+      container.innerHTML = bookingsDb.slice().reverse().map(b => {
+        const staffObj = staffList.find(s => s.id === b.staffId);
+        const sName = staffObj ? `${staffObj.name} (${staffObj.id})` : b.staffId;
+        const createdTime = b.createdAt || "歷史既有資料";
+
+        return `
+          <div class="p-2.5 bg-white rounded-xl border border-brand-200 text-xs shadow-2xs space-y-1">
+            <div class="flex justify-between font-bold">
+              <span class="text-brand-900">${b.date} ${b.startTime} - ${b.serviceName}</span>
+              <span class="text-[#8C7355]">${sName}</span>
+            </div>
+            <div class="text-[10.5px] text-brand-600 flex justify-between">
+              <span>顧客：${b.custName} (${b.custPhone})</span>
+              <span class="font-mono text-stone-400">ID: ${b.id}</span>
+            </div>
+            <!-- 插單當下系統時間戳記 -->
+            <div class="text-[9.5px] text-brand-400 border-t border-brand-100 pt-1 flex items-center justify-between font-mono">
+              <span><i class="fa-regular fa-clock mr-1"></i>操作時間：${createdTime}</span>
+              <span class="text-emerald-700 font-bold">✓ 已入庫</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
   </script>
 </body>
 </html>

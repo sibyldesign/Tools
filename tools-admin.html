@@ -1060,7 +1060,8 @@
         if (!saveRes.ok) throw new Error(await saveRes.text());
 
         hasUnsavedChanges = false;
-        document.getElementById('sticky-unsaved-bar').classList.add('hidden');
+        const unsavedBar = document.getElementById('sticky-unsaved-bar');
+        if (unsavedBar) unsavedBar.classList.add('hidden');
         Swal.fire('雲端統一設定已全數同步！', '所有前台與單頁後台已即刻鏡像生效。', 'success');
       } catch (err) {
         Swal.fire('儲存失敗', err.message, 'error');

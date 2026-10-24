@@ -953,10 +953,10 @@
         const dur = Number(document.getElementById('off-duration-select').value);
         const reason = document.getElementById('off-reason').value.trim() || '專員休假';
         const nowTs = new Date().toLocaleString('zh-TW', { 
-        year: 'numeric', month: '2-digit', day: '2-digit', 
-        hour: '2-digit', minute: '2-digit', second: '2-digit', 
-        hour12: false 
-      });
+          year: 'numeric', month: '2-digit', day: '2-digit', 
+          hour: '2-digit', minute: '2-digit', second: '2-digit', 
+          hour12: false 
+        });
 
         bookingsDb.push({
           id: `off-${Date.now().toString().slice(-5)}`,
@@ -970,17 +970,17 @@
           serviceName: '時段封鎖',
           isOff: true,
           type: 'Group_B',
-          resource: s.resource,
-        note: document.getElementById('book-note').value.trim(),
-        createdAt: nowTs // [新增] 寫入當下實際時間戳記
-      });
+          resource: 'none', // [修復] 將原本的 s.resource 改為 'none'
+          note: document.getElementById('book-note').value.trim(),
+          createdAt: nowTs
+        });
         saveBookingsDb();
         closeBookingModal();
         renderGanttCanvas();
         Swal.fire({ title: '專員休假登記完成！', icon: 'success', timer: 800, showConfirmButton: false });
         return;
       }
-
+      
       const phone = document.getElementById('book-phone').value.trim();
       const name = document.getElementById('book-name').value.trim();
       const line = document.getElementById('book-line').value.trim();

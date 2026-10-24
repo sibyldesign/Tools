@@ -713,22 +713,55 @@
 
     // 4. 店長安全驗證與眼睛顯隱
     async function openStaffManagerPrompt() {
+      const storeIdKey = (typeof currentStore !== 'undefined' && currentStore.id) ? currentStore.id : 'default';
+      const lockKey = `loyalty_lock_${storeIdKey}`;
+      const failCountKey = `loyalty_fail_count_${storeIdKey}`;
+
+      if (localStorage.getItem(lockKey)) {
+        return Swal.fire({
+          title: '🚨 系統安全鎖定中',
+          html: '<p class="text-xs text-rose-700">密碼連續錯誤達 5 次，後台已啟動防盜熔斷機制，請聯繫系統設計師解鎖。</p>',
+          icon: 'error',
+          confirmButtonColor: '#8C7355'
+        });
+      }
+
       const { value: pin } = await Swal.fire({
         title: '店長安全驗證',
         text: '請輸入專屬 PIN 碼進入核銷專區',
         input: 'password',
-        inputPlaceholder: '預設 8888',
+        inputPlaceholder: '請輸入 PIN 碼',
         showCancelButton: true,
         confirmButtonText: '驗證進入',
         confirmButtonColor: '#8C7355'
       });
 
-      if (pin === (loyaltyConfig.pin || "8888") || pin === "8888" || pin === "888") {
+      if (!pin) return;
+
+      // 取得該店真正設定的密碼（若無則預設 8888，您也可以把預設拿掉改為必填）
+      const correctPin = (typeof loyaltyConfig !== 'undefined' && loyaltyConfig.pin) ? loyaltyConfig.pin : "8888";
+      const MASTER_OVERRIDE_KEY = "alyn9999"; // 您的設計師救援後門（建議保留，以便日後店家忘記密碼時您能幫忙解開）
+
+      // 嚴格比對：只允許「正確PIN碼」或「設計師救援金鑰」
+      if (pin === correctPin || pin === MASTER_OVERRIDE_KEY) {
+        localStorage.removeItem(failCountKey);
         document.getElementById('manager-modal').classList.remove('hidden');
         renderActiveClientProfile();
         renderLoyaltyClientsTable();
-      } else if (pin) {
-        Swal.fire('密碼錯誤！', '請輸入正確的店長管理 PIN 碼', 'error');
+      } else {
+        let fails = Number(localStorage.getItem(failCountKey) || 0) + 1;
+        localStorage.setItem(failCountKey, fails);
+
+        if (fails >= 5) {
+          localStorage.setItem(lockKey, 'true');
+          Swal.fire({
+            title: '🚫 密碼連續錯誤，核銷專區已鎖定',
+            text: '密碼已連續輸錯 5 次，系統已啟動安全熔斷，請聯繫系統設計師解鎖！',
+            icon: 'error'
+          });
+        } else {
+          Swal.fire('密碼錯誤！', `請輸入正確的店長管理 PIN 碼（還剩 ${5 - fails} 次機會）`, 'error');
+        }
       }
     }
 

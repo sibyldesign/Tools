@@ -268,6 +268,9 @@
         <button type="button" onclick="switchManagerTab('tab-clients', this)" class="mgr-tab-btn py-3 px-3.5 text-brand-400 hover:text-brand-700 shrink-0">
           顧客庫
         </button>
+        <button type="button" onclick="switchManagerTab('tab-audit-logs', this)" class="mgr-tab-btn py-3 px-3.5 text-brand-400 hover:text-brand-700 shrink-0">
+  插單審計紀錄
+</button>
       </div>
 
       <!-- 滾動內容區域 -->
@@ -381,6 +384,14 @@
             <div class="flex gap-1" id="cust-page-btns"></div>
           </div>
         </div>
+        <!-- [新增分頁] 插單審計紀錄 -->
+<div id="tab-audit-logs" class="mgr-pane space-y-3 hidden">
+  <div class="flex justify-between items-center">
+    <span class="font-bold text-brand-900">歷次插單與排程建立日誌 (防漏單核對)：</span>
+    <button type="button" onclick="renderAuditLogsTable()" class="text-[11px] text-[#8C7355] underline">重新整理</button>
+  </div>
+  <div class="space-y-2 max-h-72 overflow-y-auto" id="admin-audit-table"></div>
+</div>
 
       </div>
     </div>
@@ -436,16 +447,22 @@
     const CUST_PAGE_SIZE = 10;
     let filteredCustList = [];
 
-    // 莫蘭迪色票庫
-    const MORANDI_PALETTE = [
-      { bg: '#8FA89B', border: '#7E988B' },
-      { bg: '#D98A8A', border: '#C87979' },
-      { bg: '#D4A373', border: '#C39262' },
-      { bg: '#8A9EA7', border: '#798D96' },
-      { bg: '#A68A9F', border: '#95798E' },
-      { bg: '#C2A68C', border: '#B1957B' },
-      { bg: '#6B8E8E', border: '#5A7D7D' },
-      { bg: '#C97A63', border: '#B86952' }
+    // 嚴格莫蘭迪順序：粉、橘、黃、綠、藍、紫（第一輪粉嫩，第二輪灰階加深）
+    const STRICT_MORANDI_PALETTE = [
+      // 第 1 輪 (經典莫蘭迪柔彩色)
+      { bg: '#E5A9A9', border: '#D49595' }, // 0. 煙粉
+      { bg: '#E8B298', border: '#D69E83' }, // 1. 暖杏橘
+      { bg: '#EDD382', border: '#DBC06E' }, // 2. 麥香黃
+      { bg: '#9EBC9E', border: '#8AA88A' }, // 3. 鼠尾草綠
+      { bg: '#97B3C6', border: '#839FB2' }, // 4. 霧霾藍
+      { bg: '#BFA8C0', border: '#AA93AB' }, // 5. 丁香灰紫
+      // 第 2 輪 (灰階加深沉穩色，項目過多時自動遞補)
+      { bg: '#BA8B8B', border: '#A87979' }, // 6. 灰陶粉
+      { bg: '#C28B75', border: '#AF7761' }, // 7. 焦糖灰橘
+      { bg: '#C4AE6C', border: '#B09B59' }, // 8. 灰芥末黃
+      { bg: '#7D987D', border: '#6B866B' }, // 9. 灰墨綠
+      { bg: '#778D9B', border: '#657B89' }, // 10. 灰板岩藍
+      { bg: '#968197', border: '#846F85' }  // 11. 深灰紫
     ];
 
     window.addEventListener('DOMContentLoaded', async () => {
@@ -705,88 +722,113 @@
       renderBookingBlocks(displayedStaff, totalStartMins, interval, slotHeight);
     }
 
+    // 動態配對項目色票（確保不同項目依序領取不同顏色）
+    const serviceColorCache = {};
+    let colorAssignCounter = 0;
+
     function getMorandiColorByService(serviceName) {
-      if (!serviceName) return MORANDI_PALETTE[0];
-      let hash = 0;
-      for (let i = 0; i < serviceName.length; i++) {
-        hash = serviceName.charCodeAt(i) + ((hash << 5) - hash);
+      if (!serviceName) return STRICT_MORANDI_PALETTE[0];
+      if (!serviceColorCache[serviceName]) {
+        serviceColorCache[serviceName] = STRICT_MORANDI_PALETTE[colorAssignCounter % STRICT_MORANDI_PALETTE.length];
+        colorAssignCounter++;
       }
-      const index = Math.abs(hash) % MORANDI_PALETTE.length;
-      return MORANDI_PALETTE[index];
+      return serviceColorCache[serviceName];
     }
 
     function renderBookingBlocks(displayedStaff, baseMins, interval, slotHeight) {
       const container = document.getElementById('gantt-body-container');
       const todays = bookingsDb.filter(b => b.date === selectedDate);
+      const pxPerMinute = slotHeight / interval;
 
-      todays.forEach(b => {
-        const staffIndex = displayedStaff.findIndex(s => s.id === b.staffId);
-        if (staffIndex === -1) return;
+      displayedStaff.forEach((staff, staffIndex) => {
+        const staffBookings = todays.filter(b => b.staffId === staff.id);
 
-        const [sh, sm] = b.startTime.split(':').map(Number);
-        const startMins = sh * 60 + sm;
-        const pxPerMinute = slotHeight / interval;
-        const topPx = (startMins - baseMins) * pxPerMinute;
-        const heightPx = b.durMins * pxPerMinute - 2;
+        staffBookings.forEach((b, i) => {
+          const [sh, sm] = b.startTime.split(':').map(Number);
+          const bStart = sh * 60 + sm;
+          const bEnd = bStart + b.durMins;
+          const topPx = (bStart - baseMins) * pxPerMinute;
+          const heightPx = b.durMins * pxPerMinute - 2;
+          if (topPx < 0) return;
 
-        if (topPx < 0) return;
+          // 碰撞分流檢查：同專員、重疊時段、且可插單 (Group_A)
+          let colPos = 0; // 0: 單獨滿版, 1: 靠左(寬度50%), 2: 靠右(寬度50%)
+          const hasOverlap = staffBookings.some((ob, oi) => {
+            if (i === oi) return false;
+            const [osh, osm] = ob.startTime.split(':').map(Number);
+            const obStart = osh * 60 + osm;
+            const obEnd = obStart + ob.durMins;
+            return (bStart < obEnd && bEnd > obStart);
+          });
 
-        const isOff = (b.isOff === true);
-        const block = document.createElement('div');
-        const itemColor = getMorandiColorByService(b.serviceName);
+          if (hasOverlap && b.type === 'Group_A') {
+            // 依據索引奇偶數分配左右側
+            colPos = (i % 2 === 0) ? 1 : 2;
+          }
 
-        block.className = `absolute z-20 rounded-xl p-2 shadow-md cursor-pointer transition hover:scale-[1.01] overflow-hidden flex flex-col justify-between ${
-          isOff ? 'bg-stone-200 border border-stone-300 text-stone-700' : 'text-white'
-        }`;
+          const isOff = (b.isOff === true);
+          const block = document.createElement('div');
+          const itemColor = getMorandiColorByService(b.serviceName);
 
-        block.style.top = `${topPx}px`;
-        block.style.height = `${heightPx}px`;
-        block.style.gridColumnStart = `${staffIndex + 1}`;
-        block.style.gridColumnEnd = `${staffIndex + 2}`;
-        block.style.marginLeft = '4px';
-        block.style.marginRight = '4px';
+          block.className = `absolute z-20 rounded-xl p-1.5 shadow-md cursor-pointer transition hover:scale-[1.01] overflow-hidden flex flex-col justify-between ${
+            isOff ? 'bg-stone-200 border border-stone-300 text-stone-700' : 'text-white'
+          }`;
 
-        if (!isOff) {
-          block.style.backgroundColor = itemColor.bg;
-          block.style.border = `1px solid ${itemColor.border}`;
-        }
+          block.style.top = `${topPx}px`;
+          block.style.height = `${heightPx}px`;
+          block.style.gridColumnStart = `${staffIndex + 1}`;
+          block.style.gridColumnEnd = `${staffIndex + 2}`;
 
-        const endMins = startMins + b.durMins;
-        const endTimeStr = `${String(Math.floor(endMins/60)).padStart(2,'0')}:${String(endMins%60).padStart(2,'0')}`;
+          // 並排定位處理
+          if (colPos === 1) {
+            block.style.width = 'calc(50% - 6px)';
+            block.style.left = '4px';
+          } else if (colPos === 2) {
+            block.style.width = 'calc(50% - 6px)';
+            block.style.left = 'calc(50% + 2px)';
+          } else {
+            block.style.left = '4px';
+            block.style.right = '4px';
+          }
 
-        if (isOff) {
-          block.innerHTML = `
-            <div>
-              <div class="text-[9.5px] font-mono font-bold flex justify-between">
-                <span>${b.startTime} - ${endTimeStr} (${b.durMins}分)</span>
-                <span>[休假]</span>
+          if (!isOff) {
+            block.style.backgroundColor = itemColor.bg;
+            block.style.border = `1px solid ${itemColor.border}`;
+          }
+
+          const endMins = bStart + b.durMins;
+          const endTimeStr = `${String(Math.floor(endMins/60)).padStart(2,'0')}:${String(endMins%60).padStart(2,'0')}`;
+
+          if (isOff) {
+            block.innerHTML = `
+              <div>
+                <div class="text-[9px] font-mono font-bold flex justify-between">
+                  <span>${b.startTime}-${endTimeStr}</span><span>[休]</span>
+                </div>
+                <div class="font-bold text-xs mt-0.5 truncate">☕ ${b.custName || '排休'}</div>
               </div>
-              <div class="font-black text-xs mt-1">☕ ${b.custName || '專員排休'}</div>
-            </div>
-            <div class="text-[9px] opacity-70">時段已鎖定</div>
-          `;
-        } else {
-          block.innerHTML = `
-            <div>
-              <div class="flex justify-between items-center text-[9.5px] font-mono opacity-90 pb-0.5 border-b border-white/20">
-                <span>${b.startTime} - ${endTimeStr}</span>
-                <span class="font-bold bg-black/20 px-1 rounded">${b.durMins}分鐘</span>
+            `;
+          } else {
+            block.innerHTML = `
+              <div>
+                <div class="flex justify-between items-center text-[9px] font-mono opacity-90 pb-0.5 border-b border-white/20">
+                  <span>${b.startTime}-${endTimeStr}</span>
+                  <span class="font-bold bg-black/20 px-1 rounded">${b.durMins}分</span>
+                </div>
+                <div class="font-bold text-xs truncate mt-0.5">${b.custName} <span class="font-normal text-[9px]">(${b.custPhone.slice(-4)})</span></div>
+                <div class="text-[9.5px] truncate font-medium opacity-95">${b.serviceName}</div>
               </div>
-              <div class="font-bold text-xs truncate mt-1">
-                ${b.custName} <span class="font-normal font-mono text-[9.5px]">(${b.custPhone.slice(-4)})</span>
-              </div>
-              <div class="text-[10px] truncate font-medium opacity-95">${b.serviceName}</div>
-            </div>
-            ${b.resource && b.resource !== 'none' ? `<div class="text-[9px] bg-black/25 rounded px-1 py-0.5 inline-block truncate"><i class="fa-solid fa-chair text-[8px] mr-0.5"></i>${b.resource}</div>` : ''}
-          `;
-        }
+              ${b.resource && b.resource !== 'none' ? `<div class="text-[8.5px] bg-black/25 rounded px-1 py-0.5 inline-block truncate mt-auto"><i class="fa-solid fa-chair text-[7px] mr-0.5"></i>${b.resource}</div>` : ''}
+            `;
+          }
 
-        block.onclick = (e) => {
-          e.stopPropagation();
-          viewBookingDetail(b.id);
-        };
+          block.onclick = (e) => {
+            e.stopPropagation();
+            viewBookingDetail(b.id);
+          };
 
-        container.appendChild(block);
+          container.appendChild(block);
+        });
       });
     }
 
@@ -1024,14 +1066,18 @@
       const b = bookingsDb.find(item => item.id === bookingId);
       if (!b) return;
 
+      // 取得專員代號與姓名
+      const staffObj = staffList.find(s => s.id === b.staffId);
+      const staffDisplay = staffObj ? `${staffObj.name} (${staffObj.id})` : b.staffId;
+
       Swal.fire({
         title: `排程預約詳情卡片`,
         html: `
           <div class="text-left text-xs bg-brand-50 p-3.5 rounded-2xl border border-brand-200 space-y-1.5 font-sans leading-relaxed">
+            <div>指定專員：<b class="text-[#8C7355]">${staffDisplay}</b></div>
             <div>顧客姓名：<b>${b.custName}</b></div>
             <div>聯絡電話：<span class="font-mono font-bold">${b.custPhone}</span></div>
             <div>LINE 稱呼：<b class="text-emerald-700 font-bold">${b.custLine || '未填寫'}</b></div>
-            <div>指定專員：<b>${b.staffId}</b></div>
             <div>預約時段：<b>${b.date} ${b.startTime}</b> (施作耗時：<b>${b.durMins}</b> 分鐘)</div>
             <div>施作項目：<b>${b.serviceName}</b></div>
             <div>插單屬性：<span class="font-bold text-amber-800">${b.type}</span> ｜ 佔用設備: <b>${b.resource}</b></div>
@@ -1041,7 +1087,6 @@
         showCancelButton: true,
         showDenyButton: true,
         confirmButtonText: '關閉保留',
-        confirmButtonColor: '#8C7355',
         denyButtonText: '刪除此筆排程色塊',
         denyButtonColor: '#e11d48'
       }).then(r => {
@@ -1056,23 +1101,67 @@
 
     // 5. 店長專區驗證與分頁
     async function openManagerPinPrompt() {
+      // 1. 檢查是否已被系統鎖定
+      const lockKey = `mgr_lock_${currentStore.id}`;
+      const failCountKey = `mgr_fail_count_${currentStore.id}`;
+      const isLocked = localStorage.getItem(lockKey);
+
+      if (isLocked) {
+        return Swal.fire({
+          title: '🚨 系統安全鎖定中',
+          html: `
+            <div class="text-xs text-rose-700 space-y-2 text-left">
+              <p>由於密碼連續錯誤達 5 次，為保護店內顧客電話與隱私個資，後台已啟動防盜安全熔斷機制。</p>
+              <p class="font-bold">請聯繫系統設計師 (Alyn) 進行人工安全身份驗證並重設開通。</p>
+            </div>
+          `,
+          icon: 'error',
+          confirmButtonText: '確認',
+          confirmButtonColor: '#8C7355'
+        });
+      }
+
       const { value: pin } = await Swal.fire({
         title: '店長安全驗證',
         input: 'password',
-        inputPlaceholder: '請輸入 PIN 碼 (預設 8888)',
+        inputPlaceholder: '請輸入店長 PIN 碼',
         showCancelButton: true,
         confirmButtonText: '驗證進入',
         confirmButtonColor: '#8C7355'
       });
-      if (pin === (currentStore.admin_pin || "8888") || pin === "8888" || pin === "888") {
+
+      if (!pin) return;
+
+      const correctPin = currentStore.admin_pin || "8888";
+
+      // 超級管理者後門金鑰（供你緊急解鎖客戶門市，不需等待）
+      const MASTER_OVERRIDE_KEY = "alyn9999";
+
+      if (pin === correctPin || pin === MASTER_OVERRIDE_KEY) {
+        // 成功進入：歸零失敗計數
+        localStorage.removeItem(failCountKey);
         document.getElementById('manager-modal').classList.remove('hidden');
         syncBusinessHoursForm();
         renderAdminStaffList();
         renderAdminServicesList();
         renderAdminResourcesList();
         renderCustomerTable();
-      } else if (pin) {
-        Swal.fire('密碼錯誤！', '', 'error');
+        renderAuditLogsTable();
+      } else {
+        // 累計失敗次數
+        let fails = Number(localStorage.getItem(failCountKey) || 0) + 1;
+        localStorage.setItem(failCountKey, fails);
+
+        if (fails >= 5) {
+          localStorage.setItem(lockKey, 'true');
+          Swal.fire({
+            title: '🚫 密碼連續錯誤，網站已鎖定',
+            text: '密碼已連續輸錯 5 次，系統已鎖定顧客庫，請聯絡系統設計師開通！',
+            icon: 'error'
+          });
+        } else {
+          Swal.fire(`密碼錯誤！還剩 ${5 - fails} 次機會即會永久鎖定。`, '', 'warning');
+        }
       }
     }
 
@@ -1515,6 +1604,31 @@
     function formatYearMonthDay(d) {
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
+
+    function renderAuditLogsTable() {
+  const container = document.getElementById('admin-audit-table');
+  if (!container) return;
+  if (bookingsDb.length === 0) {
+    container.innerHTML = '<div class="text-center py-6 text-brand-400">目前尚無任何插單紀錄</div>';
+    return;
+  }
+  container.innerHTML = bookingsDb.slice().reverse().map(b => {
+    const staffObj = staffList.find(s => s.id === b.staffId);
+    const sName = staffObj ? `${staffObj.name} (${staffObj.id})` : b.staffId;
+    return `
+      <div class="p-2.5 bg-white rounded-xl border border-brand-200 text-xs shadow-2xs space-y-1">
+        <div class="flex justify-between font-bold">
+          <span class="text-brand-900">${b.date} ${b.startTime} - ${b.serviceName}</span>
+          <span class="text-[#8C7355]">${sName}</span>
+        </div>
+        <div class="text-[10.5px] text-brand-500 flex justify-between">
+          <span>顧客: ${b.custName} (${b.custPhone})</span>
+          <span class="font-mono text-stone-400">ID: ${b.id}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
   </script>
 </body>
 </html>

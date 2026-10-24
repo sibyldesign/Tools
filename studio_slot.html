@@ -27,42 +27,44 @@
   <style>
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
     .story-canvas {
       width: 360px;
-      height: 640px;
-      /* SweetAlert2 全域確認按鈕統一套用系統質感棕色 */
-.swal2-styled.swal2-confirm {
-  background-color: #8C7355 !important;
-  color: #ffffff !important;
-  box-shadow: 0 2px 6px rgba(140, 115, 85, 0.35) !important;
-  border: none !important;
-  border-radius: 0.875rem !important;
-  font-weight: 700 !important;
-  padding: 0.625rem 1.5rem !important;
-  font-size: 0.8125rem !important;
-}
+      min-height: 640px;
+    }
 
-.swal2-styled.swal2-confirm:hover {
-  background-color: #7A6246 !important;
-}
+    /* SweetAlert2 全域確認按鈕統一套用系統質感棕色 */
+    .swal2-styled.swal2-confirm {
+      background-color: #8C7355 !important;
+      color: #ffffff !important;
+      box-shadow: 0 2px 6px rgba(140, 115, 85, 0.35) !important;
+      border: none !important;
+      border-radius: 0.875rem !important;
+      font-weight: 700 !important;
+      padding: 0.625rem 1.5rem !important;
+      font-size: 0.8125rem !important;
+    }
 
-.swal2-styled.swal2-confirm:focus {
-  box-shadow: 0 0 0 3px rgba(140, 115, 85, 0.3) !important;
-}
+    .swal2-styled.swal2-confirm:hover {
+      background-color: #7A6246 !important;
+    }
 
-/* 取消按鈕同步美化為質感米灰 */
-.swal2-styled.swal2-cancel {
-  background-color: #EBE5DF !important;
-  color: #5C4B3C !important;
-  border-radius: 0.875rem !important;
-  font-weight: 700 !important;
-  padding: 0.625rem 1.25rem !important;
-  font-size: 0.8125rem !important;
-}
+    .swal2-styled.swal2-confirm:focus {
+      box-shadow: 0 0 0 3px rgba(140, 115, 85, 0.3) !important;
+    }
 
-.swal2-styled.swal2-cancel:hover {
-  background-color: #D5C7BC !important;
-}
+    /* 取消按鈕同步美化為質感米灰 */
+    .swal2-styled.swal2-cancel {
+      background-color: #EBE5DF !important;
+      color: #5C4B3C !important;
+      border-radius: 0.875rem !important;
+      font-weight: 700 !important;
+      padding: 0.625rem 1.25rem !important;
+      font-size: 0.8125rem !important;
+    }
+
+    .swal2-styled.swal2-cancel:hover {
+      background-color: #D5C7BC !important;
     }
   </style>
 </head>
@@ -210,6 +212,10 @@
                 <option value="-1">無固定公休</option>
                 <option value="1" selected>每週一公休</option>
                 <option value="2">每週二公休</option>
+                <option value="3">每週三公休</option>
+                <option value="4">每週四公休</option>
+                <option value="5">每週五公休</option>
+                <option value="6">每週六公休</option>
                 <option value="0">每週日公休</option>
               </select>
             </div>
@@ -256,7 +262,7 @@
           <div class="grid grid-cols-3 sm:grid-cols-5 gap-2 pt-1" id="admin-slots-matrix"></div>
         </div>
 
-        <!-- 戰鬥雙大按鈕：生成限動圖 ＆ 立即更新前台 (已移至美圖預覽上方) -->
+        <!-- 戰鬥雙大按鈕：生成限動圖 ＆ 立即更新前台 -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
           <button type="button" onclick="exportStoryImage()" class="py-3.5 bg-gradient-to-r from-rose-500 to-amber-600 hover:opacity-90 text-white font-bold rounded-xl text-xs transition shadow-md flex items-center justify-center gap-2">
             <i class="fa-solid fa-download"></i>
@@ -272,7 +278,7 @@
         <div class="p-4 bg-amber-50/60 rounded-2xl border border-amber-200 space-y-3">
           <div class="flex justify-between items-center border-b border-amber-200 pb-1.5">
             <span class="font-bold text-amber-950 flex items-center gap-1.5">
-              <i class="fa-brands fa-instagram text-rose-500"></i> 3. 9:16 直式限動美圖預覽
+              <i class="fa-brands fa-instagram text-rose-500"></i> 3. 9:16 直式限動美圖預覽 (包含所選所有日期空檔)
             </span>
             <div class="flex items-center gap-1.5">
               <span class="text-[10px] text-amber-800 font-bold">風格色票：</span>
@@ -283,26 +289,23 @@
             </div>
           </div>
 
-          <!-- 9:16 預覽容器 -->
+          <!-- 9:16 預覽容器 (已優化支援全部日期時段滾動展示與完整截圖) -->
           <div class="flex justify-center p-2 bg-gray-900/10 rounded-2xl overflow-hidden">
             <div id="story-export-node" class="story-canvas p-6 flex flex-col justify-between rounded-3xl shadow-xl transition-all select-none" style="background-color: #F5ECE3; color: #3D3126;">
               <div class="space-y-1 text-center">
                 <div class="text-[10px] tracking-[0.25em] uppercase font-mono opacity-60">RESERVATION AVAILABLE</div>
                 <div class="text-xl font-bold font-serif" id="story-node-store">沙龍門市名稱</div>
                 <div class="inline-block px-3 py-1 bg-white/70 backdrop-blur-xs rounded-full text-xs font-bold font-mono mt-1" id="story-node-date">
-                  空檔時段釋出
+                  OPEN SLOTS AVAILABLE
                 </div>
               </div>
 
-              <div class="p-4 bg-white/80 backdrop-blur-md rounded-2xl border border-white/60 space-y-2">
-                <div class="text-[11px] font-bold border-b border-black/10 pb-1 text-center flex items-center justify-center gap-1.5">
-                  <span class="w-2 h-2 rounded-full bg-[#8C7355]"></span>
-                  <span>OPEN SLOTS AVAILABLE</span>
-                </div>
-                <div class="grid grid-cols-2 gap-2 text-center font-mono font-bold text-sm" id="story-node-slots-grid"></div>
+              <!-- 全選日期時段渲染容器 -->
+              <div class="my-4 p-4 bg-white/80 backdrop-blur-md rounded-2xl border border-white/60 space-y-3" id="story-slots-container">
+                <!-- 由 renderStoryCanvas 動態依日期填入所有時段 -->
               </div>
 
-              <div class="text-center space-y-1">
+              <div class="text-center space-y-1 pt-2">
                 <div class="text-[11px] font-bold">點擊個人首頁連結，直接前往預約</div>
                 <div class="text-[9.5px] opacity-60 font-mono">POWERED BY SIBYL TOOLS</div>
               </div>
@@ -516,19 +519,17 @@
       });
     }
 
-    // 5. 店長安全驗證與密碼修改
+    // 5. 店長安全驗證與密碼修改 (失敗5次熔斷防盜)
     async function openManagerPinPrompt() {
-      // 1. 檢查是否已被系統鎖定
       const lockKey = `mgr_lock_${currentStore.id}`;
       const failCountKey = `mgr_fail_count_${currentStore.id}`;
-      const isLocked = localStorage.getItem(lockKey);
 
-      if (isLocked) {
+      if (localStorage.getItem(lockKey)) {
         return Swal.fire({
           title: '🚨 系統安全鎖定中',
           html: `
             <div class="text-xs text-rose-700 space-y-2 text-left">
-              <p>由於密碼連續錯誤達 5 次，為保護店內顧客電話與隱私個資，後台已啟動防盜安全熔斷機制。</p>
+              <p>由於密碼連續錯誤達 5 次，為保護店內時段排程與隱私，管理後台已啟動防盜安全熔斷機制。</p>
               <p class="font-bold">請聯繫系統設計師 (Alyn) 進行人工安全身份驗證並重設開通。</p>
             </div>
           `,
@@ -550,22 +551,15 @@
       if (!pin) return;
 
       const correctPin = currentStore.admin_pin || "8888";
-
-      // 超級管理者後門金鑰（供你緊急解鎖客戶門市，不需等待）
       const MASTER_OVERRIDE_KEY = "alyn9999";
 
       if (pin === correctPin || pin === MASTER_OVERRIDE_KEY) {
-        // 成功進入：歸零失敗計數
         localStorage.removeItem(failCountKey);
         document.getElementById('manager-modal').classList.remove('hidden');
-        syncBusinessHoursForm();
-        renderAdminStaffList();
-        renderAdminServicesList();
-        renderAdminResourcesList();
-        renderCustomerTable();
-        renderAuditLogsTable();
+        renderAdminRangeDays();
+        renderAdminSlotsMatrix();
+        renderStoryCanvas();
       } else {
-        // 累計失敗次數
         let fails = Number(localStorage.getItem(failCountKey) || 0) + 1;
         localStorage.setItem(failCountKey, fails);
 
@@ -573,7 +567,7 @@
           localStorage.setItem(lockKey, 'true');
           Swal.fire({
             title: '🚫 密碼連續錯誤，網站已鎖定',
-            text: '密碼已連續輸錯 5 次，系統已鎖定顧客庫，請聯絡系統設計師開通！',
+            text: '密碼已連續輸錯 5 次，系統已鎖定管理中心，請聯絡系統設計師開通！',
             icon: 'error'
           });
         } else {
@@ -612,12 +606,13 @@
       const end = new Date(today.getTime() + 6 * 86400000);
       document.getElementById('admin-range-start').value = UtilitiesFormatDate(today);
       document.getElementById('admin-range-end').value = UtilitiesFormatDate(end);
+      renderAdminRangeDays();
     }
 
     function syncAdminRangeDates() {
       renderAdminRangeDays();
       renderAdminSlotsMatrix();
-      refreshStoryNode();
+      renderStoryCanvas();
     }
 
     function renderAdminRangeDays() {
@@ -651,7 +646,7 @@
           adminEditingDate = dStr;
           renderAdminRangeDays();
           renderAdminSlotsMatrix();
-          refreshStoryNode();
+          renderStoryCanvas();
         };
         container.appendChild(btn);
         cur.setDate(cur.getDate() + 1);
@@ -700,7 +695,7 @@
         btn.className = "py-2.5 px-1.5 rounded-xl border text-xs font-mono font-bold transition flex items-center justify-center gap-1 bg-[#8C7355] text-white border-[#8C7355] shadow-xs";
         btn.innerHTML = `<i class="fa-solid fa-check text-[10px]"></i><span>${timeStr}</span>`;
       }
-      refreshStoryNode();
+      renderStoryCanvas();
     }
 
     function batchToggleSlots(isAll) {
@@ -709,7 +704,7 @@
       const interval = Number(document.getElementById('cfg-interval').value || 30);
       slotConfig.schedule[adminEditingDate] = isAll ? generateDaySlots(start, end, interval) : [];
       renderAdminSlotsMatrix();
-      refreshStoryNode();
+      renderStoryCanvas();
     }
 
     function batchApplyToAllRangeDays() {
@@ -732,6 +727,7 @@
         cur.setDate(cur.getDate() + 1);
       }
 
+      renderStoryCanvas();
       Swal.fire({
         title: '已批次套用！',
         text: `已將此時段設定同步複製至區間內 ${count} 個上班日`,
@@ -757,20 +753,53 @@
       return slots;
     }
 
-    // 8. 9:16 IG 限動預覽與生圖
-    function refreshStoryNode() {
-      const activeSlots = slotConfig.schedule[adminEditingDate] || [];
-      const slotsGrid = document.getElementById('story-node-slots-grid');
-      document.getElementById('story-node-date').innerText = `${adminEditingDate} 空檔釋出`;
+    // 8. 9:16 IG 限動生圖核心：遍歷所有已勾選日期與時段
+    function renderStoryCanvas() {
+      const container = document.getElementById('story-slots-container');
+      if (!container) return;
+      container.innerHTML = '';
 
-      if (activeSlots.length === 0) {
-        slotsGrid.innerHTML = '<div class="col-span-2 py-4 text-xs opacity-60">本日尚未開放或時段已滿</div>';
+      // 抓取所有有被勾選時段的日期並排序
+      const activeDates = Object.keys(slotConfig.schedule || {})
+        .filter(d => Array.isArray(slotConfig.schedule[d]) && slotConfig.schedule[d].length > 0)
+        .sort();
+
+      if (activeDates.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full py-12 text-center text-xs opacity-60">
+            <i class="fa-regular fa-calendar-xmark text-2xl block mb-2 opacity-40"></i>
+            尚未勾選任何釋出空檔時段
+          </div>
+        `;
         return;
       }
 
-      slotsGrid.innerHTML = activeSlots.map(t => `
-        <div class="py-1 px-2 bg-black/5 rounded-lg">⏰ ${t}</div>
-      `).join('');
+      const weekNames = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
+
+      // 逐一將所有日期的時段群組渲染至限動美圖容器
+      activeDates.forEach(dateStr => {
+        const slots = slotConfig.schedule[dateStr].sort();
+        const dObj = new Date(dateStr);
+        const dayLabel = `${dateStr.slice(5)} (${weekNames[dObj.getDay()]})`;
+
+        const groupEl = document.createElement('div');
+        groupEl.className = "space-y-1.5 pb-2 border-b border-black/10 last:border-b-0";
+        groupEl.innerHTML = `
+          <div class="flex items-center gap-1.5">
+            <span class="w-1.5 h-3 bg-[#8C7355] rounded-full"></span>
+            <span class="font-bold text-xs tracking-wider">${dayLabel}</span>
+            <span class="text-[10px] opacity-60 font-mono">(${slots.length} 個空檔)</span>
+          </div>
+          <div class="grid grid-cols-3 gap-1.5 pt-1">
+            ${slots.map(t => `
+              <div class="py-1.5 px-1 text-center bg-black/5 rounded-lg font-mono font-bold text-xs">
+                ${t}
+              </div>
+            `).join('')}
+          </div>
+        `;
+        container.appendChild(groupEl);
+      });
     }
 
     function changeTheme(themeName) {
@@ -788,6 +817,9 @@
     }
 
     async function exportStoryImage() {
+      // 匯出前強制刷新包含全選日期之限動節點
+      renderStoryCanvas();
+
       const node = document.getElementById('story-export-node');
       Swal.fire({
         title: '正在生成 9:16 限動美圖...',
@@ -798,13 +830,13 @@
       try {
         const canvas = await html2canvas(node, { scale: 3, useCORS: true });
         const link = document.createElement('a');
-        link.download = `${currentStore.store_name}_${adminEditingDate}_IG限動空檔.png`;
+        link.download = `${currentStore.store_name}_IG限動空檔.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
 
         Swal.fire({
           title: '限動圖片已成功下載！',
-          text: '可直接發布至 IG 限時動態，並附上您的專屬空檔連結！',
+          text: '已整合所選全部日期空檔，可直接發布至 IG 限時動態！',
           icon: 'success',
           confirmButtonColor: '#8C7355'
         });
@@ -813,8 +845,7 @@
       }
     }
 
-    // 9. 儲存設定至 Supabase 雲端
-    // [工具標籤: studio_slot.html 雲端時段增量儲存]
+    // 9. 儲存設定至 Supabase 雲端 (增量合併防覆蓋)
     async function saveStoreSettingsToCloud(isSilent = false) {
       slotConfig.startTime = document.getElementById('cfg-start-time').value;
       slotConfig.endTime = document.getElementById('cfg-end-time').value;
@@ -831,7 +862,7 @@
       }
 
       try {
-        // 1. 同步店長 PIN 碼至店家資料表
+        // 同步店長 PIN 碼
         await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?id=eq.${currentStore.id}`, {
           method: "PATCH",
           headers: {
@@ -842,7 +873,7 @@
           body: JSON.stringify({ admin_pin: currentStore.admin_pin })
         });
 
-        // 2. 增量合併：先撈取既有完整 slot_config，保留其餘工具設定
+        // 增量合併：保留其餘模組設定
         let mergedConfig = {};
         try {
           const fetchRes = await fetch(`${SUPABASE_URL}/rest/v1/tool_settings?store_id=eq.${currentStore.id}&select=slot_config`, {
@@ -856,7 +887,6 @@
           console.warn("讀取既有設定失敗，將直接寫入:", readErr);
         }
 
-        // 僅更新時段相關鍵值
         mergedConfig.startTime = slotConfig.startTime;
         mergedConfig.endTime = slotConfig.endTime;
         mergedConfig.interval = slotConfig.interval;
@@ -865,7 +895,6 @@
         mergedConfig.schedule = slotConfig.schedule;
         mergedConfig.theme = slotConfig.theme;
 
-        // 3. 安全 Upsert 至 tool_settings
         const saveRes = await fetch(`${SUPABASE_URL}/rest/v1/tool_settings?on_conflict=store_id`, {
           method: "POST",
           headers: {
@@ -896,6 +925,7 @@
         if (!isSilent) Swal.fire('儲存失敗', err.message, 'error');
       }
     }
+
     function syncAdminInputs() {
       document.getElementById('cfg-start-time').value = slotConfig.startTime || "10:00";
       document.getElementById('cfg-end-time').value = slotConfig.endTime || "20:00";

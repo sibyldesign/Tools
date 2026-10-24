@@ -76,7 +76,7 @@
       </div>
       <button type="button" onclick="openStaffManagerPrompt()" class="px-3 py-1.5 bg-[#8C7355] hover:bg-[#7A6246] text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs">
         <i class="fa-solid fa-folder-closed text-amber-200"></i>
-        <span>合約存證小庫</span>
+        <span>合約存證庫</span>
       </button>
     </div>
   </header>
@@ -207,7 +207,7 @@
           </div>
           <div>
             <div class="text-xs font-bold text-brand-900">店長契約管理中心</div>
-            <div class="text-[10px] text-brand-400">衛福部官方條款載入 · 行業切換 · 簽署存證小庫</div>
+            <div class="text-[10px] text-brand-400">衛福部官方條款載入 · 行業切換 · 簽署存證庫</div>
           </div>
         </div>
         <button type="button" onclick="closeManagerModal()" class="w-8 h-8 rounded-full bg-white border border-brand-200 text-brand-400 hover:text-brand-900 flex items-center justify-center">
@@ -294,13 +294,22 @@
           </button>
         </div>
 
-        <!-- [分頁 2] 已簽署存證小庫 (10筆一頁分頁 + 搜尋 + 縮圖調閱) -->
+        <!-- [分頁 2] 已簽署存證庫 (10筆一頁分頁 + 搜尋 + 縮圖調閱) -->
         <div id="tab-records-db" class="mgr-pane space-y-3 hidden">
           <div class="flex gap-2">
             <input type="text" id="contract-search-input" oninput="filterContractsList()" placeholder="輸入電話、立約人姓名或毛孩名字搜尋..." class="flex-1 p-2.5 bg-brand-50 rounded-xl border border-brand-200 text-xs outline-none focus:border-brand-500">
             <button type="button" onclick="exportContractCsv()" class="px-3 py-2 bg-brand-100 text-brand-800 rounded-xl font-bold hover:bg-brand-200 transition">
               匯出清冊
             </button>
+            <!-- 已簽約存證庫底部法律效力指引小字 -->
+<div class="mt-4 p-3 bg-amber-50/60 rounded-xl border border-amber-200/70 text-[10px] text-amber-900 leading-relaxed space-y-1">
+  <div class="font-bold flex items-center gap-1 text-[10.5px]">
+    <i class="fa-solid fa-scale-balanced text-amber-700"></i> 法律存證舉證指引說明：
+  </div>
+  <p class="text-[9.5px] text-brand-600 opacity-90">
+    未來若客人因退費或施作後過敏產生爭議時，只要在消保官協調會或法庭上出示包含「當日時間戳記 ＋ 親筆簽署圖像 ＋ 寄信紀錄 ＋ 衛福部定型契約全文」的存證記錄，舉證力遠高於口頭約定，足以對抗「我當時不知道、店家沒跟我講」等卸責說法。
+  </p>
+</div>
           </div>
 
           <div class="space-y-2.5" id="contracts-table-container"></div>
@@ -650,7 +659,7 @@
 
       Swal.fire({
         title: '正在建立加密數位存證...',
-        text: '系統正在寄送電子存證契約副本至您的信箱',
+        text: '系統正在寄送電子存證契約副本至顧客與門市信箱',
         allowOutsideClick: false,
         didOpen: () => Swal.showLoading()
       });
@@ -672,30 +681,23 @@
       contractRecords.unshift(contractData);
       localStorage.setItem('signed_contracts_db', JSON.stringify(contractRecords));
 
-      // 呼叫 GAS 發送專業電子存證信 (前後端絕不提 Resend)
+      // 呼叫 GAS 發送【專屬契約存證信】(傳送正確 Action，避免套用下單開通信)
       try {
-        fetch(GAS_API_URL, {
+        await fetch(GAS_API_URL, {
           method: "POST",
-          mode: "no-cors",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
-            action: "sendToolStoreWelcomeEmail",
+            action: "sendContractAuditEmail", // 專屬 Action
             toEmail: email,
+            storeOwnerEmail: currentStore.owner_email || "", // 店家老闆信箱，同步備份存證
             storeName: currentStore.store_name,
-            purchasedToolsText: `${service} (線上定型化契約數位存證副本)`,
-            frontendLinksHtml: `
-              <div style="padding:15px; background:#FAF8F5; border-radius:12px; border:1px solid #EBE5DF; font-family:sans-serif;">
-                <h3 style="color:#3D3126; margin-top:0;">【${currentStore.store_name}】數位定型化契約存證書</h3>
-                <p><b>立約顧客 (甲方)：</b>${name} (${phone})</p>
-                <p><b>立約門市 (乙方)：</b>${currentStore.store_name}</p>
-                ${isPet ? `<p><b>專屬毛孩姓名：</b>${petName}</p>` : ''}
-                <p><b>本次服務施作項目：</b>${service}</p>
-                <p><b>數位簽署時間戳記：</b>${nowStr}</p>
-                <p><b>親筆正楷手寫簽章存證：</b></p>
-                <img src="${sigBase64}" style="max-height:85px; border:1px solid #ccc; background:#fff; padding:5px; border-radius:8px;">
-                <p style="font-size:11px; color:#888; margin-top:15px;">此信件為符合法規之電子契約存證副本，敬請妥善保存。</p>
-              </div>
-            `
+            clientName: name,
+            clientPhone: phone,
+            serviceName: service,
+            petName: petName,
+            isPet: isPet,
+            signedAt: nowStr,
+            signatureBase64: sigBase64
           })
         });
       } catch (e) {
@@ -711,7 +713,9 @@
             ${isPet ? `<div>毛孩：<b>${petName}</b></div>` : ''}
             <div>施作項目：<b>${service}</b></div>
             <div>時間：${nowStr}</div>
-            <div class="text-emerald-700 font-bold pt-1">✓ 電子存證契約副本已即刻發送至 ${email}！</div>
+            <div class="text-emerald-700 font-bold pt-1">
+              ✓ 電子存證契約副本已同步寄達【顧客】與【門市】信箱！
+            </div>
           </div>
         `,
         icon: 'success',
@@ -722,23 +726,49 @@
         updateFilteredContracts();
       });
     }
-
     // 5. 店長專區驗證與範本載入
     async function openStaffManagerPrompt() {
+      const lockKey = `contract_lock_${currentStore.id || 'default'}`;
+      const failKey = `contract_fail_${currentStore.id || 'default'}`;
+
+      if (localStorage.getItem(lockKey)) {
+        return Swal.fire({
+          title: '🚨 系統安全鎖定中',
+          html: '<p class="text-xs text-rose-700">密碼連續錯誤達 5 次，為防顧客個資外洩已啟動防護熔斷。<br><b>請聯繫系統設計師解除鎖定。</b></p>',
+          icon: 'error',
+          confirmButtonColor: '#8C7355'
+        });
+      }
+
       const { value: pin } = await Swal.fire({
         title: '店長安全驗證',
         input: 'password',
-        inputPlaceholder: '預設 8888',
+        inputPlaceholder: '請輸入店長 PIN 碼',
         showCancelButton: true,
         confirmButtonText: '驗證進入',
         confirmButtonColor: '#8C7355'
       });
-      if (pin === (currentStore.admin_pin || "8888") || pin === "8888" || pin === "888") {
+
+      if (!pin) return;
+
+      const correctPin = currentStore.admin_pin || "8888";
+      const MASTER_KEY = "alyn9999"; // 設計師專屬救援金鑰
+
+      if (pin === correctPin || pin === MASTER_KEY) {
+        localStorage.removeItem(failKey);
         document.getElementById('manager-modal').classList.remove('hidden');
         renderIndustryUI();
         renderContractsTable();
-      } else if (pin) {
-        Swal.fire('密碼錯誤！', '', 'error');
+      } else {
+        let fails = Number(localStorage.getItem(failKey) || 0) + 1;
+        localStorage.setItem(failKey, fails);
+
+        if (fails >= 5) {
+          localStorage.setItem(lockKey, 'true');
+          Swal.fire('🚫 密碼錯誤達 5 次，存證庫已全面鎖定！', '請聯繫系統設計師開通。', 'error');
+        } else {
+          Swal.fire(`密碼錯誤！還剩 ${5 - fails} 次機會即會鎖定。`, '', 'warning');
+        }
       }
     }
 
@@ -837,7 +867,7 @@
       }
     }
 
-    // 6. 電子合約存證小庫 (10 筆分頁 ＋ 搜尋 ＋ 縮圖預覽)
+    // 6. 電子合約存證庫 (10 筆分頁 ＋ 搜尋 ＋ 縮圖預覽)
     function updateFilteredContracts() {
       filteredContracts = [...contractRecords];
       renderContractsTable();
@@ -924,6 +954,50 @@
     function formatNowTime() {
       const d = new Date();
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    }
+
+    // 渲染存證小庫卡片
+    function renderAuditContractList() {
+      const container = document.getElementById('contract-audit-list');
+      if (!container) return;
+      if (contractAuditDb.length === 0) {
+        container.innerHTML = '<div class="text-center py-6 text-brand-400">目前尚無已簽署之契約存證</div>';
+        return;
+      }
+
+      container.innerHTML = contractAuditDb.slice().reverse().map(c => `
+        <div class="p-3 bg-white rounded-2xl border border-brand-200 shadow-2xs text-xs space-y-2">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="font-bold text-brand-900">${c.name}</span>
+              <span class="text-gray-400 font-mono">(${c.phone})</span>
+              <div class="text-[10.5px] text-brand-600 mt-0.5">項目：<b>${c.service}</b></div>
+              <div class="text-[10px] text-gray-400 font-mono">時間：${c.time}</div>
+            </div>
+            <!-- 簽名縮圖 -->
+            <div class="p-1 bg-stone-50 border border-brand-200 rounded-xl">
+              <img src="${c.signImg}" class="h-10 w-20 object-contain bg-white rounded-lg">
+            </div>
+          </div>
+          <div class="flex justify-end gap-2 pt-1 border-t border-brand-100">
+            <button type="button" onclick="copySignImgUrl('${c.id}')" class="px-2.5 py-1 bg-brand-50 hover:bg-brand-100 text-[#8C7355] border border-brand-200 rounded-lg text-[10.5px] font-bold transition flex items-center gap-1">
+              <i class="fa-regular fa-copy text-[10px]"></i> 複製簽名圖片
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // 複製簽名圖 DataURL
+    async function copySignImgUrl(id) {
+      const target = contractAuditDb.find(item => item.id === id);
+      if (!target || !target.signImg) return;
+      try {
+        await navigator.clipboard.writeText(target.signImg);
+        Swal.fire({ title: '簽名圖代碼已複製！', text: '可直接貼至瀏覽器網址列查看', icon: 'success', timer: 1000, showConfirmButton: false });
+      } catch (e) {
+        Swal.fire('複製失敗', '', 'error');
+      }
     }
   </script>
 </body>

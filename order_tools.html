@@ -91,7 +91,7 @@
       專為美甲、美睫、美容、美髮、寵美現場實戰研發。不需要繁瑣適應期，針對現場最卡關的環節單點升級，徹底終結繁雜結帳、重複報價、手動排版空檔。
     </p>
 
-    <!-- ★ 超痛點強化標籤：醒目撞色搶眼設計 ★ -->
+    <!-- 超痛點強化標籤 -->
     <div class="inline-flex items-center gap-2.5 px-6 py-3 rounded-2xl bg-amber-500 text-stone-950 font-black text-xs md:text-sm mb-6 shadow-md border-2 border-amber-300 animate-bounce">
       <i class="fa-solid fa-bolt-lightning text-stone-900 text-base"></i>
       <span>購後可直接在官方LINE放上工具連結，客人自主點選，省去一來一往的繁瑣回覆！</span>
@@ -174,7 +174,7 @@
             </div>
           </div>
 
-          <!-- YouTube Shorts 影片播放展示框 01 -->
+          <!-- YouTube Shorts 01 -->
           <div class="md:col-span-4 flex justify-center">
             <div class="w-full max-w-[210px] aspect-[9/16] rounded-2xl bg-black border border-brand-300 shadow-md overflow-hidden relative">
               <iframe class="w-full h-full object-cover" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="實機示範影片" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -231,7 +231,7 @@
             </div>
           </div>
 
-          <!-- YouTube Shorts 影片播放展示框 02 -->
+          <!-- YouTube Shorts 02 -->
           <div class="md:col-span-4 flex justify-center">
             <div class="w-full max-w-[210px] aspect-[9/16] rounded-2xl bg-black border border-brand-300 shadow-md overflow-hidden relative">
               <iframe class="w-full h-full object-cover" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="實機示範影片" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -288,7 +288,7 @@
             </div>
           </div>
 
-          <!-- YouTube Shorts 影片播放展示框 03 -->
+          <!-- YouTube Shorts 03 -->
           <div class="md:col-span-4 flex justify-center">
             <div class="w-full max-w-[210px] aspect-[9/16] rounded-2xl bg-black border border-brand-300 shadow-md overflow-hidden relative">
               <iframe class="w-full h-full object-cover" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="實機示範影片" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -345,7 +345,7 @@
             </div>
           </div>
 
-          <!-- YouTube Shorts 影片播放展示框 04 -->
+          <!-- YouTube Shorts 04 -->
           <div class="md:col-span-4 flex justify-center">
             <div class="w-full max-w-[210px] aspect-[9/16] rounded-2xl bg-black border border-brand-300 shadow-md overflow-hidden relative">
               <iframe class="w-full h-full object-cover" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="實機示範影片" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -402,7 +402,7 @@
             </div>
           </div>
 
-          <!-- YouTube Shorts 影片播放展示框 05 -->
+          <!-- YouTube Shorts 05 -->
           <div class="md:col-span-4 flex justify-center">
             <div class="w-full max-w-[210px] aspect-[9/16] rounded-2xl bg-black border border-brand-300 shadow-md overflow-hidden relative">
               <iframe class="w-full h-full object-cover" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="實機示範影片" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -459,7 +459,7 @@
             </div>
           </div>
 
-          <!-- YouTube Shorts 影片播放展示框 06 -->
+          <!-- YouTube Shorts 06 -->
           <div class="md:col-span-4 flex justify-center">
             <div class="w-full max-w-[210px] aspect-[9/16] rounded-2xl bg-black border border-brand-300 shadow-md overflow-hidden relative">
               <iframe class="w-full h-full object-cover" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="實機示範影片" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -899,8 +899,8 @@
         console.warn("GAS 郵件呼叫略過:", e);
       }
 
-      // 3. 打包訊息跳轉 LINE (第一行包含精準關鍵字「我要購買微工具」)
-      const orderMessage = encodeURIComponent(
+      // 3. 打包訊息跳轉 LINE (原始純文字，只在組成跳轉連結時進行一次編碼)
+      const rawOrderMessage = 
         `我已送出微工具訂購申請\n\n` +
         `📋【SIBYL 微工具選購訂單明細】\n` +
         `• 門市名稱：${store}\n` +
@@ -910,8 +910,9 @@
         `• 開通信箱：${email}\n` +
         `• 選購項目：${itemsList}\n` +
         `• 應付總額：NT$ ${total.toLocaleString()} 元\n\n` +
-        `已確認選購內容，請提供專屬付款賣場連結，謝謝！`
-      );
+        `已確認選購內容，請提供專屬付款賣場連結，謝謝！`;
+
+      const lineRedirectUrl = `https://line.me/R/ti/p/@480kqjoj?text=${encodeURIComponent(rawOrderMessage)}`;
 
       Swal.fire({
         title: '訂購申請已送出！',
@@ -927,8 +928,8 @@
         `,
         confirmButtonText: '前往官方 LINE 領取付款連結',
         confirmButtonColor: '#8C7355'
-      }).then(r => {
-        window.location.href = `https://line.me/R/ti/p/@480kqjoj?text=${orderMessage}`;
+      }).then(() => {
+        window.location.href = lineRedirectUrl;
       });
     }
   </script>

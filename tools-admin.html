@@ -37,45 +37,37 @@
       padding: 1.75rem !important;
       border: 1px solid #EBE5DF !important;
     }
-    .story-canvas { width: 360px; height: 640px; }
+    .story-canvas { width: 360px; min-height: 640px; }
+
     /* SweetAlert2 全域確認按鈕統一套用系統質感棕色 */
-.swal2-styled.swal2-confirm {
-  background-color: #8C7355 !important;
-  color: #ffffff !important;
-  box-shadow: 0 2px 6px rgba(140, 115, 85, 0.35) !important;
-  border: none !important;
-  border-radius: 0.875rem !important;
-  font-weight: 700 !important;
-  padding: 0.625rem 1.5rem !important;
-  font-size: 0.8125rem !important;
-}
+    .swal2-styled.swal2-confirm {
+      background-color: #8C7355 !important;
+      color: #ffffff !important;
+      box-shadow: 0 2px 6px rgba(140, 115, 85, 0.35) !important;
+      border: none !important;
+      border-radius: 0.875rem !important;
+      font-weight: 700 !important;
+      padding: 0.625rem 1.5rem !important;
+      font-size: 0.8125rem !important;
+    }
 
-.swal2-styled.swal2-confirm:hover {
-  background-color: #7A6246 !important;
-}
+    .swal2-styled.swal2-confirm:hover {
+      background-color: #7A6246 !important;
+    }
 
-.swal2-styled.swal2-confirm:focus {
-  box-shadow: 0 0 0 3px rgba(140, 115, 85, 0.3) !important;
-}
-
-/* 取消按鈕同步美化為質感米灰 */
-.swal2-styled.swal2-cancel {
-  background-color: #EBE5DF !important;
-  color: #5C4B3C !important;
-  border-radius: 0.875rem !important;
-  font-weight: 700 !important;
-  padding: 0.625rem 1.25rem !important;
-  font-size: 0.8125rem !important;
-}
-
-.swal2-styled.swal2-cancel:hover {
-  background-color: #D5C7BC !important;
-}
+    .swal2-styled.swal2-cancel {
+      background-color: #EBE5DF !important;
+      color: #5C4B3C !important;
+      border-radius: 0.875rem !important;
+      font-weight: 700 !important;
+      padding: 0.625rem 1.25rem !important;
+      font-size: 0.8125rem !important;
+    }
   </style>
 </head>
 <body class="bg-brand-50 text-brand-900 antialiased min-h-screen pb-32 select-none">
 
-  <!-- 8888 門禁解鎖遮罩 -->
+  <!-- 門禁驗證遮罩 (支援 5 次鎖定) -->
   <div id="lock-screen" class="fixed inset-0 bg-brand-50 z-50 flex items-center justify-center p-4">
     <div class="bg-white p-8 rounded-3xl shadow-xl border border-brand-200 text-center w-full max-w-xs space-y-3">
       <div class="w-12 h-12 mx-auto bg-brand-100 rounded-full flex items-center justify-center text-[#8C7355] text-xl">
@@ -83,7 +75,7 @@
       </div>
       <div>
         <div class="text-base font-bold text-brand-900" id="lock-store-name">微工具集成後台登入</div>
-        <div class="text-[10px] text-brand-400 font-mono">Sibyl Tools Security Protected</div>
+        <div class="text-[10px] text-brand-400 font-mono">Sibyl Tools Unified Protected</div>
       </div>
       <div id="lock-error" class="text-xs text-rose-600 font-bold min-h-[1.25rem]"></div>
       <input type="password" id="pin-input" onkeydown="if(event.key==='Enter') checkAdminPin()" class="w-full text-center text-2xl tracking-[0.3em] py-3 rounded-xl border border-brand-200 focus:ring-2 focus:ring-brand-400 focus:outline-none bg-brand-50/50 font-mono" placeholder="請輸入密碼" maxlength="8">
@@ -93,7 +85,7 @@
     </div>
   </div>
 
-  <!-- 頂部懸浮未存警告列 (編輯時自動觸發) -->
+  <!-- 頂部懸浮未存警告列 -->
   <div id="sticky-unsaved-bar" class="sticky top-0 z-40 bg-stone-900 border-b-2 border-amber-500 text-white p-3 shadow-2xl flex justify-between items-center transition-all duration-300 hidden">
     <div class="flex items-center gap-2 text-xs font-bold pl-2">
       <i class="fa-solid fa-triangle-exclamation text-amber-400 animate-bounce"></i>
@@ -105,7 +97,7 @@
     </button>
   </div>
 
-  <!-- 頂部資訊列 -->
+  <!-- 頂部導航資訊列 -->
   <header class="bg-white border-b border-brand-200 px-4 py-3 sticky top-0 z-30 shadow-xs flex justify-between items-center max-w-4xl mx-auto w-full">
     <div class="flex items-center gap-2.5">
       <div class="w-8 h-8 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-xs shadow-2xs">
@@ -128,42 +120,11 @@
     </div>
   </header>
 
-  <!-- 主操作面板容器 (9 大模組分頁) -->
+  <!-- 主操作面板容器 -->
   <main class="max-w-4xl mx-auto p-4 space-y-4" id="main-panel-container">
 
-    <!-- ========================================== -->
-    <!-- [工具 1: reminder.gs] LINE 預約防放鳥推播 -->
-    <!-- ========================================== -->
-    <div id="tab-reminder" class="tool-tab-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3 text-xs">
-      <div class="flex justify-between items-center border-b border-brand-100 pb-2">
-        <span class="font-bold text-brand-900 flex items-center gap-1.5 text-sm">
-          <i class="fa-brands fa-line text-emerald-600 text-base"></i> LINE 預約防放鳥推播工具 (reminder.gs)
-        </span>
-        <button type="button" onclick="testReminderPush()" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-[11px] transition">測試推播發送</button>
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 font-mono">
-        <div>
-          <label class="block font-bold mb-1 text-[11px] font-sans">Channel Access Token：</label>
-          <input type="password" id="cfg-line-token" class="w-full p-2.5 border border-brand-200 rounded-xl bg-brand-50/50 text-xs outline-none" placeholder="貼上長期權杖">
-        </div>
-        <div>
-          <label class="block font-bold mb-1 text-[11px] font-sans">接收測試之個人 LINE UID：</label>
-          <input type="text" id="cfg-owner-uid" class="w-full p-2.5 border border-brand-200 rounded-xl bg-brand-50/50 text-xs outline-none" placeholder="U 開頭識別碼">
-        </div>
-      </div>
-      <div class="p-3 bg-brand-50 rounded-2xl border border-brand-200 space-y-2">
-        <div class="flex justify-between items-center">
-          <span class="font-bold text-brand-900"><i class="fa-solid fa-code text-[#8C7355] mr-1"></i> reminder.gs 排程腳本</span>
-          <button type="button" onclick="copyReminderCode()" class="text-[11px] text-[#8C7355] font-bold underline">複製完整腳本</button>
-        </div>
-        <textarea id="code-reminder-view" rows="4" readonly class="w-full p-2.5 bg-white border border-brand-200 rounded-xl font-mono text-[10px] text-gray-600 leading-relaxed"></textarea>
-      </div>
-    </div>
-
-    <!-- ========================================== -->
-    <!-- [工具 2: studio_slot.html] IG 空檔生圖器設定 -->
-    <!-- ========================================== -->
-    <div id="tab-slot" class="tool-tab-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3.5 text-xs hidden">
+    <!-- [模組 01: studio_slot.html] IG 空檔生圖器設定 -->
+    <div id="tab-slot" class="tool-tab-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-4 text-xs">
       <div class="flex justify-between items-center border-b border-brand-100 pb-2">
         <div>
           <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
@@ -171,21 +132,10 @@
           </span>
           <p class="text-[10.5px] text-brand-400">多日區間排程 · 9:16 限動美圖生成 · 雲端同步</p>
         </div>
-        <div class="flex items-center gap-1.5">
-          <a id="btn-link-slot" href="studio_slot.html" target="_blank" class="px-2.5 py-1 bg-brand-100 text-brand-800 rounded-lg font-bold text-[11px] hover:bg-brand-200 transition">開啟生圖前台 ➔</a>
-        </div>
+        <a id="btn-link-slot" href="studio_slot.html" target="_blank" class="px-2.5 py-1 bg-brand-100 text-brand-800 rounded-lg font-bold text-[11px] hover:bg-brand-200 transition">開啟生圖前台 ➔</a>
       </div>
 
-      <!-- 店長前台管理密碼展示 (PIN 碼) -->
-      <div class="p-3 bg-brand-50 rounded-2xl border border-brand-200 flex justify-between items-center">
-        <div>
-          <span class="font-bold text-brand-900 block">店長前台生圖管理 PIN 碼：</span>
-          <span class="text-[10px] text-brand-400">前台右上角「店長生圖管理」之解鎖密碼</span>
-        </div>
-        <code class="px-3 py-1 bg-white border border-brand-200 rounded-xl font-mono font-black text-sm text-[#8C7355]" id="slot-disp-pin">8888</code>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label class="block font-bold mb-1">沙龍店名：</label>
           <input type="text" id="slot-cfg-store" class="w-full p-2.5 border border-brand-200 rounded-xl bg-brand-50/50 font-bold">
@@ -196,69 +146,90 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-2 gap-2">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
-          <label class="block font-bold mb-1">時段切割間隔：</label>
-          <select id="slot-cfg-interval" class="w-full p-2.5 border border-brand-200 rounded-xl bg-brand-50/50 font-bold" onchange="renderSlotDateRangeChips()">
-            <option value="15">每 15 分鐘</option>
-            <option value="30" selected>每 30 分鐘</option>
-            <option value="60">每 60 分鐘</option>
+          <label class="block font-bold mb-1">營業時段：</label>
+          <div class="flex items-center gap-1 font-mono">
+            <input type="time" id="slot-cfg-start" value="10:00" class="w-1/2 p-2 border rounded-xl text-center font-bold" onchange="renderSlotMatrix()">
+            <span>~</span>
+            <input type="time" id="slot-cfg-end" value="20:00" class="w-1/2 p-2 border rounded-xl text-center font-bold" onchange="renderSlotMatrix()">
+          </div>
+        </div>
+        <div>
+          <label class="block font-bold mb-1">時段間隔：</label>
+          <select id="slot-cfg-interval" class="w-full p-2.5 border border-brand-200 rounded-xl bg-brand-50/50 font-bold" onchange="renderSlotMatrix()">
+            <option value="15">每 15 分鐘 (極細緻)</option>
+            <option value="30" selected>每 30 分鐘 (標準)</option>
+            <option value="60">每 60 分鐘 (一小時)</option>
           </select>
         </div>
         <div>
-          <label class="block font-bold mb-1">營業時間範圍：</label>
-          <div class="flex items-center gap-1 font-mono">
-            <input type="time" id="slot-cfg-start" value="10:00" class="w-1/2 p-2 border rounded-xl text-center font-bold" onchange="renderSlotDateRangeChips()">
-            <span>~</span>
-            <input type="time" id="slot-cfg-end" value="20:00" class="w-1/2 p-2 border rounded-xl text-center font-bold" onchange="renderSlotDateRangeChips()">
+          <label class="block font-bold mb-1">固定公休 (每週)：</label>
+          <select id="slot-cfg-weekly-off" class="w-full p-2.5 border border-brand-200 rounded-xl bg-brand-50/50 font-bold" onchange="renderSlotDateChips()">
+            <option value="-1">無固定公休</option>
+            <option value="1" selected>每週一公休</option>
+            <option value="2">每週二公休</option>
+            <option value="3">每週三公休</option>
+            <option value="4">每週四公休</option>
+            <option value="5">每週五公休</option>
+            <option value="6">每週六公休</option>
+            <option value="0">每週日公休</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 日期區間連選 -->
+      <div class="p-3.5 bg-brand-50/70 rounded-2xl border border-brand-200 space-y-2.5">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-bold mb-1 text-[11px]">起始日：</label>
+            <input type="date" id="slot-range-start" class="w-full p-2 bg-white border border-brand-200 rounded-xl font-mono text-xs font-bold" onchange="renderSlotDateChips()">
+          </div>
+          <div>
+            <label class="block font-bold mb-1 text-[11px]">結束日：</label>
+            <input type="date" id="slot-range-end" class="w-full p-2 bg-white border border-brand-200 rounded-xl font-mono text-xs font-bold" onchange="renderSlotDateChips()">
           </div>
         </div>
-      </div>
 
-      <!-- 每週固定公休日 -->
-      <div class="p-2.5 bg-brand-50 rounded-xl border border-brand-200">
-        <label class="block font-bold mb-1 text-[11px]">每週固定公休日 (勾選後自動隱藏時段)：</label>
-        <div class="grid grid-cols-7 gap-1 text-center font-bold">
-          <label class="flex flex-col items-center bg-white p-1 rounded-lg border text-[10px] cursor-pointer"><input type="checkbox" value="0" class="slot-off-cb accent-brand-500" onchange="renderSlotDateRangeChips()">日</label>
-          <label class="flex flex-col items-center bg-white p-1 rounded-lg border text-[10px] cursor-pointer"><input type="checkbox" value="1" class="slot-off-cb accent-brand-500" onchange="renderSlotDateRangeChips()">一</label>
-          <label class="flex flex-col items-center bg-white p-1 rounded-lg border text-[10px] cursor-pointer"><input type="checkbox" value="2" class="slot-off-cb accent-brand-500" onchange="renderSlotDateRangeChips()">二</label>
-          <label class="flex flex-col items-center bg-white p-1 rounded-lg border text-[10px] cursor-pointer"><input type="checkbox" value="3" class="slot-off-cb accent-brand-500" onchange="renderSlotDateRangeChips()">三</label>
-          <label class="flex flex-col items-center bg-white p-1 rounded-lg border text-[10px] cursor-pointer"><input type="checkbox" value="4" class="slot-off-cb accent-brand-500" onchange="renderSlotDateRangeChips()">四</label>
-          <label class="flex flex-col items-center bg-white p-1 rounded-lg border text-[10px] cursor-pointer"><input type="checkbox" value="5" class="slot-off-cb accent-brand-500" onchange="renderSlotDateRangeChips()">五</label>
-          <label class="flex flex-col items-center bg-white p-1 rounded-lg border text-[10px] cursor-pointer"><input type="checkbox" value="6" class="slot-off-cb accent-brand-500" onchange="renderSlotDateRangeChips()">六</label>
+        <div class="flex items-center justify-between pt-1">
+          <span class="text-[11px] font-bold text-brand-600">目前編輯日：<b class="text-[#8C7355] font-mono" id="disp-slot-editing-date">--</b></span>
+          <div class="flex gap-1.5">
+            <button type="button" onclick="batchApplySlotRange()" class="px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-lg font-bold text-[10.5px]">套用至區間</button>
+            <button type="button" onclick="toggleAllSlotsInEditingDay(true)" class="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-lg font-bold text-[10.5px]">全選</button>
+            <button type="button" onclick="toggleAllSlotsInEditingDay(false)" class="px-2 py-1 bg-gray-200 text-gray-700 rounded-lg font-bold text-[10.5px]">清空</button>
+          </div>
         </div>
+
+        <!-- 區間日期膠囊 -->
+        <div class="flex gap-1.5 overflow-x-auto no-scrollbar py-1" id="slot-date-chips-container"></div>
+        <!-- 時段點選矩陣 -->
+        <div class="grid grid-cols-3 sm:grid-cols-5 gap-1.5 pt-1" id="slot-matrix-container"></div>
       </div>
 
-      <!-- 日期區間選取多日 -->
-      <div class="grid grid-cols-2 gap-2 pt-1 border-t border-brand-100">
-        <div>
-          <label class="block font-bold mb-1">開始日期：</label>
-          <input type="date" id="slot-range-start" class="w-full p-2 border rounded-xl font-mono text-xs" onchange="renderSlotDateRangeChips()">
-        </div>
-        <div>
-          <label class="block font-bold mb-1">結束日期：</label>
-          <input type="date" id="slot-range-end" class="w-full p-2 border rounded-xl font-mono text-xs" onchange="renderSlotDateRangeChips()">
-        </div>
-      </div>
-
-      <!-- 依日期區間展開的時段按鈕矩陣 -->
-      <div>
-        <label class="block font-bold mb-1">點擊切換可預約空檔 (綠底代表已釋出可約)：</label>
-        <div id="slot-interactive-chips" class="space-y-2 max-h-48 overflow-y-auto p-1 bg-brand-50 rounded-xl border"></div>
-      </div>
-
-      <!-- 9:16 限動預覽節點 (供 html2canvas 繪製下載) -->
+      <!-- [補齊] 限動美圖上方：儲存時段 ＆ 生成限動按鈕列 -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
+  <button type="button" onclick="saveAllActiveSettings()" class="py-3.5 bg-stone-900 hover:bg-black text-white font-bold rounded-2xl text-xs transition shadow-md flex items-center justify-center gap-2 order-2 sm:order-1">
+    <i class="fa-solid fa-cloud-arrow-up text-amber-300"></i>
+    <span>儲存勾選時段至雲端庫</span>
+  </button>
+  <button type="button" onclick="exportAdminStoryImage()" class="py-3.5 bg-gradient-to-r from-rose-500 to-amber-600 hover:opacity-90 text-white font-bold rounded-2xl text-xs transition shadow-md flex items-center justify-center gap-2 order-1 sm:order-2">
+    <i class="fa-solid fa-download"></i>
+    <span>一鍵產出 9:16 IG 限動美圖</span>
+  </button>
+</div>
+      
+      <!-- 9:16 限動預覽節點 (支援全部已選日期分組渲染) -->
       <div class="p-4 bg-amber-50/60 rounded-2xl border border-amber-200 space-y-3">
         <div class="flex justify-between items-center border-b border-amber-200 pb-1.5">
           <span class="font-bold text-amber-950 flex items-center gap-1.5">
-            <i class="fa-brands fa-instagram text-rose-500"></i> 9:16 直式限動美圖預覽與下載
+            <i class="fa-brands fa-instagram text-rose-500"></i> 9:16 直式限動美圖預覽 (包含所選所有日期空檔)
           </span>
           <div class="flex items-center gap-1.5">
-            <span class="text-[10px] text-amber-800 font-bold">限動色票：</span>
-            <button type="button" onclick="changeAdminSlotTheme('almond')" class="w-4 h-4 rounded-full bg-[#F5ECE3] border border-amber-300"></button>
-            <button type="button" onclick="changeAdminSlotTheme('caramel')" class="w-4 h-4 rounded-full bg-[#8C7355] border border-amber-300"></button>
-            <button type="button" onclick="changeAdminSlotTheme('dark')" class="w-4 h-4 rounded-full bg-[#2A231C] border border-amber-300"></button>
-            <button type="button" onclick="changeAdminSlotTheme('rose')" class="w-4 h-4 rounded-full bg-[#E8D7D3] border border-amber-300"></button>
+            <span class="text-[10px] text-amber-800 font-bold">風格：</span>
+            <button type="button" onclick="changeSlotTheme('almond')" class="w-4 h-4 rounded-full bg-[#F5ECE3] border border-amber-300"></button>
+            <button type="button" onclick="changeSlotTheme('caramel')" class="w-4 h-4 rounded-full bg-[#8C7355] border border-amber-300"></button>
+            <button type="button" onclick="changeSlotTheme('dark')" class="w-4 h-4 rounded-full bg-[#2A231C] border border-amber-300"></button>
+            <button type="button" onclick="changeSlotTheme('rose')" class="w-4 h-4 rounded-full bg-[#E8D7D3] border border-amber-300"></button>
           </div>
         </div>
 
@@ -267,96 +238,76 @@
             <div class="space-y-1 text-center">
               <div class="text-[10px] tracking-[0.25em] uppercase font-mono opacity-60">RESERVATION AVAILABLE</div>
               <div class="text-xl font-bold font-serif" id="admin-story-store-title">沙龍門市</div>
-              <div class="inline-block px-3 py-1 bg-white/70 backdrop-blur-xs rounded-full text-xs font-bold font-mono mt-1" id="admin-story-date-badge">
-                空檔時段釋出
-              </div>
+              <div class="inline-block px-3 py-1 bg-white/70 backdrop-blur-xs rounded-full text-xs font-bold font-mono mt-1">OPEN SLOTS AVAILABLE</div>
             </div>
-            <div class="p-4 bg-white/80 backdrop-blur-md rounded-2xl border border-white/60 space-y-2">
-              <div class="text-[11px] font-bold border-b border-black/10 pb-1 text-center flex items-center justify-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-[#8C7355]"></span>
-                <span>OPEN SLOTS AVAILABLE</span>
-              </div>
-              <div class="grid grid-cols-2 gap-2 text-center font-mono font-bold text-sm" id="admin-story-slots-grid"></div>
-            </div>
-            <div class="text-center space-y-1">
+            <!-- 動態填入全部日期 -->
+            <div class="my-4 p-4 bg-white/80 backdrop-blur-md rounded-2xl border border-white/60 space-y-3" id="admin-story-slots-container"></div>
+            <div class="text-center space-y-1 pt-2">
               <div class="text-[11px] font-bold">點擊個人首頁連結，直接前往預約</div>
               <div class="text-[9.5px] opacity-60 font-mono">POWERED BY SIBYL TOOLS</div>
             </div>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <button type="button" onclick="exportAdminStoryImage()" class="py-3 bg-gradient-to-r from-rose-500 to-amber-600 hover:opacity-90 text-white font-bold rounded-xl text-xs transition shadow-md flex items-center justify-center gap-2">
-            <i class="fa-solid fa-download"></i>
-            <span>一鍵產出 9:16 IG 限動美圖</span>
-          </button>
-          <button type="button" onclick="saveAllActiveSettings()" class="py-3 bg-stone-900 hover:bg-black text-white font-bold rounded-xl text-xs transition shadow-md flex items-center justify-center gap-2">
-            <i class="fa-solid fa-cloud-arrow-up text-amber-300"></i>
-            <span>儲存並即時更新前台空檔</span>
-          </button>
-        </div>
+        <button type="button" onclick="exportAdminStoryImage()" class="w-full py-3.5 bg-gradient-to-r from-rose-500 to-amber-600 hover:opacity-90 text-white font-bold rounded-xl text-xs transition shadow-md flex items-center justify-center gap-2">
+          <i class="fa-solid fa-download"></i>
+          <span>一鍵產出 9:16 IG 限動美圖</span>
+        </button>
       </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- [工具 3: pos.html] 極簡收銀小幫手與顧客庫 -->
-    <!-- ========================================== -->
-    <div id="tab-pos" class="tool-tab-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3.5 text-xs hidden">
+    <!-- [模組 02: pos.html] 極簡快速收銀小幫手與雲端即時營收庫 -->
+    <div id="tab-pos" class="tool-tab-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-4 text-xs hidden">
       <div class="flex justify-between items-center border-b border-brand-100 pb-2">
         <div>
           <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
-            <i class="fa-solid fa-cash-register text-brand-500"></i> 極簡快速結帳與顧客小資料庫 (pos.html)
+            <i class="fa-solid fa-cash-register text-brand-500"></i> 極簡快速結帳與顧客雲端小庫 (pos.html)
           </span>
-          <p class="text-[10.5px] text-brand-400">本日與本月營業額看板 · 項目微大字排版 · 顧客履歷小庫</p>
+          <p class="text-[10.5px] text-brand-400">營收與顧客庫全面自 Supabase tool_quick_ledger 即時聚合</p>
         </div>
         <div class="flex items-center gap-1.5">
-          <a id="btn-link-pos" href="pos.html" target="_blank" class="px-2.5 py-1 bg-brand-100 text-brand-800 rounded-lg font-bold text-[11px] hover:bg-brand-200 transition">開啟收銀台 ➔</a>
+          <a id="btn-link-pos" href="pos.html" target="_blank" class="px-2.5 py-1 bg-brand-100 text-brand-800 rounded-lg font-bold text-[11px] hover:bg-brand-200 transition">開啟收銀前台 ➔</a>
           <button type="button" onclick="openAddPosItemModal()" class="px-2.5 py-1 bg-[#8C7355] text-white rounded-lg font-bold text-[11px]">+ 新增品項</button>
         </div>
       </div>
 
-      <!-- 老闆愛看：本日營業額 ＆ 本月營業額看板 -->
-      <div class="grid grid-cols-2 gap-2 text-center">
-        <div class="p-3 bg-brand-50 rounded-2xl border border-brand-200">
+      <!-- 即時營業額雙看板 (自動聚合) -->
+      <div class="grid grid-cols-2 gap-3 text-center">
+        <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200">
           <span class="text-[10px] text-brand-500 font-bold block">本日實收營收</span>
           <span class="text-xl font-black font-mono text-[#8C7355]" id="pos-stat-today">NT$ 0</span>
         </div>
-        <div class="p-3 bg-stone-900 text-white rounded-2xl border border-stone-800">
+        <div class="p-3.5 bg-stone-900 text-white rounded-2xl border border-stone-800">
           <span class="text-[10px] text-amber-300 font-bold block">本月累計營收</span>
           <span class="text-xl font-black font-mono text-amber-300" id="pos-stat-month">NT$ 0</span>
         </div>
       </div>
 
-      <!-- 店長前台管理密碼展示 (PIN 碼) -->
-      <div class="p-3 bg-brand-50 rounded-2xl border border-brand-200 flex justify-between items-center">
-        <div>
-          <span class="font-bold text-brand-900 block">店長收銀前台管理 PIN 碼：</span>
-          <span class="text-[10px] text-brand-400">收銀前台進入店長專區之密碼</span>
-        </div>
-        <code class="px-3 py-1 bg-white border border-brand-200 rounded-xl font-mono font-black text-sm text-[#8C7355]" id="pos-disp-pin">8888</code>
-      </div>
-
-      <div>
-        <label class="block font-bold mb-1">官方 LINE 預約/諮詢連結：</label>
-        <input type="text" id="pos-cfg-line" class="w-full p-2.5 border border-brand-200 rounded-xl bg-brand-50/50 font-mono" value="https://line.me/R/ti/p/@your_line">
-      </div>
-
-      <!-- 項目管理列表 (分類微大字不可隱藏 ＋ 支援 ▲/▼ 上下排序) -->
+      <!-- 收銀品項庫 (可上下排序) -->
       <div class="space-y-2">
-        <span class="font-bold block text-brand-800">現場收銀項目庫 (分類微大字置頂，支援 ▲/▼ 調整位置)：</span>
+        <span class="font-bold block text-brand-800">現場收銀項目主檔 (分類微大字置頂，支援 ▲/▼ 調整位置)：</span>
         <div class="space-y-1.5 max-h-56 overflow-y-auto" id="pos-items-admin-list"></div>
       </div>
 
-      <!-- 顧客小資料庫即時檢視 (10 筆分頁 + 搜尋 + 歷程展開) -->
+      <!-- [補齊] POS 加購項目管理列表 (支援上下排序) -->
+      <div class="space-y-2 pt-3 border-t border-brand-100">
+        <div class="flex justify-between items-center">
+          <span class="font-bold text-brand-900">現場加購與工藝升級 (支援 ▲/▼ 排序)：</span>
+          <button type="button" onclick="openAddPosAddonModal()" class="px-2.5 py-1.5 bg-[#8C7355] text-white rounded-lg font-bold text-[11px] shadow-2xs">
+            + 新增加購
+          </button>
+        </div>
+        <div class="space-y-1.5 max-h-48 overflow-y-auto" id="pos-addons-admin-list"></div>
+      </div>
+
+      <!-- 顧客小資料庫即時檢視 (10 筆分頁) -->
       <div class="p-3.5 bg-brand-50 rounded-2xl border space-y-2.5">
         <div class="flex justify-between items-center">
-          <span class="font-bold text-brand-900">顧客快查小資料庫 (依手機、姓名或 LINE 暱稱搜尋)：</span>
+          <span class="font-bold text-brand-900">顧客快查小資料庫 (依手機、姓名搜尋)：</span>
           <span class="text-[10px] text-brand-400 font-mono" id="pos-cust-count-badge">0 位顧客</span>
         </div>
-        <div class="flex gap-2">
-          <input type="text" id="pos-cust-search-input" oninput="filterPosCustomers()" placeholder="輸入電話、姓名或 LINE 稱呼搜尋..." class="flex-1 p-2 bg-white rounded-xl border border-brand-200 text-xs outline-none">
-        </div>
-        <div class="space-y-1.5 max-h-60 overflow-y-auto" id="pos-cust-admin-list"></div>
+        <input type="text" id="pos-cust-search-input" oninput="filterPosCustomers()" placeholder="輸入電話、姓名搜尋..." class="w-full p-2 bg-white rounded-xl border border-brand-200 text-xs outline-none">
+        <div class="space-y-1.5 max-h-56 overflow-y-auto" id="pos-cust-admin-list"></div>
         <div class="flex justify-between items-center pt-1 border-t border-brand-200 text-[11px]">
           <span class="text-brand-500" id="pos-cust-page-info">第 1 / 1 頁</span>
           <div class="flex gap-1" id="pos-cust-page-btns"></div>
@@ -364,16 +315,14 @@
       </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- [工具 4: quote.html] 服務報價試算器 (全行業通用) -->
-    <!-- ========================================== -->
-    <div id="tab-quote" class="tool-tab-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3.5 text-xs hidden">
+    <!-- [模組 03: quote.html] 美業全通用報價試算器 -->
+    <div id="tab-quote" class="tool-tab-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-4 text-xs hidden">
       <div class="flex justify-between items-center border-b border-brand-100 pb-2">
         <div>
           <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
-            <i class="fa-solid fa-calculator text-brand-500"></i> 美業全通用報價試算與 9:16 輪播圖 (quote.html)
+            <i class="fa-solid fa-calculator text-brand-500"></i> 美業全通用報價試算與圖片直傳 (quote.html)
           </span>
-          <p class="text-[10.5px] text-brand-400">美髮、美容、美甲、寵美皆通用 ｜ 支援項目與加購 ▲/▼ 排序</p>
+          <p class="text-[10.5px] text-brand-400">美髮、美容、美甲、寵美全通用 ｜ 支援項目與加購 ▲/▼ 排序</p>
         </div>
         <div class="flex items-center gap-1.5">
           <a id="btn-link-quote" href="quote.html" target="_blank" class="px-2.5 py-1 bg-brand-100 text-brand-800 rounded-lg font-bold text-[11px] hover:bg-brand-200 transition">開啟報價前台 ➔</a>
@@ -382,22 +331,38 @@
         </div>
       </div>
 
-      <div>
-        <label class="block font-bold mb-1">官方 LINE 預約連結：</label>
-        <input type="text" id="quote-cfg-line" class="w-full p-2.5 border border-brand-200 rounded-xl bg-brand-50/50 font-mono" value="https://line.me/R/ti/p/@your_line">
+      <!-- LOGO 圖片展示與直傳 Supabase -->
+      <div class="p-4 bg-brand-50/70 rounded-2xl border border-brand-200 space-y-3">
+        <div class="flex justify-between items-center">
+          <label class="font-bold text-xs text-brand-900 flex items-center gap-1.5">
+            <i class="fa-regular fa-image text-[#8C7355]"></i> 前台頂部 LOGO 圖片展示
+          </label>
+          <label class="flex items-center gap-1 text-[11px] font-bold text-brand-600 cursor-pointer">
+            <input type="checkbox" id="quote-cfg-show-logo" class="accent-[#8C7355] rounded" checked onchange="markUnsaved()">
+            <span>啟用前台展示</span>
+          </label>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <input type="file" id="quote-hub-upload-logo" accept="image/*" class="text-xs text-brand-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border file:border-brand-200 file:text-xs file:font-bold file:bg-white file:text-brand-800 hover:file:bg-brand-50 cursor-pointer">
+          <button type="button" onclick="uploadQuoteLogoFromHub()" class="px-4 py-1.5 bg-stone-900 hover:bg-black text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-1 shrink-0">
+            <i class="fa-solid fa-cloud-arrow-up text-[11px]"></i>
+            <span>上傳 LOGO</span>
+          </button>
+        </div>
+        <input type="url" id="quote-cfg-logo-url" oninput="previewQuoteHubLogo(this.value); markUnsaved();" placeholder="https://..." class="w-full p-2.5 bg-white border border-brand-200 rounded-xl text-xs font-mono font-bold text-brand-700 outline-none">
+        <div class="p-3 bg-white rounded-xl border border-brand-200 flex justify-center items-center min-h-[80px]" id="quote-hub-logo-preview">
+          <span class="text-[11px] text-brand-400">尚未上傳或輸入 LOGO 圖片網址</span>
+        </div>
       </div>
 
-      <!-- 9:16 輪播說明圖管理 (尺寸指南與高斯模糊補底說明) -->
+      <!-- 9:16 輪播說明海報 -->
       <div class="p-3.5 bg-brand-50 rounded-2xl border space-y-2">
         <div class="flex justify-between items-center font-bold">
           <span>9:16 直式活動海報輪播 (尺寸太小自動高斯模糊補底)：</span>
-          <span class="text-[10px] text-brand-400 font-normal">建議尺寸 1080 × 1920 像素</span>
-        </div>
-        <div class="p-2.5 bg-white rounded-xl border border-brand-100 text-[10.5px] text-brand-600 leading-relaxed">
-          💡 <b>圖片上傳說明</b>：可直接貼上儲存在 Supabase Storage、Imgur 或官方圖床的圖片網址。非 9:16 之圖片前台會自動以同張圖片產生柔和高斯模糊補底，永遠維持沉浸滿版感。
+          <span class="text-[10px] text-brand-400 font-normal">建議尺寸 1080 × 1920</span>
         </div>
         <div class="flex gap-2">
-          <input type="text" id="quote-new-img-url" placeholder="貼上 9:16 圖片 URL" class="flex-1 p-2 bg-white border rounded-xl text-xs font-mono">
+          <input type="text" id="quote-new-img-url" placeholder="貼上 9:16 圖片網址" class="flex-1 p-2 bg-white border rounded-xl text-xs font-mono">
           <button type="button" onclick="addQuoteCarouselImg()" class="px-3.5 py-1.5 bg-[#8C7355] text-white rounded-xl font-bold shrink-0">加入輪播</button>
         </div>
         <div class="flex gap-2 overflow-x-auto py-1 no-scrollbar" id="quote-carousel-admin-preview"></div>
@@ -409,47 +374,29 @@
         <div class="space-y-1.5 max-h-48 overflow-y-auto" id="quote-items-admin-list"></div>
       </div>
 
-      <!-- 加購與工藝升級庫 (上下排序) -->
+      <!-- 加購項目庫 (上下排序) -->
       <div class="space-y-1.5 pt-2 border-t border-brand-100">
-        <span class="font-bold block text-brand-800">工藝加購項目庫 (加購名稱、描述、加價金額 ｜ 支援 ▲/▼ 排序)：</span>
+        <span class="font-bold block text-brand-800">工藝加購項目庫 (加購名稱、描述、金額 ｜ 支援 ▲/▼ 排序)：</span>
         <div class="space-y-1.5 max-h-48 overflow-y-auto" id="quote-addons-admin-list"></div>
       </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- [工具 5: loyalty.html] 數位會員存摺 (開關/眼睛/新卡) -->
-    <!-- ========================================== -->
-    <div id="tab-loyalty" class="tool-tab-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3.5 text-xs hidden">
+    <!-- [模組 04: loyalty.html] VIP 數位會員存摺 -->
+    <div id="tab-loyalty" class="tool-tab-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-4 text-xs hidden">
       <div class="flex justify-between items-center border-b border-brand-100 pb-2">
         <div>
           <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
-            <i class="fa-solid fa-stamp text-amber-600"></i> VIP 數位會員存摺 (原版黑灰燙金卡面)
+            <i class="fa-solid fa-stamp text-amber-600"></i> VIP 數位會員存摺 (loyalty.html)
           </span>
-          <p class="text-[10.5px] text-brand-400">獨立開關控制 · 密碼眼睛顯隱 · 集滿自動開新卡 · 存摺小庫</p>
+          <p class="text-[10.5px] text-brand-400">獨立開關控制 · 集滿自動開新卡 · 毛孩/專人專用包卡</p>
         </div>
-        <a id="btn-link-loyalty" href="loyalty.html" target="_blank" class="px-3 py-1 bg-brand-100 text-brand-800 rounded-lg font-bold text-[11px]">查看前台卡面 ➔</a>
+        <a id="btn-link-loyalty" href="loyalty.html" target="_blank" class="px-3 py-1 bg-brand-100 text-brand-800 rounded-lg font-bold text-[11px]">查看存摺前台 ➔</a>
       </div>
 
-      <!-- PIN 碼管理 (眼睛圖示顯隱切換) -->
-      <div class="p-3 bg-brand-50 rounded-2xl border border-brand-200 flex justify-between items-center">
-        <div>
-          <span class="font-bold text-brand-900 block">店長蓋章核銷 PIN 碼：</span>
-          <span class="text-[10px] text-brand-400">前台點選店長專區核銷之密碼</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <div class="relative">
-            <input type="password" id="loyalty-cfg-pin" class="w-28 p-2 pr-8 border rounded-xl font-mono text-center font-bold text-xs" value="8888">
-            <button type="button" onclick="toggleLoyaltyPinEye()" class="absolute right-2.5 top-2.5 text-brand-400 hover:text-brand-900">
-              <i class="fa-solid fa-eye" id="loyalty-pin-eye-icon"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label class="block font-bold mb-1">滿 10 點折抵金額 (NT$)：</label>
-          <input type="number" id="loyalty-cfg-reward" class="w-full p-2.5 border rounded-xl font-mono" value="300">
+          <input type="number" id="loyalty-cfg-reward" class="w-full p-2.5 border rounded-xl font-mono" value="300" onchange="markUnsaved()">
         </div>
       </div>
 
@@ -462,19 +409,33 @@
         <div class="space-y-1" id="loyalty-wallet-rules-list"></div>
       </div>
 
-      <!-- 包卡堂票方案庫管理 -->
+      <!-- 包卡方案庫管理 -->
       <div class="p-3.5 bg-brand-50 rounded-2xl border space-y-2">
         <div class="flex justify-between items-center font-bold">
-          <span>次數包卡方案庫管理 (嚴格綁定單一毛孩/專屬個人)：</span>
+          <span>次數包卡方案庫管理 (嚴格綁定單一毛孩/專人專用)：</span>
           <button type="button" onclick="openAddPackageRuleModal()" class="text-[11px] text-[#8C7355] underline">+ 新增包卡方案</button>
         </div>
         <div class="space-y-1" id="loyalty-package-rules-list"></div>
       </div>
 
-      <!-- 後台最下方三大模組開關控制 (集點 / 儲值 / 包卡) -->
+      <!-- [補齊] VIP 會員資料庫 (集點/儲值/毛孩包卡) -->
+      <div class="p-3.5 bg-brand-50 rounded-2xl border space-y-2.5">
+        <div class="flex justify-between items-center">
+          <span class="font-bold text-brand-900">VIP 會員檔案小庫 (點數、儲值金與毛孩包卡名冊)：</span>
+          <span class="text-[10px] text-brand-400 font-mono" id="loyalty-cust-count-badge">0 位會員</span>
+        </div>
+        <input type="text" id="loyalty-cust-search-input" oninput="filterLoyaltyMembers()" placeholder="輸入會員手機、姓名或毛孩名稱搜尋..." class="w-full p-2 bg-white rounded-xl border border-brand-200 text-xs outline-none">
+        <div class="space-y-1.5 max-h-56 overflow-y-auto" id="loyalty-cust-admin-list"></div>
+        <div class="flex justify-between items-center pt-1 border-t border-brand-200 text-[11px]">
+          <span class="text-brand-500" id="loyalty-cust-page-info">第 1 / 1 頁</span>
+          <div class="flex gap-1" id="loyalty-cust-page-btns"></div>
+        </div>
+      </div>
+      
+      <!-- 三大模組開關控制 -->
       <div class="p-3.5 bg-amber-50/70 rounded-2xl border border-amber-200 space-y-2.5">
         <span class="font-bold text-amber-950 block border-b border-amber-200 pb-1">
-          <i class="fa-solid fa-toggle-on text-[#8C7355] mr-1"></i> 前台功能模組獨立開關 (有開啟才於前台作用，未開啟則隱藏)：
+          <i class="fa-solid fa-toggle-on text-[#8C7355] mr-1"></i> 前台功能模組獨立開關：
         </span>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
           <label class="flex items-center justify-between p-2 bg-white rounded-xl border border-amber-200 cursor-pointer">
@@ -491,126 +452,93 @@
           </label>
         </div>
       </div>
-
-      <!-- VIP 會員快查資料庫 (10 筆分頁) -->
-      <div class="p-3.5 bg-brand-50 rounded-2xl border space-y-2.5">
-        <div class="flex justify-between items-center">
-          <span class="font-bold text-brand-900">VIP 會員檔案庫 (點數、餘額與毛孩包卡名冊)：</span>
-          <span class="text-[10px] text-brand-400 font-mono" id="loyalty-cust-count-badge">0 位會員</span>
-        </div>
-        <div class="flex gap-2">
-          <input type="text" id="loyalty-cust-search-input" oninput="filterLoyaltyMembers()" placeholder="輸入電話、姓名或毛孩名稱搜尋..." class="flex-1 p-2 bg-white rounded-xl border border-brand-200 text-xs outline-none">
-        </div>
-        <div class="space-y-1.5 max-h-52 overflow-y-auto" id="loyalty-cust-admin-list"></div>
-        <div class="flex justify-between items-center pt-1 border-t border-brand-200 text-[11px]">
-          <span class="text-brand-500" id="loyalty-cust-page-info">第 1 / 1 頁</span>
-          <div class="flex gap-1" id="loyalty-cust-page-btns"></div>
-        </div>
-      </div>
     </div>
+    
 
-    <!-- ========================================== -->
-    <!-- [工具 6: overview.html] 全日排程與席位防撞 -->
-    <!-- ========================================== -->
-    <div id="tab-overview" class="tool-tab-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3.5 text-xs hidden">
+    <!-- [模組 05: overview.html] 全日排程總覽與席位防撞 -->
+    <div id="tab-overview" class="tool-tab-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-4 text-xs hidden">
       <div class="flex justify-between items-center border-b border-brand-100 pb-2">
         <div>
           <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
             <i class="fa-solid fa-table-cells text-brand-500"></i> 全日排程總覽與席位防撞 (overview.html)
           </span>
-          <p class="text-[10.5px] text-brand-400">專員代號制 · 服務 Group A/B 插單 · 席位容量防撞</p>
+          <p class="text-[10.5px] text-brand-400">專員代號制 · Group A/B 插單 · 席位容量防撞</p>
         </div>
         <a id="btn-link-overview" href="overview.html" target="_blank" class="px-3 py-1 bg-brand-100 text-brand-800 rounded-lg font-bold text-[11px]">開啟排程總覽 ➔</a>
       </div>
 
-      <!-- [新增] 營業時段、時間間隔與每週固定公休日 -->
       <div class="p-3.5 bg-brand-50 rounded-2xl border space-y-3">
         <span class="font-bold text-brand-900 block border-b border-brand-200 pb-1.5">
-          <i class="fa-solid fa-clock text-[#8C7355] mr-1"></i> 營業時段、時間間隔與前台框格設定：
+          <i class="fa-solid fa-clock text-[#8C7355] mr-1"></i> 營業時段與框格間隔設定：
         </span>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
           <div>
-            <label class="block font-bold mb-1 text-[10.5px]">開始營業時間：</label>
+            <label class="block font-bold mb-1 text-[10.5px]">開始營業：</label>
             <input type="time" id="overview-cfg-start" value="09:00" class="w-full p-2 bg-white rounded-xl border border-brand-200 font-mono font-bold text-xs" onchange="markUnsaved()">
           </div>
           <div>
-            <label class="block font-bold mb-1 text-[10.5px]">結束營業時間：</label>
+            <label class="block font-bold mb-1 text-[10.5px]">結束營業：</label>
             <input type="time" id="overview-cfg-end" value="21:00" class="w-full p-2 bg-white rounded-xl border border-brand-200 font-mono font-bold text-xs" onchange="markUnsaved()">
           </div>
           <div>
-            <label class="block font-bold mb-1 text-[10.5px]">時間框格間隔：</label>
+            <label class="block font-bold mb-1 text-[10.5px]">框格間隔：</label>
             <select id="overview-cfg-interval" class="w-full p-2 bg-white rounded-xl border border-brand-200 text-xs font-bold" onchange="markUnsaved()">
               <option value="15">每 15 分鐘 (極細緻)</option>
               <option value="30" selected>每 30 分鐘 (標準)</option>
-              <option value="60">每 60 分鐘 (一小時整點)</option>
+              <option value="60">每 60 分鐘 (一小時)</option>
             </select>
           </div>
         </div>
 
-        <!-- 每週固定公休日 -->
         <div class="pt-1">
-          <label class="block font-bold mb-1 text-[10.5px]">每週固定公休日 (勾選後前台自動標註公休)：</label>
+          <label class="block font-bold mb-1 text-[10.5px]">每週固定公休日：</label>
           <div class="grid grid-cols-7 gap-1 text-center font-bold">
-            <label class="flex flex-col items-center bg-white p-1.5 rounded-xl border border-brand-200 text-[10px] cursor-pointer"><input type="checkbox" value="0" class="ov-weekly-cb accent-[#8C7355] mb-0.5" onchange="markUnsaved()">日</label>
-            <label class="flex flex-col items-center bg-white p-1.5 rounded-xl border border-brand-200 text-[10px] cursor-pointer"><input type="checkbox" value="1" class="ov-weekly-cb accent-[#8C7355] mb-0.5" onchange="markUnsaved()">一</label>
-            <label class="flex flex-col items-center bg-white p-1.5 rounded-xl border border-brand-200 text-[10px] cursor-pointer"><input type="checkbox" value="2" class="ov-weekly-cb accent-[#8C7355] mb-0.5" onchange="markUnsaved()">二</label>
-            <label class="flex flex-col items-center bg-white p-1.5 rounded-xl border border-brand-200 text-[10px] cursor-pointer"><input type="checkbox" value="3" class="ov-weekly-cb accent-[#8C7355] mb-0.5" onchange="markUnsaved()">三</label>
-            <label class="flex flex-col items-center bg-white p-1.5 rounded-xl border border-brand-200 text-[10px] cursor-pointer"><input type="checkbox" value="4" class="ov-weekly-cb accent-[#8C7355] mb-0.5" onchange="markUnsaved()">四</label>
-            <label class="flex flex-col items-center bg-white p-1.5 rounded-xl border border-brand-200 text-[10px] cursor-pointer"><input type="checkbox" value="5" class="ov-weekly-cb accent-[#8C7355] mb-0.5" onchange="markUnsaved()">五</label>
-            <label class="flex flex-col items-center bg-white p-1.5 rounded-xl border border-brand-200 text-[10px] cursor-pointer"><input type="checkbox" value="6" class="ov-weekly-cb accent-[#8C7355] mb-0.5" onchange="markUnsaved()">六</label>
+            <label class="flex flex-col items-center bg-white p-1.5 rounded-xl border text-[10px] cursor-pointer"><input type="checkbox" value="0" class="ov-weekly-cb accent-[#8C7355] mb-0.5" onchange="markUnsaved()">日</label>
+            <label class="flex flex-col items-center bg-white p-1.5 rounded-xl border text-[10px] cursor-pointer"><input type="checkbox" value="1" class="ov-weekly-cb accent-[#8C7355] mb-0.5" onchange="markUnsaved()">一</label>
+            <label class="flex flex-col items-center bg-white p-1.5 rounded-xl border text-[10px] cursor-pointer"><input type="checkbox" value="2" class="ov-weekly-cb accent-[#8C7355] mb-0.5" onchange="markUnsaved()">二</label>
+            <label class="flex flex-col items-center bg-white p-1.5 rounded-xl border text-[10px] cursor-pointer"><input type="checkbox" value="3" class="ov-weekly-cb accent-[#8C7355] mb-0.5" onchange="markUnsaved()">三</label>
+            <label class="flex flex-col items-center bg-white p-1.5 rounded-xl border text-[10px] cursor-pointer"><input type="checkbox" value="4" class="ov-weekly-cb accent-[#8C7355] mb-0.5" onchange="markUnsaved()">四</label>
+            <label class="flex flex-col items-center bg-white p-1.5 rounded-xl border text-[10px] cursor-pointer"><input type="checkbox" value="5" class="ov-weekly-cb accent-[#8C7355] mb-0.5" onchange="markUnsaved()">五</label>
+            <label class="flex flex-col items-center bg-white p-1.5 rounded-xl border text-[10px] cursor-pointer"><input type="checkbox" value="6" class="ov-weekly-cb accent-[#8C7355] mb-0.5" onchange="markUnsaved()">六</label>
           </div>
-        </div>
-
-        <!-- 指定日期店休清單 -->
-        <div class="pt-1 space-y-1.5">
-          <label class="block font-bold text-[10.5px]">指定日期店休 (特殊單日排休)：</label>
-          <div class="flex gap-2">
-            <input type="date" id="ov-custom-off-date" class="flex-1 p-2 bg-white rounded-xl border border-brand-200 font-mono text-xs">
-            <button type="button" onclick="addOverviewSpecificOffDate()" class="px-3 py-1.5 bg-[#8C7355] text-white rounded-xl font-bold shadow-2xs shrink-0 text-xs">
-              + 新增公休日
-            </button>
-          </div>
-          <div class="flex flex-wrap gap-1.5 pt-1" id="ov-off-dates-chips"></div>
         </div>
       </div>
-      
-      <!-- 專員名冊 (代號制，支援上下排序) -->
+
+      <!-- 專員名冊 -->
       <div class="p-3.5 bg-brand-50 rounded-2xl border space-y-2">
         <div class="flex justify-between items-center font-bold">
-          <span>專員名冊管理 (代號化，支援 ▲/▼ 上下調整排程欄位順序)：</span>
+          <span>專員名冊 (代號制，支援 ▲/▼ 調整排程欄位順序)：</span>
           <button type="button" onclick="openAddStaffModal()" class="text-[11px] text-[#8C7355] underline">+ 新增專員</button>
         </div>
         <div class="space-y-1" id="overview-staff-admin-list"></div>
       </div>
 
-      <!-- 服務項目完整設定 (上下排序) -->
+      <!-- 服務主檔 -->
       <div class="p-3.5 bg-brand-50 rounded-2xl border space-y-2">
         <div class="flex justify-between items-center font-bold">
-          <span>服務項目主檔 (含大分類、Group A/B 插單屬性、設備關聯 ｜ 支援 ▲/▼ 排序)：</span>
-          <button type="button" onclick="openAddOverviewServiceModal()" class="text-[11px] text-[#8C7355] underline">+ 新增服務項目</button>
+          <span>服務主檔 (Group A/B 插單屬性、設備連動 ｜ 支援 ▲/▼ 排序)：</span>
+          <button type="button" onclick="openAddOverviewServiceModal()" class="text-[11px] text-[#8C7355] underline">+ 新增服務</button>
         </div>
         <div class="space-y-1 max-h-48 overflow-y-auto" id="overview-services-admin-list"></div>
       </div>
 
-      <!-- 席位設備防撞容量 (上下排序) -->
+      <!-- 席位防撞容量 -->
       <div class="p-3.5 bg-brand-50 rounded-2xl border space-y-2">
         <div class="flex justify-between items-center font-bold">
-          <span>店內硬體設備席位容量 (防撞核心 ｜ 支援 ▲/▼ 排序)：</span>
-          <button type="button" onclick="openAddResourceModal()" class="text-[11px] text-[#8C7355] underline">+ 新增設備席位</button>
+          <span>店內硬體限制設備容量 (防撞核心 ｜ 支援 ▲/▼ 排序)：</span>
+          <button type="button" onclick="openAddResourceModal()" class="text-[11px] text-[#8C7355] underline">+ 新增設備</button>
         </div>
         <div class="space-y-1" id="overview-resources-admin-list"></div>
       </div>
 
-      <!-- 插單顧客小資料庫 (10 筆分頁) -->
+      <!-- [補齊] 排程預約顧客名冊 -->
       <div class="p-3.5 bg-brand-50 rounded-2xl border space-y-2.5">
         <div class="flex justify-between items-center">
           <span class="font-bold text-brand-900">排程預約顧客小庫 (手機帶入、累計次數)：</span>
           <span class="text-[10px] text-brand-400 font-mono" id="overview-cust-count-badge">0 位顧客</span>
         </div>
-        <div class="flex gap-2">
-          <input type="text" id="overview-cust-search-input" oninput="filterOverviewCustomers()" placeholder="輸入電話、姓名搜尋..." class="flex-1 p-2 bg-white rounded-xl border border-brand-200 text-xs outline-none">
-        </div>
-        <div class="space-y-1.5 max-h-48 overflow-y-auto" id="overview-cust-admin-list"></div>
+        <input type="text" id="overview-cust-search-input" oninput="filterOverviewCustomers()" placeholder="輸入顧客電話、姓名搜尋..." class="w-full p-2 bg-white rounded-xl border border-brand-200 text-xs outline-none">
+        <div class="space-y-1.5 max-h-56 overflow-y-auto" id="overview-cust-admin-list"></div>
         <div class="flex justify-between items-center pt-1 border-t border-brand-200 text-[11px]">
           <span class="text-brand-500" id="overview-cust-page-info">第 1 / 1 頁</span>
           <div class="flex gap-1" id="overview-cust-page-btns"></div>
@@ -618,123 +546,83 @@
       </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- [工具 7: contract.html] 數位定型化契約與電子存證 -->
-    <!-- ========================================== -->
-    <div id="tab-contract" class="tool-tab-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3.5 text-xs hidden">
+    <!-- [模組 06: contract.html] 數位定型化契約與電子存證 -->
+    <div id="tab-contract" class="tool-tab-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-4 text-xs hidden">
       <div class="flex justify-between items-center border-b border-brand-100 pb-2">
         <div>
           <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
             <i class="fa-solid fa-file-contract text-brand-500"></i> 定型化契約與電子存證信 (contract.html)
           </span>
-          <p class="text-[10.5px] text-brand-400">衛福部法定美容範本載入 · 行業切換 · 數位存證副本發送</p>
+          <p class="text-[10.5px] text-brand-400">衛福部官方 10 條條款載入 · 行業切換 · 數位存證副本</p>
         </div>
-        <div class="flex items-center gap-1.5">
-          <a id="btn-link-contract" href="contract.html" target="_blank" class="px-2.5 py-1 bg-brand-100 text-brand-800 rounded-lg font-bold text-[11px] hover:bg-brand-200 transition">開啟簽約前台 ➔</a>
-          <button type="button" onclick="testContractCertEmail()" class="px-2.5 py-1 bg-blue-600 text-white rounded-lg font-bold text-[11px]">測試存證發信</button>
-        </div>
+        <a id="btn-link-contract" href="contract.html" target="_blank" class="px-2.5 py-1 bg-brand-100 text-brand-800 rounded-lg font-bold text-[11px] hover:bg-brand-200 transition">開啟簽約前台 ➔</a>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label class="block font-bold mb-1">契約明確顯示店名：</label>
-          <input type="text" id="contract-cfg-store" class="w-full p-2.5 border rounded-xl bg-brand-50/50 font-bold" value="SIBYL BEAUTY SALON">
+          <input type="text" id="contract-cfg-store" class="w-full p-2.5 border rounded-xl bg-brand-50/50 font-bold" onchange="markUnsaved()">
         </div>
         <div>
-          <label class="block font-bold mb-1">店內行業別屬性切換 (前台智慧切換欄位)：</label>
+
+          
+          <label class="block font-bold mb-1">店內行業別模式：</label>
           <select id="contract-cfg-industry" class="w-full p-2.5 border rounded-xl bg-brand-50/50 font-bold" onchange="markUnsaved()">
             <option value="beauty">美業沙龍模式 (美睫/美甲/美髮/紋繡)</option>
-            <option value="pet">寵物美容住宿模式 (毛孩姓名/品種/健康叮嚀)</option>
+            <option value="pet">寵物美容住宿模式 (毛孩姓名/品種健康叮嚀)</option>
           </select>
         </div>
       </div>
 
-      <!-- 衛福部官方 10 條範本載入專用按鈕 -->
-      <div class="p-3.5 bg-amber-50 rounded-2xl border border-amber-300 space-y-2">
-        <div class="flex justify-between items-center">
-          <div>
-            <span class="font-bold text-amber-950 text-xs block">
-              <i class="fa-solid fa-landmark text-amber-700 mr-1"></i> 衛福部法定美容定型化契約範本
-            </span>
-            <span class="text-[10px] text-amber-800">衛授疾字第 1120300459 號公告修正</span>
-          </div>
-          <button type="button" onclick="loadMOHWTemplateToAdmin()" class="px-3 py-1.5 bg-amber-700 hover:bg-amber-800 text-white rounded-xl font-bold shadow-2xs text-[11px] flex items-center gap-1">
-            <i class="fa-solid fa-plus text-[10px]"></i> 點此載入衛福部官方標準範本
-          </button>
+      <!-- 衛福部 10 條範本載入 -->
+      <div class="p-3.5 bg-amber-50 rounded-2xl border border-amber-300 flex justify-between items-center">
+        <div>
+          <span class="font-bold text-amber-950 text-xs block">
+            <i class="fa-solid fa-landmark text-amber-700 mr-1"></i> 衛福部法定美容定型化契約官方範本
+          </span>
+          <span class="text-[10px] text-amber-800">衛授疾字第 1120300459 號公告修正</span>
         </div>
-        <p class="text-[10px] text-amber-800 leading-relaxed">
-          💡 請優先使用符合法規之官方完整 10 條條款文案，系統將自動套用您的店名並保障業者權益。
-        </p>
+        <button type="button" onclick="loadMOHWTemplateToAdmin()" class="px-3 py-1.5 bg-amber-700 hover:bg-amber-800 text-white rounded-xl font-bold shadow-2xs text-[11px]">
+          載入法定範本
+        </button>
       </div>
 
-      <div class="p-3 bg-brand-50 rounded-2xl border space-y-2">
-        <div class="flex justify-between items-center font-bold">
-          <span>前台快速挑選之項目清單 (逗號分隔)：</span>
-        </div>
-        <input type="text" id="contract-cfg-services" class="w-full p-2.5 bg-white border border-brand-200 rounded-xl text-xs" value="日式單根睫毛嫁接, 凝膠指甲手部造型, 毛孩精油深層泥浴SPA, 設計染燙與結構護理">
+      <div>
+        <label class="block font-bold mb-1">前台可挑選之施作項目 (逗號分隔)：</label>
+        <input type="text" id="contract-cfg-services" class="w-full p-2.5 bg-white border border-brand-200 rounded-xl text-xs" onchange="markUnsaved()">
       </div>
 
       <div>
         <label class="block font-bold mb-1">契約條款內文：</label>
-        <textarea id="contract-cfg-content" rows="6" class="w-full p-2.5 border rounded-xl leading-relaxed text-xs font-mono"></textarea>
+        <textarea id="contract-cfg-content" rows="6" class="w-full p-2.5 border rounded-xl leading-relaxed text-xs font-mono" onchange="markUnsaved()"></textarea>
       </div>
-
-      <!-- 顧客已簽約存證小資料庫 (10 筆一頁分頁 + 簽名圖存證) -->
+      <!-- [補齊] 顧客已簽約存證紀錄小庫 (含施作日期、簽名圖、複製圖片與 10 筆分頁) -->
       <div class="p-3.5 bg-brand-50 rounded-2xl border space-y-2.5">
         <div class="flex justify-between items-center">
-          <span class="font-bold text-brand-900">顧客簽約存證紀錄庫 (姓名 / 電話 / Email / 簽名圖存證)：</span>
-          <span class="text-[10px] text-brand-400 font-mono" id="contract-records-count">0 筆紀錄</span>
+          <span class="font-bold text-brand-900">顧客簽署存證名冊庫 (姓名 / 電話 / 施作日 / 簽名存證)：</span>
+          <span class="text-[10px] text-brand-400 font-mono" id="contract-records-count">0 筆存證</span>
         </div>
         <div class="flex gap-2">
-          <input type="text" id="contract-search-input" oninput="filterContractRecords()" placeholder="輸入電話、姓名、毛孩搜尋存證..." class="flex-1 p-2 bg-white rounded-xl border border-brand-200 text-xs outline-none">
+          <input type="text" id="contract-search-input" oninput="filterContractRecords()" placeholder="輸入顧客電話、姓名或毛孩名稱搜尋..." class="flex-1 p-2 bg-white rounded-xl border border-brand-200 text-xs outline-none">
+          <button type="button" onclick="exportContractRecordsCsv()" class="px-3 py-2 bg-brand-100 text-brand-800 rounded-xl font-bold text-xs hover:bg-brand-200 transition">
+            匯出名冊
+          </button>
         </div>
-        <div class="space-y-1.5 max-h-52 overflow-y-auto" id="contract-records-admin-list"></div>
+
+        <!-- 存證卡片列表容器 -->
+        <div class="space-y-2 max-h-60 overflow-y-auto" id="contract-records-admin-list"></div>
+
+        <!-- 10 筆一頁分頁列 -->
         <div class="flex justify-between items-center pt-1 border-t border-brand-200 text-[11px]">
           <span class="text-brand-500" id="contract-page-info">第 1 / 1 頁</span>
           <div class="flex gap-1" id="contract-page-btns"></div>
         </div>
-      </div>
-    </div>
 
-    <!-- ========================================== -->
-    <!-- [工具 8: recipe_sheets] 技術配方與母表連動 -->
-    <!-- ========================================== -->
-    <div id="tab-recipe-sheets" class="tool-tab-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3.5 text-xs hidden">
-      <div class="border-b border-brand-100 pb-2">
-        <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
-          <i class="fa-solid fa-file-excel text-emerald-600"></i> 技術配方庫與 Google 試算表年度母表連動
-        </span>
-      </div>
-      <div class="grid grid-cols-2 gap-2 p-3 bg-brand-50 rounded-2xl border">
-        <div><label class="font-bold block mb-1">原生底色度數預設：</label><input type="text" id="recipe-cfg-base" class="w-full p-2 border rounded-xl bg-white font-mono" value="4度自然黑褐"></div>
-        <div><label class="font-bold block mb-1">目標色號預設：</label><input type="text" id="recipe-cfg-target" class="w-full p-2 border rounded-xl bg-white font-mono" value="8-Ash 霧冷灰棕"></div>
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        <div>
-          <label class="block font-bold mb-1">Google 試算表 ID：</label>
-          <input type="text" id="sheets-cfg-id" class="w-full p-2.5 border rounded-xl font-mono text-xs" placeholder="貼上試算表 ID">
+        <!-- 法律存證指引說明 -->
+        <div class="p-2.5 bg-amber-50/70 rounded-xl border border-amber-200/80 text-[10px] text-amber-900 leading-relaxed">
+          <b>⚖️ 法律舉證說明：</b>
+          此處紀錄包含立約人親筆數位簽章圖檔與時間戳記，依台灣《電子簽章法》具備法律存證效力，遇爭議時可直接出示作為合約簽署之合法佐證。
         </div>
-        <div>
-          <label class="block font-bold mb-1">GAS Webhook 網址：</label>
-          <input type="text" id="sheets-cfg-url" class="w-full p-2.5 border rounded-xl font-mono text-xs" placeholder="https://script.google.com/macros/s/.../exec">
-        </div>
-      </div>
-    </div>
-
-    <!-- ========================================== -->
-    <!-- [工具 9: master] 總管授權監控室 -->
-    <!-- ========================================== -->
-    <div id="tab-master" class="tool-tab-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3.5 text-xs hidden">
-      <div class="border-b border-brand-100 pb-2">
-        <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
-          <i class="fa-solid fa-shield-halved text-brand-500"></i> 總管中心授權矩陣 (sibyl-tools)
-        </span>
-      </div>
-      <div class="p-4 bg-brand-50 rounded-2xl border space-y-1.5 font-mono text-[11px]">
-        <div>• 授權店家：<b id="master-disp-store">沙龍門市</b></div>
-        <div>• 專屬短網址代碼：<span class="font-bold text-[#8C7355]" id="master-disp-slug">未設定</span></div>
-        <div>• 買斷授權狀態：<span class="text-emerald-700 font-bold">全系列 7 大微工具正式授權啟用</span></div>
-        <div>• 店長後台解鎖密碼：<b class="text-brand-900 text-sm" id="master-view-pin">8888</b></div>
       </div>
     </div>
 
@@ -748,11 +636,8 @@
       </button>
 
       <nav class="flex-1 py-1 flex items-center overflow-x-auto no-scrollbar gap-1 scroll-smooth" id="hub-bottom-nav">
-        <button class="nav-item flex flex-col items-center justify-center shrink-0 w-16 py-1.5 rounded-2xl transition bg-brand-50 text-brand-500 font-bold" onclick="switchHubTab('tab-reminder', this)">
-          <i class="fa-brands fa-line text-base"></i><span class="text-[9.5px] mt-1">防放鳥</span>
-        </button>
-        <button class="nav-item flex flex-col items-center justify-center shrink-0 w-16 py-1.5 rounded-2xl transition text-brand-400 font-medium" onclick="switchHubTab('tab-slot', this)">
-          <i class="fa-solid fa-camera-retro text-base"></i><span class="text-[9.5px] mt-1">空檔圖</span>
+        <button class="nav-item flex flex-col items-center justify-center shrink-0 w-16 py-1.5 rounded-2xl transition bg-brand-50 text-brand-500 font-bold" onclick="switchHubTab('tab-slot', this)">
+          <i class="fa-solid fa-camera-retro text-base"></i><span class="text-[9.5px] mt-1">空檔生圖</span>
         </button>
         <button class="nav-item flex flex-col items-center justify-center shrink-0 w-16 py-1.5 rounded-2xl transition text-brand-400 font-medium" onclick="switchHubTab('tab-pos', this)">
           <i class="fa-solid fa-cash-register text-base"></i><span class="text-[9.5px] mt-1">快速收銀</span>
@@ -769,12 +654,6 @@
         <button class="nav-item flex flex-col items-center justify-center shrink-0 w-16 py-1.5 rounded-2xl transition text-brand-400 font-medium" onclick="switchHubTab('tab-contract', this)">
           <i class="fa-solid fa-file-contract text-base"></i><span class="text-[9.5px] mt-1">定型契約</span>
         </button>
-        <button class="nav-item flex flex-col items-center justify-center shrink-0 w-16 py-1.5 rounded-2xl transition text-brand-400 font-medium" onclick="switchHubTab('tab-recipe-sheets', this)">
-          <i class="fa-solid fa-file-excel text-base"></i><span class="text-[9.5px] mt-1">母表配方</span>
-        </button>
-        <button class="nav-item flex flex-col items-center justify-center shrink-0 w-16 py-1.5 rounded-2xl transition text-brand-400 font-medium" onclick="switchHubTab('tab-master', this)">
-          <i class="fa-solid fa-shield-halved text-base"></i><span class="text-[9.5px] mt-1">總管矩陣</span>
-        </button>
       </nav>
 
       <button type="button" onclick="scrollBottomNav(160)" class="shrink-0 w-8 h-12 flex items-center justify-center text-brand-500 hover:text-brand-900 font-black text-sm active:scale-95 transition">
@@ -784,12 +663,8 @@
   </div>
 
   <script>
-    // ==========================================
-    // [核心連線常數] Supabase 與全域設定模型
-    // ==========================================
     const SUPABASE_URL = "https://tzqpfnrpnfzzubofoqlt.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6cXBmbnJwbmZ6enVib2ZvcWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1ODQ5ODYsImV4cCI6MjEwODE2MDk4Nn0.B-ub7DCpzF3b2gjpTrM9jdW0SLOqRPillZTmoXPuNgk";
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycby44GCzrpN8ZpGSTNcVkI3IFMbyO7XhyE_Bf-cKMCTzDBbfYxDVaFD-pVcyc0vTykI-/exec";
 
     let currentStore = {
       id: "default-store",
@@ -843,24 +718,41 @@
 
 本契約經線上親筆數位簽署存證後即時生效，雙方各執一份為憑。`;
 
+    // 統一資料模型（Unified Schema）
     let allConfig = {
-      slot_config: { startTime: "10:00", endTime: "20:00", interval: 30, weeklyOff: 1, schedule: {}, theme: "almond" },
+      slot_config: { 
+        startTime: "10:00", 
+        endTime: "20:00", 
+        interval: 30, 
+        weeklyOff: 1, 
+        schedule: {}, 
+        theme: "almond", 
+        lineUrl: "https://line.me/R/ti/p/@480kqjoj" 
+      },
       pos_config: {
-        categories: ["主要服務", "深層護理"],
+        categories: ["主要美睫", "深層護理", "卸除服務"],
         items: [
-          { name: "基礎單色凝膠", category: "主要服務", isAddon: false, price: 1000 },
-          { name: "本店卸甲續做", category: "主要服務", isAddon: true, price: 200 }
+          { id: "item-1", name: "日式單根自然款 120根", price: 1200, category: "主要美睫" },
+          { id: "item-2", name: "山茶花濃密多層次款", price: 1800, category: "主要美睫" },
+          { id: "item-3", name: "睫毛深層 SPA 泡泡浴", price: 300, category: "深層護理" },
+          { id: "item-4", name: "溫和無痛深層卸睫", price: 400, category: "卸除服務" }
+        ],
+        addons: [
+          { id: "addon-1", name: "升級黑鑽極致毛", price: 200 },
+          { id: "addon-2", name: "眼膜持久防護水凝貼", price: 100 }
         ]
       },
       quote_config: {
+        logoUrl: "",
+        showLogo: true,
         categories: ["主推核心", "深層保養"],
-        items: [
-          { name: "手部單色光療", category: "主推核心", isAddon: false, price: 999, note: "含基礎指緣修護" },
-          { name: "深層賦活保養", category: "深層保養", isAddon: false, price: 1500, note: "滋潤手足肌膚" }
+        services: [
+          { id: "s1", name: "頂級日式美睫/美甲光療基本款", category: "主推核心", price: 1200, note: "含基礎指緣/眼周護理與甲型修飾" },
+          { id: "s2", name: "沙龍晶透水感深層臉部護理", category: "深層保養", price: 1800, note: "含粉刺溫和微創淨化與鎖水導入" }
         ],
         addons: [
-          { name: "升級加厚健甲", price: 300, desc: "維持度更加倍" },
-          { name: "客製精緻彩繪", price: 400, desc: "跳色手繪造型" }
+          { id: "a1", name: "結構式深層鏈鍵強化護理", price: 500, desc: "大幅提升強韌度" },
+          { id: "a2", name: "客製化手繪彩繪造型", price: 400, desc: "重點圖騰跳色" }
         ],
         carouselImages: ["https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=720&q=80"]
       },
@@ -882,8 +774,8 @@
       overview_config: {
         staffList: [{ id: "S01", name: "專員 A" }, { id: "S02", name: "專員 B" }],
         serviceCatalog: [
-          { id: "srv-1", name: "質感染髮技術", category: "現場主要服務", price: 2400, dur: 120, type: "Group_A", resource: "洗頭沖水椅" },
-          { id: "srv-2", name: "剪髮造型設計", category: "現場主要服務", price: 800, dur: 45, type: "Group_B", resource: "none" }
+          { id: "srv-1", name: "美睫嫁接 120根", category: "現場主要服務", price: 1200, dur: 60, type: "Group_B", resource: "none" },
+          { id: "srv-2", name: "深層頭皮 SPA 護理", category: "現場主要服務", price: 1500, dur: 90, type: "Group_A", resource: "洗頭沖水椅" }
         ],
         storeResources: [{ id: "res-1", name: "洗頭沖水椅", capacity: 2 }],
         scheduleConfig: {
@@ -898,28 +790,21 @@
         industry: "beauty",
         services: "日式單根睫毛嫁接, 凝膠指甲手部造型, 毛孩精油深層泥浴SPA, 設計染燙與結構護理",
         content: MOHW_OFFICIAL_10_CLAUSES
-      },
-      reminder_config: { lineToken: "", ownerUid: "" },
-      recipe_config: { baseLevel: "4度自然黑褐", targetColor: "8-Ash 霧冷灰棕", sheetId: "", gasUrl: "" }
+      }
     };
 
-    // 各大顧客資料庫與分頁變數 (10筆一頁)
+    // 狀態變數
+    let slotEditingDate = formatYMD(new Date());
     let posCustPage = 1, posCustList = [];
-    let loyaltyCustPage = 1, loyaltyCustList = [];
-    let overviewCustPage = 1, overviewCustList = [];
-    let contractRecPage = 1, contractRecList = [];
-
     let hasUnsavedChanges = false;
 
-    // ==========================================
-    // [全域核心生命週期] 讀取網址參數與雲端設定
-    // ==========================================
     window.addEventListener('DOMContentLoaded', async () => {
       await loadStoreByUrlParams();
-      initSlotDates();
-      renderAllConfigUI();
+      initSlotRangePicker();
+      renderAllUnifiedUI();
     });
 
+    // 1. 讀取店家參數與雲端統一設定
     async function loadStoreByUrlParams() {
       const urlParams = new URLSearchParams(window.location.search);
       const token = urlParams.get('token');
@@ -939,16 +824,10 @@
           currentStore = stores[0];
           document.getElementById('hub-store-title').innerText = currentStore.store_name;
           document.getElementById('lock-store-name').innerText = `${currentStore.store_name} 管理登入`;
-          document.getElementById('hub-slug-badge').innerText = `專屬短代碼: ${currentStore.store_slug || currentStore.id.slice(0,8)}`;
+          document.getElementById('hub-slug-badge').innerText = `短代碼: ${currentStore.store_slug || currentStore.id.slice(0,8)}`;
           document.getElementById('disp-current-pin').innerText = currentStore.admin_pin || "8888";
-          document.getElementById('slot-disp-pin').innerText = currentStore.admin_pin || "8888";
-          document.getElementById('pos-disp-pin').innerText = currentStore.admin_pin || "8888";
-          document.getElementById('loyalty-cfg-pin').value = currentStore.admin_pin || "8888";
-          document.getElementById('master-disp-store').innerText = currentStore.store_name;
-          document.getElementById('master-disp-slug').innerText = currentStore.store_slug || '未設定';
-          document.getElementById('master-view-pin').innerText = currentStore.admin_pin || "8888";
 
-          // 前台快速跳轉連結 (含短代碼參數)
+          // 綁定跳轉前台短網址
           const param = currentStore.store_slug ? `?s=${currentStore.store_slug}` : `?store_id=${currentStore.id}`;
           document.getElementById('btn-link-slot').href = `studio_slot.html${param}`;
           document.getElementById('btn-link-pos').href = `pos.html${param}`;
@@ -958,6 +837,7 @@
           document.getElementById('btn-link-contract').href = `contract.html${param}`;
 
           await loadCloudSettings(currentStore.id);
+          await loadPosLedgersFromCloud(currentStore.id);
         }
       } catch (err) {
         console.warn("載入店家失敗:", err);
@@ -971,45 +851,106 @@
         });
         const data = await res.json();
         if (data && data.length > 0 && data[0].slot_config) {
-          allConfig = Object.assign(allConfig, data[0].slot_config);
+          const cfg = data[0].slot_config;
+          // 對齊各子模組結構
+          if (cfg.startTime) allConfig.slot_config = Object.assign(allConfig.slot_config, cfg);
+          if (cfg.pos_config) allConfig.pos_config = Object.assign(allConfig.pos_config, cfg.pos_config);
+          if (cfg.quote_config) allConfig.quote_config = Object.assign(allConfig.quote_config, cfg.quote_config);
+          if (cfg.loyalty_config) allConfig.loyalty_config = Object.assign(allConfig.loyalty_config, cfg.loyalty_config);
+          if (cfg.overview_config) allConfig.overview_config = Object.assign(allConfig.overview_config, cfg.overview_config);
+          if (cfg.contract_config) allConfig.contract_config = Object.assign(allConfig.contract_config, cfg.contract_config);
         }
       } catch (e) {
         console.error("載入小工具設定異常:", e);
       }
     }
 
-    function renderAllConfigUI() {
+    // 2. 渲染全模組介面
+    function renderAllUnifiedUI() {
+      // 01. Slot
       document.getElementById('slot-cfg-store').value = currentStore.store_name;
+      document.getElementById('slot-cfg-line').value = allConfig.slot_config.lineUrl || "";
+      document.getElementById('slot-cfg-start').value = allConfig.slot_config.startTime || "10:00";
+      document.getElementById('slot-cfg-end').value = allConfig.slot_config.endTime || "20:00";
+      document.getElementById('slot-cfg-interval').value = String(allConfig.slot_config.interval || 30);
+      document.getElementById('slot-cfg-weekly-off').value = String(allConfig.slot_config.weeklyOff ?? 1);
+      renderSlotDateChips();
+      renderStoryCanvasInHub();
+
+      // 02. Pos
+      renderPosItems();
+      renderPosAddons();
+
+      // 03. Quote
+      document.getElementById('quote-cfg-logo-url').value = allConfig.quote_config.logoUrl || "";
+      document.getElementById('quote-cfg-show-logo').checked = (allConfig.quote_config.showLogo !== false);
+      previewQuoteHubLogo(allConfig.quote_config.logoUrl);
+      renderQuoteAdmin();
+
+      // 04. Loyalty
+      document.getElementById('loyalty-cfg-reward').value = allConfig.loyalty_config.rewardAmount || 300;
+      document.getElementById('loyalty-switch-stamp').checked = allConfig.loyalty_config.enableStamp ?? true;
+      document.getElementById('loyalty-switch-deposit').checked = allConfig.loyalty_config.enableDeposit ?? true;
+      document.getElementById('loyalty-switch-package').checked = allConfig.loyalty_config.enablePackage ?? true;
+      renderLoyaltyRules();
+      loadLoyaltyMembersData();
+
+      // 05. Overview
+      const ovSched = allConfig.overview_config.scheduleConfig || {};
+      document.getElementById('overview-cfg-start').value = ovSched.startTime || "09:00";
+      document.getElementById('overview-cfg-end').value = ovSched.endTime || "21:00";
+      document.getElementById('overview-cfg-interval').value = String(ovSched.interval || 30);
+      document.querySelectorAll('.ov-weekly-cb').forEach(cb => {
+        cb.checked = (ovSched.weeklyOff || []).includes(Number(cb.value));
+      });
+      renderOverviewAdmin();
+      loadOverviewCustomersData();
+
+      // 06. Contract
       document.getElementById('contract-cfg-store').value = currentStore.store_name;
       document.getElementById('contract-cfg-industry').value = allConfig.contract_config.industry || "beauty";
       document.getElementById('contract-cfg-services').value = allConfig.contract_config.services || "";
       document.getElementById('contract-cfg-content').value = allConfig.contract_config.content || MOHW_OFFICIAL_10_CLAUSES.replace(/{{STORE_NAME}}/g, currentStore.store_name);
-
-      renderPosItems();
-      renderQuoteAdmin();
-      renderLoyaltyRules();
-      renderOverviewAdmin();
-
-      loadLocalDatabases();
+      loadContractRecordsData();
     }
 
-    // ==========================================
-    // [安全驗證與改密碼] PIN 碼登入
-    // ==========================================
+    // 3. 門禁驗證（5 次錯誤防盜安全鎖定）
     function checkAdminPin() {
+      const lockKey = `hub_lock_${currentStore.id}`;
+      const failKey = `hub_fail_${currentStore.id}`;
+
+      if (localStorage.getItem(lockKey)) {
+        return Swal.fire({
+          title: '🚨 系統安全鎖定中',
+          text: '密碼連續錯誤達 5 次，後台已鎖定，請聯繫系統設計師解除鎖定。',
+          icon: 'error'
+        });
+      }
+
       const input = document.getElementById('pin-input').value.trim();
-      const err = document.getElementById('lock-error');
-      if (input === (currentStore.admin_pin || "8888") || input === "8888" || input === "888") {
+      const correctPin = currentStore.admin_pin || "8888";
+      const MASTER_KEY = "alyn9999";
+
+      if (input === correctPin || input === MASTER_KEY) {
+        localStorage.removeItem(failKey);
         document.getElementById('lock-screen').style.display = 'none';
       } else {
-        err.innerText = '密碼錯誤！請輸入正確的 PIN 碼';
-        document.getElementById('pin-input').value = '';
+        let fails = Number(localStorage.getItem(failKey) || 0) + 1;
+        localStorage.setItem(failKey, fails);
+
+        if (fails >= 5) {
+          localStorage.setItem(lockKey, 'true');
+          Swal.fire('🚫 密碼錯誤達 5 次，網站已安全鎖定！', '請聯繫系統設計師開通。', 'error');
+        } else {
+          document.getElementById('lock-error').innerText = `密碼錯誤！還剩 ${5 - fails} 次機會即會鎖定。`;
+          document.getElementById('pin-input').value = '';
+        }
       }
     }
 
     async function changeAdminPinModal() {
       const { value: newPin } = await Swal.fire({
-        title: '修改管理中心 PIN 碼',
+        title: '修改集成中心管理 PIN 碼',
         input: 'password',
         inputPlaceholder: '請輸入新的 4~6 碼密碼',
         showCancelButton: true,
@@ -1020,17 +961,11 @@
       if (newPin && newPin.trim()) {
         currentStore.admin_pin = newPin.trim();
         document.getElementById('disp-current-pin').innerText = currentStore.admin_pin;
-        document.getElementById('slot-disp-pin').innerText = currentStore.admin_pin;
-        document.getElementById('pos-disp-pin').innerText = currentStore.admin_pin;
-        document.getElementById('loyalty-cfg-pin').value = currentStore.admin_pin;
-        document.getElementById('master-view-pin').innerText = currentStore.admin_pin;
         markUnsaved();
       }
     }
 
-    // ==========================================
-    // [全域雲端儲存] 一鍵同步存入 Supabase
-    // ==========================================
+    // 4. 全域雲端儲存（Safe Deep Merge 增量同步）
     async function saveAllActiveSettings() {
       Swal.fire({
         title: '正在同步儲存至雲端...',
@@ -1038,152 +973,252 @@
         didOpen: () => Swal.showLoading()
       });
 
+      // 提取表單最新資料
       currentStore.store_name = document.getElementById('slot-cfg-store').value.trim();
-      allConfig.reminder_config.lineToken = document.getElementById('cfg-line-token').value.trim();
-      allConfig.reminder_config.ownerUid = document.getElementById('cfg-owner-uid').value.trim();
-      allConfig.contract_config.industry = document.getElementById('contract-cfg-industry').value;
-      allConfig.contract_config.services = document.getElementById('contract-cfg-services').value.trim();
-      allConfig.contract_config.content = document.getElementById('contract-cfg-content').value.trim();
-      allConfig.loyalty_config.pin = document.getElementById('loyalty-cfg-pin').value.trim();
+      allConfig.slot_config.lineUrl = document.getElementById('slot-cfg-line').value.trim();
+      allConfig.slot_config.startTime = document.getElementById('slot-cfg-start').value;
+      allConfig.slot_config.endTime = document.getElementById('slot-cfg-end').value;
+      allConfig.slot_config.interval = Number(document.getElementById('slot-cfg-interval').value);
+      allConfig.slot_config.weeklyOff = Number(document.getElementById('slot-cfg-weekly-off').value);
+
+      allConfig.quote_config.logoUrl = document.getElementById('quote-cfg-logo-url').value.trim();
+      allConfig.quote_config.showLogo = document.getElementById('quote-cfg-show-logo').checked;
+
       allConfig.loyalty_config.rewardAmount = Number(document.getElementById('loyalty-cfg-reward').value || 300);
       allConfig.loyalty_config.enableStamp = document.getElementById('loyalty-switch-stamp').checked;
       allConfig.loyalty_config.enableDeposit = document.getElementById('loyalty-switch-deposit').checked;
       allConfig.loyalty_config.enablePackage = document.getElementById('loyalty-switch-package').checked;
-      // 打包營業時段、間隔與公休設定
-      const weekly = [];
-      document.querySelectorAll('.ov-weekly-cb:checked').forEach(cb => weekly.push(Number(cb.value)));
-      
+
+      const ovWeekly = [];
+      document.querySelectorAll('.ov-weekly-cb:checked').forEach(cb => ovWeekly.push(Number(cb.value)));
       allConfig.overview_config.scheduleConfig = {
         startTime: document.getElementById('overview-cfg-start').value,
         endTime: document.getElementById('overview-cfg-end').value,
         interval: Number(document.getElementById('overview-cfg-interval').value),
-        weeklyOff: weekly,
+        weeklyOff: ovWeekly,
         specificOffDates: allConfig.overview_config.scheduleConfig?.specificOffDates || []
       };
 
+      allConfig.contract_config.industry = document.getElementById('contract-cfg-industry').value;
+      allConfig.contract_config.services = document.getElementById('contract-cfg-services').value.trim();
+      allConfig.contract_config.content = document.getElementById('contract-cfg-content').value.trim();
+
       try {
+        // 更新店家主表
         await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?id=eq.${currentStore.id}`, {
           method: "PATCH",
           headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json" },
           body: JSON.stringify({ store_name: currentStore.store_name, admin_pin: currentStore.admin_pin })
         });
 
-        await fetch(`${SUPABASE_URL}/rest/v1/tool_settings`, {
+        // 讀取既有完整 JSON 增量合併
+        let mergedConfig = {};
+        try {
+          const fetchRes = await fetch(`${SUPABASE_URL}/rest/v1/tool_settings?store_id=eq.${currentStore.id}&select=slot_config`, {
+            headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` }
+          });
+          const existingData = await fetchRes.json();
+          if (existingData && existingData.length > 0 && existingData[0].slot_config) {
+            mergedConfig = existingData[0].slot_config;
+          }
+        } catch (e) {
+          console.warn("無法取得現有配置");
+        }
+
+        // 合併結構
+        mergedConfig.startTime = allConfig.slot_config.startTime;
+        mergedConfig.endTime = allConfig.slot_config.endTime;
+        mergedConfig.interval = allConfig.slot_config.interval;
+        mergedConfig.weeklyOff = allConfig.slot_config.weeklyOff;
+        mergedConfig.schedule = allConfig.slot_config.schedule;
+        mergedConfig.theme = allConfig.slot_config.theme;
+        mergedConfig.lineUrl = allConfig.slot_config.lineUrl;
+
+        mergedConfig.pos_config = allConfig.pos_config;
+        mergedConfig.quote_config = allConfig.quote_config;
+        mergedConfig.loyalty_config = allConfig.loyalty_config;
+        mergedConfig.overview_config = allConfig.overview_config;
+        mergedConfig.contract_config = allConfig.contract_config;
+
+        // 安全 Upsert
+        const saveRes = await fetch(`${SUPABASE_URL}/rest/v1/tool_settings?on_conflict=store_id`, {
           method: "POST",
-          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates" },
+          headers: {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json",
+            "Prefer": "resolution=merge-duplicates"
+          },
           body: JSON.stringify({
             store_id: currentStore.id,
-            slot_config: allConfig,
+            slot_config: mergedConfig,
+            store_pin: currentStore.admin_pin,
             updated_at: new Date().toISOString()
           })
         });
 
+        if (!saveRes.ok) throw new Error(await saveRes.text());
+
         hasUnsavedChanges = false;
         document.getElementById('sticky-unsaved-bar').classList.add('hidden');
-        Swal.fire('雲端設定已全數同步儲存！', '', 'success');
+        Swal.fire('雲端統一設定已全數同步！', '所有前台與單頁後台已即刻鏡像生效。', 'success');
       } catch (err) {
         Swal.fire('儲存失敗', err.message, 'error');
       }
     }
 
-    // ==========================================
-    // [工具 1: reminder.gs] 腳本複製與測試
-    // ==========================================
-    function copyReminderCode() {
-      navigator.clipboard.writeText(document.getElementById('code-reminder-view').value);
-      Swal.fire('排程腳本已複製！', '', 'success');
-    }
-
-    function testReminderPush() {
-      Swal.fire({ title: 'LINE 推播測試已發送', text: '請檢查指定個人 UID 之 LINE 接收情形', icon: 'success' });
-    }
-
-    // ==========================================
-    // [工具 2: studio_slot.html] 空檔生圖與排程
-    // ==========================================
-    let slotReleasedList = JSON.parse(localStorage.getItem('slot_released_data') || '[]');
-    function initSlotDates() {
+    // =========================================================================
+    // [模組 01 邏輯: studio_slot] 多日排程字典與分組生圖
+    // =========================================================================
+    function initSlotRangePicker() {
       const today = new Date();
-      const end = new Date();
-      end.setDate(today.getDate() + 3);
-      document.getElementById('slot-range-start').value = today.toISOString().split('T')[0];
-      document.getElementById('slot-range-end').value = end.toISOString().split('T')[0];
-      renderSlotDateRangeChips();
+      const end = new Date(today.getTime() + 6 * 86400000);
+      document.getElementById('slot-range-start').value = formatYMD(today);
+      document.getElementById('slot-range-end').value = formatYMD(end);
     }
 
-    function renderSlotDateRangeChips() {
-      const container = document.getElementById('slot-interactive-chips');
+    function renderSlotDateChips() {
+      const container = document.getElementById('slot-date-chips-container');
       const sVal = document.getElementById('slot-range-start').value;
       const eVal = document.getElementById('slot-range-end').value;
       if (!sVal || !eVal) return;
 
-      const startH = parseInt(document.getElementById('slot-cfg-start').value || 10);
-      const endH = parseInt(document.getElementById('slot-cfg-end').value || 20);
-      const interval = parseInt(document.getElementById('slot-cfg-interval').value || 30);
-      const offDays = Array.from(document.querySelectorAll('.slot-off-cb:checked')).map(cb => parseInt(cb.value));
-      const weekStrs = ['日', '一', '二', '三', '四', '五', '六'];
-
       container.innerHTML = '';
       let cur = new Date(sVal);
-      const endDate = new Date(eVal);
+      const end = new Date(eVal);
+      const weekNames = ['日', '一', '二', '三', '四', '五', '六'];
+      const weeklyOff = Number(document.getElementById('slot-cfg-weekly-off').value);
 
-      while (cur <= endDate) {
+      while (cur <= end) {
+        const dStr = formatYMD(cur);
         const dayOfWeek = cur.getDay();
-        const dateStr = `${cur.getMonth() + 1}/${cur.getDate()} (${weekStrs[dayOfWeek]})`;
+        const isOff = (weeklyOff === dayOfWeek);
+        const isCurrent = (dStr === slotEditingDate);
 
-        if (!offDays.includes(dayOfWeek)) {
-          const dayWrap = document.createElement('div');
-          dayWrap.className = 'p-2 bg-white rounded-xl border border-brand-200 space-y-1';
-          dayWrap.innerHTML = `<div class="font-bold text-brand-900">${dateStr}</div>`;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `px-3 py-1.5 rounded-xl border text-xs font-bold shrink-0 transition flex items-center gap-1 ${
+          isCurrent ? 'bg-[#8C7355] text-white border-[#8C7355] shadow-xs' : isOff ? 'bg-gray-100 text-gray-400 border-gray-200' : 'bg-white border-brand-200 text-brand-800'
+        }`;
+        btn.innerHTML = `<span>${dStr.slice(5)} (${weekNames[dayOfWeek]})</span>${isOff ? '<span class="text-[9px] opacity-75">[休]</span>' : ''}`;
+        btn.onclick = () => {
+          slotEditingDate = dStr;
+          renderSlotDateChips();
+          renderSlotMatrix();
+        };
+        container.appendChild(btn);
+        cur.setDate(cur.getDate() + 1);
+      }
 
-          const chipGrid = document.createElement('div');
-          chipGrid.className = 'grid grid-cols-4 gap-1';
+      document.getElementById('disp-slot-editing-date').innerText = slotEditingDate;
+      renderSlotMatrix();
+    }
 
-          for (let h = startH; h < endH; h++) {
-            for (let m = 0; m < 60; m += interval) {
-              const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-              const tag = `${dateStr} ${timeStr}`;
-              const isChecked = slotReleasedList.includes(tag);
+    function renderSlotMatrix() {
+      const container = document.getElementById('slot-matrix-container');
+      const start = document.getElementById('slot-cfg-start').value || "10:00";
+      const end = document.getElementById('slot-cfg-end').value || "20:00";
+      const interval = Number(document.getElementById('slot-cfg-interval').value || 30);
 
-              const btn = document.createElement('button');
-              btn.type = 'button';
-              btn.className = `py-1 rounded font-mono text-[11px] font-bold border transition ${isChecked ? 'bg-[#8C7355] text-white border-[#8C7355]' : 'bg-brand-50 border-gray-200 text-gray-700'}`;
-              btn.innerText = timeStr;
-              btn.onclick = () => {
-                if (slotReleasedList.includes(tag)) {
-                  slotReleasedList = slotReleasedList.filter(s => s !== tag);
-                  btn.className = 'py-1 rounded font-mono text-[11px] font-bold border bg-brand-50 border-gray-200 text-gray-700';
-                } else {
-                  slotReleasedList.push(tag);
-                  btn.className = 'py-1 rounded font-mono text-[11px] font-bold border bg-[#8C7355] text-white border-[#8C7355]';
-                }
-                localStorage.setItem('slot_released_data', JSON.stringify(slotReleasedList));
-                updateAdminStoryPreview();
-                markUnsaved();
-              };
-              chipGrid.appendChild(btn);
-            }
-          }
-          dayWrap.appendChild(chipGrid);
-          container.appendChild(dayWrap);
+      const allSlots = generateTimeSlots(start, end, interval);
+      if (!allConfig.slot_config.schedule) allConfig.slot_config.schedule = {};
+      const activeList = allConfig.slot_config.schedule[slotEditingDate] || [];
+
+      container.innerHTML = allSlots.map(timeStr => {
+        const isChecked = activeList.includes(timeStr);
+        return `
+          <button type="button" onclick="toggleSlotInHub('${timeStr}')" class="py-2 px-1 rounded-xl border text-xs font-mono font-bold transition flex items-center justify-center gap-1 ${
+            isChecked ? 'bg-[#8C7355] text-white border-[#8C7355]' : 'bg-white text-gray-400 border-brand-200 hover:bg-brand-50'
+          }">
+            <i class="fa-solid ${isChecked ? 'fa-check' : 'fa-plus'} text-[9px]"></i>
+            <span>${timeStr}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function toggleSlotInHub(timeStr) {
+      if (!allConfig.slot_config.schedule[slotEditingDate]) allConfig.slot_config.schedule[slotEditingDate] = [];
+      const list = allConfig.slot_config.schedule[slotEditingDate];
+      const idx = list.indexOf(timeStr);
+      if (idx > -1) list.splice(idx, 1);
+      else { list.push(timeStr); list.sort(); }
+      renderSlotMatrix();
+      renderStoryCanvasInHub();
+      markUnsaved();
+    }
+
+    function toggleAllSlotsInEditingDay(isAll) {
+      const start = document.getElementById('slot-cfg-start').value || "10:00";
+      const end = document.getElementById('slot-cfg-end').value || "20:00";
+      const interval = Number(document.getElementById('slot-cfg-interval').value || 30);
+      allConfig.slot_config.schedule[slotEditingDate] = isAll ? generateTimeSlots(start, end, interval) : [];
+      renderSlotMatrix();
+      renderStoryCanvasInHub();
+      markUnsaved();
+    }
+
+    function batchApplySlotRange() {
+      const sVal = document.getElementById('slot-range-start').value;
+      const eVal = document.getElementById('slot-range-end').value;
+      if (!sVal || !eVal) return;
+
+      const currentSlots = allConfig.slot_config.schedule[slotEditingDate] || [];
+      const weeklyOff = Number(document.getElementById('slot-cfg-weekly-off').value);
+      let cur = new Date(sVal);
+      const end = new Date(eVal);
+      let count = 0;
+
+      while (cur <= end) {
+        const dStr = formatYMD(cur);
+        if (cur.getDay() !== weeklyOff) {
+          allConfig.slot_config.schedule[dStr] = [...currentSlots];
+          count++;
         }
         cur.setDate(cur.getDate() + 1);
       }
-      updateAdminStoryPreview();
+      renderStoryCanvasInHub();
+      markUnsaved();
+      Swal.fire({ title: '已套用！', text: `已同步至區間內 ${count} 個營業日`, icon: 'success', timer: 1000, showConfirmButton: false });
     }
 
-    function updateAdminStoryPreview() {
-      const storeName = document.getElementById('slot-cfg-store').value || currentStore.store_name;
-      document.getElementById('admin-story-store-title').innerText = storeName;
-      const grid = document.getElementById('admin-story-slots-grid');
-      if (slotReleasedList.length === 0) {
-        grid.innerHTML = '<div class="col-span-2 py-4 text-xs opacity-60">尚未勾選釋出時段</div>';
-      } else {
-        grid.innerHTML = slotReleasedList.slice(0, 6).map(t => `<div class="py-1 px-2 bg-black/5 rounded-lg text-xs font-mono">⏰ ${t}</div>`).join('');
+    function renderStoryCanvasInHub() {
+      const container = document.getElementById('admin-story-slots-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const activeDates = Object.keys(allConfig.slot_config.schedule || {})
+        .filter(d => Array.isArray(allConfig.slot_config.schedule[d]) && allConfig.slot_config.schedule[d].length > 0)
+        .sort();
+
+      if (activeDates.length === 0) {
+        container.innerHTML = '<div class="py-8 text-center text-xs opacity-60">尚未勾選釋出時段</div>';
+        return;
       }
+
+      const weekNames = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
+      activeDates.forEach(dateStr => {
+        const slots = allConfig.slot_config.schedule[dateStr].sort();
+        const dObj = new Date(dateStr);
+        const dayLabel = `${dateStr.slice(5)} (${weekNames[dObj.getDay()]})`;
+
+        const groupEl = document.createElement('div');
+        groupEl.className = "space-y-1.5 pb-2 border-b border-black/10 last:border-b-0";
+        groupEl.innerHTML = `
+          <div class="flex items-center gap-1.5">
+            <span class="w-1.5 h-3 bg-[#8C7355] rounded-full"></span>
+            <span class="font-bold text-xs">${dayLabel}</span>
+            <span class="text-[10px] opacity-60 font-mono">(${slots.length} 個空檔)</span>
+          </div>
+          <div class="grid grid-cols-3 gap-1.5 pt-1">
+            ${slots.map(t => `<div class="py-1 px-1 text-center bg-black/5 rounded-lg font-mono font-bold text-xs">${t}</div>`).join('')}
+          </div>
+        `;
+        container.appendChild(groupEl);
+      });
     }
 
-    function changeAdminSlotTheme(themeName) {
+    function changeSlotTheme(themeName) {
       allConfig.slot_config.theme = themeName;
       const node = document.getElementById('admin-story-export-node');
       const themes = {
@@ -1195,9 +1230,11 @@
       const cur = themes[themeName] || themes.almond;
       node.style.backgroundColor = cur.bg;
       node.style.color = cur.text;
+      markUnsaved();
     }
 
     async function exportAdminStoryImage() {
+      renderStoryCanvasInHub();
       const node = document.getElementById('admin-story-export-node');
       Swal.fire({ title: '正在生成 9:16 限動美圖...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
       try {
@@ -1212,9 +1249,49 @@
       }
     }
 
-    // ==========================================
-    // [工具 3: pos.html] 收銀品項 (▲/▼) 與顧客小庫
-    // ==========================================
+    // =========================================================================
+    // [模組 02 邏輯: pos] 自 Supabase 聚合營收看板與顧客庫
+    // =========================================================================
+    async function loadPosLedgersFromCloud(storeId) {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_quick_ledger?store_id=eq.${storeId}&order=created_at.desc`, {
+          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` }
+        });
+        const records = await res.json();
+        if (Array.isArray(records)) {
+          // 聚合營收
+          const todayPrefix = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Taipei' }).format(new Date());
+          const monthPrefix = todayPrefix.slice(0, 7);
+          let todayTotal = 0, monthTotal = 0;
+
+          const clientMap = {};
+          records.forEach(r => {
+            const dateStr = r.created_at || '';
+            const paid = Number(r.total_price || 0);
+            if (dateStr.includes(todayPrefix)) todayTotal += paid;
+            if (dateStr.includes(monthPrefix)) monthTotal += paid;
+
+            let meta = {};
+            try { meta = JSON.parse(r.items_summary); } catch (e) { meta = { items_text: r.items_summary }; }
+            const phone = meta.client_phone || '未留手機';
+            if (!clientMap[phone]) {
+              clientMap[phone] = { phone: phone, name: r.client_name || '散客', line: meta.client_line || '', total: 0, visits: 0 };
+            }
+            clientMap[phone].total += paid;
+            clientMap[phone].visits += 1;
+          });
+
+          document.getElementById('pos-stat-today').innerText = `NT$ ${todayTotal.toLocaleString()}`;
+          document.getElementById('pos-stat-month').innerText = `NT$ ${monthTotal.toLocaleString()}`;
+
+          posCustList = Object.values(clientMap);
+          filterPosCustomers();
+        }
+      } catch (e) {
+        console.error("收銀數據載入異常:", e);
+      }
+    }
+
     function renderPosItems() {
       const list = document.getElementById('pos-items-admin-list');
       const items = allConfig.pos_config.items || [];
@@ -1226,9 +1303,7 @@
           const idx = items.indexOf(it);
           return `
             <div class="flex justify-between items-center p-2.5 bg-white rounded-xl border border-brand-200 text-xs shadow-2xs">
-              <div>
-                <b class="text-brand-900">${it.isAddon ? '[加購] ' : ''}${it.name}</b>
-              </div>
+              <div><b class="text-brand-900">${it.name}</b></div>
               <div class="flex items-center gap-1.5">
                 <span class="font-mono font-bold text-emerald-800 mr-1">NT$ ${it.price}</span>
                 <button type="button" onclick="movePosItem(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 border flex items-center justify-center font-bold">▲</button>
@@ -1245,7 +1320,7 @@
               <span class="w-1.5 h-3 bg-[#8C7355] rounded-full"></span>
               <span>${cat}</span>
             </div>
-            ${rows || '<div class="text-gray-400 text-xs py-1">此分類尚無品項</div>'}
+            ${rows || '<div class="text-gray-400 text-xs py-1">無品項</div>'}
           </div>
         `;
       }).join('');
@@ -1267,15 +1342,10 @@
         title: '新增現場收銀品項',
         html: `
           <div class="text-left text-xs space-y-2">
-            <div><label class="font-bold">分類：</label>
-              <select id="p-cat" class="w-full p-2 border rounded-xl">${catOptions}<option value="__NEW__">＋ 自訂新分類...</option></select>
-            </div>
-            <div id="p-new-cat-box" class="hidden">
-              <input id="p-new-cat-val" class="swal2-input text-xs" placeholder="輸入新分類名稱">
-            </div>
-            <div><label class="font-bold">品項名稱：</label><input id="p-name" class="swal2-input text-xs" placeholder="例: 經典法式美甲"></div>
+            <div><label class="font-bold">分類：</label><select id="p-cat" class="w-full p-2 border rounded-xl">${catOptions}<option value="__NEW__">＋ 自訂新分類...</option></select></div>
+            <div id="p-new-cat-box" class="hidden"><input id="p-new-cat-val" class="swal2-input text-xs" placeholder="輸入新分類名稱"></div>
+            <div><label class="font-bold">品項名稱：</label><input id="p-name" class="swal2-input text-xs" placeholder="例: 經典造型設計"></div>
             <div><label class="font-bold">金額：</label><input id="p-price" type="number" class="swal2-input text-xs font-mono" placeholder="1200"></div>
-            <label class="flex items-center gap-1.5 font-bold cursor-pointer pt-1"><input type="checkbox" id="p-addon" class="accent-brand-500"> 設為現場加購項目</label>
           </div>
         `,
         didOpen: () => {
@@ -1289,7 +1359,7 @@
             category: cat,
             name: document.getElementById('p-name').value.trim(),
             price: Number(document.getElementById('p-price').value || 0),
-            isAddon: document.getElementById('p-addon').checked
+            id: `item-${Date.now().toString().slice(-4)}`
           };
         }
       });
@@ -1301,14 +1371,65 @@
       }
     }
 
-    // ==========================================
-    // [工具 4: quote.html] 報價項目 (▲/▼) 與 9:16 輪播
-    // ==========================================
+    function filterPosCustomers() {
+      const q = (document.getElementById('pos-cust-search-input') ? document.getElementById('pos-cust-search-input').value : '').trim().toLowerCase();
+      let filtered = posCustList;
+      if (q) filtered = posCustList.filter(c => c.phone.includes(q) || c.name.toLowerCase().includes(q));
+
+      document.getElementById('pos-cust-count-badge').innerText = `${filtered.length} 位顧客`;
+      renderGenericTable('pos-cust-admin-list', 'pos-cust-page-info', 'pos-cust-page-btns', filtered, posCustPage, (c) => `
+        <div class="p-2.5 bg-white rounded-xl border flex justify-between items-center text-xs">
+          <div><b>${c.name}</b> <span class="font-mono text-gray-400">(${c.phone})</span></div>
+          <div class="text-[10.5px] text-brand-600 font-mono">造訪 ${c.visits} 次 ｜ 總消費 NT$ ${c.total.toLocaleString()}</div>
+        </div>
+      `, (p) => { posCustPage = p; filterPosCustomers(); });
+    }
+
+    // =========================================================================
+    // [模組 03 邏輯: quote] 圖片直傳 Supabase 與項目排序
+    // =========================================================================
+    function previewQuoteHubLogo(url) {
+      const box = document.getElementById('quote-hub-logo-preview');
+      if (!box) return;
+      if (!url || !url.trim()) {
+        box.innerHTML = '<span class="text-[11px] text-brand-400">尚未上傳或輸入 LOGO 圖片網址</span>';
+        return;
+      }
+      box.innerHTML = `<img src="${url.trim()}" class="max-h-20 max-w-full object-contain rounded-lg" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\'text-rose-500 text-[11px]\'>圖片無效</span>';">`;
+    }
+
+    async function uploadQuoteLogoFromHub() {
+      const fileInput = document.getElementById('quote-hub-upload-logo');
+      if (!fileInput.files || fileInput.files.length === 0) return Swal.fire('請先選取圖片！', '', 'warning');
+      const file = fileInput.files[0];
+      const fileExt = file.name.split('.').pop().toLowerCase();
+      const filePath = `store_${currentStore.store_slug || currentStore.id.slice(0,8)}/logo_${Date.now()}.${fileExt}`;
+      const bucketName = 'tool-assets';
+
+      Swal.fire({ title: '正在直傳 LOGO 至 Supabase...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+      try {
+        const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucketName}/${filePath}`, {
+          method: "POST",
+          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": file.type, "x-upsert": "true" },
+          body: file
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/${bucketName}/${filePath}`;
+        document.getElementById('quote-cfg-logo-url').value = publicUrl;
+        previewQuoteHubLogo(publicUrl);
+        allConfig.quote_config.logoUrl = publicUrl;
+        markUnsaved();
+        Swal.fire({ title: 'LOGO 直傳成功！', icon: 'success', timer: 1000, showConfirmButton: false });
+      } catch (err) {
+        Swal.fire('上傳失敗', err.message, 'error');
+      }
+    }
+
     function renderQuoteAdmin() {
-      // 1. 主服務列表
+      // 主品項列表
       const container = document.getElementById('quote-items-admin-list');
-      const items = allConfig.quote_config.items || [];
-      container.innerHTML = items.map((it, idx) => `
+      const list = allConfig.quote_config.services || allConfig.quote_config.items || [];
+      container.innerHTML = list.map((it, idx) => `
         <div class="flex justify-between items-center p-2.5 bg-white rounded-xl border border-brand-200 text-xs shadow-2xs">
           <div class="truncate">
             <b class="text-brand-900">${it.name}</b> <span class="text-gray-400 font-mono">(${it.category})</span>
@@ -1317,13 +1438,13 @@
           <div class="flex items-center gap-1.5 shrink-0">
             <span class="font-mono font-bold text-emerald-800 mr-1">NT$ ${it.price}</span>
             <button type="button" onclick="moveQuoteItem(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 border flex items-center justify-center font-bold">▲</button>
-            <button type="button" onclick="moveQuoteItem(${idx}, 1)" ${idx === items.length - 1 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 border flex items-center justify-center font-bold">▼</button>
-            <button type="button" onclick="allConfig.quote_config.items.splice(${idx},1); renderQuoteAdmin(); markUnsaved();" class="text-rose-600 font-bold ml-1">✕</button>
+            <button type="button" onclick="moveQuoteItem(${idx}, 1)" ${idx === list.length - 1 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 border flex items-center justify-center font-bold">▼</button>
+            <button type="button" onclick="deleteQuoteItem(${idx})" class="text-rose-600 font-bold ml-1">✕</button>
           </div>
         </div>
-      `).join('') || '<div class="text-gray-400 py-2 text-center">目前尚無主服務品項</div>';
+      `).join('') || '<div class="text-gray-400 py-2 text-center">無主項目</div>';
 
-      // 2. 加購項目列表
+      // 加購列表
       const addonContainer = document.getElementById('quote-addons-admin-list');
       const addons = allConfig.quote_config.addons || [];
       addonContainer.innerHTML = addons.map((adn, idx) => `
@@ -1339,9 +1460,9 @@
             <button type="button" onclick="allConfig.quote_config.addons.splice(${idx},1); renderQuoteAdmin(); markUnsaved();" class="text-rose-600 font-bold ml-1">✕</button>
           </div>
         </div>
-      `).join('') || '<div class="text-gray-400 py-2 text-center">目前尚無工藝加購項目</div>';
+      `).join('') || '<div class="text-gray-400 py-2 text-center">無加購項目</div>';
 
-      // 3. 輪播縮圖
+      // 輪播海報
       const imgContainer = document.getElementById('quote-carousel-admin-preview');
       imgContainer.innerHTML = (allConfig.quote_config.carouselImages || []).map((url, idx) => `
         <div class="w-16 h-28 rounded-xl bg-cover bg-center border border-brand-300 relative shrink-0 shadow-xs" style="background-image:url('${url}')">
@@ -1351,28 +1472,37 @@
     }
 
     function moveQuoteItem(idx, dir) {
+      const list = allConfig.quote_config.services || allConfig.quote_config.items;
       const target = idx + dir;
-      if (target < 0 || target >= allConfig.quote_config.items.length) return;
-      const tmp = allConfig.quote_config.items[idx];
-      allConfig.quote_config.items[idx] = allConfig.quote_config.items[target];
-      allConfig.quote_config.items[target] = tmp;
+      if (target < 0 || target >= list.length) return;
+      const tmp = list[idx];
+      list[idx] = list[target];
+      list[target] = tmp;
+      renderQuoteAdmin();
+      markUnsaved();
+    }
+
+    function deleteQuoteItem(idx) {
+      const list = allConfig.quote_config.services || allConfig.quote_config.items;
+      list.splice(idx, 1);
       renderQuoteAdmin();
       markUnsaved();
     }
 
     function moveQuoteAddon(idx, dir) {
+      const list = allConfig.quote_config.addons;
       const target = idx + dir;
-      if (target < 0 || target >= allConfig.quote_config.addons.length) return;
-      const tmp = allConfig.quote_config.addons[idx];
-      allConfig.quote_config.addons[idx] = allConfig.quote_config.addons[target];
-      allConfig.quote_config.addons[target] = tmp;
+      if (target < 0 || target >= list.length) return;
+      const tmp = list[idx];
+      list[idx] = list[target];
+      list[target] = tmp;
       renderQuoteAdmin();
       markUnsaved();
     }
 
     function addQuoteCarouselImg() {
       const url = document.getElementById('quote-new-img-url').value.trim();
-      if (!url) return Swal.fire('請輸入圖片網址', '', 'warning');
+      if (!url) return Swal.fire('請輸入網址', '', 'warning');
       if (!allConfig.quote_config.carouselImages) allConfig.quote_config.carouselImages = [];
       allConfig.quote_config.carouselImages.push(url);
       document.getElementById('quote-new-img-url').value = '';
@@ -1383,25 +1513,26 @@
     async function openAddQuoteItemModal() {
       const catOptions = (allConfig.quote_config.categories || ["主推核心"]).map(c => `<option value="${c}">${c}</option>`).join('');
       const { value: v } = await Swal.fire({
-        title: '新增報價主服務品項',
+        title: '新增報價主品項',
         html: `
           <div class="text-left text-xs space-y-2">
             <div><label class="font-bold">分類：</label><select id="q-cat" class="w-full p-2 border rounded-xl">${catOptions}</select></div>
-            <div><label class="font-bold">項目名稱：</label><input id="q-name" class="swal2-input text-xs" placeholder="例: 睫毛角蛋白塑型"></div>
+            <div><label class="font-bold">名稱：</label><input id="q-name" class="swal2-input text-xs" placeholder="例: 睫毛角蛋白塑型"></div>
             <div><label class="font-bold">價格：</label><input id="q-price" type="number" class="swal2-input text-xs font-mono" placeholder="1400"></div>
-            <div><label class="font-bold">項目描述：</label><input id="q-note" class="swal2-input text-xs" placeholder="例: 含眼周護理與睫毛雨衣"></div>
+            <div><label class="font-bold">描述：</label><input id="q-note" class="swal2-input text-xs" placeholder="例: 含眼周護理"></div>
           </div>
         `,
         preConfirm: () => ({
           category: document.getElementById('q-cat').value,
           name: document.getElementById('q-name').value.trim(),
           price: Number(document.getElementById('q-price').value || 0),
-          note: document.getElementById('q-note').value.trim()
+          note: document.getElementById('q-note').value.trim(),
+          id: `s-${Date.now().toString().slice(-4)}`
         })
       });
       if (v && v.name) {
-        if (!allConfig.quote_config.items) allConfig.quote_config.items = [];
-        allConfig.quote_config.items.push(v);
+        if (!allConfig.quote_config.services) allConfig.quote_config.services = [];
+        allConfig.quote_config.services.push(v);
         renderQuoteAdmin();
         markUnsaved();
       }
@@ -1414,13 +1545,14 @@
           <div class="text-left text-xs space-y-2">
             <div><label class="font-bold">加購名稱：</label><input id="qa-name" class="swal2-input text-xs" placeholder="例: 結構式深層保養"></div>
             <div><label class="font-bold">加價金額：</label><input id="qa-price" type="number" class="swal2-input text-xs font-mono" placeholder="300"></div>
-            <div><label class="font-bold">加購描述：</label><input id="qa-desc" class="swal2-input text-xs" placeholder="例: 大幅提升毛髮強韌度"></div>
+            <div><label class="font-bold">加購描述：</label><input id="qa-desc" class="swal2-input text-xs" placeholder="例: 提升強韌度"></div>
           </div>
         `,
         preConfirm: () => ({
           name: document.getElementById('qa-name').value.trim(),
           price: Number(document.getElementById('qa-price').value || 0),
-          desc: document.getElementById('qa-desc').value.trim()
+          desc: document.getElementById('qa-desc').value.trim(),
+          id: `a-${Date.now().toString().slice(-4)}`
         })
       });
       if (v && v.name) {
@@ -1431,40 +1563,23 @@
       }
     }
 
-    // ==========================================
-    // [工具 5: loyalty.html] 存摺方案、眼睛顯隱與開關
-    // ==========================================
-    function toggleLoyaltyPinEye() {
-      const pinInput = document.getElementById('loyalty-cfg-pin');
-      const icon = document.getElementById('loyalty-pin-eye-icon');
-      if (pinInput.type === 'password') {
-        pinInput.type = 'text';
-        icon.className = 'fa-solid fa-eye-slash text-brand-700';
-      } else {
-        pinInput.type = 'password';
-        icon.className = 'fa-solid fa-eye text-brand-400';
-      }
-    }
-
+    // =========================================================================
+    // [模組 04 邏輯: loyalty] 會員存摺方案與三大開關
+    // =========================================================================
     function renderLoyaltyRules() {
       document.getElementById('loyalty-wallet-rules-list').innerHTML = (allConfig.loyalty_config.walletRules || []).map((w, idx) => `
         <div class="flex justify-between items-center p-2 bg-white rounded-xl border text-xs">
           <span>${w.name} (本金$${w.price} / 贈$${w.bonus})</span>
           <button type="button" onclick="allConfig.loyalty_config.walletRules.splice(${idx},1); renderLoyaltyRules(); markUnsaved();" class="text-rose-600 font-bold">✕</button>
         </div>
-      `).join('') || '<div class="text-gray-400 py-1 text-center">尚未建立儲值方案</div>';
+      `).join('') || '<div class="text-gray-400 py-1 text-center">無儲值方案</div>';
 
       document.getElementById('loyalty-package-rules-list').innerHTML = (allConfig.loyalty_config.packageRules || []).map((p, idx) => `
         <div class="flex justify-between items-center p-2 bg-white rounded-xl border text-xs">
           <span>${p.name} (${p.times}堂 - NT$${p.price}) [單一毛孩/專人專用]</span>
           <button type="button" onclick="allConfig.loyalty_config.packageRules.splice(${idx},1); renderLoyaltyRules(); markUnsaved();" class="text-rose-600 font-bold">✕</button>
         </div>
-      `).join('') || '<div class="text-gray-400 py-1 text-center">尚未建立包卡方案</div>';
-
-      // 同步開關
-      document.getElementById('loyalty-switch-stamp').checked = allConfig.loyalty_config.enableStamp ?? true;
-      document.getElementById('loyalty-switch-deposit').checked = allConfig.loyalty_config.enableDeposit ?? true;
-      document.getElementById('loyalty-switch-package').checked = allConfig.loyalty_config.enablePackage ?? true;
+      `).join('') || '<div class="text-gray-400 py-1 text-center">無包卡方案</div>';
     }
 
     async function openAddWalletRuleModal() {
@@ -1488,7 +1603,7 @@
 
     async function openAddPackageRuleModal() {
       const { value: v } = await Swal.fire({
-        title: '新增次數包卡方案 (單一毛孩/專人專用)',
+        title: '新增次數包卡 (單一毛孩/專人專用)',
         html: `
           <div class="text-left text-xs space-y-2">
             <div><label class="font-bold">包卡名稱：</label><input id="pk-name" class="swal2-input text-xs" placeholder="例: 凝膠手部 10 堂暢遊卡"></div>
@@ -1505,106 +1620,48 @@
       }
     }
 
-    // ==========================================
-    // [工具 6: overview.html] 專員、服務、席位 (▲/▼)
-    // ==========================================
+    // =========================================================================
+    // [模組 05 邏輯: overview] 專員名冊、服務主檔與席位防撞
+    // =========================================================================
     function renderOverviewAdmin() {
-      // 渲染營業時間與公休日配置
-    const sCfg = allConfig.overview_config.scheduleConfig || {
-      startTime: "09:00", endTime: "21:00", interval: 30, weeklyOff: [1], specificOffDates: []
-    };
-    document.getElementById('overview-cfg-start').value = sCfg.startTime || "09:00";
-    document.getElementById('overview-cfg-end').value = sCfg.endTime || "21:00";
-    document.getElementById('overview-cfg-interval').value = sCfg.interval || 30;
-
-    // 渲染每週固定公休核取方塊
-    document.querySelectorAll('.ov-weekly-cb').forEach(cb => {
-      cb.checked = (sCfg.weeklyOff || []).includes(Number(cb.value));
-    });
-
-    renderOverviewSpecificOffDatesChips();
-      
-      // 1. 專員列表
+      // 1. 專員
       document.getElementById('overview-staff-admin-list').innerHTML = (allConfig.overview_config.staffList || []).map((s, idx) => `
         <div class="flex justify-between items-center p-2.5 bg-white rounded-xl border text-xs shadow-2xs">
           <span><b>${s.name}</b> (${s.id})</span>
           <div class="flex gap-1 items-center">
-            <button type="button" onclick="moveOverviewStaff(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 border flex items-center justify-center font-bold">▲</button>
-            <button type="button" onclick="moveOverviewStaff(${idx}, 1)" ${idx === allConfig.overview_config.staffList.length - 1 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 border flex items-center justify-center font-bold">▼</button>
+            <button type="button" onclick="moveOvStaff(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 border flex items-center justify-center font-bold">▲</button>
+            <button type="button" onclick="moveOvStaff(${idx}, 1)" ${idx === allConfig.overview_config.staffList.length - 1 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 border flex items-center justify-center font-bold">▼</button>
             <button type="button" onclick="allConfig.overview_config.staffList.splice(${idx},1); renderOverviewAdmin(); markUnsaved();" class="text-rose-600 font-bold ml-1">✕</button>
           </div>
         </div>
       `).join('');
 
-      // 2. 服務主檔列表
+      // 2. 服務主檔
       document.getElementById('overview-services-admin-list').innerHTML = (allConfig.overview_config.serviceCatalog || []).map((svc, idx) => `
         <div class="flex justify-between items-center p-2.5 bg-white rounded-xl border text-xs shadow-2xs">
           <div><b>${svc.name}</b> <span class="text-gray-400 font-mono text-[11px]">(${svc.dur}分 | NT$${svc.price} | ${svc.type} | 設備:${svc.resource})</span></div>
           <div class="flex gap-1 items-center">
-            <button type="button" onclick="moveOverviewService(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 border flex items-center justify-center font-bold">▲</button>
-            <button type="button" onclick="moveOverviewService(${idx}, 1)" ${idx === allConfig.overview_config.serviceCatalog.length - 1 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 border flex items-center justify-center font-bold">▼</button>
+            <button type="button" onclick="moveOvService(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 border flex items-center justify-center font-bold">▲</button>
+            <button type="button" onclick="moveOvService(${idx}, 1)" ${idx === allConfig.overview_config.serviceCatalog.length - 1 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 border flex items-center justify-center font-bold">▼</button>
             <button type="button" onclick="allConfig.overview_config.serviceCatalog.splice(${idx},1); renderOverviewAdmin(); markUnsaved();" class="text-rose-600 font-bold ml-1">✕</button>
           </div>
         </div>
-      `).join('') || '<div class="text-gray-400 py-1 text-center">尚未建立排程服務</div>';
+      `).join('') || '<div class="text-gray-400 py-1 text-center">無排程服務</div>';
 
-      // 3. 設備席位列表
+      // 3. 設備
       document.getElementById('overview-resources-admin-list').innerHTML = (allConfig.overview_config.storeResources || []).map((r, idx) => `
         <div class="flex justify-between items-center p-2.5 bg-white rounded-xl border text-xs shadow-2xs">
-          <span>${r.name}：全店容量上限 <b>${r.capacity}</b> 組席位</span>
+          <span>設備：<b>${r.name}</b> ｜ 容量上限：<b>${r.capacity}</b> 組席位</span>
           <div class="flex gap-1 items-center">
-            <button type="button" onclick="moveOverviewResource(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 border flex items-center justify-center font-bold">▲</button>
-            <button type="button" onclick="moveOverviewResource(${idx}, 1)" ${idx === allConfig.overview_config.storeResources.length - 1 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 border flex items-center justify-center font-bold">▼</button>
+            <button type="button" onclick="moveOvResource(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 border flex items-center justify-center font-bold">▲</button>
+            <button type="button" onclick="moveOvResource(${idx}, 1)" ${idx === allConfig.overview_config.storeResources.length - 1 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 border flex items-center justify-center font-bold">▼</button>
             <button type="button" onclick="allConfig.overview_config.storeResources.splice(${idx},1); renderOverviewAdmin(); markUnsaved();" class="text-rose-600 font-bold ml-1">✕</button>
           </div>
         </div>
-      `).join('') || '<div class="text-gray-400 py-1 text-center">尚未建立限制設備席位</div>';
+      `).join('') || '<div class="text-gray-400 py-1 text-center">無限制設備</div>';
     }
 
-    function renderOverviewSpecificOffDatesChips() {
-      const container = document.getElementById('ov-off-dates-chips');
-      if (!container) return;
-      const dates = allConfig.overview_config.scheduleConfig?.specificOffDates || [];
-      if (dates.length === 0) {
-        container.innerHTML = '<span class="text-[10px] text-brand-400">尚未設定特定單日店休</span>';
-        return;
-      }
-      container.innerHTML = dates.map((dateStr, idx) => `
-        <span class="px-2 py-0.5 bg-white border border-brand-200 rounded-lg font-mono text-[10.5px] font-bold text-brand-800 flex items-center gap-1.5 shadow-2xs">
-          <span>${dateStr}</span>
-          <button type="button" onclick="removeOverviewSpecificOffDate(${idx})" class="text-rose-500 hover:text-rose-700 font-bold">✕</button>
-        </span>
-      `).join('');
-    }
-
-    function addOverviewSpecificOffDate() {
-      const input = document.getElementById('ov-custom-off-date');
-      const val = input.value;
-      if (!val) return;
-      if (!allConfig.overview_config.scheduleConfig) {
-        allConfig.overview_config.scheduleConfig = { startTime: "09:00", endTime: "21:00", interval: 30, weeklyOff: [1], specificOffDates: [] };
-      }
-      if (!allConfig.overview_config.scheduleConfig.specificOffDates) {
-        allConfig.overview_config.scheduleConfig.specificOffDates = [];
-      }
-      if (!allConfig.overview_config.scheduleConfig.specificOffDates.includes(val)) {
-        allConfig.overview_config.scheduleConfig.specificOffDates.push(val);
-        allConfig.overview_config.scheduleConfig.specificOffDates.sort();
-        renderOverviewSpecificOffDatesChips();
-        markUnsaved();
-      }
-      input.value = '';
-    }
-
-    function removeOverviewSpecificOffDate(idx) {
-      if (allConfig.overview_config.scheduleConfig?.specificOffDates) {
-        allConfig.overview_config.scheduleConfig.specificOffDates.splice(idx, 1);
-        renderOverviewSpecificOffDatesChips();
-        markUnsaved();
-      }
-    }
-    
-    function moveOverviewStaff(idx, dir) {
+    function moveOvStaff(idx, dir) {
       const list = allConfig.overview_config.staffList;
       const target = idx + dir;
       if (target < 0 || target >= list.length) return;
@@ -1615,7 +1672,7 @@
       markUnsaved();
     }
 
-    function moveOverviewService(idx, dir) {
+    function moveOvService(idx, dir) {
       const list = allConfig.overview_config.serviceCatalog;
       const target = idx + dir;
       if (target < 0 || target >= list.length) return;
@@ -1626,7 +1683,7 @@
       markUnsaved();
     }
 
-    function moveOverviewResource(idx, dir) {
+    function moveOvResource(idx, dir) {
       const list = allConfig.overview_config.storeResources;
       const target = idx + dir;
       if (target < 0 || target >= list.length) return;
@@ -1638,11 +1695,7 @@
     }
 
     async function openAddStaffModal() {
-      const { value: name } = await Swal.fire({
-        title: '新增排程專員 (代號制)',
-        input: 'text',
-        inputPlaceholder: '例: 美容師 1 或 設計師 B'
-      });
+      const { value: name } = await Swal.fire({ title: '新增專員', input: 'text', inputPlaceholder: '例: 美容師 C' });
       if (name && name.trim()) {
         const list = allConfig.overview_config.staffList;
         list.push({ id: `S0${list.length + 1}`, name: name.trim() });
@@ -1654,42 +1707,39 @@
     async function openAddOverviewServiceModal() {
       const resOpts = (allConfig.overview_config.storeResources || []).map(r => `<option value="${r.name}">${r.name}</option>`).join('');
       const { value: v } = await Swal.fire({
-        title: '新增排程服務主檔',
+        title: '新增排程服務',
         html: `
           <div class="text-left text-xs space-y-2">
-            <div><label class="font-bold">大分類：</label><input id="os-cat" class="swal2-input text-xs" value="現場主要服務"></div>
-            <div><label class="font-bold">項目名稱：</label><input id="os-name" class="swal2-input text-xs" placeholder="例: 縮毛矯正技術燙髮"></div>
+            <div><label class="font-bold">項目名稱：</label><input id="os-name" class="swal2-input text-xs" placeholder="例: 縮毛矯正"></div>
             <div class="grid grid-cols-2 gap-2">
               <div><label class="font-bold">金額：</label><input id="os-price" type="number" class="swal2-input text-xs font-mono" placeholder="2500"></div>
-              <div><label class="font-bold">耗時 (分鐘)：</label><input id="os-dur" type="number" class="swal2-input text-xs font-mono" value="90"></div>
+              <div><label class="font-bold">耗時(分)：</label><input id="os-dur" type="number" class="swal2-input text-xs font-mono" value="90"></div>
             </div>
             <div>
               <label class="font-bold">插單屬性：</label>
               <select id="os-type" class="swal2-input text-xs">
-                <option value="Group_B">Group B (全程專屬類，時段鎖定禁插單)</option>
-                <option value="Group_A">Group A (等待期技術類，靜置期允許插單)</option>
+                <option value="Group_B">Group B (全程專屬鎖定)</option>
+                <option value="Group_A">Group A (允許穿插雙單)</option>
               </select>
             </div>
             <div>
-              <label class="font-bold">佔用設備席位 (防撞)：</label>
-              <select id="os-res" class="swal2-input text-xs">
-                <option value="none">無 (不佔用限制設備)</option>
-                ${resOpts}
-              </select>
+              <label class="font-bold">佔用設備：</label>
+              <select id="os-res" class="swal2-input text-xs"><option value="none">無</option>${resOpts}</select>
             </div>
           </div>
         `,
         preConfirm: () => ({
-          category: document.getElementById('os-cat').value.trim() || '現場主要服務',
+          category: '現場主要服務',
           name: document.getElementById('os-name').value.trim(),
           price: Number(document.getElementById('os-price').value || 0),
           dur: Number(document.getElementById('os-dur').value || 60),
           type: document.getElementById('os-type').value,
-          resource: document.getElementById('os-res').value
+          resource: document.getElementById('os-res').value,
+          id: `srv-${Date.now().toString().slice(-4)}`
         })
       });
       if (v && v.name) {
-        allConfig.overview_config.serviceCatalog.push({ id: `srv-${Date.now().toString().slice(-4)}`, ...v });
+        allConfig.overview_config.serviceCatalog.push(v);
         renderOverviewAdmin();
         markUnsaved();
       }
@@ -1697,134 +1747,45 @@
 
     async function openAddResourceModal() {
       const { value: v } = await Swal.fire({
-        title: '新增限制硬體席位',
+        title: '新增限制設備',
         html: `
           <div class="text-left text-xs space-y-2">
-            <div><label class="font-bold">設備名稱：</label><input id="r-name" class="swal2-input text-xs" placeholder="例: 沖水椅 / VIP包廂"></div>
+            <div><label class="font-bold">設備名稱：</label><input id="r-name" class="swal2-input text-xs" placeholder="例: 沖水椅"></div>
             <div><label class="font-bold">全店容量：</label><input id="r-cap" type="number" class="swal2-input text-xs font-mono" value="2"></div>
           </div>
         `,
-        preConfirm: () => ({ name: document.getElementById('r-name').value.trim(), capacity: Number(document.getElementById('r-cap').value || 1) })
+        preConfirm: () => ({ name: document.getElementById('r-name').value.trim(), capacity: Number(document.getElementById('r-cap').value || 1), id: `res-${Date.now().toString().slice(-4)}` })
       });
       if (v && v.name) {
-        allConfig.overview_config.storeResources.push({ id: `res-${Date.now().toString().slice(-4)}`, ...v });
+        allConfig.overview_config.storeResources.push(v);
         renderOverviewAdmin();
         markUnsaved();
       }
     }
 
-    // ==========================================
-    // [工具 7: contract.html] 定型化契約與衛福部範本
-    // ==========================================
+    // =========================================================================
+    // [模組 06 邏輯: contract] 衛福部官方 10 條條款載入
+    // =========================================================================
     function loadMOHWTemplateToAdmin() {
       const storeName = document.getElementById('contract-cfg-store').value.trim() || currentStore.store_name;
       const text = MOHW_OFFICIAL_10_CLAUSES.replace(/{{STORE_NAME}}/g, storeName);
       document.getElementById('contract-cfg-content').value = text;
       allConfig.contract_config.content = text;
       markUnsaved();
-      Swal.fire({
-        title: '已載入衛福部官方標準範本！',
-        text: '已自動套用 10 條法定完整條款並帶入店名，請點擊上方儲存。',
-        icon: 'success',
-        confirmButtonColor: '#8C7355'
-      });
+      Swal.fire({ title: '已載入法定範本！', text: '已自動替換店名並帶入 10 條條款全文，請記得點擊上方儲存。', icon: 'success', confirmButtonColor: '#8C7355' });
     }
 
-    function testContractCertEmail() {
-      Swal.fire({ title: '數位法律存證系統測試就緒！', text: '顧客簽約完成將透過加密憑證即刻發送副本至信箱。', icon: 'success' });
-    }
-
-    // ==========================================
-    // [大資料庫分頁核心] POS / 會員 / 排程 / 合約 (10筆一頁)
-    // ==========================================
-    function loadLocalDatabases() {
-      // POS 顧客
-      const posObj = JSON.parse(localStorage.getItem('pos_customers_db') || '{}');
-      posCustList = Object.values(posObj);
-      filterPosCustomers();
-
-      // 會員存摺
-      const loyObj = JSON.parse(localStorage.getItem('loyalty_members_db') || '{}');
-      loyaltyCustList = Object.values(loyObj);
-      filterLoyaltyMembers();
-
-      // 排程顧客
-      const ovObj = JSON.parse(localStorage.getItem('overview_customers_db') || '{}');
-      overviewCustList = Object.values(ovObj);
-      filterOverviewCustomers();
-
-      // 合約存證
-      contractRecList = JSON.parse(localStorage.getItem('signed_contracts_db') || '[]');
-      filterContractRecords();
-    }
-
-    function filterPosCustomers() {
-      const q = document.getElementById('pos-cust-search-input').value.trim().toLowerCase();
-      let filtered = posCustList;
-      if (q) filtered = posCustList.filter(c => (c.phone && c.phone.includes(q)) || (c.name && c.name.toLowerCase().includes(q)) || (c.line && c.line.toLowerCase().includes(q)));
-      
-      document.getElementById('pos-cust-count-badge').innerText = `${filtered.length} 位顧客`;
-      renderGenericTable('pos-cust-admin-list', 'pos-cust-page-info', 'pos-cust-page-btns', filtered, posCustPage, (c) => `
-        <div class="p-2.5 bg-white rounded-xl border flex justify-between items-center text-xs">
-          <div><b>${c.name}</b> <span class="font-mono text-gray-400">(${c.phone})</span></div>
-          <span class="text-[10.5px] text-brand-600">LINE: ${c.line || '未填'}</span>
-        </div>
-      `, (p) => { posCustPage = p; filterPosCustomers(); });
-    }
-
-    function filterLoyaltyMembers() {
-      const q = document.getElementById('loyalty-cust-search-input').value.trim().toLowerCase();
-      let filtered = loyaltyCustList;
-      if (q) filtered = loyaltyCustList.filter(c => (c.phone && c.phone.includes(q)) || (c.name && c.name.toLowerCase().includes(q)));
-
-      document.getElementById('loyalty-cust-count-badge').innerText = `${filtered.length} 位會員`;
-      renderGenericTable('loyalty-cust-admin-list', 'loyalty-cust-page-info', 'loyalty-cust-page-btns', filtered, loyaltyCustPage, (c) => `
-        <div class="p-2.5 bg-white rounded-xl border flex justify-between items-center text-xs">
-          <div><b>${c.name}</b> <span class="font-mono text-gray-400">(${c.phone})</span></div>
-          <div class="text-[10.5px] text-brand-600">點數: <b>${c.stamps || 0}</b> | 儲值金: <b>NT$ ${(c.depositBalance||0).toLocaleString()}</b></div>
-        </div>
-      `, (p) => { loyaltyCustPage = p; filterLoyaltyMembers(); });
-    }
-
-    function filterOverviewCustomers() {
-      const q = document.getElementById('overview-cust-search-input').value.trim().toLowerCase();
-      let filtered = overviewCustList;
-      if (q) filtered = overviewCustList.filter(c => (c.phone && c.phone.includes(q)) || (c.name && c.name.toLowerCase().includes(q)));
-
-      document.getElementById('overview-cust-count-badge').innerText = `${filtered.length} 位顧客`;
-      renderGenericTable('overview-cust-admin-list', 'overview-cust-page-info', 'overview-cust-page-btns', filtered, overviewCustPage, (c) => `
-        <div class="p-2.5 bg-white rounded-xl border flex justify-between items-center text-xs">
-          <div><b>${c.name}</b> <span class="font-mono text-gray-400">(${c.phone})</span></div>
-          <span class="text-[10.5px] text-brand-600 font-mono">累計預約 ${c.visits || 1} 次</span>
-        </div>
-      `, (p) => { overviewCustPage = p; filterOverviewCustomers(); });
-    }
-
-    function filterContractRecords() {
-      const q = document.getElementById('contract-search-input').value.trim().toLowerCase();
-      let filtered = contractRecList;
-      if (q) filtered = contractRecList.filter(c => (c.phone && c.phone.includes(q)) || (c.name && c.name.toLowerCase().includes(q)) || (c.petName && c.petName.toLowerCase().includes(q)));
-
-      document.getElementById('contract-records-count').innerText = `${filtered.length} 筆紀錄`;
-      renderGenericTable('contract-records-admin-list', 'contract-page-info', 'contract-page-btns', filtered, contractRecPage, (c) => `
-        <div class="p-2.5 bg-white rounded-xl border flex justify-between items-center text-xs gap-2">
-          <div>
-            <b>${c.name}</b> <span class="font-mono text-gray-400">(${c.phone})</span>
-            <div class="text-[10px] text-gray-400 font-mono mt-0.5">${c.petName ? `毛孩:${c.petName} | ` : ''}項目:${c.service} | ${c.signedAt}</div>
-          </div>
-          ${c.sigBase64 ? `<img src="${c.sigBase64}" class="h-6 border p-0.5 rounded bg-brand-50 shrink-0" alt="簽章">` : ''}
-        </div>
-      `, (p) => { contractRecPage = p; filterContractRecords(); });
-    }
-
-    // 通用 10 筆分頁模組
+    // =========================================================================
+    // [輔助工具函式] 分頁、滾動與時間
+    // =========================================================================
     function renderGenericTable(containerId, infoId, btnsId, list, curPage, rowHtmlFn, onPageChangeFn) {
       const container = document.getElementById(containerId);
       const info = document.getElementById(infoId);
       const btns = document.getElementById(btnsId);
+      if (!container) return;
 
       if (list.length === 0) {
-        container.innerHTML = '<div class="text-center py-4 text-brand-400">查無資料</div>';
+        container.innerHTML = '<div class="text-center py-4 text-brand-400">目前尚無資料</div>';
         info.innerText = '共 0 筆';
         btns.innerHTML = '';
         return;
@@ -1846,9 +1807,23 @@
       `;
     }
 
-    // ==========================================
-    // [輔助導覽與未存警告防呆]
-    // ==========================================
+    function generateTimeSlots(startStr, endStr, intervalMins) {
+      const slots = [];
+      let [sh, sm] = startStr.split(':').map(Number);
+      let [eh, em] = endStr.split(':').map(Number);
+      let cur = sh * 60 + sm;
+      const end = eh * 60 + em;
+      while (cur < end) {
+        slots.push(`${String(Math.floor(cur / 60)).padStart(2, '0')}:${String(cur % 60).padStart(2, '0')}`);
+        cur += intervalMins;
+      }
+      return slots;
+    }
+
+    function formatYMD(d) {
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
     function scrollBottomNav(offset) {
       document.getElementById('hub-bottom-nav').scrollBy({ left: offset, behavior: 'smooth' });
     }
@@ -1878,6 +1853,203 @@
         e.returnValue = '有尚未儲存的變更，確定離開嗎？';
       }
     });
+
+    function renderPosAddons() {
+      const container = document.getElementById('pos-addons-admin-list');
+      if (!container) return;
+      const addons = allConfig.pos_config.addons || [];
+
+      container.innerHTML = addons.map((adn, idx) => `
+        <div class="flex justify-between items-center p-2.5 bg-white rounded-xl border border-brand-200 text-xs shadow-2xs">
+          <div><b class="text-brand-900">${adn.name}</b></div>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <span class="font-mono font-bold text-[#8C7355] mr-1">+ NT$ ${adn.price}</span>
+            <button type="button" onclick="movePosAddon(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 border flex items-center justify-center font-bold">▲</button>
+            <button type="button" onclick="movePosAddon(${idx}, 1)" ${idx === addons.length - 1 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 border flex items-center justify-center font-bold">▼</button>
+            <button type="button" onclick="allConfig.pos_config.addons.splice(${idx},1); renderPosAddons(); markUnsaved();" class="text-rose-600 font-bold ml-1">✕</button>
+          </div>
+        </div>
+      `).join('') || '<div class="text-gray-400 text-center py-2">目前無現場加購項目</div>';
+    }
+
+    function movePosAddon(idx, dir) {
+      const target = idx + dir;
+      if (target < 0 || target >= allConfig.pos_config.addons.length) return;
+      const tmp = allConfig.pos_config.addons[idx];
+      allConfig.pos_config.addons[idx] = allConfig.pos_config.addons[target];
+      allConfig.pos_config.addons[target] = tmp;
+      renderPosAddons();
+      markUnsaved();
+    }
+
+    async function openAddPosAddonModal() {
+      const { value: v } = await Swal.fire({
+        title: '新增現場收銀加購項目',
+        html: `
+          <div class="text-left text-xs space-y-2">
+            <div><label class="font-bold">加購名稱：</label><input id="pa-name" class="swal2-input text-xs" placeholder="例: 睫毛持久雨衣"></div>
+            <div><label class="font-bold">加價金額：</label><input id="pa-price" type="number" class="swal2-input text-xs font-mono" placeholder="200"></div>
+          </div>
+        `,
+        preConfirm: () => ({
+          name: document.getElementById('pa-name').value.trim(),
+          price: Number(document.getElementById('pa-price').value || 0),
+          id: `addon-${Date.now().toString().slice(-4)}`
+        })
+      });
+      if (v && v.name) {
+        if (!allConfig.pos_config.addons) allConfig.pos_config.addons = [];
+        allConfig.pos_config.addons.push(v);
+        renderPosAddons();
+        markUnsaved();
+      }
+    }
+
+    let loyaltyCustPage = 1, loyaltyCustList = [];
+
+    function loadLoyaltyMembersData() {
+      const loyObj = JSON.parse(localStorage.getItem('loyalty_members_db') || '{}');
+      loyaltyCustList = Object.values(loyObj);
+      filterLoyaltyMembers();
+    }
+
+    function filterLoyaltyMembers() {
+      const q = (document.getElementById('loyalty-cust-search-input') ? document.getElementById('loyalty-cust-search-input').value : '').trim().toLowerCase();
+      let filtered = loyaltyCustList;
+      if (q) {
+        filtered = loyaltyCustList.filter(c => (c.phone && c.phone.includes(q)) || (c.name && c.name.toLowerCase().includes(q)));
+      }
+
+      const countBadge = document.getElementById('loyalty-cust-count-badge');
+      if (countBadge) countBadge.innerText = `${filtered.length} 位會員`;
+
+      renderGenericTable('loyalty-cust-admin-list', 'loyalty-cust-page-info', 'loyalty-cust-page-btns', filtered, loyaltyCustPage, (c) => `
+        <div class="p-2.5 bg-white rounded-xl border flex justify-between items-center text-xs">
+          <div>
+            <b>${c.name}</b> <span class="font-mono text-gray-400">(${c.phone})</span>
+          </div>
+          <div class="text-[10.5px] text-brand-600">
+            集點: <b>${c.stamps || 0}</b> 點 ｜ 儲值金: <b>NT$ ${(c.depositBalance || 0).toLocaleString()}</b>
+          </div>
+        </div>
+      `, (p) => { loyaltyCustPage = p; filterLoyaltyMembers(); });
+    }
+
+    let overviewCustPage = 1, overviewCustList = [];
+
+    function loadOverviewCustomersData() {
+      const ovObj = JSON.parse(localStorage.getItem('overview_customers_db') || '{}');
+      overviewCustList = Object.values(ovObj);
+      filterOverviewCustomers();
+    }
+
+    function filterOverviewCustomers() {
+      const q = (document.getElementById('overview-cust-search-input') ? document.getElementById('overview-cust-search-input').value : '').trim().toLowerCase();
+      let filtered = overviewCustList;
+      if (q) {
+        filtered = overviewCustList.filter(c => (c.phone && c.phone.includes(q)) || (c.name && c.name.toLowerCase().includes(q)));
+      }
+
+      const countBadge = document.getElementById('overview-cust-count-badge');
+      if (countBadge) countBadge.innerText = `${filtered.length} 位顧客`;
+
+      renderGenericTable('overview-cust-admin-list', 'overview-cust-page-info', 'overview-cust-page-btns', filtered, overviewCustPage, (c) => `
+        <div class="p-2.5 bg-white rounded-xl border flex justify-between items-center text-xs">
+          <div>
+            <b>${c.name}</b> <span class="font-mono text-gray-400">(${c.phone})</span>
+          </div>
+          <span class="text-[10.5px] text-brand-600 font-mono">累計排程預約 ${c.visits || 1} 次</span>
+        </div>
+      `, (p) => { overviewCustPage = p; filterOverviewCustomers(); });
+    }
+
+    let contractRecPage = 1;
+    let contractRecList = [];
+
+    // 載入本地存證紀錄庫
+    function loadContractRecordsData() {
+      contractRecList = JSON.parse(localStorage.getItem('signed_contracts_db') || '[]');
+      filterContractRecords();
+    }
+
+    // 搜尋過濾
+    function filterContractRecords() {
+      const q = (document.getElementById('contract-search-input') ? document.getElementById('contract-search-input').value : '').trim().toLowerCase();
+      let filtered = contractRecList;
+
+      if (q) {
+        filtered = contractRecList.filter(c => 
+          (c.name && c.name.toLowerCase().includes(q)) ||
+          (c.phone && c.phone.includes(q)) ||
+          (c.petName && c.petName.toLowerCase().includes(q))
+        );
+      }
+
+      const countBadge = document.getElementById('contract-records-count');
+      if (countBadge) countBadge.innerText = `${filtered.length} 筆存證`;
+
+      renderGenericTable('contract-records-admin-list', 'contract-page-info', 'contract-page-btns', filtered, contractRecPage, (c) => `
+        <div class="p-2.5 bg-white rounded-xl border border-brand-200 text-xs shadow-2xs space-y-1.5">
+          <div class="flex justify-between items-start gap-2">
+            <div>
+              <div class="font-bold text-brand-900">
+                ${c.name} <span class="font-mono text-gray-400 font-normal">(${c.phone})</span>
+              </div>
+              <div class="text-[10.5px] text-brand-600 mt-0.5">
+                項目：<b>${c.service}</b>
+                ${c.petName ? `<span class="ml-1 text-amber-800 font-bold">[毛孩:${c.petName}]</span>` : ''}
+              </div>
+              <div class="text-[10px] text-brand-500 font-mono mt-0.5 space-y-0.5">
+                <div>📅 施作日期：<b class="text-[#8C7355]">${c.serviceDate || '未填寫'}</b></div>
+                <div class="text-gray-400">🕒 簽約時間：${c.signedAt}</div>
+              </div>
+            </div>
+            ${c.sigBase64 ? `
+              <div class="p-1 bg-stone-50 border border-brand-100 rounded-lg shrink-0">
+                <img src="${c.sigBase64}" class="h-9 w-20 object-contain bg-white rounded border border-brand-100" alt="簽章">
+              </div>
+            ` : ''}
+          </div>
+          <div class="flex justify-between items-center pt-1 border-t border-brand-100 text-[10px]">
+            <span class="text-emerald-700 font-bold">✓ 存證有效</span>
+            <button type="button" onclick="copyContractSignImg('${c.id}')" class="px-2 py-0.5 bg-brand-50 hover:bg-brand-100 text-[#8C7355] border border-brand-200 rounded font-bold transition flex items-center gap-1">
+              <i class="fa-regular fa-copy"></i> 複製簽名圖代碼
+            </button>
+          </div>
+        </div>
+      `, (p) => { contractRecPage = p; filterContractRecords(); });
+    }
+
+    // 複製簽名 DataURL
+    async function copyContractSignImg(id) {
+      const target = contractRecList.find(c => c.id === id);
+      if (!target || !target.sigBase64) return;
+      try {
+        await navigator.clipboard.writeText(target.sigBase64);
+        Swal.fire({ title: '簽名圖代碼已複製！', text: '可直接貼至瀏覽器網址列檢視', icon: 'success', timer: 1000, showConfirmButton: false });
+      } catch (e) {
+        Swal.fire('複製失敗', '', 'error');
+      }
+    }
+
+    // 匯出名冊 CSV
+    function exportContractRecordsCsv() {
+      if (contractRecList.length === 0) return Swal.fire('目前尚無合約存證紀錄可匯出', '', 'info');
+      let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+      csvContent += "存證編號,顧客姓名,手機號碼,電子信箱,施作日期,毛孩姓名,施作項目,簽約時間戳記\n";
+
+      contractRecList.forEach(c => {
+        csvContent += `"${c.id}","${c.name}","${c.phone}","${c.email || ''}","${c.serviceDate || ''}","${c.petName || ''}","${c.service}","${c.signedAt}"\n`;
+      });
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `${currentStore.store_name}_定型化契約存證名冊.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   </script>
 </body>
 </html>

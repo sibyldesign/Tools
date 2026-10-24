@@ -441,12 +441,17 @@
           ledgerRecords = data;
           updateRevenueStatCards(data);
           rebuildClientsDatabaseFromLedgers(data);
+          renderLedgersList();
+        } else {
+          // [修復] 尚無資料時清空歸零
+          ledgerRecords = [];
+          updateRevenueStatCards([]);
+          rebuildClientsDatabaseFromLedgers([]);
         }
       } catch (e) {
         console.error("載入流水帳失敗:", e);
       }
     }
-
     // 計算並渲染前台「本日營業額 ＆ 本月營業額」看板
     function updateRevenueStatCards(records) {
       const now = new Date();

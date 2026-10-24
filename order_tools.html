@@ -364,7 +364,7 @@
           <div class="md:col-span-8 space-y-4">
             <div class="flex items-center gap-2.5">
               <span class="w-8 h-8 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center text-sm"><i class="fa-solid fa-table-cells"></i></span>
-              <span class="text-[10.5px] font-mono text-brand-400 font-bold uppercase tracking-wider">Module 06</span>
+              <span class="text-[10.5px] font-mono text-brand-400 font-bold uppercase tracking-wider">Module 05</span>
               <h3 class="text-base font-bold text-brand-900">全日排程總覽與席位防撞畫布</h3>
             </div>
 
@@ -422,7 +422,7 @@
           <div class="md:col-span-8 space-y-4">
             <div class="flex items-center gap-2.5">
               <span class="w-8 h-8 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center text-sm"><i class="fa-solid fa-file-contract"></i></span>
-              <span class="text-[10.5px] font-mono text-brand-400 font-bold uppercase tracking-wider">Module 07</span>
+              <span class="text-[10.5px] font-mono text-brand-400 font-bold uppercase tracking-wider">Module 06</span>
               <h3 class="text-base font-bold text-brand-900">數位定型化契約與電子存證</h3>
             </div>
 
@@ -802,12 +802,26 @@
       const itemsList = Object.values(cart).map(i => i.name).join('、');
       const secureToken = generateSecureToken();
 
-      const frontendPreviewHtml = keys.map(k => {
-        const fileMap = { slot: 'studio_slot.html', pos: 'pos.html', quote: 'quote.html', loyalty: 'loyalty.html', reminder: 'reminder.gs', overview: 'overview.html', contract: 'contract.html' };
-        const nameMap = { slot: 'IG限動生圖', pos: '極簡收銀', quote: '報價試算', loyalty: 'VIP會員存摺', reminder: 'LINE防放鳥', overview: '排程總覽', contract: '定型化契約' };
-        const url = `https://tools.heysibyl.com/${fileMap[k] || 'studio_slot.html'}`;
-        return `<div>• <b>${nameMap[k]}前台體驗：</b><a href="${url}" style="color:#2D6A4F;">${url}</a></div>`;
-      }).join('');
+      // 替換原本的 const frontendPreviewHtml = keys.map(...).join('');
+      const frontendPreviewHtml = `
+        <div style="font-size: 12.5px; line-height: 1.8; color: #3D3126;">
+          <p style="margin: 0 0 10px 0; font-weight: bold; color: #8C7355;">
+            HI! 謝謝您關注到 SIBYL DESIGN，相信微工具能為您省心省力～
+          </p>
+          <div style="font-weight: bold; margin-bottom: 6px; color: #2D6A4F;">微工具的試用連結：</div>
+          <div style="margin-bottom: 12px;">
+            • 01. IG限動空檔生圖：<a href="https://tools.heysibyl.com/studio_slot.html?s=aaa" style="color: #8C7355; text-decoration: underline;">https://tools.heysibyl.com/studio_slot.html?s=aaa</a><br>
+            • 03. 服務報價試算器：<a href="https://tools.heysibyl.com/quote.html?s=aaa" style="color: #8C7355; text-decoration: underline;">https://tools.heysibyl.com/quote.html?s=aaa</a><br>
+            • 02. 極簡收銀小幫手：<a href="https://tools.heysibyl.com/pos.html?s=aaa" style="color: #8C7355; text-decoration: underline;">https://tools.heysibyl.com/pos.html?s=aaa</a><br>
+            • 04. VIP數位會員存摺：<a href="https://tools.heysibyl.com/loyalty.html?s=aaa" style="color: #8C7355; text-decoration: underline;">https://tools.heysibyl.com/loyalty.html?s=aaa</a><br>
+            • 05. 全日排程總覽：<a href="https://tools.heysibyl.com/overview.html?s=aaa" style="color: #8C7355; text-decoration: underline;">https://tools.heysibyl.com/overview.html?s=aaa</a><br>
+            • 06. 數位定型化契約：<a href="https://tools.heysibyl.com/contract.html?s=aaa" style="color: #8C7355; text-decoration: underline;">https://tools.heysibyl.com/contract.html?s=aaa</a>
+          </div>
+          <div>• 微工具線上操作教學手冊：<a href="https://tools.heysibyl.com/tutorial.html" style="color: #8C7355; font-weight: bold; text-decoration: underline;">https://tools.heysibyl.com/tutorial.html</a></div>
+          <div style="color: #7A6246;">• 另有管理後台於開通後即可使用</div>
+          <div style="margin-top: 4px;">🔗 • 微工具功能介紹與下單開通：<a href="https://tools.heysibyl.com/order_tools.html" style="color: #8C7355; font-weight: bold; text-decoration: underline;">https://tools.heysibyl.com/order_tools.html</a></div>
+        </div>
+      `;
 
       Swal.fire({
         title: '訂單建立中...',

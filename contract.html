@@ -650,6 +650,18 @@
         return Swal.fire('請於手寫簽名板親筆簽署大名！', '簽章為重要數位法律存證要件，未簽署無法送出。', 'warning');
       }
 
+      // 首次完整性檢查
+      const isExisting = contractCustomers[phone] || Object.values(contractCustomers).some(c => c.name === name);
+      if (!isExisting) {
+        if (!name || !phone || !email || !email.includes('@')) {
+          return Swal.fire('首次簽約請完整填寫！', '姓名、手機號碼與電子信箱皆為法律存證必填項目。', 'warning');
+        }
+      }
+
+      // 更新與覆蓋顧客資料庫
+      contractCustomers[phone] = { name, phone, email };
+      localStorage.setItem('contract_customers_db', JSON.stringify(contractCustomers));
+      
       const name = document.getElementById('signer-name').value.trim();
       const phone = document.getElementById('signer-phone').value.trim();
       const email = document.getElementById('signer-email').value.trim();
@@ -696,7 +708,28 @@
       contractRecords.unshift(contractData);
       localStorage.setItem('signed_contracts_db', JSON.stringify(contractRecords));
 
-      // 2. 呼叫 GAS 發送專屬契約存證信 (BCC 抄送店家老闆備查)
+      // [優化] 將親筆簽名上傳換取永久公開存證 URL
+      let signatureUrl = sigBase64;
+      try {
+        const blob = await (await fetch(sigBase64)).blob();
+        const filePath = `signatures/sig_${Date.now()}.png`;
+        const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/tool-assets/${filePath}`, {
+          method: "POST",
+          headers: {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "image/png"
+          },
+          body: blob
+        });
+        if (uploadRes.ok) {
+          signatureUrl = `${SUPABASE_URL}/storage/v1/object/public/tool-assets/${filePath}`;
+        }
+      } catch (e) {
+        console.warn("Storage 轉檔略過:", e);
+      }
+
+      // 呼叫 GAS 發送存證副本
       try {
         await fetch(GAS_API_URL, {
           method: "POST",
@@ -708,12 +741,12 @@
             storeName: currentStore.store_name,
             clientName: name,
             clientPhone: phone,
-            serviceDate: serviceDate,
+            serviceDate: serviceDate, // 施作日期
             serviceName: service,
             petName: petName,
             isPet: isPet,
             signedAt: nowStr,
-            signatureBase64: sigBase64
+            signatureUrl: signatureUrl // 傳送純網址而非大圖
           })
         });
       } catch (e) {
@@ -1018,6 +1051,22 @@
     function formatNowTime() {
       const d = new Date();
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    }
+
+    let contractCustomers = JSON.parse(localStorage.getItem('contract_customers_db') || '{}');
+
+    function lookupContractCustomerAny() {
+      const p = document.getElementById('signer-phone').value.trim();
+      const n = document.getElementById('signer-name').value.trim();
+
+      const all = Object.values(contractCustomers);
+      const found = all.find(c => (p && c.phone === p) || (n && c.name === n));
+
+      if (found) {
+        document.getElementById('signer-name').value = found.name;
+        document.getElementById('signer-phone').value = found.phone;
+        document.getElementById('signer-email').value = found.email || '';
+      }
     }
   </script>
 </body>

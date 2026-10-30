@@ -120,12 +120,12 @@
       </div>
     </section>
 
-    <!-- 2. 主服務核心項目挑選 (分類切換 ＋ 單選點擊) -->
+    <!-- 2. 主服務核心項目挑選 (分類切換 ＋ 多選點擊) -->
     <section class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-4">
       <div class="flex justify-between items-center pb-2 border-b border-brand-100">
         <div>
           <h2 class="text-xs font-black text-brand-900">1. 選擇預約核心主服務</h2>
-          <p class="text-[10px] text-brand-400 mt-0.5">點擊品項選取本次欲施作的主要服務</p>
+          <p class="text-[10px] text-brand-400 mt-0.5">點擊品項選取本次欲施作的主要服務（支援多選）</p>
         </div>
         <span class="text-[10.5px] font-mono text-[#8C7355] font-bold" id="selected-service-badge">尚未選擇</span>
       </div>
@@ -142,7 +142,7 @@
       <div class="flex justify-between items-center pb-2 border-b border-brand-100">
         <div>
           <h2 class="text-xs font-black text-brand-900">2. 附加升級、專屬護理與工藝選購</h2>
-          <p class="text-[10px] text-brand-400 mt-0.5">美髮修護 / 美甲工藝 / 美睫升級 / 寵美泥浴 皆適用</p>
+          <p class="text-[10px] text-brand-400 mt-0.5">美髮修護 / 美甲工藝 / 美睫升級 / 寵美泥浴 皆適用（需先選主服務）</p>
         </div>
         <span class="text-[10px] text-brand-400" id="addons-count-badge">可自由多選</span>
       </div>
@@ -201,7 +201,7 @@
           </div>
           <div>
             <div class="text-xs font-bold text-brand-900">店長報價後台 · 價目表與輪播圖配置</div>
-            <div class="text-[10px] text-brand-400">主項目上下排序 · 加購管理 · Supabase 海報直傳</div>
+            <div class="text-[10px] text-brand-400">主項目上下排序與編輯 · 加購管理 · 9:16 海報直傳</div>
           </div>
         </div>
         <button type="button" onclick="closeManagerModal()" class="w-8 h-8 rounded-full bg-white border border-brand-200 text-brand-400 hover:text-brand-900 flex items-center justify-center">
@@ -225,7 +225,7 @@
       <!-- 滾動內容區域 -->
       <div class="p-5 overflow-y-auto space-y-4 text-xs">
 
-        <!-- [分頁 1] 主服務項目管理 (上下排序 ＋ 描述) -->
+        <!-- [分頁 1] 主服務項目管理 (上下排序 ＋ 描述 ＋ 編輯) -->
         <div id="tab-services-admin" class="mgr-tab-content space-y-4">
           <!-- PIN 碼展示與修改 -->
           <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 flex justify-between items-center">
@@ -243,7 +243,7 @@
 
           <div class="space-y-2">
             <div class="flex justify-between items-center">
-              <span class="font-bold text-brand-900">主服務項目列表 (點擊 ▲/▼ 調整順序)：</span>
+              <span class="font-bold text-brand-900">主服務項目列表 (支援編輯、刪除與 ▲/▼ 調整順序)：</span>
               <button type="button" onclick="openAddServiceModal()" class="px-2.5 py-1.5 bg-[#8C7355] text-white rounded-lg font-bold text-[11px] shadow-2xs">
                 + 新增品項
               </button>
@@ -262,11 +262,11 @@
           </button>
         </div>
 
-        <!-- [分頁 2] 工藝加購選項管理 (上下排序 ＋ 描述) -->
+        <!-- [分頁 2] 工藝加購選項管理 (上下排序 ＋ 描述 ＋ 編輯) -->
         <div id="tab-addons-admin" class="mgr-tab-content space-y-4 hidden">
           <div class="space-y-2">
             <div class="flex justify-between items-center">
-              <span class="font-bold text-brand-900">加購與工藝選項列表 (點擊 ▲/▼ 調整順序)：</span>
+              <span class="font-bold text-brand-900">加購與工藝選項列表 (支援編輯、刪除與 ▲/▼ 調整順序)：</span>
               <button type="button" onclick="openAddAddonModal()" class="px-2.5 py-1.5 bg-[#8C7355] text-white rounded-lg font-bold text-[11px] shadow-2xs">
                 + 新增加購
               </button>
@@ -354,7 +354,7 @@
       ]
     };
 
-    let selectedService = null;
+    let selectedServices = [];
     let selectedAddons = [];
     let activeCategory = "全部";
 
@@ -362,12 +362,15 @@
     let slideTimer = null;
 
     window.addEventListener('DOMContentLoaded', async () => {
-      await loadStoreQuoteProfile();
+      // 1. 先用預設資料完整初始化畫面，保證前台絕不空白
       initCarousel();
       renderCategoryTabs();
       renderServicesGrid();
       renderAddonsList();
       updateCartSummary();
+
+      // 2. 異步載入雲端專屬門市設定
+      await loadStoreQuoteProfile();
     });
 
     // 1. 讀取店家設定
@@ -391,8 +394,12 @@
           document.getElementById('quote-store-name').innerHTML = `<i class="fa-solid fa-calculator text-[#8C7355]"></i> ${currentStore.store_name}`;
           document.getElementById('quote-store-sub').innerText = `專屬報價試算 · ${currentStore.store_slug || currentStore.id.slice(0,8)}`;
           document.getElementById('header-line-btn').href = currentStore.line_url || "https://line.me/R/ti/p/@480kqjoj";
-          document.getElementById('admin-line-url').value = currentStore.line_url || "";
-          document.getElementById('disp-manager-pin').innerText = currentStore.admin_pin || "8888";
+          
+          const adminLineInput = document.getElementById('admin-line-url');
+          if (adminLineInput) adminLineInput.value = currentStore.line_url || "";
+          
+          const pinDisplay = document.getElementById('disp-manager-pin');
+          if (pinDisplay) pinDisplay.innerText = currentStore.admin_pin || "8888";
 
           await loadCloudQuoteSettings(currentStore.id);
         }
@@ -410,11 +417,25 @@
         if (data && data.length > 0) {
           const cfg = data[0];
           if (cfg.slot_config && cfg.slot_config.quote_config) {
-            quoteConfig = Object.assign(quoteConfig, cfg.slot_config.quote_config);
+            const remoteCfg = cfg.slot_config.quote_config;
+            // 安全覆蓋：有遠端資料才進行替換
+            if (remoteCfg.services && remoteCfg.services.length > 0) quoteConfig.services = remoteCfg.services;
+            if (remoteCfg.addons && remoteCfg.addons.length > 0) quoteConfig.addons = remoteCfg.addons;
+            if (remoteCfg.categories && remoteCfg.categories.length > 0) quoteConfig.categories = remoteCfg.categories;
+            if (remoteCfg.carouselImages && remoteCfg.carouselImages.length > 0) quoteConfig.carouselImages = remoteCfg.carouselImages;
+            if (remoteCfg.lineUrl) quoteConfig.lineUrl = remoteCfg.lineUrl;
+
+            // 重新刷新前台
+            initCarousel();
+            renderCategoryTabs();
+            renderServicesGrid();
+            renderAddonsList();
+            updateCartSummary();
           }
           if (cfg.store_pin) {
             currentStore.admin_pin = cfg.store_pin;
-            document.getElementById('disp-manager-pin').innerText = currentStore.admin_pin;
+            const pinDisplay = document.getElementById('disp-manager-pin');
+            if (pinDisplay) pinDisplay.innerText = currentStore.admin_pin;
           }
         }
       } catch (e) {
@@ -480,7 +501,7 @@
       renderServicesGrid();
     }
 
-    // 4. 核心主服務項目渲染
+    // 4. 核心主服務項目渲染 (支援多選複選)
     function renderServicesGrid() {
       const grid = document.getElementById('quote-services-grid');
       const list = (activeCategory === "全部")
@@ -493,7 +514,7 @@
       }
 
       grid.innerHTML = list.map(svc => {
-        const isSelected = selectedService && selectedService.id === svc.id;
+        const isSelected = selectedServices.some(s => s.id === svc.id);
         return `
           <button type="button" onclick="selectServiceItem('${svc.id}')" class="p-3.5 rounded-2xl border text-left transition flex flex-col justify-between gap-2 shadow-2xs ${
             isSelected 
@@ -503,13 +524,13 @@
             <div>
               <div class="flex justify-between items-start gap-2">
                 <span class="font-bold text-xs leading-snug line-clamp-1">${svc.name}</span>
-                <span class="font-mono font-black text-xs shrink-0 ${isSelected ? 'text-amber-200' : 'text-[#8C7355]'}">NT$ ${svc.price.toLocaleString()}</span>
+                <span class="font-mono font-black text-xs shrink-0 ${isSelected ? 'text-amber-200' : 'text-[#8C7355]'}">NT$ ${Number(svc.price).toLocaleString()}</span>
               </div>
               ${svc.note ? `<p class="text-[10px] mt-1 line-clamp-2 ${isSelected ? 'text-stone-200' : 'text-brand-400'}">${svc.note}</p>` : ''}
             </div>
             <div class="text-[9.5px] font-mono flex items-center gap-1 ${isSelected ? 'text-amber-100' : 'text-brand-400'}">
-              <i class="fa-solid ${isSelected ? 'fa-circle-check' : 'fa-circle-dot'}"></i>
-              <span>${isSelected ? '已選取此主要項目' : '點擊選取'}</span>
+              <i class="fa-solid ${isSelected ? 'fa-circle-check' : 'fa-circle-plus'}"></i>
+              <span>${isSelected ? '已選取' : '點擊選取'}</span>
             </div>
           </button>
         `;
@@ -518,14 +539,29 @@
 
     function selectServiceItem(id) {
       const found = quoteConfig.services.find(s => s.id === id);
-      selectedService = (selectedService && selectedService.id === id) ? null : found;
+      if (!found) return;
 
-      document.getElementById('selected-service-badge').innerText = selectedService ? selectedService.name : '尚未選擇';
+      const idx = selectedServices.findIndex(s => s.id === id);
+      if (idx > -1) {
+        selectedServices.splice(idx, 1);
+      } else {
+        selectedServices.push(found);
+      }
+
+      // 若主服務全部取消，自動清空加購項目
+      if (selectedServices.length === 0) {
+        selectedAddons = [];
+      }
+
+      document.getElementById('selected-service-badge').innerText = 
+        selectedServices.length > 0 ? `已選 ${selectedServices.length} 項主服務` : '尚未選擇';
+
       renderServicesGrid();
+      renderAddonsList();
       updateCartSummary();
     }
 
-    // 5. 附加升級與工藝護理
+    // 5. 附加升級與工藝護理 (加購需先選主服務)
     function renderAddonsList() {
       const container = document.getElementById('quote-addons-container');
       const addons = quoteConfig.addons || [];
@@ -555,7 +591,7 @@
               </div>
             </div>
             <span class="font-mono font-bold text-xs shrink-0 ${isChecked ? 'text-amber-300' : 'text-[#8C7355]'}">
-              + NT$ ${adn.price.toLocaleString()}
+              + NT$ ${Number(adn.price).toLocaleString()}
             </span>
           </div>
         `;
@@ -563,6 +599,15 @@
     }
 
     function toggleAddonItem(id) {
+      if (selectedServices.length === 0) {
+        return Swal.fire({
+          title: '請先選擇核心主服務！',
+          text: '附加升級與工藝護理項目需搭配主要服務進行施作，請先從上方點選一項主服務。',
+          icon: 'warning',
+          confirmButtonColor: '#8C7355'
+        });
+      }
+
       const found = quoteConfig.addons.find(a => a.id === id);
       const idx = selectedAddons.findIndex(a => a.id === id);
       if (idx > -1) {
@@ -579,7 +624,7 @@
       const container = document.getElementById('quote-cart-items');
       const totalDisplay = document.getElementById('quote-total-price');
 
-      if (!selectedService && selectedAddons.length === 0) {
+      if (selectedServices.length === 0 && selectedAddons.length === 0) {
         container.innerHTML = '<div class="text-center py-4 text-brand-400">尚未選取任何項目</div>';
         totalDisplay.innerText = 'NT$ 0';
         return;
@@ -588,22 +633,22 @@
       let total = 0;
       let html = '';
 
-      if (selectedService) {
-        total += selectedService.price;
+      selectedServices.forEach(s => {
+        total += s.price;
         html += `
           <div class="flex justify-between items-center p-2.5 bg-brand-50 rounded-xl border border-brand-200 font-bold">
-            <span class="text-brand-900">核心項目：${selectedService.name}</span>
-            <span class="font-mono text-brand-700">NT$ ${selectedService.price.toLocaleString()}</span>
+            <span class="text-brand-900">• 主服務：${s.name}</span>
+            <span class="font-mono text-brand-700">NT$ ${Number(s.price).toLocaleString()}</span>
           </div>
         `;
-      }
+      });
 
       selectedAddons.forEach(a => {
         total += a.price;
         html += `
           <div class="flex justify-between items-center px-3 py-1.5 bg-white rounded-lg border border-brand-100 text-[11px]">
-            <span class="text-brand-600">＋ ${a.name}</span>
-            <span class="font-mono text-brand-600 font-bold">+ NT$ ${a.price.toLocaleString()}</span>
+            <span class="text-brand-600">＋ 加購：${a.name}</span>
+            <span class="font-mono text-brand-600 font-bold">+ NT$ ${Number(a.price).toLocaleString()}</span>
           </div>
         `;
       });
@@ -613,7 +658,7 @@
     }
 
     function resetQuoteCart() {
-      selectedService = null;
+      selectedServices = [];
       selectedAddons = [];
       document.getElementById('selected-service-badge').innerText = '尚未選擇';
       renderServicesGrid();
@@ -621,24 +666,26 @@
       updateCartSummary();
     }
 
-    // 7. 一鍵複製明細並跳轉官方 LINE
+    // 7. 一鍵打包報價明細並跳轉官方 LINE (含引導文字說明)
     async function copyQuoteAndRedirectLine() {
-      if (!selectedService) {
-        return Swal.fire('請先選取一項主要服務核心項目！', '', 'warning');
+      if (selectedServices.length === 0) {
+        return Swal.fire('請先選取至少一項主要服務核心項目！', '', 'warning');
       }
 
-      let total = selectedService.price;
+      let total = 0;
+      selectedServices.forEach(s => total += s.price);
       selectedAddons.forEach(a => total += a.price);
 
+      const servicesText = selectedServices.map(s => `• ${s.name} (NT$ ${Number(s.price).toLocaleString()})`).join('\n');
       const addonText = selectedAddons.length > 0 
-        ? selectedAddons.map(a => `• ${a.name} (+NT$ ${a.price.toLocaleString()})`).join('\n')
+        ? selectedAddons.map(a => `• ${a.name} (+NT$ ${Number(a.price).toLocaleString()})`).join('\n')
         : '無加購護理';
 
       const quoteMessage = 
         `您好！我在官網完成了線上報價試算，想諮詢以下項目之預約時段：\n\n` +
         `【門市名稱】：${currentStore.store_name}\n` +
-        `【主要服務】：${selectedService.name} (NT$ ${selectedService.price.toLocaleString()})\n` +
-        `【工藝加購】：\n${addonText}\n` +
+        `【預約主服務】：\n${servicesText}\n` +
+        `【附加升級/工藝】：\n${addonText}\n` +
         `─────────────\n` +
         `【預算小計】：NT$ ${total.toLocaleString()} 元\n\n` +
         `請問近期有哪些空檔時段可以安排施作呢？謝謝！`;
@@ -653,17 +700,21 @@
       const lineUrl = `${lineBase}?text=${encodeURIComponent(quoteMessage)}`;
 
       Swal.fire({
-        title: '報價明細已成功複製！',
+        title: '報價明細已打包完成！',
         html: `
-          <div class="text-left text-xs bg-brand-50 p-3.5 rounded-2xl border border-brand-200 space-y-1.5 font-sans leading-relaxed">
+          <div class="text-left text-xs bg-brand-50 p-3.5 rounded-2xl border border-brand-200 space-y-2 font-sans leading-relaxed">
             <div>門市：<b>${currentStore.store_name}</b></div>
-            <div>項目：<b>${selectedService.name}</b></div>
-            <div>附加：${selectedAddons.length > 0 ? selectedAddons.map(a=>a.name).join('、') : '無'}</div>
-            <div>預估金額：<b class="text-[#1F4E3D] font-mono text-sm">NT$ ${total.toLocaleString()}</b></div>
-            <div class="text-emerald-800 font-bold pt-1">✓ 完整明細已複製到剪貼簿，點擊下方前往 LINE 直接貼上送出！</div>
+            <div>主服務：<b>${selectedServices.map(s=>s.name).join('、')}</b></div>
+            <div>加購項目：${selectedAddons.length > 0 ? selectedAddons.map(a=>a.name).join('、') : '無'}</div>
+            <div>試算總額：<b class="text-[#1F4E3D] font-mono text-sm">NT$ ${total.toLocaleString()}</b></div>
+            <div class="p-2.5 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 text-[11px] font-bold">
+              💬 <b>預約步驟引導：</b><br>
+              點擊下方將直接開啟官方 LINE，並自動填入此份試算明細。<br>
+              <span class="text-rose-600 underline">請直接在 LINE 對話框按下「發送」</span>，專員收到後將立即為您核對檔期！
+            </div>
           </div>
         `,
-        confirmButtonText: '前往官方 LINE 預約',
+        confirmButtonText: '前往官方 LINE 提出預約需求',
         confirmButtonColor: '#1F4E3D',
         showCancelButton: true,
         cancelButtonText: '返回修改'
@@ -674,7 +725,7 @@
       });
     }
 
-    // 8. 店長後台專區驗證與安全熔斷 (失敗 5 次鎖定)
+    // 8. 店長後台專區驗證與安全熔斷 (失敗 5 次鎖定 + alyn9999 救援金鑰)
     async function openManagerPinPrompt() {
       const lockKey = `mgr_lock_${currentStore.id}`;
       const failCountKey = `mgr_fail_count_${currentStore.id}`;
@@ -743,7 +794,8 @@
       });
       if (newPin && newPin.trim()) {
         currentStore.admin_pin = newPin.trim();
-        document.getElementById('disp-manager-pin').innerText = currentStore.admin_pin;
+        const pinDisp = document.getElementById('disp-manager-pin');
+        if (pinDisp) pinDisp.innerText = currentStore.admin_pin;
         await saveQuoteConfigToCloud(true);
         Swal.fire('PIN 碼修改成功！', `下次請使用新密碼：${currentStore.admin_pin}`, 'success');
       }
@@ -766,9 +818,11 @@
       btn.className = "mgr-tab-btn py-3 px-4 border-b-2 border-[#8C7355] text-[#8C7355]";
     }
 
-    // 9. 後台主服務項目增修與上下排序 (▲/▼)
+    // 9. 後台主服務項目增修、排序 (▲/▼) 與直接編輯
     function renderAdminServicesSortable() {
       const container = document.getElementById('admin-services-sortable-list');
+      if (!container) return;
+
       container.innerHTML = quoteConfig.services.map((svc, idx) => `
         <div class="p-3 bg-white rounded-xl border border-brand-200 flex justify-between items-center gap-2 shadow-2xs">
           <div class="truncate">
@@ -779,16 +833,13 @@
             ${svc.note ? `<div class="text-[10px] text-brand-400 truncate">${svc.note}</div>` : ''}
           </div>
           <div class="flex items-center gap-1 shrink-0">
-            <span class="font-mono font-bold text-[#8C7355] mr-1">NT$ ${svc.price.toLocaleString()}</span>
-            <button type="button" onclick="moveServiceOrder(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 hover:bg-brand-100 flex items-center justify-center text-brand-700">
-              <i class="fa-solid fa-arrow-up text-[10px]"></i>
+            <span class="font-mono font-bold text-[#8C7355] mr-1">NT$ ${Number(svc.price).toLocaleString()}</span>
+            <button type="button" onclick="openEditServiceModal(${idx})" class="w-6 h-6 rounded bg-amber-50 hover:bg-amber-100 text-amber-800 flex items-center justify-center font-bold" title="編輯品項">
+              <i class="fa-solid fa-pen text-[10px]"></i>
             </button>
-            <button type="button" onclick="moveServiceOrder(${idx}, 1)" ${idx === quoteConfig.services.length - 1 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 hover:bg-brand-100 flex items-center justify-center text-brand-700">
-              <i class="fa-solid fa-arrow-down text-[10px]"></i>
-            </button>
-            <button type="button" onclick="deleteServiceById('${svc.id}')" class="w-6 h-6 rounded bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center ml-1">
-              <i class="fa-solid fa-trash text-[10px]"></i>
-            </button>
+            <button type="button" onclick="moveServiceOrder(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-20 pointer-events-none"' : ''} class="w-6 h-6 rounded bg-brand-50 hover:bg-brand-100 flex items-center justify-center text-brand-700">▲</button>
+            <button type="button" onclick="moveServiceOrder(${idx}, 1)" ${idx === quoteConfig.services.length - 1 ? 'disabled class="opacity-20 pointer-events-none"' : ''} class="w-6 h-6 rounded bg-brand-50 hover:bg-brand-100 flex items-center justify-center text-brand-700">▼</button>
+            <button type="button" onclick="deleteServiceById('${svc.id}')" class="w-6 h-6 rounded bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center ml-0.5">✕</button>
           </div>
         </div>
       `).join('') || '<div class="text-center py-4 text-brand-400">目前尚無主服務品項</div>';
@@ -801,11 +852,13 @@
       quoteConfig.services[index] = quoteConfig.services[targetIndex];
       quoteConfig.services[targetIndex] = temp;
       renderAdminServicesSortable();
+      renderServicesGrid();
     }
 
     function deleteServiceById(id) {
       quoteConfig.services = quoteConfig.services.filter(s => s.id !== id);
       renderAdminServicesSortable();
+      renderServicesGrid();
     }
 
     async function openAddServiceModal() {
@@ -827,7 +880,7 @@
               <label class="font-bold text-amber-800">自訂新分類名稱：</label>
               <input id="as-new-cat-val" class="swal2-input text-xs" placeholder="輸入新分類名稱">
             </div>
-            <div><label class="font-bold">項目特色描述 (選填)：</label><input id="as-note" class="swal2-input text-xs" placeholder="例: 含指緣護理與甲型修飾"></div>
+            <div><label class="font-bold">特色描述 (選填)：</label><input id="as-note" class="swal2-input text-xs" placeholder="例: 含指緣護理與甲型修飾"></div>
           </div>
         `,
         didOpen: () => {
@@ -863,12 +916,48 @@
           note: v.note
         });
         renderAdminServicesSortable();
+        renderServicesGrid();
       }
     }
 
-    // 10. 後台加購選項增修與上下排序 (▲/▼)
+    async function openEditServiceModal(idx) {
+      const svc = quoteConfig.services[idx];
+      const catOptions = (quoteConfig.categories || ["主推核心", "深層保養"]).map(c => `<option value="${c}" ${c === svc.category ? 'selected' : ''}>${c}</option>`).join('');
+
+      const { value: v } = await Swal.fire({
+        title: '編輯主服務品項',
+        html: `
+          <div class="text-left text-xs space-y-2 p-1">
+            <div><label class="font-bold">項目名稱 *：</label><input id="es-name" class="swal2-input text-xs" value="${svc.name}"></div>
+            <div><label class="font-bold">金額 (NT$) *：</label><input id="es-price" type="number" class="swal2-input text-xs font-mono" value="${svc.price}"></div>
+            <div><label class="font-bold">分類：</label><select id="es-cat" class="w-full p-2.5 rounded-xl border border-gray-300 text-xs mt-1 outline-none">${catOptions}</select></div>
+            <div><label class="font-bold">特色描述：</label><input id="es-note" class="swal2-input text-xs" value="${svc.note || ''}"></div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '儲存更新',
+        confirmButtonColor: '#8C7355',
+        preConfirm: () => {
+          const name = document.getElementById('es-name').value.trim();
+          const price = Number(document.getElementById('es-price').value || 0);
+          if (!name || price <= 0) return Swal.showValidationMessage('請輸入正確的品項名稱與金額！');
+          return { name, price, category: document.getElementById('es-cat').value, note: document.getElementById('es-note').value.trim() };
+        }
+      });
+
+      if (v) {
+        quoteConfig.services[idx] = Object.assign(quoteConfig.services[idx], v);
+        renderAdminServicesSortable();
+        renderServicesGrid();
+        Swal.fire({ title: '已更新品項！', text: '請記得點擊下方按鈕儲存至雲端。', icon: 'success', timer: 900, showConfirmButton: false });
+      }
+    }
+
+    // 10. 後台加購選項增修、排序 (▲/▼) 與直接編輯
     function renderAdminAddonsSortable() {
       const container = document.getElementById('admin-addons-sortable-list');
+      if (!container) return;
+
       container.innerHTML = quoteConfig.addons.map((adn, idx) => `
         <div class="p-3 bg-white rounded-xl border border-brand-200 flex justify-between items-center gap-2 shadow-2xs">
           <div class="truncate">
@@ -876,16 +965,13 @@
             ${adn.desc ? `<div class="text-[10px] text-brand-400 truncate">${adn.desc}</div>` : ''}
           </div>
           <div class="flex items-center gap-1 shrink-0">
-            <span class="font-mono font-bold text-[#8C7355] mr-1">+ NT$ ${adn.price.toLocaleString()}</span>
-            <button type="button" onclick="moveAddonOrder(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 hover:bg-brand-100 flex items-center justify-center text-brand-700">
-              <i class="fa-solid fa-arrow-up text-[10px]"></i>
+            <span class="font-mono font-bold text-[#8C7355] mr-1">+ NT$ ${Number(adn.price).toLocaleString()}</span>
+            <button type="button" onclick="openEditAddonModal(${idx})" class="w-6 h-6 rounded bg-amber-50 hover:bg-amber-100 text-amber-800 flex items-center justify-center font-bold" title="編輯加購">
+              <i class="fa-solid fa-pen text-[10px]"></i>
             </button>
-            <button type="button" onclick="moveAddonOrder(${idx}, 1)" ${idx === quoteConfig.addons.length - 1 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 hover:bg-brand-100 flex items-center justify-center text-brand-700">
-              <i class="fa-solid fa-arrow-down text-[10px]"></i>
-            </button>
-            <button type="button" onclick="deleteAddonById('${adn.id}')" class="w-6 h-6 rounded bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center ml-1">
-              <i class="fa-solid fa-trash text-[10px]"></i>
-            </button>
+            <button type="button" onclick="moveAddonOrder(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-20 pointer-events-none"' : ''} class="w-6 h-6 rounded bg-brand-50 hover:bg-brand-100 flex items-center justify-center text-brand-700">▲</button>
+            <button type="button" onclick="moveAddonOrder(${idx}, 1)" ${idx === quoteConfig.addons.length - 1 ? 'disabled class="opacity-20 pointer-events-none"' : ''} class="w-6 h-6 rounded bg-brand-50 hover:bg-brand-100 flex items-center justify-center text-brand-700">▼</button>
+            <button type="button" onclick="deleteAddonById('${adn.id}')" class="w-6 h-6 rounded bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center ml-0.5">✕</button>
           </div>
         </div>
       `).join('') || '<div class="text-center py-4 text-brand-400">目前尚無加購選項</div>';
@@ -898,11 +984,13 @@
       quoteConfig.addons[index] = quoteConfig.addons[targetIndex];
       quoteConfig.addons[targetIndex] = temp;
       renderAdminAddonsSortable();
+      renderAddonsList();
     }
 
     function deleteAddonById(id) {
       quoteConfig.addons = quoteConfig.addons.filter(a => a.id !== id);
       renderAdminAddonsSortable();
+      renderAddonsList();
     }
 
     async function openAddAddonModal() {
@@ -934,6 +1022,37 @@
           desc: v.desc
         });
         renderAdminAddonsSortable();
+        renderAddonsList();
+      }
+    }
+
+    async function openEditAddonModal(idx) {
+      const adn = quoteConfig.addons[idx];
+      const { value: v } = await Swal.fire({
+        title: '編輯工藝加購項目',
+        html: `
+          <div class="text-left text-xs space-y-2 p-1">
+            <div><label class="font-bold">加購名稱 *：</label><input id="ea-name" class="swal2-input text-xs" value="${adn.name}"></div>
+            <div><label class="font-bold">加價金額 (NT$) *：</label><input id="ea-price" type="number" class="swal2-input text-xs font-mono" value="${adn.price}"></div>
+            <div><label class="font-bold">加購描述：</label><input id="ea-desc" class="swal2-input text-xs" value="${adn.desc || ''}"></div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '儲存更新',
+        confirmButtonColor: '#8C7355',
+        preConfirm: () => {
+          const name = document.getElementById('ea-name').value.trim();
+          const price = Number(document.getElementById('ea-price').value || 0);
+          if (!name || price <= 0) return Swal.showValidationMessage('請輸入正確的加購名稱與金額！');
+          return { name, price, desc: document.getElementById('ea-desc').value.trim() };
+        }
+      });
+
+      if (v) {
+        quoteConfig.addons[idx] = Object.assign(quoteConfig.addons[idx], v);
+        renderAdminAddonsSortable();
+        renderAddonsList();
+        Swal.fire({ title: '已更新加購項目！', text: '請記得點擊下方按鈕儲存至雲端。', icon: 'success', timer: 900, showConfirmButton: false });
       }
     }
 
@@ -983,7 +1102,7 @@
         quoteConfig.carouselImages.push(publicUrl);
 
         renderAdminCarouselGrid();
-        initCarousel(); // 前台立即同步重新啟動輪播
+        initCarousel();
         fileInput.value = '';
 
         Swal.fire({
@@ -997,18 +1116,62 @@
       }
     }
 
-    // 12. 9:16 輪播圖網格列表管理
+    // 12. 輪播海報渲染：顯示網址、前後移動、二次確認刪除
     function renderAdminCarouselGrid() {
       const container = document.getElementById('admin-carousel-grid');
-      container.innerHTML = (quoteConfig.carouselImages || []).map((url, idx) => `
-        <div class="aspect-[9/16] rounded-2xl bg-cover bg-center border border-brand-200 relative shadow-xs overflow-hidden group" style="background-image:url('${url}')">
-          <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            <button type="button" onclick="deleteCarouselImg(${idx})" class="px-2.5 py-1 bg-rose-600 text-white rounded-lg text-xs font-bold shadow-md">
-              刪除圖片
+      if (!container) return;
+      const list = quoteConfig.carouselImages || [];
+
+      if (list.length === 0) {
+        container.innerHTML = '<div class="col-span-full py-4 text-center text-brand-400">尚未加入任何輪播圖</div>';
+        return;
+      }
+
+      container.innerHTML = list.map((url, idx) => `
+        <div class="p-2.5 bg-white rounded-2xl border border-brand-200 shadow-2xs space-y-2">
+          <div class="aspect-[9/16] rounded-xl bg-cover bg-center border border-brand-100 overflow-hidden" style="background-image:url('${url}')"></div>
+          <input type="text" readonly value="${url}" class="w-full p-1 bg-brand-50 border border-brand-200 rounded text-[9.5px] font-mono text-gray-500 truncate" title="${url}">
+          <div class="flex items-center justify-between pt-1 border-t border-brand-100">
+            <div class="flex gap-1">
+              <button type="button" onclick="moveCarouselImg(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-20 pointer-events-none"' : ''} class="w-6 h-6 rounded bg-brand-50 border flex items-center justify-center font-bold text-xs hover:bg-brand-100">▲</button>
+              <button type="button" onclick="moveCarouselImg(${idx}, 1)" ${idx === list.length - 1 ? 'disabled class="opacity-20 pointer-events-none"' : ''} class="w-6 h-6 rounded bg-brand-50 border flex items-center justify-center font-bold text-xs hover:bg-brand-100">▼</button>
+            </div>
+            <button type="button" onclick="confirmDeleteCarouselImg(${idx})" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded text-[10.5px] font-bold">
+              刪除
             </button>
           </div>
         </div>
-      `).join('') || '<div class="col-span-full py-4 text-center text-brand-400">尚未加入任何輪播圖</div>';
+      `).join('');
+    }
+
+    function moveCarouselImg(idx, dir) {
+      const list = quoteConfig.carouselImages;
+      const target = idx + dir;
+      if (target < 0 || target >= list.length) return;
+      const tmp = list[idx];
+      list[idx] = list[target];
+      list[target] = tmp;
+      renderAdminCarouselGrid();
+      initCarousel();
+    }
+
+    function confirmDeleteCarouselImg(idx) {
+      Swal.fire({
+        title: '確定要刪除此張輪播圖嗎？',
+        text: '刪除後請記得點擊下方儲存按鈕發布變更。',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: '確定刪除',
+        confirmButtonColor: '#e11d48',
+        cancelButtonText: '取消'
+      }).then(r => {
+        if (r.isConfirmed) {
+          quoteConfig.carouselImages.splice(idx, 1);
+          renderAdminCarouselGrid();
+          initCarousel();
+          Swal.fire({ title: '已移除！', icon: 'success', timer: 700, showConfirmButton: false });
+        }
+      });
     }
 
     function addAdminCarouselImg() {
@@ -1017,12 +1180,6 @@
       if (!quoteConfig.carouselImages) quoteConfig.carouselImages = [];
       quoteConfig.carouselImages.push(url);
       document.getElementById('admin-new-carousel-url').value = '';
-      renderAdminCarouselGrid();
-      initCarousel();
-    }
-
-    function deleteCarouselImg(idx) {
-      quoteConfig.carouselImages.splice(idx, 1);
       renderAdminCarouselGrid();
       initCarousel();
     }

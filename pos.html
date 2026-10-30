@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>極簡快速收銀小幫手與營收看板</title>
+  <title>服務報價試算與線上預約預估</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
@@ -18,6 +18,10 @@
               400: '#BCA38F', 500: '#8C7355', 600: '#7A6246', 700: '#68523A',
               800: '#5C4B3C', 900: '#3D3126',
             }
+          },
+          fontFamily: {
+            sans: ['Noto Sans TC', 'sans-serif'],
+            serif: ['Playfair Display', 'serif']
           }
         }
       }
@@ -26,55 +30,61 @@
   <style>
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .blur-backdrop {
+      filter: blur(22px);
+      transform: scale(1.18);
+      opacity: 0.65;
+    }
+
     /* SweetAlert2 全域確認按鈕統一套用系統質感棕色 */
-.swal2-styled.swal2-confirm {
-  background-color: #8C7355 !important;
-  color: #ffffff !important;
-  box-shadow: 0 2px 6px rgba(140, 115, 85, 0.35) !important;
-  border: none !important;
-  border-radius: 0.875rem !important;
-  font-weight: 700 !important;
-  padding: 0.625rem 1.5rem !important;
-  font-size: 0.8125rem !important;
-}
+    .swal2-styled.swal2-confirm {
+      background-color: #8C7355 !important;
+      color: #ffffff !important;
+      box-shadow: 0 2px 6px rgba(140, 115, 85, 0.35) !important;
+      border: none !important;
+      border-radius: 0.875rem !important;
+      font-weight: 700 !important;
+      padding: 0.625rem 1.5rem !important;
+      font-size: 0.8125rem !important;
+    }
 
-.swal2-styled.swal2-confirm:hover {
-  background-color: #7A6246 !important;
-}
+    .swal2-styled.swal2-confirm:hover {
+      background-color: #7A6246 !important;
+    }
 
-.swal2-styled.swal2-confirm:focus {
-  box-shadow: 0 0 0 3px rgba(140, 115, 85, 0.3) !important;
-}
+    .swal2-styled.swal2-confirm:focus {
+      box-shadow: 0 0 0 3px rgba(140, 115, 85, 0.3) !important;
+    }
 
-/* 取消按鈕同步美化為質感米灰 */
-.swal2-styled.swal2-cancel {
-  background-color: #EBE5DF !important;
-  color: #5C4B3C !important;
-  border-radius: 0.875rem !important;
-  font-weight: 700 !important;
-  padding: 0.625rem 1.25rem !important;
-  font-size: 0.8125rem !important;
-}
+    /* 取消按鈕同步美化為質感米灰 */
+    .swal2-styled.swal2-cancel {
+      background-color: #EBE5DF !important;
+      color: #5C4B3C !important;
+      border-radius: 0.875rem !important;
+      font-weight: 700 !important;
+      padding: 0.625rem 1.25rem !important;
+      font-size: 0.8125rem !important;
+    }
 
-.swal2-styled.swal2-cancel:hover {
-  background-color: #D5C7BC !important;
-}
+    .swal2-styled.swal2-cancel:hover {
+      background-color: #D5C7BC !important;
+    }
   </style>
 </head>
 <body class="bg-brand-50 text-brand-900 antialiased min-h-screen pb-28 selection:bg-brand-200 select-none">
 
-  <!-- 頂部導航 -->
+  <!-- 頂部沙龍抬頭 -->
   <header class="bg-white/95 backdrop-blur-md border-b border-brand-200 sticky top-0 z-30 px-4 py-3 shadow-2xs">
     <div class="max-w-xl mx-auto flex justify-between items-center">
       <div>
-        <h1 class="text-sm font-bold text-brand-900 flex items-center gap-1.5" id="disp-store-title">
-          <i class="fa-solid fa-cash-register text-[#8C7355]"></i>
-          <span>極簡收銀小幫手</span>
+        <h1 class="text-sm font-bold text-brand-900 flex items-center gap-1.5" id="quote-store-name">
+          <i class="fa-solid fa-calculator text-[#8C7355]"></i>
+          <span>沙龍服務價目試算器</span>
         </h1>
-        <p class="text-[10px] text-brand-400 font-mono" id="disp-store-subtitle">門市收銀端點載入中...</p>
+        <p class="text-[10px] text-brand-400 font-mono" id="quote-store-sub">Transparent Price Estimator</p>
       </div>
       <div class="flex items-center gap-2">
-        <a id="header-line-link" href="#" target="_blank" class="p-2 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition" title="官方 LINE">
+        <a id="header-line-btn" href="#" target="_blank" class="p-2 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition" title="官方 LINE">
           <i class="fa-brands fa-line text-sm"></i>
         </a>
         <button type="button" onclick="openManagerPinPrompt()" class="px-3 py-1.5 bg-[#8C7355] hover:bg-[#7A6246] text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs">
@@ -87,139 +97,111 @@
 
   <main class="max-w-xl mx-auto p-4 space-y-4">
 
-    <!-- 1. 前台常駐展示：本日營業額 ＆ 本月營業額看板 (老闆最愛) -->
-    <section class="grid grid-cols-2 gap-3">
-      <!-- 本日營收 -->
-      <div class="bg-white p-4 rounded-3xl border border-brand-200 shadow-sm relative overflow-hidden flex flex-col justify-between">
-        <div class="flex justify-between items-center text-[11px] font-bold text-brand-600">
-          <span class="flex items-center gap-1"><i class="fa-solid fa-calendar-day text-[#8C7355]"></i> 本日實收營收</span>
-          <span class="text-[10px] font-mono text-brand-400" id="stat-today-count">0 筆</span>
-        </div>
-        <div class="mt-2">
-          <div class="text-2xl font-black font-mono text-[#8C7355]" id="stat-today-revenue">NT$ 0</div>
-          <div class="text-[9.5px] text-brand-400 mt-0.5">即時結帳自動累計</div>
-        </div>
-      </div>
-      <!-- 本月營收 -->
-      <div class="bg-gradient-to-br from-stone-900 to-[#3D3126] text-white p-4 rounded-3xl shadow-sm relative overflow-hidden flex flex-col justify-between">
-        <div class="flex justify-between items-center text-[11px] font-bold text-amber-200/80">
-          <span class="flex items-center gap-1"><i class="fa-solid fa-chart-line text-amber-400"></i> 本月累計營收</span>
-          <span class="text-[10px] font-mono opacity-60" id="stat-month-label">當月</span>
-        </div>
-        <div class="mt-2">
-          <div class="text-2xl font-black font-mono text-amber-300" id="stat-month-revenue">NT$ 0</div>
-          <div class="text-[9.5px] text-stone-300 mt-0.5">全月營收總覽</div>
-        </div>
+    <!-- 1. 9:16 活動宣傳與價目輪播圖 (高斯模糊補底 + 白點指示) -->
+    <section class="bg-stone-900 rounded-3xl overflow-hidden shadow-lg border border-brand-200 relative">
+      <div class="w-full aspect-[9/16] max-h-[460px] relative overflow-hidden flex items-center justify-center">
+        <!-- 模糊底圖 -->
+        <div id="carousel-blur-bg" class="absolute inset-0 bg-cover bg-center blur-backdrop pointer-events-none transition-all duration-700"></div>
+        <div class="absolute inset-0 bg-black/25 z-0 pointer-events-none"></div>
+
+        <!-- 清晰前景主圖 -->
+        <img id="carousel-main-img" src="" alt="店內價目與活動介紹" class="max-h-full max-w-full object-contain relative z-10 transition-all duration-500 drop-shadow-2xl">
+
+        <!-- 左右滑動切換鍵 -->
+        <button type="button" onclick="prevSlide()" class="absolute left-2.5 z-20 w-8 h-8 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur-sm transition">
+          <i class="fa-solid fa-chevron-left text-xs"></i>
+        </button>
+        <button type="button" onclick="nextSlide()" class="absolute right-2.5 z-20 w-8 h-8 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur-sm transition">
+          <i class="fa-solid fa-chevron-right text-xs"></i>
+        </button>
+
+        <!-- 底部進度白點指示 -->
+        <div class="absolute bottom-3 inset-x-0 z-20 flex justify-center items-center gap-1.5" id="carousel-dots-container"></div>
       </div>
     </section>
 
-    <!-- 2. 顧客手機快速帶入卡片 -->
-    <section class="bg-white p-4 rounded-3xl border border-brand-200 shadow-sm space-y-3">
-      <div class="flex justify-between items-center pb-2 border-b border-brand-100">
-        <span class="text-xs font-bold text-brand-900 flex items-center gap-1.5">
-          <i class="fa-solid fa-user-check text-[#8C7355]"></i> 結帳顧客資料 (輸入手機自動帶入)
-        </span>
-        <span class="text-[10px] text-brand-400 font-mono" id="client-status-badge">新客首結或舊客帶入</span>
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-        <div>
-          <label class="block text-[10.5px] font-bold text-brand-700 mb-1">手機號碼 *</label>
-          <input type="tel" id="pos-client-phone" maxlength="10" placeholder="0912345678" onblur="handlePhoneLookup(this.value)" class="w-full p-2 bg-brand-50/50 rounded-xl border border-brand-200 text-xs font-mono font-bold outline-none focus:border-brand-500">
-        </div>
-        <div>
-          <label class="block text-[10.5px] font-bold text-brand-700 mb-1">顧客姓名 *</label>
-          <input type="text" id="pos-client-name" placeholder="例: 林小美" class="w-full p-2 bg-brand-50/50 rounded-xl border border-brand-200 text-xs font-bold outline-none focus:border-brand-500">
-        </div>
-        <div>
-          <label class="block text-[10.5px] font-bold text-brand-700 mb-1">LINE 稱呼 (選填)</label>
-          <input type="text" id="pos-client-line" placeholder="例: May" class="w-full p-2 bg-brand-50/50 rounded-xl border border-brand-200 text-xs outline-none focus:border-brand-500">
-        </div>
-      </div>
-      <div id="client-history-hint" class="text-[10.5px] text-brand-700 bg-brand-50 p-2.5 rounded-xl border border-brand-200 hidden leading-relaxed"></div>
-    </section>
-
-    <!-- 3. 服務項目點選區 (分類微大字置頂排版，不隱藏品項) -->
+    <!-- 2. 主服務核心項目挑選 (分類切換 ＋ 多選點擊) -->
     <section class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-4">
       <div class="flex justify-between items-center pb-2 border-b border-brand-100">
         <div>
-          <h2 class="text-xs font-black text-brand-900">服務項目與加購點選</h2>
-          <p class="text-[10px] text-brand-400 mt-0.5">點擊品項即可快速加入本次結帳清單</p>
+          <h2 class="text-xs font-black text-brand-900">1. 選擇預約核心主服務</h2>
+          <p class="text-[10px] text-brand-400 mt-0.5">點擊品項選取本次欲施作的主要服務（支援多選）</p>
         </div>
-        <button type="button" onclick="clearCart()" class="text-[10.5px] text-rose-500 font-bold hover:underline">清空重選</button>
+        <span class="text-[10.5px] font-mono text-[#8C7355] font-bold" id="selected-service-badge">尚未選擇</span>
       </div>
 
-      <!-- 分類微大字容器 (垂直展開各分類區塊) -->
-      <div class="space-y-5" id="pos-categorized-items-container">
-        <!-- JS 動態生成各大分類與按鈕 -->
-      </div>
+      <!-- 分類標籤滑動條 -->
+      <div class="flex gap-2 overflow-x-auto no-scrollbar py-0.5" id="quote-category-tabs"></div>
 
-      <!-- 加購與工藝升級 (複選按鈕) -->
-      <div class="pt-3 border-t border-brand-100 space-y-2">
-        <span class="text-xs font-bold text-brand-900 flex items-center gap-1.5">
-          <i class="fa-solid fa-sparkles text-amber-600"></i> 加購與工藝升級 (可多選)：
-        </span>
-        <div class="flex flex-wrap gap-2" id="pos-addons-container"></div>
-      </div>
+      <!-- 項目清單按鈕網格 -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5" id="quote-services-grid"></div>
     </section>
 
-    <!-- 4. 當前開單清單與結帳計算卡片 -->
+    <!-- 3. 全美業通用：工藝加值與專屬護理 (複選切換) -->
+    <section class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3.5">
+      <div class="flex justify-between items-center pb-2 border-b border-brand-100">
+        <div>
+          <h2 class="text-xs font-black text-brand-900">2. 附加升級、專屬護理與工藝選購</h2>
+          <p class="text-[10px] text-brand-400 mt-0.5">美髮修護 / 美甲工藝 / 美睫升級 / 寵美泥浴 皆適用（需先選主服務）</p>
+        </div>
+        <span class="text-[10px] text-brand-400" id="addons-count-badge">可自由多選</span>
+      </div>
+
+      <div class="space-y-2" id="quote-addons-container"></div>
+    </section>
+
+    <!-- 4. 費用試算明細與高美感 LINE 預約按鈕 -->
     <section class="bg-white p-5 rounded-3xl border border-brand-200 shadow-md space-y-4">
       <div class="flex justify-between items-center pb-2 border-b border-brand-100">
         <span class="text-xs font-bold text-brand-900 flex items-center gap-1.5">
-          <i class="fa-solid fa-receipt text-[#8C7355]"></i> 本次結帳明細
+          <i class="fa-solid fa-receipt text-[#8C7355]"></i> 預估報價試算清單
         </span>
-        <span class="text-[10.5px] font-mono text-[#8C7355] font-bold" id="cart-items-count-badge">未選品項</span>
+        <button type="button" onclick="resetQuoteCart()" class="text-[10.5px] text-rose-500 font-bold hover:underline">重新試算</button>
       </div>
 
-      <div class="space-y-2" id="cart-items-list">
-        <div class="text-center py-4 text-xs text-brand-400">尚未選取任何服務項目</div>
+      <div class="space-y-2 text-xs" id="quote-cart-items">
+        <div class="text-center py-4 text-brand-400">請從上方選取服務品項</div>
       </div>
 
-      <!-- 金額小計與快速折讓 -->
-      <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-100 space-y-2 text-xs">
-        <div class="flex justify-between items-center">
-          <span class="text-brand-600 font-medium">原價小計：</span>
-          <span class="font-mono font-bold text-brand-800" id="disp-subtotal">NT$ 0</span>
-        </div>
-        <div class="flex justify-between items-center">
-          <span class="text-brand-600 font-medium">現場折扣 / 折讓金額：</span>
-          <div class="flex items-center gap-1">
-            <span class="font-bold text-rose-600">- NT$</span>
-            <input type="number" id="pos-discount-input" value="0" min="0" oninput="calculateTotal()" class="w-20 p-1 bg-white rounded-lg border border-brand-200 text-xs font-mono font-bold text-right outline-none">
-          </div>
-        </div>
-      </div>
-
-      <!-- 實收金額與一鍵結帳 -->
-      <div class="pt-2 flex justify-between items-center border-t border-brand-100">
+      <!-- 總額統計 -->
+      <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-100 flex justify-between items-center">
         <div>
-          <span class="text-[10px] text-brand-400 block">實收應結金額</span>
-          <span class="text-2xl font-black font-mono text-brand-700" id="disp-final-total">NT$ 0</span>
+          <span class="text-[10px] text-brand-400 block font-sans">線上預估參考金額</span>
+          <span class="text-2xl font-black font-mono text-brand-700" id="quote-total-price">NT$ 0</span>
         </div>
-        <button type="button" onclick="submitCheckout()" class="px-7 py-3.5 bg-[#8C7355] hover:bg-[#7A6246] text-white font-bold rounded-2xl text-xs transition shadow-md flex items-center gap-2">
-          <i class="fa-solid fa-circle-check"></i>
-          <span>確認結帳並入帳</span>
-        </button>
+        <div class="text-right text-[10px] text-brand-400">
+          現場依實際狀況評估為準<br>不含現場臨時特惠折扣
+        </div>
       </div>
+
+      <!-- 奢華深林墨綠質感預約按鈕 -->
+      <button type="button" onclick="copyQuoteAndRedirectLine()" class="w-full py-3.5 bg-[#1F4E3D] hover:bg-[#183E30] text-white rounded-2xl text-xs font-bold tracking-wide transition shadow-md flex items-center justify-center gap-2 group">
+        <i class="fa-brands fa-line text-lg text-emerald-300 group-hover:scale-110 transition-transform"></i>
+        <span>複製報價明細，前往官方 LINE 預約時段</span>
+      </button>
+
+      <p class="text-[10px] text-center text-brand-400">
+        點擊將自動為您複製試算項目，並打開 LINE 貼上傳送給美療師確認空檔。
+      </p>
     </section>
 
   </main>
 
   <!-- ========================================================================= -->
-  <!-- 店長專區：營業額雙卡 ＆ 項目上下排序 ＆ 顧客資料庫 (PIN 驗證後開啟) -->
+  <!-- 店長專區：報價項目/加購管理 ＆ 9:16 輪播海報直傳管理 ＆ PIN 碼 -->
   <!-- ========================================================================= -->
   <div id="manager-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
     <div class="bg-white w-full sm:max-w-2xl max-h-[92vh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
       
-      <!-- 抽屜抬頭 -->
+      <!-- 抬頭 -->
       <div class="p-4 bg-brand-50 border-b border-brand-200 flex justify-between items-center shrink-0">
         <div class="flex items-center gap-2">
           <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xs">
             <i class="fa-solid fa-sliders"></i>
           </div>
           <div>
-            <div class="text-xs font-bold text-brand-900">店長收銀後台 · 項目配置與顧客小庫</div>
-            <div class="text-[10px] text-brand-400">項目上下排序 · 密碼管理 · 消費履歷分頁</div>
+            <div class="text-xs font-bold text-brand-900">店長報價後台 · 價目表與輪播圖配置</div>
+            <div class="text-[10px] text-brand-400">主項目上下排序與編輯 · 加購管理 · 9:16 海報直傳</div>
           </div>
         </div>
         <button type="button" onclick="closeManagerModal()" class="w-8 h-8 rounded-full bg-white border border-brand-200 text-brand-400 hover:text-brand-900 flex items-center justify-center">
@@ -229,26 +211,26 @@
 
       <!-- 分頁標籤 -->
       <div class="flex border-b border-brand-200 bg-white px-4 text-xs font-bold shrink-0">
-        <button type="button" onclick="switchManagerSubTab('tab-items', this)" class="mgr-tab-btn py-3 px-4 border-b-2 border-[#8C7355] text-[#8C7355]">
-          收銀品項管理
+        <button type="button" onclick="switchManagerSubTab('tab-services-admin', this)" class="mgr-tab-btn py-3 px-4 border-b-2 border-[#8C7355] text-[#8C7355]">
+          主服務品項
         </button>
-        <button type="button" onclick="switchManagerSubTab('tab-clients', this)" class="mgr-tab-btn py-3 px-4 text-brand-400 hover:text-brand-700">
-          顧客資料庫
+        <button type="button" onclick="switchManagerSubTab('tab-addons-admin', this)" class="mgr-tab-btn py-3 px-4 text-brand-400 hover:text-brand-700">
+          工藝加購選項
         </button>
-        <button type="button" onclick="switchManagerSubTab('tab-revenue', this)" class="mgr-tab-btn py-3 px-4 text-brand-400 hover:text-brand-700">
-          營收明細流水帳
+        <button type="button" onclick="switchManagerSubTab('tab-carousel-admin', this)" class="mgr-tab-btn py-3 px-4 text-brand-400 hover:text-brand-700">
+          9:16 輪播海報
         </button>
       </div>
 
       <!-- 滾動內容區域 -->
       <div class="p-5 overflow-y-auto space-y-4 text-xs">
 
-        <!-- [分頁 1] 項目配置與排序 ＋ PIN 碼管理 -->
-        <div id="tab-items" class="mgr-tab-content space-y-4">
+        <!-- [分頁 1] 主服務項目管理 (上下排序 ＋ 描述 ＋ 編輯) -->
+        <div id="tab-services-admin" class="mgr-tab-content space-y-4">
           <!-- PIN 碼展示與修改 -->
           <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 flex justify-between items-center">
             <div>
-              <span class="font-bold text-brand-900 block">店長前台登入 PIN 碼：</span>
+              <span class="font-bold text-brand-900 block">店長前台管理 PIN 碼：</span>
               <span class="text-[10px] text-brand-400">進入此店長專區之驗證密碼</span>
             </div>
             <div class="flex items-center gap-2">
@@ -259,26 +241,14 @@
             </div>
           </div>
 
-          <!-- 主項目管理列表 (上下排序) -->
           <div class="space-y-2">
             <div class="flex justify-between items-center">
-              <span class="font-bold text-brand-900">服務主品項列表 (點擊 ▲/▼ 調整順序)：</span>
-              <button type="button" onclick="openAddItemModal()" class="px-2.5 py-1.5 bg-[#8C7355] text-white rounded-lg font-bold text-[11px] shadow-2xs">
+              <span class="font-bold text-brand-900">主服務項目列表 (支援編輯、刪除與 ▲/▼ 調整順序)：</span>
+              <button type="button" onclick="openAddServiceModal()" class="px-2.5 py-1.5 bg-[#8C7355] text-white rounded-lg font-bold text-[11px] shadow-2xs">
                 + 新增品項
               </button>
             </div>
-            <div class="space-y-2" id="admin-items-sortable-list"></div>
-          </div>
-
-          <!-- 加購選項管理 (上下排序) -->
-          <div class="pt-3 border-t border-brand-100 space-y-2">
-            <div class="flex justify-between items-center">
-              <span class="font-bold text-brand-900">加購與工藝升級選項：</span>
-              <button type="button" onclick="openAddAddonModal()" class="px-2.5 py-1.5 bg-[#8C7355] text-white rounded-lg font-bold text-[11px] shadow-2xs">
-                + 新增加購
-              </button>
-            </div>
-            <div class="space-y-2" id="admin-addons-sortable-list"></div>
+            <div class="space-y-2" id="admin-services-sortable-list"></div>
           </div>
 
           <!-- 官方 LINE 設定 -->
@@ -287,45 +257,65 @@
             <input type="url" id="admin-line-url" placeholder="https://line.me/R/ti/p/@480kqjoj" class="w-full p-2.5 bg-brand-50 rounded-xl border border-brand-200 text-xs font-mono">
           </div>
 
-          <button type="button" onclick="saveStoreConfigToCloud()" class="w-full py-3 bg-stone-900 hover:bg-black text-white font-bold rounded-xl text-xs transition shadow-md">
-            儲存所有收銀設定與排序
+          <button type="button" onclick="saveQuoteConfigToCloud()" class="w-full py-3 bg-stone-900 hover:bg-black text-white font-bold rounded-xl text-xs transition shadow-md">
+            儲存所有報價設定與排序
           </button>
         </div>
 
-        <!-- [分頁 2] 顧客小資料庫 (10筆分頁 + 搜尋 + 展開消費紀錄) -->
-        <div id="tab-clients" class="mgr-tab-content space-y-3 hidden">
-          <div class="flex gap-2">
-            <div class="relative flex-1">
-              <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-brand-400"></i>
-              <input type="text" id="client-search-input" oninput="filterClientsList()" placeholder="輸入手機、顧客姓名或 LINE 稱呼搜尋..." class="w-full pl-8 pr-3 py-2 bg-brand-50 rounded-xl border border-brand-200 text-xs outline-none focus:border-brand-500">
+        <!-- [分頁 2] 工藝加購選項管理 (上下排序 ＋ 描述 ＋ 編輯) -->
+        <div id="tab-addons-admin" class="mgr-tab-content space-y-4 hidden">
+          <div class="space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-brand-900">加購與工藝選項列表 (支援編輯、刪除與 ▲/▼ 調整順序)：</span>
+              <button type="button" onclick="openAddAddonModal()" class="px-2.5 py-1.5 bg-[#8C7355] text-white rounded-lg font-bold text-[11px] shadow-2xs">
+                + 新增加購
+              </button>
             </div>
-            <button type="button" onclick="exportClientsCsv()" class="px-3 py-2 bg-brand-100 text-brand-800 rounded-xl font-bold text-xs hover:bg-brand-200 transition">
-              匯出清冊
-            </button>
+            <div class="space-y-2" id="admin-addons-sortable-list"></div>
           </div>
 
-          <div class="space-y-2.5" id="clients-list-container"></div>
-
-          <!-- 10筆分頁列 -->
-          <div class="flex justify-between items-center pt-2 border-t border-brand-100 text-[11px]">
-            <span class="text-brand-500" id="clients-page-info">第 1 / 1 頁</span>
-            <div class="flex gap-1" id="clients-pagination-btns"></div>
-          </div>
+          <button type="button" onclick="saveQuoteConfigToCloud()" class="w-full py-3 bg-stone-900 hover:bg-black text-white font-bold rounded-xl text-xs transition shadow-md">
+            儲存所有加購設定
+          </button>
         </div>
 
-        <!-- [分頁 3] 本日/本月營收明細流水帳 -->
-        <div id="tab-revenue" class="mgr-tab-content space-y-3 hidden">
-          <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 grid grid-cols-2 gap-2 text-center">
-            <div>
-              <span class="text-[10px] text-brand-400 block font-bold">本日實收總額</span>
-              <span class="text-lg font-black font-mono text-[#8C7355]" id="mgr-stat-today">NT$ 0</span>
+        <!-- [分頁 3] 9:16 輪播說明海報直傳與管理 -->
+        <div id="tab-carousel-admin" class="mgr-tab-content space-y-4 hidden">
+          <div class="p-4 bg-brand-50/70 rounded-2xl border border-brand-200 space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-xs text-brand-900 flex items-center gap-1.5">
+                <i class="fa-solid fa-cloud-arrow-up text-[#8C7355]"></i> 直傳 9:16 活動海報至 Supabase
+              </span>
+              <span class="text-[10px] text-brand-500 font-mono">建議解析度 1080 × 1920</span>
             </div>
-            <div>
-              <span class="text-[10px] text-brand-400 block font-bold">本月累計總額</span>
-              <span class="text-lg font-black font-mono text-brand-900" id="mgr-stat-month">NT$ 0</span>
+
+            <!-- 檔案選擇與直傳按鈕 -->
+            <div class="flex flex-wrap items-center gap-2">
+              <input type="file" id="quote-upload-carousel-file" accept="image/*" class="text-xs text-brand-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border file:border-brand-200 file:text-xs file:font-bold file:bg-white file:text-brand-800 hover:file:bg-brand-50 cursor-pointer">
+              <button type="button" onclick="uploadQuoteCarouselToSupabase()" class="px-4 py-1.5 bg-[#8C7355] hover:bg-[#7A6246] text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-1 shrink-0">
+                <i class="fa-solid fa-cloud-arrow-up text-[10px]"></i>
+                <span>上傳海報並加入輪播</span>
+              </button>
+            </div>
+
+            <!-- 手動外鏈補充框 -->
+            <div class="flex gap-2 pt-1 border-t border-brand-200/60">
+              <input type="url" id="admin-new-carousel-url" placeholder="亦可手動貼上圖片外部網址 (https://...)" class="flex-1 p-2 bg-white border border-brand-200 rounded-xl text-xs font-mono outline-none">
+              <button type="button" onclick="addAdminCarouselImg()" class="px-3.5 py-1.5 bg-stone-900 text-white rounded-xl font-bold text-xs shadow-2xs shrink-0">
+                貼網址加入
+              </button>
             </div>
           </div>
-          <div class="space-y-2" id="ledgers-list-container"></div>
+
+          <!-- 已加入之輪播圖列表 (可預覽、查看網址並刪除) -->
+          <div class="space-y-2">
+            <span class="font-bold text-brand-800 block">目前輪播海報清單 (點擊刪除圖片)：</span>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="admin-carousel-grid"></div>
+          </div>
+
+          <button type="button" onclick="saveQuoteConfigToCloud()" class="w-full py-3 bg-stone-900 hover:bg-black text-white font-bold rounded-xl text-xs transition shadow-md">
+            儲存輪播圖設定
+          </button>
         </div>
 
       </div>
@@ -338,48 +328,54 @@
 
     let currentStore = {
       id: "default-store",
-      store_name: "希貝兒沙龍收銀台",
+      store_name: "希貝兒沙龍美學工作室",
       admin_pin: "8888",
       line_url: "https://line.me/R/ti/p/@480kqjoj"
     };
 
-    // 收銀品項設定模型 (可上下排序)
-    let posConfig = {
-      categories: ["主要美睫", "深層護理", "卸除服務"],
-      items: [
-        { id: "item-1", name: "日式單根自然款 120根", price: 1200, category: "主要美睫" },
-        { id: "item-2", name: "山茶花濃密多層次款", price: 1800, category: "主要美睫" },
-        { id: "item-3", name: "睫毛深層 SPA 泡泡浴", price: 300, category: "深層護理" },
-        { id: "item-4", name: "溫和無痛深層卸睫", price: 400, category: "卸除服務" }
+    // 預設報價資料模型 (保證離線或尚未設定時前台不空白)
+    let quoteConfig = {
+      lineUrl: "https://line.me/R/ti/p/@480kqjoj",
+      carouselImages: [
+        "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=720&q=80",
+        "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=720&q=80"
+      ],
+      categories: ["主推核心", "深層保養", "工藝升級", "特殊護理"],
+      services: [
+        { id: "s1", name: "頂級日式美睫/美甲光療基本款", category: "主推核心", price: 1200, note: "含基礎指緣/眼周護理與甲型修飾" },
+        { id: "s2", name: "沙龍晶透水感深層臉部護理", category: "深層保養", price: 1800, note: "含粉刺溫和微創淨化與鎖水導入" },
+        { id: "s3", name: "毛孩草本精油深層泥浴SPA", category: "深層保養", price: 1500, note: "鎮定放鬆、去除體味、深層毛囊調理" },
+        { id: "s4", name: "設計染燙/縮毛矯正技術工藝", category: "主推核心", price: 2800, note: "依個人骨骼臉型客製化剪裁設計" }
       ],
       addons: [
-        { id: "addon-1", name: "升級黑鑽極致毛", price: 200 },
-        { id: "addon-2", name: "眼膜持久防護水凝貼", price: 100 },
-        { id: "addon-3", name: "專用睫毛定型雨衣", price: 350 }
+        { id: "a1", name: "結構式深層鏈鍵強化護理", price: 500, desc: "大幅提升毛髮與甲面強韌度，持久保鮮" },
+        { id: "a2", name: "客製化手繪彩繪 / 專屬指甲造型鑽飾", price: 400, desc: "單指精緻設計或重點圖騰跳色" },
+        { id: "a3", name: "眼膜冷凝水光保濕貼片", price: 150, desc: "嫁接過程深層舒緩，淡化眼周乾燥細紋" },
+        { id: "a4", name: "草本防護除蚤加強浸泡浴", price: 300, desc: "天然草本抑菌驅蟲，守護毛孩皮膚屏障" }
       ]
     };
 
-    let ledgerRecords = [];
-    let clientsDatabase = [];
+    let selectedServices = [];
+    let selectedAddons = [];
+    let activeCategory = "全部";
 
-    // 當前開單暫存：由單選改為陣列（支援複選）
-    let selectedItemsList = [];    // 主服務項目複選陣列
-    let selectedAddonsList = [];   // 加購項目複選陣列
-
-    // 顧客小庫分頁
-    let clientsCurrentPage = 1;
-    const CLIENTS_PAGE_SIZE = 10;
-    let filteredClients = [];
+    let currentSlideIdx = 0;
+    let slideTimer = null;
 
     window.addEventListener('DOMContentLoaded', async () => {
-      await loadStoreByUrlParams();
-      renderCategorizedItems();
-      renderAddons();
-      calculateTotal();
+      // 1. 先用預設資料完整初始化畫面，保證前台絕不空白
+      initCarousel();
+      renderCategoryTabs();
+      renderServicesGrid();
+      renderAddonsList();
+      updateCartSummary();
+
+      // 2. 異步載入雲端專屬門市設定
+      await loadStoreQuoteProfile();
     });
 
-    // 1. 雙軌解析店家參數
-    async function loadStoreByUrlParams() {
+    // 1. 讀取店家設定
+    async function loadStoreQuoteProfile() {
       const urlParams = new URLSearchParams(window.location.search);
       const storeParam = urlParams.get('s') || urlParams.get('store') || urlParams.get('store_id');
       if (!storeParam) return;
@@ -396,420 +392,351 @@
         const stores = await res.json();
         if (stores && stores.length > 0) {
           currentStore = stores[0];
-          document.getElementById('disp-store-title').innerHTML = `<i class="fa-solid fa-cash-register text-[#8C7355]"></i> ${currentStore.store_name}`;
-          document.getElementById('disp-store-subtitle').innerText = `收銀端點: ${currentStore.store_slug || currentStore.id.slice(0,8)}`;
-          document.getElementById('header-line-link').href = currentStore.line_url || "https://line.me/R/ti/p/@480kqjoj";
-          document.getElementById('admin-line-url').value = currentStore.line_url || "";
-          document.getElementById('disp-manager-pin').innerText = currentStore.admin_pin || "8888";
+          document.getElementById('quote-store-name').innerHTML = `<i class="fa-solid fa-calculator text-[#8C7355]"></i> ${currentStore.store_name}`;
+          document.getElementById('quote-store-sub').innerText = `專屬報價試算 · ${currentStore.store_slug || currentStore.id.slice(0,8)}`;
+          document.getElementById('header-line-btn').href = currentStore.line_url || "https://line.me/R/ti/p/@480kqjoj";
+          
+          const adminLineInput = document.getElementById('admin-line-url');
+          if (adminLineInput) adminLineInput.value = currentStore.line_url || "";
+          
+          const pinDisplay = document.getElementById('disp-manager-pin');
+          if (pinDisplay) pinDisplay.innerText = currentStore.admin_pin || "8888";
 
-          await loadCloudPosSettings(currentStore.id);
-          await loadCloudLedgers(currentStore.id);
+          await loadCloudQuoteSettings(currentStore.id);
         }
       } catch (err) {
-        console.warn("載入雲端設定異常:", err);
+        console.warn("載入雲端報價資料失敗:", err);
       }
     }
 
-    async function loadCloudPosSettings(storeId) {
+    async function loadCloudQuoteSettings(storeId) {
       try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_settings?store_id=eq.${storeId}&select=*`, {
           headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` }
         });
         const data = await res.json();
         if (data && data.length > 0) {
-          if (data[0].slot_config && data[0].slot_config.pos_config) {
-            posConfig = data[0].slot_config.pos_config;
+          const cfg = data[0];
+          if (cfg.slot_config && cfg.slot_config.quote_config) {
+            const remoteCfg = cfg.slot_config.quote_config;
+            // 安全覆蓋：有遠端資料才進行替換
+            if (remoteCfg.services && remoteCfg.services.length > 0) quoteConfig.services = remoteCfg.services;
+            if (remoteCfg.addons && remoteCfg.addons.length > 0) quoteConfig.addons = remoteCfg.addons;
+            if (remoteCfg.categories && remoteCfg.categories.length > 0) quoteConfig.categories = remoteCfg.categories;
+            if (remoteCfg.carouselImages && remoteCfg.carouselImages.length > 0) quoteConfig.carouselImages = remoteCfg.carouselImages;
+            if (remoteCfg.lineUrl) quoteConfig.lineUrl = remoteCfg.lineUrl;
+
+            // 重新刷新前台
+            initCarousel();
+            renderCategoryTabs();
+            renderServicesGrid();
+            renderAddonsList();
+            updateCartSummary();
           }
-          if (data[0].store_pin) {
-            currentStore.admin_pin = data[0].store_pin;
-            document.getElementById('disp-manager-pin').innerText = currentStore.admin_pin;
+          if (cfg.store_pin) {
+            currentStore.admin_pin = cfg.store_pin;
+            const pinDisplay = document.getElementById('disp-manager-pin');
+            if (pinDisplay) pinDisplay.innerText = currentStore.admin_pin;
           }
         }
       } catch (e) {
-        console.error("載入收銀設定失敗:", e);
+        console.error("載入小工具設定異常:", e);
       }
     }
 
-    // 載入流水帳 ＆ 同步計算本日與本月營業額
-    async function loadCloudLedgers(storeId) {
-      try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_quick_ledger?store_id=eq.${storeId}&order=created_at.desc`, {
-          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` }
-        });
-        const data = await res.json();
-        if (Array.isArray(data)) {
-          ledgerRecords = data;
-          updateRevenueStatCards(data);
-          rebuildClientsDatabaseFromLedgers(data);
-          renderLedgersList();
-        } else {
-          // [修復] 尚無資料時清空歸零
-          ledgerRecords = [];
-          updateRevenueStatCards([]);
-          rebuildClientsDatabaseFromLedgers([]);
-        }
-      } catch (e) {
-        console.error("載入流水帳失敗:", e);
-      }
+    // 2. 9:16 輪播圖 (高斯模糊補底 ＋ 白點進度)
+    function initCarousel() {
+      const images = quoteConfig.carouselImages || [];
+      if (images.length === 0) return;
+
+      const dotsContainer = document.getElementById('carousel-dots-container');
+      dotsContainer.innerHTML = images.map((_, i) => `
+        <button type="button" onclick="goToSlide(${i})" class="w-2 h-2 rounded-full transition-all duration-300 ${i === currentSlideIdx ? 'bg-white w-5' : 'bg-white/40'}"></button>
+      `).join('');
+
+      showSlide(currentSlideIdx);
+      if (slideTimer) clearInterval(slideTimer);
+      slideTimer = setInterval(() => nextSlide(), 4500);
     }
-    // 計算並渲染前台「本日營業額 ＆ 本月營業額」看板
-    function updateRevenueStatCards(records) {
-      const now = new Date();
-      const todayPrefix = now.toISOString().slice(0, 10); // YYYY-MM-DD
-      const monthPrefix = now.toISOString().slice(0, 7);  // YYYY-MM
 
-      let todayTotal = 0, todayCount = 0;
-      let monthTotal = 0;
+    function showSlide(idx) {
+      const images = quoteConfig.carouselImages || [];
+      if (images.length === 0) return;
 
-      records.forEach(r => {
-        const dateStr = r.created_at || '';
-        const paid = Number(r.total_price || 0);
+      currentSlideIdx = (idx + images.length) % images.length;
+      const targetUrl = images[currentSlideIdx];
 
-        if (dateStr.startsWith(todayPrefix)) {
-          todayTotal += paid;
-          todayCount++;
-        }
-        if (dateStr.startsWith(monthPrefix)) {
-          monthTotal += paid;
-        }
+      const mainImg = document.getElementById('carousel-main-img');
+      const blurBg = document.getElementById('carousel-blur-bg');
+
+      mainImg.src = targetUrl;
+      blurBg.style.backgroundImage = `url('${targetUrl}')`;
+
+      const dots = document.querySelectorAll('#carousel-dots-container button');
+      dots.forEach((dot, i) => {
+        dot.className = `h-2 rounded-full transition-all duration-300 ${i === currentSlideIdx ? 'bg-white w-5' : 'bg-white/40 w-2'}`;
       });
-
-      // 前台看板更新
-      document.getElementById('stat-today-revenue').innerText = `NT$ ${todayTotal.toLocaleString()}`;
-      document.getElementById('stat-today-count').innerText = `${todayCount} 筆結帳`;
-      document.getElementById('stat-month-revenue').innerText = `NT$ ${monthTotal.toLocaleString()}`;
-      document.getElementById('stat-month-label').innerText = `${now.getMonth() + 1} 月累積`;
-
-      // 後台流水帳看板更新
-      const mgrToday = document.getElementById('mgr-stat-today');
-      const mgrMonth = document.getElementById('mgr-stat-month');
-      if (mgrToday) mgrToday.innerText = `NT$ ${todayTotal.toLocaleString()}`;
-      if (mgrMonth) mgrMonth.innerText = `NT$ ${monthTotal.toLocaleString()}`;
     }
 
-    // 從每一筆收銀資料中彙整出顧客履歷 (消費次數、總額、每次明細)
-    function rebuildClientsDatabaseFromLedgers(records) {
-      const clientMap = {};
+    function nextSlide() { showSlide(currentSlideIdx + 1); }
+    function prevSlide() { showSlide(currentSlideIdx - 1); }
+    function goToSlide(i) { showSlide(i); }
 
-      records.forEach(r => {
-        let meta = {};
-        try { meta = JSON.parse(r.items_summary); } catch (e) { meta = { items_text: r.items_summary }; }
+    // 3. 分類標籤切換
+    function renderCategoryTabs() {
+      const container = document.getElementById('quote-category-tabs');
+      const cats = ["全部", ...(quoteConfig.categories || [])];
 
-        const phone = meta.client_phone || '未留手機';
-        const name = r.client_name || '散客';
-        const line = meta.client_line || '';
-        const paid = Number(r.total_price || 0);
-        const date = r.created_at ? r.created_at.replace('T', ' ').substring(0, 16) : '未知';
-
-        if (!clientMap[phone]) {
-          clientMap[phone] = {
-            phone: phone,
-            name: name,
-            line: line,
-            totalSpend: 0,
-            visitsCount: 0,
-            lastVisit: date,
-            orders: []
-          };
-        }
-
-        if (name && name !== '散客') clientMap[phone].name = name;
-        if (line) clientMap[phone].line = line;
-
-        clientMap[phone].totalSpend += paid;
-        clientMap[phone].visitsCount += 1;
-        clientMap[phone].orders.push({
-          date: date,
-          items: meta.items_text || r.items_summary,
-          paid: paid
-        });
-      });
-
-      clientsDatabase = Object.values(clientMap);
-      filteredClients = [...clientsDatabase];
+      container.innerHTML = cats.map(cat => `
+        <button type="button" onclick="switchCategory('${cat}')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition shrink-0 ${
+          activeCategory === cat ? 'bg-[#8C7355] text-white shadow-2xs' : 'bg-brand-100 text-brand-700 hover:bg-brand-200'
+        }">
+          ${cat}
+        </button>
+      `).join('');
     }
 
-    // 2. 手機號碼失焦自動帶入顧客資料
-    function handlePhoneLookup(phoneVal) {
-      const p = phoneVal.trim();
-      const hint = document.getElementById('client-history-hint');
-      const badge = document.getElementById('client-status-badge');
+    function switchCategory(cat) {
+      activeCategory = cat;
+      renderCategoryTabs();
+      renderServicesGrid();
+    }
 
-      if (!p || p.length < 9) {
-        hint.classList.add('hidden');
-        badge.innerText = '新客首結或舊客帶入';
+    // 4. 核心主服務項目渲染 (支援多選複選)
+    function renderServicesGrid() {
+      const grid = document.getElementById('quote-services-grid');
+      const list = (activeCategory === "全部")
+        ? quoteConfig.services
+        : quoteConfig.services.filter(s => s.category === activeCategory);
+
+      if (list.length === 0) {
+        grid.innerHTML = '<div class="col-span-full py-6 text-center text-xs text-brand-400">此分類目前無項目</div>';
         return;
       }
 
-      const found = clientsDatabase.find(c => c.phone === p);
-      if (found) {
-        document.getElementById('pos-client-name').value = found.name;
-        document.getElementById('pos-client-line').value = found.line || '';
-        badge.innerHTML = `<span class="text-emerald-700 font-bold">✓ 舊客檔案帶入 (累計造訪 ${found.visitsCount} 次)</span>`;
-        hint.innerHTML = `🌟 <b>${found.name}</b> VIP 履歷：累計消費 <b>NT$ ${found.totalSpend.toLocaleString()}</b> 元 ｜ 上次造訪：${found.lastVisit}`;
-        hint.classList.remove('hidden');
-      } else {
-        badge.innerText = '★ 全新顧客 (結帳將自動建檔入庫)';
-        hint.classList.add('hidden');
-      }
-    }
-
-    // 3. 前台項目分類「微大字」置頂垂直排版（不隱藏品項）
-    function renderCategorizedItems() {
-      const container = document.getElementById('pos-categorized-items-container');
-      const cats = posConfig.categories || ["主要服務"];
-
-      container.innerHTML = cats.map(cat => {
-        const catItems = posConfig.items.filter(i => i.category === cat);
-        if (catItems.length === 0) return '';
-
-        const itemsHtml = catItems.map(item => {
-          // 支援多選判定
-          const isSelected = selectedItemsList.some(i => i.id === item.id);
-          return `
-            <button type="button" onclick="selectMainItem('${item.id}')" class="p-3.5 rounded-2xl border text-left transition flex flex-col justify-between gap-2 shadow-2xs ${
-              isSelected 
-                ? 'bg-[#8C7355] text-white border-[#8C7355] shadow-xs ring-2 ring-[#8C7355]/30' 
-                : 'bg-brand-50/60 hover:bg-brand-100/60 border-brand-200 text-brand-900'
-            }">
-              <span class="font-bold text-xs leading-snug line-clamp-2">${item.name}</span>
-              <div class="flex justify-between items-center pt-1 border-t ${isSelected ? 'border-white/20' : 'border-brand-200/60'}">
-                <span class="font-mono font-black text-xs ${isSelected ? 'text-amber-200' : 'text-[#8C7355]'}">NT$ ${item.price.toLocaleString()}</span>
-                <span class="text-[9.5px] font-bold ${isSelected ? 'text-white' : 'text-brand-400'}">${isSelected ? '✓ 已選取' : '+ 點選'}</span>
-              </div>
-            </button>
-          `;
-        }).join('');
-
+      grid.innerHTML = list.map(svc => {
+        const isSelected = selectedServices.some(s => s.id === svc.id);
         return `
-          <div class="space-y-2">
-            <div class="flex items-center gap-2 border-b border-brand-100 pb-1 text-brand-900 font-black text-sm">
-              <span class="w-1.5 h-3.5 bg-[#8C7355] rounded-full"></span>
-              <span>${cat}</span>
-            </div>
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-              ${itemsHtml}
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function selectMainItem(itemId) {
-      const found = posConfig.items.find(i => i.id === itemId);
-      if (!found) return;
-
-      const idx = selectedItemsList.findIndex(i => i.id === itemId);
-      if (idx > -1) {
-        selectedItemsList.splice(idx, 1); // 再次點擊取消
-      } else {
-        selectedItemsList.push(found);    // 加入清單（複選）
-      }
-
-      renderCategorizedItems();
-      renderCartUI();
-      calculateTotal();
-    }
-
-    // 渲染加購選項 (複選按鈕)
-    function renderAddons() {
-      const container = document.getElementById('pos-addons-container');
-      container.innerHTML = posConfig.addons.map(addon => {
-        const isSelected = selectedAddonsList.some(a => a.id === addon.id);
-        return `
-          <button type="button" onclick="toggleAddonItem('${addon.id}')" class="px-3.5 py-2 rounded-xl border text-xs font-bold transition flex items-center gap-1.5 ${
+          <button type="button" onclick="selectServiceItem('${svc.id}')" class="p-3.5 rounded-2xl border text-left transition flex flex-col justify-between gap-2 shadow-2xs ${
             isSelected 
-              ? 'bg-stone-900 text-white border-stone-900 shadow-2xs' 
-              : 'bg-white border-brand-200 text-brand-800 hover:bg-brand-50'
+              ? 'bg-[#8C7355] text-white border-[#8C7355] shadow-xs' 
+              : 'bg-white hover:bg-brand-50 border-brand-200 text-brand-900'
           }">
-            <i class="fa-solid ${isSelected ? 'fa-check' : 'fa-plus'} text-[10px]"></i>
-            <span>${addon.name} (+NT$ ${addon.price})</span>
+            <div>
+              <div class="flex justify-between items-start gap-2">
+                <span class="font-bold text-xs leading-snug line-clamp-1">${svc.name}</span>
+                <span class="font-mono font-black text-xs shrink-0 ${isSelected ? 'text-amber-200' : 'text-[#8C7355]'}">NT$ ${Number(svc.price).toLocaleString()}</span>
+              </div>
+              ${svc.note ? `<p class="text-[10px] mt-1 line-clamp-2 ${isSelected ? 'text-stone-200' : 'text-brand-400'}">${svc.note}</p>` : ''}
+            </div>
+            <div class="text-[9.5px] font-mono flex items-center gap-1 ${isSelected ? 'text-amber-100' : 'text-brand-400'}">
+              <i class="fa-solid ${isSelected ? 'fa-circle-check' : 'fa-circle-plus'}"></i>
+              <span>${isSelected ? '已選取' : '點擊選取'}</span>
+            </div>
           </button>
         `;
       }).join('');
     }
 
-    function toggleAddonItem(addonId) {
-      const found = posConfig.addons.find(a => a.id === addonId);
-      const idx = selectedAddonsList.findIndex(a => a.id === addonId);
+    function selectServiceItem(id) {
+      const found = quoteConfig.services.find(s => s.id === id);
+      if (!found) return;
+
+      const idx = selectedServices.findIndex(s => s.id === id);
       if (idx > -1) {
-        selectedAddonsList.splice(idx, 1);
+        selectedServices.splice(idx, 1);
       } else {
-        selectedAddonsList.push(found);
+        selectedServices.push(found);
       }
-      renderAddons();
-      renderCartUI();
-      calculateTotal();
+
+      // 若主服務全部取消，自動清空加購項目
+      if (selectedServices.length === 0) {
+        selectedAddons = [];
+      }
+
+      document.getElementById('selected-service-badge').innerText = 
+        selectedServices.length > 0 ? `已選 ${selectedServices.length} 項主服務` : '尚未選擇';
+
+      renderServicesGrid();
+      renderAddonsList();
+      updateCartSummary();
     }
 
-    // 4. 結帳清單與金額計算
-    function renderCartUI() {
-      const container = document.getElementById('cart-items-list');
-      const badge = document.getElementById('cart-items-count-badge');
+    // 5. 附加升級與工藝護理 (加購需先選主服務)
+    function renderAddonsList() {
+      const container = document.getElementById('quote-addons-container');
+      const addons = quoteConfig.addons || [];
 
-      const totalItemsCount = selectedItemsList.length + selectedAddonsList.length;
-      if (totalItemsCount === 0) {
-        container.innerHTML = '<div class="text-center py-4 text-xs text-brand-400">尚未選取任何服務項目</div>';
-        badge.innerText = '未選品項';
+      if (addons.length === 0) {
+        container.innerHTML = '<div class="py-4 text-center text-xs text-brand-400">無附加選項</div>';
         return;
       }
 
-      badge.innerText = `已選 ${totalItemsCount} 項`;
-
-      let html = '';
-      // 逐筆列出已選之主項目
-      selectedItemsList.forEach(item => {
-        html += `
-          <div class="flex justify-between items-center p-2.5 bg-brand-50 rounded-xl border border-brand-200 text-xs">
-            <div>
-              <span class="font-bold text-brand-900">• ${item.name}</span>
-              <span class="text-[10px] text-brand-400 block">${item.category}</span>
+      container.innerHTML = addons.map(adn => {
+        const isChecked = selectedAddons.some(a => a.id === adn.id);
+        return `
+          <div onclick="toggleAddonItem('${adn.id}')" class="p-3 rounded-2xl border cursor-pointer transition flex items-center justify-between gap-3 shadow-2xs ${
+            isChecked 
+              ? 'bg-stone-900 text-white border-stone-900 shadow-2xs' 
+              : 'bg-brand-50/60 hover:bg-brand-100/60 border-brand-200 text-brand-900'
+          }">
+            <div class="flex items-center gap-2.5 truncate">
+              <div class="w-5 h-5 rounded-lg flex items-center justify-center border text-xs shrink-0 ${
+                isChecked ? 'bg-amber-400 text-stone-950 border-amber-400' : 'border-brand-300 bg-white'
+              }">
+                ${isChecked ? '<i class="fa-solid fa-check text-[10px]"></i>' : ''}
+              </div>
+              <div class="truncate">
+                <span class="font-bold text-xs block truncate">${adn.name}</span>
+                ${adn.desc ? `<span class="text-[10px] block truncate ${isChecked ? 'text-stone-300' : 'text-brand-400'}">${adn.desc}</span>` : ''}
+              </div>
             </div>
-            <span class="font-mono font-bold text-brand-700">NT$ ${item.price.toLocaleString()}</span>
+            <span class="font-mono font-bold text-xs shrink-0 ${isChecked ? 'text-amber-300' : 'text-[#8C7355]'}">
+              + NT$ ${Number(adn.price).toLocaleString()}
+            </span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleAddonItem(id) {
+      if (selectedServices.length === 0) {
+        return Swal.fire({
+          title: '請先選擇核心主服務！',
+          text: '附加升級與工藝護理項目需搭配主要服務進行施作，請先從上方點選一項主服務。',
+          icon: 'warning',
+          confirmButtonColor: '#8C7355'
+        });
+      }
+
+      const found = quoteConfig.addons.find(a => a.id === id);
+      const idx = selectedAddons.findIndex(a => a.id === id);
+      if (idx > -1) {
+        selectedAddons.splice(idx, 1);
+      } else {
+        selectedAddons.push(found);
+      }
+      renderAddonsList();
+      updateCartSummary();
+    }
+
+    // 6. 更新明細與試算總金額
+    function updateCartSummary() {
+      const container = document.getElementById('quote-cart-items');
+      const totalDisplay = document.getElementById('quote-total-price');
+
+      if (selectedServices.length === 0 && selectedAddons.length === 0) {
+        container.innerHTML = '<div class="text-center py-4 text-brand-400">尚未選取任何項目</div>';
+        totalDisplay.innerText = 'NT$ 0';
+        return;
+      }
+
+      let total = 0;
+      let html = '';
+
+      selectedServices.forEach(s => {
+        total += s.price;
+        html += `
+          <div class="flex justify-between items-center p-2.5 bg-brand-50 rounded-xl border border-brand-200 font-bold">
+            <span class="text-brand-900">• 主服務：${s.name}</span>
+            <span class="font-mono text-brand-700">NT$ ${Number(s.price).toLocaleString()}</span>
           </div>
         `;
       });
 
-      // 逐筆列出加購項目
-      selectedAddonsList.forEach(addon => {
+      selectedAddons.forEach(a => {
+        total += a.price;
         html += `
           <div class="flex justify-between items-center px-3 py-1.5 bg-white rounded-lg border border-brand-100 text-[11px]">
-            <span class="text-brand-600">＋ 加購：${addon.name}</span>
-            <span class="font-mono text-brand-600 font-bold">+ NT$ ${addon.price.toLocaleString()}</span>
+            <span class="text-brand-600">＋ 加購：${a.name}</span>
+            <span class="font-mono text-brand-600 font-bold">+ NT$ ${Number(a.price).toLocaleString()}</span>
           </div>
         `;
       });
 
       container.innerHTML = html;
+      totalDisplay.innerText = `NT$ ${total.toLocaleString()}`;
     }
 
-    function calculateTotal() {
-      let subtotal = 0;
-      selectedItemsList.forEach(i => subtotal += Number(i.price || 0));
-      selectedAddonsList.forEach(a => subtotal += Number(a.price || 0));
-
-      const discount = Math.max(0, Number(document.getElementById('pos-discount-input').value || 0));
-      const finalTotal = Math.max(0, subtotal - discount);
-
-      document.getElementById('disp-subtotal').innerText = `NT$ ${subtotal.toLocaleString()}`;
-      document.getElementById('disp-final-total').innerText = `NT$ ${finalTotal.toLocaleString()}`;
-      return { subtotal, discount, finalTotal };
+    function resetQuoteCart() {
+      selectedServices = [];
+      selectedAddons = [];
+      document.getElementById('selected-service-badge').innerText = '尚未選擇';
+      renderServicesGrid();
+      renderAddonsList();
+      updateCartSummary();
     }
 
-    function clearCart() {
-      selectedItemsList = [];
-      selectedAddonsList = [];
-      document.getElementById('pos-discount-input').value = 0;
-      renderCategorizedItems();
-      renderAddons();
-      renderCartUI();
-      calculateTotal();
-    }
-
-    // 5. 提交結帳：入庫 Supabase ＋ 自動覆寫更新顧客庫
-    // [工具標籤: pos.html 防重複扣款連點之安全結帳函式]
-    let isSubmittingCheckout = false;
-
-    async function submitCheckout() {
-      if (isSubmittingCheckout) return;
-
-      const phone = document.getElementById('pos-client-phone').value.trim();
-      const name = document.getElementById('pos-client-name').value.trim();
-      const line = document.getElementById('pos-client-line').value.trim();
-
-      if (selectedItemsList.length === 0 && selectedAddonsList.length === 0) {
-        return Swal.fire('請先點選欲結帳的服務項目！', '', 'warning');
-      }
-      if (!phone || !name) {
-        return Swal.fire('請完整填寫顧客手機與姓名！', '結帳資訊將自動歸戶入庫。', 'warning');
+    // 7. 一鍵打包報價明細並跳轉官方 LINE (含引導文字說明)
+    async function copyQuoteAndRedirectLine() {
+      if (selectedServices.length === 0) {
+        return Swal.fire('請先選取至少一項主要服務核心項目！', '', 'warning');
       }
 
-      isSubmittingCheckout = true;
+      let total = 0;
+      selectedServices.forEach(s => total += s.price);
+      selectedAddons.forEach(a => total += a.price);
 
-      const { subtotal, discount, finalTotal } = calculateTotal();
-      
-      // 打包多個品項的摘要文字
-      const mainNames = selectedItemsList.map(i => i.name).join(' ＋ ');
-      const addonNames = selectedAddonsList.length > 0 ? ` (+${selectedAddonsList.map(a => a.name).join('、')})` : '';
-      const itemsSummaryText = (mainNames || '加購項目') + addonNames;
+      const servicesText = selectedServices.map(s => `• ${s.name} (NT$ ${Number(s.price).toLocaleString()})`).join('\n');
+      const addonText = selectedAddons.length > 0 
+        ? selectedAddons.map(a => `• ${a.name} (+NT$ ${Number(a.price).toLocaleString()})`).join('\n')
+        : '無加購護理';
 
-      Swal.fire({
-        title: '正在建立結帳記錄...',
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading()
-      });
-
-      const payload = {
-        store_id: currentStore.id,
-        client_name: name,
-        total_price: finalTotal,
-        items_summary: JSON.stringify({
-          client_phone: phone,
-          client_line: line,
-          items_text: itemsSummaryText,
-          subtotal: subtotal,
-          discount: discount,
-          timestamp: new Date().toISOString()
-        })
-      };
+      const quoteMessage = 
+        `您好！我在官網完成了線上報價試算，想諮詢以下項目之預約時段：\n\n` +
+        `【門市名稱】：${currentStore.store_name}\n` +
+        `【預約主服務】：\n${servicesText}\n` +
+        `【附加升級/工藝】：\n${addonText}\n` +
+        `─────────────\n` +
+        `【預算小計】：NT$ ${total.toLocaleString()} 元\n\n` +
+        `請問近期有哪些空檔時段可以安排施作呢？謝謝！`;
 
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_quick_ledger`, {
-          method: "POST",
-          headers: {
-            "apikey": SUPABASE_ANON_KEY,
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-            "Content-Type": "application/json",
-            "Prefer": "return=representation"
-          },
-          body: JSON.stringify(payload)
-        });
-
-        if (res.ok) {
-          Swal.fire({
-            title: '結帳完成！',
-            html: `
-              <div class="text-left text-xs bg-brand-50 p-3.5 rounded-2xl border border-brand-200 space-y-1.5 font-sans leading-relaxed">
-                <div>顧客：<b>${name}</b> (${phone})</div>
-                <div>項目：${itemsSummaryText}</div>
-                <div>實收：<b class="text-[#8C7355] font-mono text-sm">NT$ ${finalTotal.toLocaleString()}</b></div>
-                <div class="text-emerald-700 font-bold pt-1">✓ 資料已自動同步覆寫更新至顧客庫！</div>
-              </div>
-            `,
-            icon: 'success',
-            confirmButtonColor: '#8C7355'
-          });
-
-          await loadCloudLedgers(currentStore.id);
-          clearCart();
-          document.getElementById('pos-client-phone').value = '';
-          document.getElementById('pos-client-name').value = '';
-          document.getElementById('pos-client-line').value = '';
-          document.getElementById('client-history-hint').classList.add('hidden');
-          document.getElementById('client-status-badge').innerText = '新客首結或舊客帶入';
-        } else {
-          throw new Error(await res.text());
-        }
-      } catch (err) {
-        Swal.fire('入帳失敗', err.message, 'error');
-      } finally {
-        isSubmittingCheckout = false;
+        await navigator.clipboard.writeText(quoteMessage);
+      } catch (e) {
+        console.warn("剪貼簿限制，轉由網址參數直接傳遞");
       }
+
+      const lineBase = quoteConfig.lineUrl || currentStore.line_url || "https://line.me/R/ti/p/@480kqjoj";
+      const lineUrl = `${lineBase}?text=${encodeURIComponent(quoteMessage)}`;
+
+      Swal.fire({
+        title: '報價明細已打包完成！',
+        html: `
+          <div class="text-left text-xs bg-brand-50 p-3.5 rounded-2xl border border-brand-200 space-y-2 font-sans leading-relaxed">
+            <div>門市：<b>${currentStore.store_name}</b></div>
+            <div>主服務：<b>${selectedServices.map(s=>s.name).join('、')}</b></div>
+            <div>加購項目：${selectedAddons.length > 0 ? selectedAddons.map(a=>a.name).join('、') : '無'}</div>
+            <div>試算總額：<b class="text-[#1F4E3D] font-mono text-sm">NT$ ${total.toLocaleString()}</b></div>
+            <div class="p-2.5 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 text-[11px] font-bold">
+              💬 <b>預約步驟引導：</b><br>
+              點擊下方將直接開啟官方 LINE，並自動填入此份試算明細。<br>
+              <span class="text-rose-600 underline">請直接在 LINE 對話框按下「發送」</span>，專員收到後將立即為您核對檔期！
+            </div>
+          </div>
+        `,
+        confirmButtonText: '前往官方 LINE 提出預約需求',
+        confirmButtonColor: '#1F4E3D',
+        showCancelButton: true,
+        cancelButtonText: '返回修改'
+      }).then(r => {
+        if (r.isConfirmed) {
+          window.open(lineUrl, '_blank');
+        }
+      });
     }
 
-    // 6. 店長專區驗證與分頁切換
+    // 8. 店長後台專區驗證與安全熔斷 (失敗 5 次鎖定 + alyn9999 救援金鑰)
     async function openManagerPinPrompt() {
-      // 1. 檢查是否已被系統鎖定
       const lockKey = `mgr_lock_${currentStore.id}`;
       const failCountKey = `mgr_fail_count_${currentStore.id}`;
-      const isLocked = localStorage.getItem(lockKey);
 
-      if (isLocked) {
+      if (localStorage.getItem(lockKey)) {
         return Swal.fire({
           title: '🚨 系統安全鎖定中',
           html: `
             <div class="text-xs text-rose-700 space-y-2 text-left">
-              <p>由於密碼連續錯誤達 5 次，為保護店內顧客電話與隱私個資，後台已啟動防盜安全熔斷機制。</p>
+              <p>由於密碼連續錯誤達 5 次，為保護店內價目配置與個資，後台已啟動防盜安全熔斷機制。</p>
               <p class="font-bold">請聯繫系統設計師 (Alyn) 進行人工安全身份驗證並重設開通。</p>
             </div>
           `,
@@ -831,22 +758,15 @@
       if (!pin) return;
 
       const correctPin = currentStore.admin_pin || "8888";
-
-      // 超級管理者後門金鑰（供你緊急解鎖客戶門市，不需等待）
       const MASTER_OVERRIDE_KEY = "alyn9999";
 
       if (pin === correctPin || pin === MASTER_OVERRIDE_KEY) {
-        // 成功進入：歸零失敗計數
         localStorage.removeItem(failCountKey);
         document.getElementById('manager-modal').classList.remove('hidden');
-        syncBusinessHoursForm();
-        renderAdminStaffList();
-        renderAdminServicesList();
-        renderAdminResourcesList();
-        renderCustomerTable();
-        renderAuditLogsTable();
+        renderAdminServicesSortable();
+        renderAdminAddonsSortable();
+        renderAdminCarouselGrid();
       } else {
-        // 累計失敗次數
         let fails = Number(localStorage.getItem(failCountKey) || 0) + 1;
         localStorage.setItem(failCountKey, fails);
 
@@ -854,7 +774,7 @@
           localStorage.setItem(lockKey, 'true');
           Swal.fire({
             title: '🚫 密碼連續錯誤，網站已鎖定',
-            text: '密碼已連續輸錯 5 次，系統已鎖定顧客庫，請聯絡系統設計師開通！',
+            text: '密碼已連續輸錯 5 次，系統已安全鎖定，請聯絡系統設計師開通！',
             icon: 'error'
           });
         } else {
@@ -875,16 +795,19 @@
       });
       if (newPin && newPin.trim()) {
         currentStore.admin_pin = newPin.trim();
-        document.getElementById('disp-manager-pin').innerText = currentStore.admin_pin;
-        await saveStoreConfigToCloud(true);
+        const pinDisp = document.getElementById('disp-manager-pin');
+        if (pinDisp) pinDisp.innerText = currentStore.admin_pin;
+        await saveQuoteConfigToCloud(true);
         Swal.fire('PIN 碼修改成功！', `下次請使用新密碼：${currentStore.admin_pin}`, 'success');
       }
     }
 
     function closeManagerModal() {
       document.getElementById('manager-modal').classList.add('hidden');
-      renderCategorizedItems();
-      renderAddons();
+      renderCategoryTabs();
+      renderServicesGrid();
+      renderAddonsList();
+      initCarousel();
     }
 
     function switchManagerSubTab(tabId, btn) {
@@ -896,173 +819,378 @@
       btn.className = "mgr-tab-btn py-3 px-4 border-b-2 border-[#8C7355] text-[#8C7355]";
     }
 
-    // 7. 品項上下排序與增修
-    function renderAdminItemsSortable() {
-      const container = document.getElementById('admin-items-sortable-list');
-      container.innerHTML = posConfig.items.map((item, idx) => `
-        <div class="p-2.5 bg-white rounded-xl border border-brand-200 flex items-center justify-between gap-2 shadow-2xs">
+    // 9. 後台主服務項目增修、排序 (▲/▼) 與直接編輯
+    function renderAdminServicesSortable() {
+      const container = document.getElementById('admin-services-sortable-list');
+      if (!container) return;
+
+      container.innerHTML = quoteConfig.services.map((svc, idx) => `
+        <div class="p-3 bg-white rounded-xl border border-brand-200 flex justify-between items-center gap-2 shadow-2xs">
           <div class="truncate">
-            <span class="font-bold text-brand-900">${item.name}</span>
-            <span class="text-[10px] text-brand-400 ml-1.5">[${item.category}] NT$ ${item.price}</span>
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-brand-900">${svc.name}</span>
+              <span class="text-[10px] text-gray-400 font-mono">(${svc.category})</span>
+            </div>
+            ${svc.note ? `<div class="text-[10px] text-brand-400 truncate">${svc.note}</div>` : ''}
           </div>
           <div class="flex items-center gap-1 shrink-0">
-            <button type="button" onclick="moveItemOrder(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 hover:bg-brand-100 flex items-center justify-center text-brand-700">
-              <i class="fa-solid fa-arrow-up text-[10px]"></i>
+            <span class="font-mono font-bold text-[#8C7355] mr-1">NT$ ${Number(svc.price).toLocaleString()}</span>
+            <button type="button" onclick="openEditServiceModal(${idx})" class="w-6 h-6 rounded bg-amber-50 hover:bg-amber-100 text-amber-800 flex items-center justify-center font-bold" title="編輯品項">
+              <i class="fa-solid fa-pen text-[10px]"></i>
             </button>
-            <button type="button" onclick="moveItemOrder(${idx}, 1)" ${idx === posConfig.items.length - 1 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 hover:bg-brand-100 flex items-center justify-center text-brand-700">
-              <i class="fa-solid fa-arrow-down text-[10px]"></i>
-            </button>
-            <button type="button" onclick="deleteItemById('${item.id}')" class="w-6 h-6 rounded bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center">
-              <i class="fa-solid fa-trash text-[10px]"></i>
-            </button>
+            <button type="button" onclick="moveServiceOrder(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-20 pointer-events-none"' : ''} class="w-6 h-6 rounded bg-brand-50 hover:bg-brand-100 flex items-center justify-center text-brand-700">▲</button>
+            <button type="button" onclick="moveServiceOrder(${idx}, 1)" ${idx === quoteConfig.services.length - 1 ? 'disabled class="opacity-20 pointer-events-none"' : ''} class="w-6 h-6 rounded bg-brand-50 hover:bg-brand-100 flex items-center justify-center text-brand-700">▼</button>
+            <button type="button" onclick="deleteServiceById('${svc.id}')" class="w-6 h-6 rounded bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center ml-0.5">✕</button>
           </div>
         </div>
-      `).join('');
+      `).join('') || '<div class="text-center py-4 text-brand-400">目前尚無主服務品項</div>';
     }
 
-    function moveItemOrder(index, direction) {
+    function moveServiceOrder(index, direction) {
       const targetIndex = index + direction;
-      if (targetIndex < 0 || targetIndex >= posConfig.items.length) return;
-      const temp = posConfig.items[index];
-      posConfig.items[index] = posConfig.items[targetIndex];
-      posConfig.items[targetIndex] = temp;
-      renderAdminItemsSortable();
+      if (targetIndex < 0 || targetIndex >= quoteConfig.services.length) return;
+      const temp = quoteConfig.services[index];
+      quoteConfig.services[index] = quoteConfig.services[targetIndex];
+      quoteConfig.services[targetIndex] = temp;
+      renderAdminServicesSortable();
+      renderServicesGrid();
     }
 
-    function deleteItemById(id) {
-      posConfig.items = posConfig.items.filter(i => i.id !== id);
-      renderAdminItemsSortable();
+    function deleteServiceById(id) {
+      quoteConfig.services = quoteConfig.services.filter(s => s.id !== id);
+      renderAdminServicesSortable();
+      renderServicesGrid();
     }
 
-    async function openAddItemModal() {
-      const catOptions = (posConfig.categories || ["主要服務"]).map(c => `<option value="${c}">${c}</option>`).join('');
-      const { value: formValues } = await Swal.fire({
-        title: '新增收銀服務品項',
+    async function openAddServiceModal() {
+      const catOptions = (quoteConfig.categories || ["主推核心", "深層保養"]).map(c => `<option value="${c}">${c}</option>`).join('');
+      const { value: v } = await Swal.fire({
+        title: '新增主服務品項',
         html: `
           <div class="text-left text-xs space-y-2 p-1">
-            <div><label class="font-bold">品項名稱 *：</label><input id="swal-item-name" class="swal2-input text-xs" placeholder="例: 經典造型設計"></div>
-            <div><label class="font-bold">金額 (NT$) *：</label><input id="swal-item-price" type="number" class="swal2-input text-xs font-mono" placeholder="1200"></div>
+            <div><label class="font-bold">項目名稱 *：</label><input id="as-name" class="swal2-input text-xs" placeholder="例: 晶透美甲/美睫嫁接"></div>
+            <div><label class="font-bold">金額 (NT$) *：</label><input id="as-price" type="number" class="swal2-input text-xs font-mono" placeholder="1200"></div>
             <div>
               <label class="font-bold">分類：</label>
-              <select id="swal-item-cat" class="w-full p-2.5 rounded-xl border border-gray-300 text-xs mt-1 outline-none">
+              <select id="as-cat" class="w-full p-2.5 rounded-xl border border-gray-300 text-xs mt-1 outline-none">
                 ${catOptions}
                 <option value="__NEW__">＋ 自訂新分類...</option>
               </select>
             </div>
-            <div id="swal-new-cat-box" class="hidden">
+            <div id="as-new-cat-box" class="hidden">
               <label class="font-bold text-amber-800">自訂新分類名稱：</label>
-              <input id="swal-new-cat-val" class="swal2-input text-xs" placeholder="輸入新分類名稱">
+              <input id="as-new-cat-val" class="swal2-input text-xs" placeholder="輸入新分類名稱">
             </div>
+            <div><label class="font-bold">特色描述 (選填)：</label><input id="as-note" class="swal2-input text-xs" placeholder="例: 含指緣護理與甲型修飾"></div>
           </div>
         `,
         didOpen: () => {
-          const sel = document.getElementById('swal-item-cat');
+          const sel = document.getElementById('as-cat');
           sel.onchange = () => {
-            document.getElementById('swal-new-cat-box').classList.toggle('hidden', sel.value !== '__NEW__');
+            document.getElementById('as-new-cat-box').classList.toggle('hidden', sel.value !== '__NEW__');
           };
         },
         showCancelButton: true,
         confirmButtonText: '確定新增',
         confirmButtonColor: '#8C7355',
         preConfirm: () => {
-          const name = document.getElementById('swal-item-name').value.trim();
-          const price = Number(document.getElementById('swal-item-price').value || 0);
-          let cat = document.getElementById('swal-item-cat').value;
+          const name = document.getElementById('as-name').value.trim();
+          const price = Number(document.getElementById('as-price').value || 0);
+          let cat = document.getElementById('as-cat').value;
           if (cat === '__NEW__') {
-            cat = document.getElementById('swal-new-cat-val').value.trim() || '其他服務';
+            cat = document.getElementById('as-new-cat-val').value.trim() || '其他服務';
           }
           if (!name || price <= 0) return Swal.showValidationMessage('請輸入正確的品項名稱與金額！');
-          return { name, price, category: cat };
+          return { name, price, category: cat, note: document.getElementById('as-note').value.trim() };
         }
       });
 
-      if (formValues) {
-        if (!posConfig.categories.includes(formValues.category)) {
-          posConfig.categories.push(formValues.category);
+      if (v) {
+        if (!quoteConfig.categories.includes(v.category)) {
+          quoteConfig.categories.push(v.category);
         }
-        posConfig.items.push({
-          id: `item-${Date.now().toString().slice(-4)}`,
-          name: formValues.name,
-          price: formValues.price,
-          category: formValues.category
+        quoteConfig.services.push({
+          id: `s-${Date.now().toString().slice(-4)}`,
+          name: v.name,
+          price: v.price,
+          category: v.category,
+          note: v.note
         });
-        renderAdminItemsSortable();
+        renderAdminServicesSortable();
+        renderServicesGrid();
       }
     }
 
+    async function openEditServiceModal(idx) {
+      const svc = quoteConfig.services[idx];
+      const catOptions = (quoteConfig.categories || ["主推核心", "深層保養"]).map(c => `<option value="${c}" ${c === svc.category ? 'selected' : ''}>${c}</option>`).join('');
+
+      const { value: v } = await Swal.fire({
+        title: '編輯主服務品項',
+        html: `
+          <div class="text-left text-xs space-y-2 p-1">
+            <div><label class="font-bold">項目名稱 *：</label><input id="es-name" class="swal2-input text-xs" value="${svc.name}"></div>
+            <div><label class="font-bold">金額 (NT$) *：</label><input id="es-price" type="number" class="swal2-input text-xs font-mono" value="${svc.price}"></div>
+            <div><label class="font-bold">分類：</label><select id="es-cat" class="w-full p-2.5 rounded-xl border border-gray-300 text-xs mt-1 outline-none">${catOptions}</select></div>
+            <div><label class="font-bold">特色描述：</label><input id="es-note" class="swal2-input text-xs" value="${svc.note || ''}"></div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '儲存更新',
+        confirmButtonColor: '#8C7355',
+        preConfirm: () => {
+          const name = document.getElementById('es-name').value.trim();
+          const price = Number(document.getElementById('es-price').value || 0);
+          if (!name || price <= 0) return Swal.showValidationMessage('請輸入正確的品項名稱與金額！');
+          return { name, price, category: document.getElementById('es-cat').value, note: document.getElementById('es-note').value.trim() };
+        }
+      });
+
+      if (v) {
+        quoteConfig.services[idx] = Object.assign(quoteConfig.services[idx], v);
+        renderAdminServicesSortable();
+        renderServicesGrid();
+        Swal.fire({ title: '已更新品項！', text: '請記得點擊下方按鈕儲存至雲端。', icon: 'success', timer: 900, showConfirmButton: false });
+      }
+    }
+
+    // 10. 後台加購選項增修、排序 (▲/▼) 與直接編輯
     function renderAdminAddonsSortable() {
       const container = document.getElementById('admin-addons-sortable-list');
-      container.innerHTML = posConfig.addons.map((addon, idx) => `
-        <div class="p-2.5 bg-white rounded-xl border border-brand-200 flex items-center justify-between gap-2 shadow-2xs">
+      if (!container) return;
+
+      container.innerHTML = quoteConfig.addons.map((adn, idx) => `
+        <div class="p-3 bg-white rounded-xl border border-brand-200 flex justify-between items-center gap-2 shadow-2xs">
           <div class="truncate">
-            <span class="font-bold text-brand-900">${addon.name}</span>
-            <span class="text-[10px] text-brand-400 ml-1.5">+ NT$ ${addon.price}</span>
+            <span class="font-bold text-brand-900">${adn.name}</span>
+            ${adn.desc ? `<div class="text-[10px] text-brand-400 truncate">${adn.desc}</div>` : ''}
           </div>
           <div class="flex items-center gap-1 shrink-0">
-            <button type="button" onclick="moveAddonOrder(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 hover:bg-brand-100 flex items-center justify-center text-brand-700">
-              <i class="fa-solid fa-arrow-up text-[10px]"></i>
+            <span class="font-mono font-bold text-[#8C7355] mr-1">+ NT$ ${Number(adn.price).toLocaleString()}</span>
+            <button type="button" onclick="openEditAddonModal(${idx})" class="w-6 h-6 rounded bg-amber-50 hover:bg-amber-100 text-amber-800 flex items-center justify-center font-bold" title="編輯加購">
+              <i class="fa-solid fa-pen text-[10px]"></i>
             </button>
-            <button type="button" onclick="moveAddonOrder(${idx}, 1)" ${idx === posConfig.addons.length - 1 ? 'disabled class="opacity-20"' : ''} class="w-6 h-6 rounded bg-brand-50 hover:bg-brand-100 flex items-center justify-center text-brand-700">
-              <i class="fa-solid fa-arrow-down text-[10px]"></i>
-            </button>
-            <button type="button" onclick="deleteAddonById('${addon.id}')" class="w-6 h-6 rounded bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center">
-              <i class="fa-solid fa-trash text-[10px]"></i>
-            </button>
+            <button type="button" onclick="moveAddonOrder(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-20 pointer-events-none"' : ''} class="w-6 h-6 rounded bg-brand-50 hover:bg-brand-100 flex items-center justify-center text-brand-700">▲</button>
+            <button type="button" onclick="moveAddonOrder(${idx}, 1)" ${idx === quoteConfig.addons.length - 1 ? 'disabled class="opacity-20 pointer-events-none"' : ''} class="w-6 h-6 rounded bg-brand-50 hover:bg-brand-100 flex items-center justify-center text-brand-700">▼</button>
+            <button type="button" onclick="deleteAddonById('${adn.id}')" class="w-6 h-6 rounded bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center ml-0.5">✕</button>
           </div>
         </div>
-      `).join('');
+      `).join('') || '<div class="text-center py-4 text-brand-400">目前尚無加購選項</div>';
     }
 
     function moveAddonOrder(index, direction) {
       const targetIndex = index + direction;
-      if (targetIndex < 0 || targetIndex >= posConfig.addons.length) return;
-      const temp = posConfig.addons[index];
-      posConfig.addons[index] = posConfig.addons[targetIndex];
-      posConfig.addons[targetIndex] = temp;
+      if (targetIndex < 0 || targetIndex >= quoteConfig.addons.length) return;
+      const temp = quoteConfig.addons[index];
+      quoteConfig.addons[index] = quoteConfig.addons[targetIndex];
+      quoteConfig.addons[targetIndex] = temp;
       renderAdminAddonsSortable();
+      renderAddonsList();
     }
 
     function deleteAddonById(id) {
-      posConfig.addons = posConfig.addons.filter(a => a.id !== id);
+      quoteConfig.addons = quoteConfig.addons.filter(a => a.id !== id);
       renderAdminAddonsSortable();
+      renderAddonsList();
     }
 
     async function openAddAddonModal() {
-      const { value: formValues } = await Swal.fire({
-        title: '新增加購升級選項',
+      const { value: v } = await Swal.fire({
+        title: '新增工藝加購選項',
         html: `
           <div class="text-left text-xs space-y-2 p-1">
-            <div><label class="font-bold">加購名稱 *：</label><input id="swal-addon-name" class="swal2-input text-xs" placeholder="例: 睫毛雨衣持久防護"></div>
-            <div><label class="font-bold">加價金額 (NT$) *：</label><input id="swal-addon-price" type="number" class="swal2-input text-xs font-mono" placeholder="200"></div>
+            <div><label class="font-bold">加購名稱 *：</label><input id="aa-name" class="swal2-input text-xs" placeholder="例: 結構式深層保養"></div>
+            <div><label class="font-bold">加價金額 (NT$) *：</label><input id="aa-price" type="number" class="swal2-input text-xs font-mono" placeholder="400"></div>
+            <div><label class="font-bold">加購細節描述 (選填)：</label><input id="aa-desc" class="swal2-input text-xs" placeholder="例: 強化韌度、持久保鮮"></div>
           </div>
         `,
         showCancelButton: true,
         confirmButtonText: '確定新增',
         confirmButtonColor: '#8C7355',
         preConfirm: () => {
-          const name = document.getElementById('swal-addon-name').value.trim();
-          const price = Number(document.getElementById('swal-addon-price').value || 0);
+          const name = document.getElementById('aa-name').value.trim();
+          const price = Number(document.getElementById('aa-price').value || 0);
           if (!name || price <= 0) return Swal.showValidationMessage('請輸入正確的加購名稱與金額！');
-          return { name, price };
+          return { name, price, desc: document.getElementById('aa-desc').value.trim() };
         }
       });
 
-      if (formValues) {
-        posConfig.addons.push({
-          id: `addon-${Date.now().toString().slice(-4)}`,
-          name: formValues.name,
-          price: formValues.price
+      if (v) {
+        quoteConfig.addons.push({
+          id: `a-${Date.now().toString().slice(-4)}`,
+          name: v.name,
+          price: v.price,
+          desc: v.desc
         });
         renderAdminAddonsSortable();
+        renderAddonsList();
       }
     }
 
-    async function saveStoreConfigToCloud(isSilent = false) {
-      currentStore.line_url = document.getElementById('admin-line-url').value.trim();
+    async function openEditAddonModal(idx) {
+      const adn = quoteConfig.addons[idx];
+      const { value: v } = await Swal.fire({
+        title: '編輯工藝加購項目',
+        html: `
+          <div class="text-left text-xs space-y-2 p-1">
+            <div><label class="font-bold">加購名稱 *：</label><input id="ea-name" class="swal2-input text-xs" value="${adn.name}"></div>
+            <div><label class="font-bold">加價金額 (NT$) *：</label><input id="ea-price" type="number" class="swal2-input text-xs font-mono" value="${adn.price}"></div>
+            <div><label class="font-bold">加購描述：</label><input id="ea-desc" class="swal2-input text-xs" value="${adn.desc || ''}"></div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '儲存更新',
+        confirmButtonColor: '#8C7355',
+        preConfirm: () => {
+          const name = document.getElementById('ea-name').value.trim();
+          const price = Number(document.getElementById('ea-price').value || 0);
+          if (!name || price <= 0) return Swal.showValidationMessage('請輸入正確的加購名稱與金額！');
+          return { name, price, desc: document.getElementById('ea-desc').value.trim() };
+        }
+      });
+
+      if (v) {
+        quoteConfig.addons[idx] = Object.assign(quoteConfig.addons[idx], v);
+        renderAdminAddonsSortable();
+        renderAddonsList();
+        Swal.fire({ title: '已更新加購項目！', text: '請記得點擊下方按鈕儲存至雲端。', icon: 'success', timer: 900, showConfirmButton: false });
+      }
+    }
+
+    // 11. Supabase Storage 9:16 活動海報直傳
+    async function uploadQuoteCarouselToSupabase() {
+      const fileInput = document.getElementById('quote-upload-carousel-file');
+      if (!fileInput.files || fileInput.files.length === 0) {
+        return Swal.fire('請先選取要上傳的海報圖片檔案！', '', 'warning');
+      }
+
+      const file = fileInput.files[0];
+      const fileExt = file.name.split('.').pop().toLowerCase();
+      const allowed = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+      if (!allowed.includes(fileExt)) {
+        return Swal.fire('格式不符', '僅支援 JPG、PNG、WEBP 圖片！', 'warning');
+      }
+
+      const storePrefix = (currentStore && (currentStore.store_slug || currentStore.id)) ? (currentStore.store_slug || currentStore.id.slice(0, 8)) : 'quote';
+      const filePath = `store_${storePrefix}/carousel_${Date.now()}.${fileExt}`;
+      const bucketName = 'tool-assets';
+
+      Swal.fire({
+        title: '正在上傳海報至雲端庫...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      try {
+        const uploadUrl = `${SUPABASE_URL}/storage/v1/object/${bucketName}/${filePath}`;
+        const res = await fetch(uploadUrl, {
+          method: "POST",
+          headers: {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": file.type,
+            "x-upsert": "true"
+          },
+          body: file
+        });
+
+        if (!res.ok) throw new Error(await res.text());
+
+        const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/${bucketName}/${filePath}`;
+
+        if (!quoteConfig.carouselImages) quoteConfig.carouselImages = [];
+        quoteConfig.carouselImages.push(publicUrl);
+
+        renderAdminCarouselGrid();
+        initCarousel();
+        fileInput.value = '';
+
+        Swal.fire({
+          title: '海報上傳成功！',
+          text: '已加入前台輪播清單中，請點擊下方儲存發布。',
+          icon: 'success',
+          confirmButtonColor: '#8C7355'
+        });
+      } catch (err) {
+        Swal.fire('上傳失敗', err.message || '請確認 Supabase Storage tool-assets 設定為 Public', 'error');
+      }
+    }
+
+    // 12. 輪播海報渲染：顯示網址、前後移動、二次確認刪除
+    function renderAdminCarouselGrid() {
+      const container = document.getElementById('admin-carousel-grid');
+      if (!container) return;
+      const list = quoteConfig.carouselImages || [];
+
+      if (list.length === 0) {
+        container.innerHTML = '<div class="col-span-full py-4 text-center text-brand-400">尚未加入任何輪播圖</div>';
+        return;
+      }
+
+      container.innerHTML = list.map((url, idx) => `
+        <div class="p-2.5 bg-white rounded-2xl border border-brand-200 shadow-2xs space-y-2">
+          <div class="aspect-[9/16] rounded-xl bg-cover bg-center border border-brand-100 overflow-hidden" style="background-image:url('${url}')"></div>
+          <input type="text" readonly value="${url}" class="w-full p-1 bg-brand-50 border border-brand-200 rounded text-[9.5px] font-mono text-gray-500 truncate" title="${url}">
+          <div class="flex items-center justify-between pt-1 border-t border-brand-100">
+            <div class="flex gap-1">
+              <button type="button" onclick="moveCarouselImg(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-20 pointer-events-none"' : ''} class="w-6 h-6 rounded bg-brand-50 border flex items-center justify-center font-bold text-xs hover:bg-brand-100">▲</button>
+              <button type="button" onclick="moveCarouselImg(${idx}, 1)" ${idx === list.length - 1 ? 'disabled class="opacity-20 pointer-events-none"' : ''} class="w-6 h-6 rounded bg-brand-50 border flex items-center justify-center font-bold text-xs hover:bg-brand-100">▼</button>
+            </div>
+            <button type="button" onclick="confirmDeleteCarouselImg(${idx})" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded text-[10.5px] font-bold">
+              刪除
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function moveCarouselImg(idx, dir) {
+      const list = quoteConfig.carouselImages;
+      const target = idx + dir;
+      if (target < 0 || target >= list.length) return;
+      const tmp = list[idx];
+      list[idx] = list[target];
+      list[target] = tmp;
+      renderAdminCarouselGrid();
+      initCarousel();
+    }
+
+    function confirmDeleteCarouselImg(idx) {
+      Swal.fire({
+        title: '確定要刪除此張輪播圖嗎？',
+        text: '刪除後請記得點擊下方儲存按鈕發布變更。',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: '確定刪除',
+        confirmButtonColor: '#e11d48',
+        cancelButtonText: '取消'
+      }).then(r => {
+        if (r.isConfirmed) {
+          quoteConfig.carouselImages.splice(idx, 1);
+          renderAdminCarouselGrid();
+          initCarousel();
+          Swal.fire({ title: '已移除！', icon: 'success', timer: 700, showConfirmButton: false });
+        }
+      });
+    }
+
+    function addAdminCarouselImg() {
+      const url = document.getElementById('admin-new-carousel-url').value.trim();
+      if (!url) return Swal.fire('請輸入有效的圖片網址', '', 'warning');
+      if (!quoteConfig.carouselImages) quoteConfig.carouselImages = [];
+      quoteConfig.carouselImages.push(url);
+      document.getElementById('admin-new-carousel-url').value = '';
+      renderAdminCarouselGrid();
+      initCarousel();
+    }
+
+    // 13. 儲存設定至 Supabase 雲端 (增量防覆蓋)
+    async function saveQuoteConfigToCloud(isSilent = false) {
+      quoteConfig.lineUrl = document.getElementById('admin-line-url').value.trim();
 
       if (!isSilent) {
         Swal.fire({
-          title: '正在同步儲存設定...',
+          title: '正在同步儲存設定至雲端...',
           allowOutsideClick: false,
           didOpen: () => Swal.showLoading()
         });
@@ -1071,11 +1199,33 @@
       try {
         await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?id=eq.${currentStore.id}`, {
           method: "PATCH",
-          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json" },
-          body: JSON.stringify({ admin_pin: currentStore.admin_pin })
+          headers: {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            admin_pin: currentStore.admin_pin,
+            line_url: quoteConfig.lineUrl
+          })
         });
 
-        await fetch(`${SUPABASE_URL}/rest/v1/tool_settings`, {
+        let mergedConfig = {};
+        try {
+          const fetchRes = await fetch(`${SUPABASE_URL}/rest/v1/tool_settings?store_id=eq.${currentStore.id}&select=slot_config`, {
+            headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` }
+          });
+          const existingData = await fetchRes.json();
+          if (existingData && existingData.length > 0 && existingData[0].slot_config) {
+            mergedConfig = existingData[0].slot_config;
+          }
+        } catch (readErr) {
+          console.warn("讀取既有設定失敗，將直接寫入:", readErr);
+        }
+
+        mergedConfig.quote_config = quoteConfig;
+
+        const saveRes = await fetch(`${SUPABASE_URL}/rest/v1/tool_settings?on_conflict=store_id`, {
           method: "POST",
           headers: {
             "apikey": SUPABASE_ANON_KEY,
@@ -1085,154 +1235,18 @@
           },
           body: JSON.stringify({
             store_id: currentStore.id,
-            slot_config: { 
-  pos_config: {
-    categories: posConfig.categories,
-    items: posConfig.items,
-    addons: posConfig.addons || []
-  } 
-},
+            slot_config: mergedConfig,
             store_pin: currentStore.admin_pin,
             updated_at: new Date().toISOString()
           })
         });
 
-        if (!isSilent) Swal.fire('收銀配置已成功儲存！', '', 'success');
+        if (!saveRes.ok) throw new Error(await saveRes.text());
+
+        if (!isSilent) Swal.fire('報價與輪播海報已成功儲存！', '', 'success');
       } catch (e) {
         if (!isSilent) Swal.fire('儲存失敗', e.message, 'error');
       }
-    }
-
-    // 8. 顧客庫搜尋與 10 筆一頁分頁
-    function filterClientsList() {
-      const q = document.getElementById('client-search-input').value.trim().toLowerCase();
-      if (!q) {
-        filteredClients = [...clientsDatabase];
-      } else {
-        filteredClients = clientsDatabase.filter(c => 
-          (c.phone && c.phone.includes(q)) ||
-          (c.name && c.name.toLowerCase().includes(q)) ||
-          (c.line && c.line.toLowerCase().includes(q))
-        );
-      }
-      clientsCurrentPage = 1;
-      renderClientsList();
-    }
-
-    function renderClientsList() {
-      const container = document.getElementById('clients-list-container');
-      const pageInfo = document.getElementById('clients-page-info');
-      const btnsContainer = document.getElementById('clients-pagination-btns');
-
-      if (filteredClients.length === 0) {
-        container.innerHTML = '<div class="text-center py-8 text-brand-400">查無任何符合條件的顧客檔案</div>';
-        pageInfo.innerText = '共 0 位顧客';
-        btnsContainer.innerHTML = '';
-        return;
-      }
-
-      const totalPages = Math.ceil(filteredClients.length / CLIENTS_PAGE_SIZE) || 1;
-      if (clientsCurrentPage > totalPages) clientsCurrentPage = totalPages;
-
-      const startIndex = (clientsCurrentPage - 1) * CLIENTS_PAGE_SIZE;
-      const endIndex = Math.min(startIndex + CLIENTS_PAGE_SIZE, filteredClients.length);
-      const paged = filteredClients.slice(startIndex, endIndex);
-
-      pageInfo.innerText = `顯示第 ${startIndex + 1} - ${endIndex} 位（共 ${filteredClients.length} 位顧客）`;
-
-      container.innerHTML = paged.map(c => {
-        const orderHistoryHtml = c.orders.map(o => `
-          <div class="flex justify-between items-center py-1 border-b border-brand-100/60 text-[10.5px]">
-            <div>
-              <span class="text-gray-400 font-mono">${o.date}</span>
-              <span class="text-brand-800 ml-1.5 font-bold">${o.items}</span>
-            </div>
-            <span class="font-mono text-brand-700 font-bold">NT$ ${o.paid.toLocaleString()}</span>
-          </div>
-        `).join('');
-
-        return `
-          <div class="p-3.5 bg-white rounded-2xl border border-brand-200 shadow-2xs space-y-2">
-            <div class="flex justify-between items-start">
-              <div>
-                <div class="flex items-center gap-1.5">
-                  <span class="font-bold text-brand-900 text-sm">${c.name}</span>
-                  ${c.line ? `<span class="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded">LINE: ${c.line}</span>` : ''}
-                </div>
-                <div class="text-xs font-mono text-brand-500 mt-0.5">📱 ${c.phone}</div>
-              </div>
-              <div class="text-right">
-                <span class="text-[10px] text-brand-400 block">累計造訪 ${c.visitsCount} 次</span>
-                <span class="font-mono font-bold text-brand-700">總消費 NT$ ${c.totalSpend.toLocaleString()}</span>
-              </div>
-            </div>
-
-            <!-- 可折疊之歷次明細 -->
-            <details class="text-xs pt-1 border-t border-brand-100">
-              <summary class="cursor-pointer text-[#8C7355] font-bold text-[10.5px] hover:underline select-none">
-                檢視歷次消費明細 (${c.orders.length} 筆)
-              </summary>
-              <div class="mt-2 p-2 bg-brand-50/60 rounded-xl space-y-1">
-                ${orderHistoryHtml}
-              </div>
-            </details>
-          </div>
-        `;
-      }).join('');
-
-      // 分頁按鈕
-      btnsContainer.innerHTML = `
-        <button type="button" onclick="changeClientsPage(${clientsCurrentPage - 1})" ${clientsCurrentPage === 1 ? 'disabled class="opacity-30"' : ''} class="px-2 py-1 bg-white border border-brand-200 rounded text-[11px] font-bold">上一頁</button>
-        <span class="px-2 py-1 font-mono font-bold text-brand-700">${clientsCurrentPage} / ${totalPages}</span>
-        <button type="button" onclick="changeClientsPage(${clientsCurrentPage + 1})" ${clientsCurrentPage === totalPages ? 'disabled class="opacity-30"' : ''} class="px-2 py-1 bg-white border border-brand-200 rounded text-[11px] font-bold">下一頁</button>
-      `;
-    }
-
-    function changeClientsPage(target) {
-      clientsCurrentPage = target;
-      renderClientsList();
-    }
-
-    function exportClientsCsv() {
-      if (clientsDatabase.length === 0) return Swal.fire('目前尚無顧客資料可匯出', '', 'info');
-      let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-      csvContent += "顧客姓名,手機號碼,LINE稱呼,消費次數,累積總金額,最近消費日期\n";
-
-      clientsDatabase.forEach(c => {
-        csvContent += `"${c.name}","${c.phone}","${c.line || ''}",${c.visitsCount},${c.totalSpend},"${c.lastVisit}"\n`;
-      });
-
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `${currentStore.store_name}_顧客資料庫名冊.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-
-    // 9. 後台流水帳明細列表
-    function renderLedgersList() {
-      const container = document.getElementById('ledgers-list-container');
-      if (ledgerRecords.length === 0) {
-        container.innerHTML = '<div class="text-center py-6 text-brand-400">目前尚無開單結帳紀錄</div>';
-        return;
-      }
-
-      container.innerHTML = ledgerRecords.slice(0, 30).map(r => {
-        let meta = {};
-        try { meta = JSON.parse(r.items_summary); } catch (e) { meta = { items_text: r.items_summary }; }
-        const dateStr = r.created_at ? r.created_at.replace('T', ' ').substring(0, 16) : '';
-        return `
-          <div class="p-3 bg-white rounded-xl border border-brand-200 flex justify-between items-center text-xs shadow-2xs">
-            <div>
-              <div class="font-bold text-brand-900">${r.client_name} <span class="font-mono text-gray-400 font-normal ml-1">(${dateStr})</span></div>
-              <div class="text-[10.5px] text-brand-400">${meta.items_text || r.items_summary}</div>
-            </div>
-            <span class="font-mono font-bold text-[#8C7355] text-sm">NT$ ${Number(r.total_price || 0).toLocaleString()}</span>
-          </div>
-        `;
-      }).join('');
     }
   </script>
 </body>

@@ -26,6 +26,28 @@
   <style>
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    .swal2-styled.swal2-confirm {
+      background-color: #8C7355 !important;
+      color: #ffffff !important;
+      box-shadow: 0 2px 6px rgba(140, 115, 85, 0.35) !important;
+      border: none !important;
+      border-radius: 0.875rem !important;
+      font-weight: 700 !important;
+      padding: 0.625rem 1.5rem !important;
+      font-size: 0.8125rem !important;
+    }
+    .swal2-styled.swal2-confirm:hover {
+      background-color: #7A6246 !important;
+    }
+    .swal2-styled.swal2-cancel {
+      background-color: #EBE5DF !important;
+      color: #5C4B3C !important;
+      border-radius: 0.875rem !important;
+      font-weight: 700 !important;
+      padding: 0.625rem 1.25rem !important;
+      font-size: 0.8125rem !important;
+    }
   </style>
 </head>
 <body class="bg-brand-50 text-brand-900 antialiased min-h-screen pb-28 select-none">
@@ -55,7 +77,7 @@
       </div>
       <div>
         <h1 class="text-xs font-black text-brand-900">微工具營運總控中心</h1>
-        <div class="text-[9.5px] text-brand-400 font-mono">Database: sibyl-tools</div>
+        <div class="text-[9.5px] text-brand-400 font-mono">Database: tzqpfnrpnfzzubofoqlt (sibyl-tools)</div>
       </div>
     </div>
     <div class="flex items-center gap-2">
@@ -72,7 +94,9 @@
   <!-- 主操作面版 -->
   <main class="max-w-4xl mx-auto p-4 space-y-4">
 
+    <!-- ========================================================================= -->
     <!-- [分頁 1] 店家名冊與訂單開通審核 -->
+    <!-- ========================================================================= -->
     <div id="page-stores" class="super-panel space-y-4">
 
       <!-- 前台 order_tools.html 送出的「待對帳與開通訂單名單」 -->
@@ -101,20 +125,111 @@
       </div>
     </div>
 
-    <!-- [分頁 2] 獨立微工具維護開關 -->
-    <div id="page-maintenance" class="super-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3 text-xs hidden">
-      <div class="border-b border-brand-100 pb-2">
-        <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
-          <i class="fa-solid fa-lock text-rose-500"></i> 各微工具獨立維護鎖定開關
-        </span>
-        <p class="text-[10px] text-brand-400 mt-0.5">鎖定單一微工具（前台彈出維護中告示），其餘微工具正常營運</p>
+    <!-- ========================================================================= -->
+    <!-- [分頁 2] 各微工具獨立全域維護鎖定控制台 -->
+    <!-- ========================================================================= -->
+    <div id="page-maintenance" class="super-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-4 text-xs hidden">
+      <div class="flex justify-between items-center border-b border-brand-100 pb-3">
+        <div>
+          <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
+            <i class="fa-solid fa-shield-halved text-[#8C7355]"></i> 各微工具獨立全域維護鎖定控制台
+          </span>
+          <p class="text-[10.5px] text-brand-400 mt-0.5">精確鎖定單一微工具（前台彈出全螢幕施工遮罩阻斷預約），其餘微工具不受影響正常營運</p>
+        </div>
+        <button type="button" onclick="loadToolMaintenanceStatus()" class="p-1.5 text-brand-500 hover:bg-brand-50 rounded-lg transition" title="重新整理維護狀態">
+          <i class="fa-solid fa-rotate-right text-xs"></i>
+        </button>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5" id="maintenance-matrix-grid">
-        <!-- JS 動態生成開關 -->
+
+      <!-- 7 大微工具即時狀態卡片矩陣 -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5" id="maintenance-matrix-grid">
+        <!-- JS 動態渲染狀態卡片 -->
+      </div>
+
+      <!-- 獨立鎖定操作面板 -->
+      <div class="p-4 bg-brand-50/70 rounded-2xl border border-brand-200 space-y-3 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-brand-900 mb-1">選擇欲鎖定/解除之微工具：</label>
+            <select id="tool-lock-target" class="w-full p-2.5 bg-white rounded-xl border border-brand-200 font-bold text-brand-900 outline-none">
+              <option value="slot">01. IG 限動空檔生圖器 (studio_slot.html)</option>
+              <option value="pos">02. 極簡收銀小幫手 (pos.html)</option>
+              <option value="quote">03. 美業服務報價試算器 (quote.html)</option>
+              <option value="loyalty">04. VIP 數位會員存摺 (loyalty.html)</option>
+              <option value="overview">05. 全日排程席位防撞 (overview.html)</option>
+              <option value="contract">06. 數位定型化契約 (contract.html)</option>
+              <option value="admin">07. 集成管理總後台 (tools-admin.html)</option>
+              <option value="ALL_TOOLS">全系列微工具 (全線緊急全面大封鎖)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-brand-900 mb-1">施工告示原因說明 (前台全螢幕遮罩展示)：</label>
+            <input type="text" id="tool-lock-reason" value="系統模組目前正進行雲端架構優化升級，施工期間暫停服務，造成不便敬請見諒。" class="w-full p-2.5 bg-white rounded-xl border border-brand-200 text-xs outline-none">
+          </div>
+        </div>
+
+        <div class="flex flex-wrap justify-between items-center pt-2 border-t border-brand-200/60 gap-2">
+          <span class="text-[10px] text-gray-500">提示：執行鎖定後，前台於 15 秒內即刻彈出施工遮罩阻斷顧客存取。</span>
+          <div class="flex gap-2">
+            <button type="button" onclick="executeToolMaintenanceLock(false)" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-xs transition flex items-center gap-1.5">
+              <i class="fa-solid fa-lock-open text-[10px]"></i> 解除所選工具維護
+            </button>
+            <button type="button" onclick="executeToolMaintenanceLock(true)" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-xs transition flex items-center gap-1.5">
+              <i class="fa-solid fa-lock text-[10px]"></i> 啟動所選工具維護鎖定
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- [分頁 3] 買斷金鑰序號產生器 -->
+    <!-- ========================================================================= -->
+    <!-- [分頁 3] 微工具優化建議與功能許願池 -->
+    <!-- ========================================================================= -->
+    <div id="page-feedbacks" class="super-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-4 text-xs hidden">
+      <div class="flex justify-between items-center border-b border-brand-100 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center text-xs font-bold shadow-2xs">
+            <i class="fa-solid fa-comments"></i>
+          </span>
+          <div>
+            <h2 class="text-xs font-bold text-brand-900">微工具優化建議與功能許願池</h2>
+            <p class="text-[10px] text-brand-400">收集來自各微工具後台 (tools-admin) 業主提出的操作想法與改版回饋</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span id="tool-feedback-count-badge" class="text-[10px] px-2.5 py-0.5 bg-amber-100 text-amber-900 rounded-full font-bold">0 則建議</span>
+          <button type="button" onclick="loadToolFeedbacks()" class="p-1.5 text-brand-500 hover:bg-brand-50 rounded-lg transition" title="重新整理">
+            <i class="fa-solid fa-rotate-right text-xs"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- 快速篩選與搜尋列 -->
+      <div class="flex flex-col sm:flex-row gap-2 justify-between">
+        <div class="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar" id="feedback-tool-filter-bar">
+          <button type="button" onclick="filterToolFeedbacks('ALL', this)" class="feedback-filter-btn px-3 py-1 rounded-xl text-xs font-bold bg-[#8C7355] text-white shadow-xs whitespace-nowrap">全部工具</button>
+          <button type="button" onclick="filterToolFeedbacks('01. IG限動空檔生圖器', this)" class="feedback-filter-btn px-3 py-1 rounded-xl text-xs font-bold bg-white text-brand-800 border border-brand-200 whitespace-nowrap">生圖器</button>
+          <button type="button" onclick="filterToolFeedbacks('02. 極簡收銀小幫手', this)" class="feedback-filter-btn px-3 py-1 rounded-xl text-xs font-bold bg-white text-brand-800 border border-brand-200 whitespace-nowrap">收銀台</button>
+          <button type="button" onclick="filterToolFeedbacks('03. 服務報價試算器', this)" class="feedback-filter-btn px-3 py-1 rounded-xl text-xs font-bold bg-white text-brand-800 border border-brand-200 whitespace-nowrap">報價試算</button>
+          <button type="button" onclick="filterToolFeedbacks('04. VIP數位會員存摺', this)" class="feedback-filter-btn px-3 py-1 rounded-xl text-xs font-bold bg-white text-brand-800 border border-brand-200 whitespace-nowrap">會員存摺</button>
+          <button type="button" onclick="filterToolFeedbacks('05. 全日排程席位防撞', this)" class="feedback-filter-btn px-3 py-1 rounded-xl text-xs font-bold bg-white text-brand-800 border border-brand-200 whitespace-nowrap">排程防撞</button>
+          <button type="button" onclick="filterToolFeedbacks('06. 數位定型化契約', this)" class="feedback-filter-btn px-3 py-1 rounded-xl text-xs font-bold bg-white text-brand-800 border border-brand-200 whitespace-nowrap">定型契約</button>
+        </div>
+        <div class="relative w-full sm:w-60">
+          <input type="text" id="feedback-search-kw" oninput="renderToolFeedbacks()" placeholder="搜尋店名 / 提案人 / 建議文字..." class="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl border border-brand-200 bg-brand-50/50 outline-none">
+          <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-brand-400 text-xs"></i>
+        </div>
+      </div>
+
+      <!-- 建議卡片列表容器 -->
+      <div id="tool-feedbacks-container" class="space-y-2.5 max-h-[60vh] overflow-y-auto pr-1">
+        <div class="text-center py-8 text-brand-400">正在讀取建議紀錄...</div>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- [分頁 4] 買斷金鑰序號產生器 -->
+    <!-- ========================================================================= -->
     <div id="page-licenses" class="super-panel bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3 text-xs hidden">
       <div class="border-b border-brand-100 pb-2">
         <span class="font-bold text-brand-900 text-sm flex items-center gap-1.5">
@@ -133,17 +248,20 @@
 
   </main>
 
-  <!-- 底部固定導覽列 -->
+  <!-- 底部固定導覽列 (4 分頁配置) -->
   <div class="fixed bottom-0 left-0 right-0 z-40 flex justify-center bg-white/95 backdrop-blur-md border-t border-brand-200 shadow-xl pb-[env(safe-area-inset-bottom,12px)] px-2">
     <div class="max-w-4xl w-full flex items-center min-h-[64px]">
-      <nav class="flex-1 flex justify-around items-center" id="super-bottom-nav">
-        <button class="super-nav-item flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition bg-brand-50 text-brand-500 font-bold" onclick="switchSuperTab('page-stores', this)">
+      <nav class="flex-1 grid grid-cols-4 gap-1 items-center" id="super-bottom-nav">
+        <button class="super-nav-item flex flex-col items-center justify-center py-1.5 rounded-2xl transition bg-brand-50 text-brand-500 font-bold" onclick="switchSuperTab('page-stores', this)">
           <i class="fa-solid fa-store text-base"></i><span class="text-[10px] mt-1">店家名冊</span>
         </button>
-        <button class="super-nav-item flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition text-brand-400 font-medium" onclick="switchSuperTab('page-maintenance', this)">
-          <i class="fa-solid fa-lock text-base"></i><span class="text-[10px] mt-1">維護鎖定</span>
+        <button class="super-nav-item flex flex-col items-center justify-center py-1.5 rounded-2xl transition text-brand-400 font-medium" onclick="switchSuperTab('page-maintenance', this)">
+          <i class="fa-solid fa-shield-halved text-base"></i><span class="text-[10px] mt-1">獨立維護</span>
         </button>
-        <button class="super-nav-item flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition text-brand-400 font-medium" onclick="switchSuperTab('page-licenses', this)">
+        <button class="super-nav-item flex flex-col items-center justify-center py-1.5 rounded-2xl transition text-brand-400 font-medium" onclick="switchSuperTab('page-feedbacks', this)">
+          <i class="fa-solid fa-comments text-base"></i><span class="text-[10px] mt-1">許願建議</span>
+        </button>
+        <button class="super-nav-item flex flex-col items-center justify-center py-1.5 rounded-2xl transition text-brand-400 font-medium" onclick="switchSuperTab('page-licenses', this)">
           <i class="fa-solid fa-key text-base"></i><span class="text-[10px] mt-1">序號產出</span>
         </button>
       </nav>
@@ -154,10 +272,6 @@
     // 1. 核心 Supabase 連線常數 (對齊新專案 tzqpfnrpnfzzubofoqlt)
     const SUPABASE_URL = "https://tzqpfnrpnfzzubofoqlt.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6cXBmbnJwbmZ6enVib2ZvcWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1ODQ5ODYsImV4cCI6MjEwODE2MDk4Nn0.B-ub7DCpzF3b2gjpTrM9jdW0SLOqRPillZTmoXPuNgk";
-    
-    // 別名防呆
-    const TOOLS_SUPABASE_URL = SUPABASE_URL;
-    const TOOLS_SUPABASE_ANON_KEY = SUPABASE_ANON_KEY;
     
     // GAS 部署網址
     const API_URL = "https://script.google.com/macros/s/AKfycby44GCzrpN8ZpGSTNcVkI3IFMbyO7XhyE_Bf-cKMCTzDBbfYxDVaFD-pVcyc0vTykI-/exec";
@@ -170,7 +284,7 @@
       { id: "quote", name: "03. 服務報價試算器", file: "quote.html" },
       { id: "loyalty", name: "04. VIP數位會員存摺", file: "loyalty.html" },
       { id: "reminder", name: "05. LINE防放鳥推播", file: "reminder.gs" },
-      { id: "overview", name: "06. 全日排程總覽", file: "overview.html" },
+      { id: "overview", name: "06. 全日排程席位防撞", file: "overview.html" },
       { id: "contract", name: "07. 數位定型化契約", file: "contract.html" }
     ];
 
@@ -178,13 +292,23 @@
     const TOOLS_PAGE_SIZE = 10;
     let allToolStores = [];
 
+    // 微工具維護狀態字典
+    let toolMaintenanceState = {
+      slot: false, pos: false, quote: false, loyalty: false, reminder: false, overview: false, contract: false, admin: false, ALL_TOOLS: false
+    };
+
+    // 許願建議資料變數
+    let allToolFeedbacksList = [];
+    let currentFeedbackToolFilter = 'ALL';
+
     // 驗證登入
     function checkSuperKey() {
       const input = document.getElementById('super-key-input').value.trim();
       if (input === SUPER_PIN || input === "888") {
         document.getElementById('super-lock').remove();
         loadToolsStores();
-        renderMaintenanceMatrix();
+        loadToolMaintenanceStatus();
+        loadToolFeedbacks();
       } else {
         Swal.fire('密碼錯誤！', '請輸入正確的總管 PIN 碼', 'error');
       }
@@ -193,14 +317,20 @@
     function switchSuperTab(pageId, btn) {
       document.querySelectorAll('.super-panel').forEach(p => p.classList.add('hidden'));
       document.querySelectorAll('.super-nav-item').forEach(b => {
-        b.className = "super-nav-item flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition text-brand-400 font-medium";
+        b.className = "super-nav-item flex flex-col items-center justify-center py-1.5 rounded-2xl transition text-brand-400 font-medium";
       });
       document.getElementById(pageId).classList.remove('hidden');
-      if (btn) btn.className = "super-nav-item flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition bg-brand-50 text-brand-500 font-bold";
+      if (btn) btn.className = "super-nav-item flex flex-col items-center justify-center py-1.5 rounded-2xl transition bg-brand-50 text-brand-500 font-bold";
+      
+      if (pageId === 'page-maintenance') loadToolMaintenanceStatus();
+      if (pageId === 'page-feedbacks') loadToolFeedbacks();
+      
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // 從 Supabase 取得最新店家名冊 (防快取 Headers)
+    // =========================================================================
+    // [分頁 1] 店家名冊與訂單開通審核
+    // =========================================================================
     async function loadToolsStores() {
       try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?order=created_at.desc`, {
@@ -214,13 +344,10 @@
         
         if (res.ok) {
           const data = await res.json();
-          console.log("Supabase 最新店家名冊：", data);
           if (Array.isArray(data)) {
             allToolStores = data;
             saveLocalStoresDb();
           }
-        } else {
-          console.warn("載入名冊失敗，狀態碼：", res.status, await res.text());
         }
       } catch (e) {
         console.error("載入名冊異常：", e);
@@ -271,7 +398,6 @@
       container.innerHTML = html;
     }
     
-    // 渲染待對帳與開通訂單名單 (來自前台下單 pending)
     function renderPendingOrdersZone() {
       const container = document.getElementById('pending-orders-container');
       if (!container) return;
@@ -323,7 +449,6 @@
       `;
     }
 
-    // 渲染店家名冊卡片 (包含待開通與已開通店家，全部清晰可見)
     function renderStoresList() {
       const container = document.getElementById('stores-list-wrapper');
       if (!container) return;
@@ -371,7 +496,6 @@
           const toolObj = TOOLS_CATALOG.find(tc => tc.id === tKey);
           if (!toolObj) return '';
           
-          // 優先使用店家自訂短代碼，避免長 UUID
           const storeKey = s.store_slug || s.id;
           const toolUrl = `https://tools.heysibyl.com/${toolObj.file}?s=${storeKey}`;
 
@@ -497,7 +621,6 @@
       }).join('');
     }
 
-    // 一鍵開通店家
     async function activateStoreById(id) {
       const s = allToolStores.find(item => item.id === id);
       if (!s) return;
@@ -541,7 +664,6 @@
       });
     }
 
-    // 手動寄發正式開通信件
     async function sendWelcomeActivationEmail(id) {
       const s = allToolStores.find(item => item.id === id);
       if (!s) return;
@@ -611,7 +733,6 @@
       }
     }
 
-    // 模組授權配置彈窗
     async function openModulesConfigModal(id) {
       const s = allToolStores.find(item => item.id === id);
       const currentTools = Array.isArray(s.purchased_tools) ? s.purchased_tools : [];
@@ -655,7 +776,6 @@
       }
     }
 
-    // 鎖定/解鎖店家
     async function toggleStoreLock(id, lockState) {
       const s = allToolStores.find(item => item.id === id);
       const actionText = lockState ? '鎖定 (前後台封鎖)' : '解除鎖定';
@@ -686,7 +806,6 @@
       renderStoresList();
     }
 
-    // 快速修改店家欄位
     async function editStoreFieldPrompt(id, fieldKey, fieldTitle, currentVal) {
       const s = allToolStores.find(item => item.id === id);
       const { value: newVal } = await Swal.fire({
@@ -717,7 +836,6 @@
       }
     }
 
-    // 刪除店家
     async function deleteStorePrompt(id) {
       const s = allToolStores.find(item => item.id === id);
       const confirm = await Swal.fire({
@@ -744,7 +862,6 @@
       loadToolsStores();
     }
 
-    // 手動開通新店家彈窗
     function openAddStoreModal() {
       Swal.fire({
         title: '手動開通微工具店家',
@@ -815,27 +932,220 @@
       return token;
     }
 
-    function renderMaintenanceMatrix() {
+    function saveLocalStoresDb() {
+      localStorage.setItem('local_tool_stores_db', JSON.stringify(allToolStores));
+    }
+
+    // =========================================================================
+    // [分頁 2] 獨立微工具維護開關（全域維護管理鎖定，分開工具鎖定）
+    // =========================================================================
+    async function loadToolMaintenanceStatus() {
       const grid = document.getElementById('maintenance-matrix-grid');
       if (!grid) return;
-      grid.innerHTML = TOOLS_CATALOG.map(t => `
-        <div class="p-3 bg-brand-50 rounded-2xl border border-brand-200 flex justify-between items-center">
-          <div>
-            <span class="font-bold text-brand-900 block">${t.name}</span>
-            <span class="text-[10px] text-gray-400 font-mono">${t.file}</span>
+
+      toolMaintenanceState = {
+        slot: false, pos: false, quote: false, loyalty: false, reminder: false, overview: false, contract: false, admin: false, ALL_TOOLS: false
+      };
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_maintenance?select=*`, {
+          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` }
+        });
+        if (res.ok) {
+          const list = await res.json();
+          if (Array.isArray(list)) {
+            list.forEach(item => {
+              if (item.is_locked) toolMaintenanceState[item.tool_key] = true;
+            });
+          }
+        }
+      } catch (e) {
+        console.warn("載入維護鎖定狀態略過:", e);
+      }
+
+      grid.innerHTML = TOOLS_CATALOG.map(t => {
+        const isLocked = toolMaintenanceState[t.id] || toolMaintenanceState.ALL_TOOLS;
+        return `
+          <div class="p-3.5 rounded-2xl border transition ${isLocked ? 'bg-rose-50 border-rose-300' : 'bg-brand-50/70 border-brand-200'} space-y-1.5 shadow-2xs">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-brand-900 text-xs">${t.name}</span>
+              <span class="flex items-center gap-1 text-[10px] font-bold ${isLocked ? 'text-rose-600' : 'text-emerald-700'}">
+                <span class="w-2 h-2 rounded-full ${isLocked ? 'bg-rose-500 animate-ping' : 'bg-emerald-500'}"></span>
+                ${isLocked ? '施工鎖定中' : '正常運行'}
+              </span>
+            </div>
+            <div class="text-[10px] text-gray-400 font-mono">${t.file}</div>
           </div>
-          <button type="button" onclick="toggleToolMaintenance(this, '${t.name}')" class="px-3 py-1 bg-emerald-600 text-white rounded-full font-bold">營運中</button>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
-    function toggleToolMaintenance(btn, toolName) {
-      const isRunning = (btn.innerText === '營運中');
-      btn.innerText = isRunning ? '維護中' : '營運中';
-      btn.className = isRunning ? 'px-3 py-1 bg-rose-600 text-white rounded-full font-bold' : 'px-3 py-1 bg-emerald-600 text-white rounded-full font-bold';
-      Swal.fire({ title: `【${toolName}】已切換為【${btn.innerText}】`, icon: 'success', timer: 800, showConfirmButton: false });
+    async function executeToolMaintenanceLock(targetLockState) {
+      const toolKey = document.getElementById('tool-lock-target').value;
+      const reason = document.getElementById('tool-lock-reason').value.trim() || '系統模組目前正進行雲端架構升級施工，暫停服務。';
+      const actionText = targetLockState ? '啟動維護鎖定' : '解除維護鎖定';
+
+      let targetDisplayName = toolKey;
+      const foundTool = TOOLS_CATALOG.find(t => t.id === toolKey);
+      if (foundTool) targetDisplayName = foundTool.name;
+      else if (toolKey === 'ALL_TOOLS') targetDisplayName = '全系列微工具';
+      else if (toolKey === 'admin') targetDisplayName = '集成管理總後台';
+
+      const confirm = await Swal.fire({
+        title: `確定要對【${targetDisplayName}】${actionText}？`,
+        text: targetLockState 
+          ? '鎖定後，該工具前台將於 15 秒內彈出全螢幕施工遮罩阻止客人使用；其餘工具正常營運。' 
+          : '解除後該工具前台將立即恢復正常顧客預約與存取。',
+        icon: targetLockState ? 'warning' : 'question',
+        showCancelButton: true,
+        confirmButtonText: `確定${actionText}`,
+        confirmButtonColor: targetLockState ? '#E11D48' : '#10B981',
+        cancelButtonText: '取消'
+      });
+
+      if (!confirm.isConfirmed) return;
+      Swal.showLoading();
+
+      try {
+        const payload = {
+          tool_key: toolKey,
+          is_locked: targetLockState,
+          reason: reason,
+          updated_at: new Date().toISOString()
+        };
+
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_maintenance?on_conflict=tool_key`, {
+          method: "POST",
+          headers: {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json",
+            "Prefer": "resolution=merge-duplicates"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error(await res.text());
+
+        Swal.fire({ title: '操作完成！', text: `已成功對【${targetDisplayName}】${actionText}。`, icon: 'success' });
+        loadToolMaintenanceStatus();
+      } catch (err) {
+        Swal.fire('更新失敗', err.message, 'error');
+      }
     }
 
+    // =========================================================================
+    // [分頁 3] 微工具優化建議與功能許願池
+    // =========================================================================
+    async function loadToolFeedbacks() {
+      const container = document.getElementById('tool-feedbacks-container');
+      const badge = document.getElementById('tool-feedback-count-badge');
+      if (!container) return;
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_feedbacks?order=created_at.desc&limit=50`, {
+          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` }
+        });
+        
+        if (res.ok) {
+          const list = await res.json();
+          allToolFeedbacksList = Array.isArray(list) ? list : [];
+        } else {
+          allToolFeedbacksList = [];
+        }
+
+        if (badge) badge.innerText = `共 ${allToolFeedbacksList.length} 則建議`;
+        renderToolFeedbacks();
+      } catch (e) {
+        container.innerHTML = `<div class="text-center py-6 text-xs text-rose-500">載入建議名冊失敗：${e.message}</div>`;
+      }
+    }
+
+    function filterToolFeedbacks(toolCategory, btn) {
+      currentFeedbackToolFilter = toolCategory;
+      document.querySelectorAll('.feedback-filter-btn').forEach(b => {
+        b.className = "feedback-filter-btn px-3 py-1 rounded-xl text-xs font-bold bg-white text-brand-800 border border-brand-200 whitespace-nowrap";
+      });
+      if (btn) {
+        btn.className = "feedback-filter-btn px-3 py-1 rounded-xl text-xs font-bold bg-[#8C7355] text-white shadow-xs whitespace-nowrap";
+      }
+      renderToolFeedbacks();
+    }
+
+    function renderToolFeedbacks() {
+      const container = document.getElementById('tool-feedbacks-container');
+      if (!container) return;
+
+      const kw = (document.getElementById('feedback-search-kw')?.value || '').trim().toLowerCase();
+      let filtered = allToolFeedbacksList;
+
+      if (currentFeedbackToolFilter !== 'ALL') {
+        filtered = filtered.filter(item => (item.tool_name || '').includes(currentFeedbackToolFilter));
+      }
+
+      if (kw) {
+        filtered = filtered.filter(item => 
+          (item.store_name || '').toLowerCase().includes(kw) ||
+          (item.user_name || '').toLowerCase().includes(kw) ||
+          (item.content || '').toLowerCase().includes(kw) ||
+          (item.tool_name || '').toLowerCase().includes(kw)
+        );
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="text-center py-8 text-brand-400 bg-brand-50/50 rounded-2xl border border-dashed border-brand-200">目前尚無符合的微工具建議或許願紀錄</div>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(item => {
+        const dateStr = item.created_at ? item.created_at.replace('T', ' ').substring(0, 16) : '未知時間';
+        return `
+          <div class="p-4 bg-brand-50/70 hover:bg-brand-50 rounded-2xl border border-brand-200 transition flex justify-between items-start gap-3">
+            <div class="space-y-1.5 flex-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="px-2.5 py-0.5 rounded-full bg-[#8C7355] text-white text-[10px] font-bold">${item.tool_name || '微工具'}</span>
+                <span class="font-bold text-brand-900 text-xs">${item.store_name || '沙龍店家'}</span>
+                <span class="text-gray-500 font-medium">提案人：<b>${item.user_name || '店長'}</b></span>
+                <span class="text-[10px] text-brand-400 font-mono">${dateStr}</span>
+              </div>
+              <p class="text-brand-800 text-xs leading-relaxed whitespace-pre-line pl-1 bg-white/70 p-2.5 rounded-xl border border-brand-100">${item.content || '無文字建議'}</p>
+            </div>
+            <button type="button" onclick="deleteToolFeedbackPrompt('${item.id}')" class="px-2.5 py-1 bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 rounded-xl text-xs font-semibold transition shrink-0 shadow-2xs">
+              <i class="fa-solid fa-trash text-[10px] mr-0.5"></i> 刪除
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function deleteToolFeedbackPrompt(id) {
+      const confirm = await Swal.fire({
+        title: '確定刪除此則微工具建議？',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        confirmButtonText: '確定刪除',
+        cancelButtonText: '取消'
+      });
+
+      if (confirm.isConfirmed) {
+        Swal.showLoading();
+        try {
+          await fetch(`${SUPABASE_URL}/rest/v1/tool_feedbacks?id=eq.${id}`, {
+            method: "DELETE",
+            headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` }
+          });
+          Swal.fire({ title: '已成功移除！', icon: 'success', timer: 1000, showConfirmButton: false });
+          loadToolFeedbacks();
+        } catch (e) {
+          Swal.fire('刪除失敗', e.message, 'error');
+        }
+      }
+    }
+
+    // =========================================================================
+    // [分頁 4] 買斷金鑰序號產生器
+    // =========================================================================
     function generateNewLicense() {
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
       let key = 'SIBYL-';
@@ -844,10 +1154,6 @@
         key += chars.charAt(Math.floor(Math.random() * chars.length));
       }
       document.getElementById('disp-gen-key').innerText = key;
-    }
-
-    function saveLocalStoresDb() {
-      localStorage.setItem('local_tool_stores_db', JSON.stringify(allToolStores));
     }
   </script>
 </body>

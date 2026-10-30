@@ -171,15 +171,15 @@
       <div id="box-booking-mode" class="space-y-3">
         <div class="space-y-2">
           <label class="block font-bold text-brand-800">顧客手機號碼 * (輸入自動帶入)：</label>
-          <input type="tel" id="book-phone" maxlength="10" placeholder="0912345678" onblur="lookupCustomer(this.value)" class="w-full p-2.5 bg-brand-50/60 rounded-xl border border-brand-200 font-mono font-bold outline-none focus:border-brand-500">
+          <input type="tel" id="book-phone" onblur="lookupCustomerAny()" maxlength="10" placeholder="0912345678" onblur="lookupCustomer(this.value)" class="w-full p-2.5 bg-brand-50/60 rounded-xl border border-brand-200 font-mono font-bold outline-none focus:border-brand-500">
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block font-bold text-brand-700 text-[10.5px] mb-1">顧客姓名 *：</label>
-              <input type="text" id="book-name" placeholder="例: 林小美" class="w-full p-2 bg-brand-50/60 rounded-xl border border-brand-200 outline-none">
+              <input type="text" id="book-name" onblur="lookupCustomerAny()" placeholder="例: 林小美" class="w-full p-2 bg-brand-50/60 rounded-xl border border-brand-200 outline-none">
             </div>
             <div>
               <label class="block font-bold text-brand-700 text-[10.5px] mb-1">LINE 稱呼 (選填)：</label>
-              <input type="text" id="book-line" placeholder="例: May" class="w-full p-2 bg-brand-50/60 rounded-xl border border-brand-200 outline-none">
+              <input type="text" id="book-line" onblur="lookupCustomerAny()" placeholder="例: May" class="w-full p-2 bg-brand-50/60 rounded-xl border border-brand-200 outline-none">
             </div>
           </div>
           <div id="book-cust-hint" class="text-[10.5px] text-emerald-700 font-bold bg-emerald-50 p-2 rounded-xl border border-emerald-200 hidden"></div>
@@ -753,6 +753,7 @@
 
           // 碰撞分流檢查：同專員、重疊時段、且可插單 (Group_A)
           let colPos = 0; // 0: 單獨滿版, 1: 靠左(寬度50%), 2: 靠右(寬度50%)
+          // [優化] 重疊排程自動分流為左/右並排
           const hasOverlap = staffBookings.some((ob, oi) => {
             if (i === oi) return false;
             const [osh, osm] = ob.startTime.split(':').map(Number);
@@ -760,6 +761,16 @@
             const obEnd = obStart + ob.durMins;
             return (bStart < obEnd && bEnd > obStart);
           });
+
+          if (hasOverlap) {
+            // 奇偶數分流左右兩側
+            const isRightSide = (i % 2 === 1);
+            block.style.width = 'calc(50% - 5px)';
+            block.style.left = isRightSide ? 'calc(50% + 2px)' : '3px';
+          } else {
+            block.style.left = '3px';
+            block.style.right = '3px';
+          }
 
           if (hasOverlap && b.type === 'Group_A') {
             // 依據索引奇偶數分配左右側
@@ -947,6 +958,24 @@
     }
 
     function confirmBookingInsert() {
+      // 檢查首次填寫
+      const isExisting = customerDb[phone] || Object.values(customerDb).some(c => c.name === name || (line && c.line === line));
+      if (!isExisting) {
+        if (!name || !phone || !line) {
+          return Swal.fire('首次預約顧客請完整填寫！', '姓名、手機號碼與 LINE 稱呼三項皆為必填。', 'warning');
+        }
+      }
+
+      // 覆蓋並儲存最新資料
+      customerDb[phone] = {
+        phone: phone,
+        name: name,
+        line: line,
+        visits: (customerDb[phone]?.visits || 0) + 1
+      };
+      saveCustomerDb();
+      updateFilteredCustList();
+      
       const customTime = document.getElementById('book-start-time').value || pendingSlotInsert.timeStr;
 
       if (currentBookingMode === 'off') {
@@ -1642,6 +1671,91 @@
           </div>
         `;
       }).join('');
+    }
+
+    // [優化] 三欄位任意比對顧客庫
+    function lookupCustomerAny() {
+      const p = document.getElementById('book-phone').value.trim();
+      const n = document.getElementById('book-name').value.trim();
+      const l = document.getElementById('book-line').value.trim();
+      const hint = document.getElementById('book-cust-hint');
+
+      const allCusts = Object.values(customerDb);
+      const found = allCusts.find(c => 
+        (p && c.phone === p) || 
+        (n && c.name === n) || 
+        (l && c.line === l)
+      );
+
+      if (found) {
+        document.getElementById('book-phone').value = found.phone;
+        document.getElementById('book-name').value = found.name;
+        document.getElementById('book-line').value = found.line || '';
+        hint.innerHTML = `✓ 舊客檔案帶入：<b>${found.name}</b> (LINE: ${found.line || '未填'}) ｜ 累計排程 ${found.visits || 1} 次`;
+        hint.classList.remove('hidden');
+      } else {
+        hint.classList.add('hidden');
+      }
+    }
+
+    // [新增] 服務項目編輯功能 (含可施作專員)
+    async function openEditOverviewServiceModal(idx) {
+      const s = serviceCatalog[idx];
+      const resOptions = storeResources.map(r => `<option value="${r.name}" ${r.name === s.resource ? 'selected' : ''}>${r.name} (容量:${r.capacity})</option>`).join('');
+      const staffCheckboxes = staffList.map(st => `
+        <label class="inline-flex items-center gap-1 mr-3 cursor-pointer">
+          <input type="checkbox" value="${st.id}" class="edit-staff-cb accent-[#8C7355]" ${(s.allowedStaff || []).includes(st.id) ? 'checked' : ''}>
+          <span>${st.name}</span>
+        </label>
+      `).join('');
+
+      const { value: v } = await Swal.fire({
+        title: '編輯排程服務主檔',
+        html: `
+          <div class="text-left text-xs space-y-2">
+            <div><label class="font-bold">項目名稱：</label><input id="eos-name" class="swal2-input text-xs" value="${s.name}"></div>
+            <div class="grid grid-cols-2 gap-2">
+              <div><label class="font-bold">金額：</label><input id="eos-price" type="number" class="swal2-input text-xs font-mono" value="${s.price}"></div>
+              <div><label class="font-bold">耗時(分)：</label><input id="eos-dur" type="number" class="swal2-input text-xs font-mono" value="${s.dur}"></div>
+            </div>
+            <div>
+              <label class="font-bold">插單屬性：</label>
+              <select id="eos-type" class="w-full p-2.5 rounded-xl border mt-1">
+                <option value="Group_B" ${s.type === 'Group_B' ? 'selected' : ''}>Group B (全程專屬類)</option>
+                <option value="Group_A" ${s.type === 'Group_A' ? 'selected' : ''}>Group A (允許雙單穿插)</option>
+              </select>
+            </div>
+            <div>
+              <label class="font-bold">佔用設備：</label>
+              <select id="eos-res" class="w-full p-2.5 rounded-xl border mt-1"><option value="none">無</option>${resOptions}</select>
+            </div>
+            <div class="pt-1">
+              <label class="font-bold block mb-1">可施作專員：</label>
+              <div class="p-2 bg-brand-50 rounded-xl border border-brand-200">${staffCheckboxes}</div>
+            </div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '儲存更新',
+        confirmButtonColor: '#8C7355',
+        preConfirm: () => {
+          const staffChecked = Array.from(document.querySelectorAll('.edit-staff-cb:checked')).map(cb => cb.value);
+          return {
+            name: document.getElementById('eos-name').value.trim(),
+            price: Number(document.getElementById('eos-price').value || 0),
+            dur: Number(document.getElementById('eos-dur').value || 60),
+            type: document.getElementById('eos-type').value,
+            resource: document.getElementById('eos-res').value,
+            allowedStaff: staffChecked
+          };
+        }
+      });
+
+      if (v) {
+        serviceCatalog[idx] = Object.assign(serviceCatalog[idx], v);
+        renderAdminServicesList();
+        await saveOverviewConfigToCloud();
+      }
     }
   </script>
 </body>

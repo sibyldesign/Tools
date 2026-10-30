@@ -88,7 +88,7 @@
     <section class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3.5">
       <div class="flex justify-between items-center pb-2 border-b border-brand-100">
         <span class="text-xs font-bold text-brand-900 flex items-center gap-1.5">
-          <i class="fa-solid fa-user-pen text-[#8C7355]"></i> 立約人資訊登記
+          <i class="fa-solid fa-user-pen text-[#8C7355]"></i> 立約人資訊登記 (輸入姓名或手機自動帶入)
         </span>
         <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 font-bold border border-amber-200" id="badge-industry-mode">
           美業沙龍模式
@@ -98,21 +98,26 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
         <div>
           <label class="block font-bold text-brand-800 text-[10.5px] mb-1">立約顧客姓名 (甲方) *：</label>
-          <input type="text" id="signer-name" placeholder="例: 王小美" class="w-full p-2.5 bg-brand-50/60 rounded-xl border border-brand-200 outline-none font-bold">
+          <!-- 綁定 onblur 與 oninput 自動比對舊客 -->
+          <input type="text" id="signer-name" onblur="lookupContractCustomerAny()" placeholder="例: 王小美" class="w-full p-2.5 bg-brand-50/60 rounded-xl border border-brand-200 outline-none font-bold focus:border-[#8C7355]">
         </div>
         <div>
           <label class="block font-bold text-brand-800 text-[10.5px] mb-1">聯絡手機號碼 *：</label>
-          <input type="tel" id="signer-phone" maxlength="10" placeholder="0912345678" class="w-full p-2.5 bg-brand-50/60 rounded-xl border border-brand-200 font-mono font-bold outline-none">
+          <!-- 綁定 onblur 與 oninput 自動比對舊客 -->
+          <input type="tel" id="signer-phone" maxlength="10" onblur="lookupContractCustomerAny()" placeholder="0912345678" class="w-full p-2.5 bg-brand-50/60 rounded-xl border border-brand-200 font-mono font-bold outline-none focus:border-[#8C7355]">
         </div>
         <div>
           <label class="block font-bold text-brand-800 text-[10.5px] mb-1">電子信箱 * (自動寄發存證副本)：</label>
-          <input type="email" id="signer-email" placeholder="client@gmail.com" class="w-full p-2.5 bg-brand-50/60 rounded-xl border border-brand-200 font-mono outline-none">
+          <input type="email" id="signer-email" placeholder="client@gmail.com" class="w-full p-2.5 bg-brand-50/60 rounded-xl border border-brand-200 font-mono outline-none focus:border-[#8C7355]">
         </div>
         <div>
           <!-- 服務施作日期 -->
           <label class="block font-bold text-brand-800 text-[10.5px] mb-1">服務施作日期 *：</label>
-          <input type="date" id="signer-service-date" class="w-full p-2.5 bg-brand-50/60 rounded-xl border border-brand-200 font-mono font-bold outline-none">
+          <input type="date" id="signer-service-date" class="w-full p-2.5 bg-brand-50/60 rounded-xl border border-brand-200 font-mono font-bold outline-none focus:border-[#8C7355]">
         </div>
+
+        <!-- 帶入舊客提示標籤 -->
+        <div id="contract-cust-hint" class="col-span-full text-[10.5px] text-emerald-800 font-bold bg-emerald-50 p-2.5 rounded-xl border border-emerald-200 hidden leading-relaxed"></div>
 
         <!-- 寵美模式專屬欄位 (依行業別動態展開) -->
         <div id="box-pet-fields" class="col-span-full p-3.5 bg-amber-50/70 rounded-2xl border border-amber-200 space-y-2 hidden">
@@ -396,6 +401,8 @@
     };
 
     let contractRecords = JSON.parse(localStorage.getItem('signed_contracts_db') || '[]');
+    let contractCustomers = JSON.parse(localStorage.getItem('contract_customers_db') || '{}');
+
     let contractPage = 1;
     const PAGE_SIZE = 10;
     let filteredContracts = [];
@@ -640,7 +647,30 @@
       document.getElementById('sig-placeholder').classList.remove('hidden');
     }
 
-    // 4. 送出簽約 (寫入小庫 ＋ 呼叫後端發送專業法律存證信)
+    // 前台：姓名、手機任意輸入失焦自動帶入其他資料
+    function lookupContractCustomerAny() {
+      const p = document.getElementById('signer-phone').value.trim();
+      const n = document.getElementById('signer-name').value.trim();
+      const hint = document.getElementById('contract-cust-hint');
+
+      const all = Object.values(contractCustomers);
+      const found = all.find(c => (p && c.phone === p) || (n && c.name === n));
+
+      if (found) {
+        document.getElementById('signer-name').value = found.name;
+        document.getElementById('signer-phone').value = found.phone;
+        if (found.email) document.getElementById('signer-email').value = found.email;
+
+        if (hint) {
+          hint.innerHTML = `🌟 <b>${found.name}</b> 舊客資料已自動帶入 (${found.phone})`;
+          hint.classList.remove('hidden');
+        }
+      } else {
+        if (hint) hint.classList.add('hidden');
+      }
+    }
+
+    // 4. 送出簽約 (修復順序，補齊存證與信件直傳網址)
     async function submitContractSigning() {
       const agreeCb = document.getElementById('cb-agree-contract');
       if (!agreeCb || !agreeCb.checked) {
@@ -650,18 +680,7 @@
         return Swal.fire('請於手寫簽名板親筆簽署大名！', '簽章為重要數位法律存證要件，未簽署無法送出。', 'warning');
       }
 
-      // 首次完整性檢查
-      const isExisting = contractCustomers[phone] || Object.values(contractCustomers).some(c => c.name === name);
-      if (!isExisting) {
-        if (!name || !phone || !email || !email.includes('@')) {
-          return Swal.fire('首次簽約請完整填寫！', '姓名、手機號碼與電子信箱皆為法律存證必填項目。', 'warning');
-        }
-      }
-
-      // 更新與覆蓋顧客資料庫
-      contractCustomers[phone] = { name, phone, email };
-      localStorage.setItem('contract_customers_db', JSON.stringify(contractCustomers));
-      
+      // ★ 先提取變數，杜絕 ReferenceError 崩潰
       const name = document.getElementById('signer-name').value.trim();
       const phone = document.getElementById('signer-phone').value.trim();
       const email = document.getElementById('signer-email').value.trim();
@@ -669,6 +688,14 @@
       const service = document.getElementById('signer-service-select').value;
       const isPet = (contractConfig.industry === 'pet');
       const petName = isPet ? document.getElementById('pet-name').value.trim() : '';
+
+      // 檢查首次填寫完整性
+      const isExisting = contractCustomers[phone] || Object.values(contractCustomers).some(c => c.name === name);
+      if (!isExisting) {
+        if (!name || !phone || !email || !email.includes('@')) {
+          return Swal.fire('首次簽約請完整填寫！', '姓名、手機號碼與電子信箱皆為法律存證必填項目。', 'warning');
+        }
+      }
 
       if (!name || !phone || !email || !email.includes('@')) {
         return Swal.fire('請完整填寫姓名、手機號碼與正確的電子信箱！', '', 'warning');
@@ -679,6 +706,10 @@
       if (isPet && !petName) {
         return Swal.fire('寵美模式請填寫毛孩名字！', '', 'warning');
       }
+
+      // 更新與覆蓋顧客資料庫 (支援姓名/手機帶入)
+      contractCustomers[phone] = { name, phone, email };
+      localStorage.setItem('contract_customers_db', JSON.stringify(contractCustomers));
 
       const sigBase64 = canvas.toDataURL('image/png');
       const nowStr = formatNowTime();
@@ -708,7 +739,7 @@
       contractRecords.unshift(contractData);
       localStorage.setItem('signed_contracts_db', JSON.stringify(contractRecords));
 
-      // [優化] 將親筆簽名上傳換取永久公開存證 URL
+      // 2. 將親筆簽名上傳至 Supabase Storage 換取永久公開存證 URL
       let signatureUrl = sigBase64;
       try {
         const blob = await (await fetch(sigBase64)).blob();
@@ -729,7 +760,7 @@
         console.warn("Storage 轉檔略過:", e);
       }
 
-      // 呼叫 GAS 發送存證副本
+      // 3. 呼叫 GAS 發送存證副本 (郵件改傳簽名 URL 與施作日期)
       try {
         await fetch(GAS_API_URL, {
           method: "POST",
@@ -741,12 +772,12 @@
             storeName: currentStore.store_name,
             clientName: name,
             clientPhone: phone,
-            serviceDate: serviceDate, // 施作日期
+            serviceDate: serviceDate,
             serviceName: service,
             petName: petName,
             isPet: isPet,
             signedAt: nowStr,
-            signatureUrl: signatureUrl // 傳送純網址而非大圖
+            signatureUrl: signatureUrl
           })
         });
       } catch (e) {
@@ -776,6 +807,8 @@
         document.getElementById('signer-phone').value = '';
         document.getElementById('signer-email').value = '';
         if (document.getElementById('pet-name')) document.getElementById('pet-name').value = '';
+        const hint = document.getElementById('contract-cust-hint');
+        if (hint) hint.classList.add('hidden');
         lockContractAgreement();
         updateFilteredContracts();
       });
@@ -1035,13 +1068,13 @@
 
     function exportContractCsv() {
       if (contractRecords.length === 0) return Swal.fire('目前無紀錄可匯出', '', 'info');
-      let csv = "data:text/csv;charset=utf-8,\uFEFF";
-      csv += "立約顧客,聯絡電話,電子信箱,服務施作日期,專屬毛孩,施作項目,立約時間戳記\n";
+      let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+      csvContent += "立約顧客,聯絡電話,電子信箱,服務施作日期,專屬毛孩,施作項目,立約時間戳記\n";
       contractRecords.forEach(c => {
-        csv += `"${c.name}","${c.phone}","${c.email}","${c.serviceDate || ''}","${c.petName || ''}","${c.service}","${c.signedAt}"\n`;
+        csvContent += `"${c.name}","${c.phone}","${c.email}","${c.serviceDate || ''}","${c.petName || ''}","${c.service}","${c.signedAt}"\n`;
       });
       const a = document.createElement("a");
-      a.href = encodeURI(csv);
+      a.href = encodeURI(csvContent);
       a.download = `${currentStore.store_name}_電子定型化契約存證清冊.csv`;
       document.body.appendChild(a);
       a.click();
@@ -1051,22 +1084,6 @@
     function formatNowTime() {
       const d = new Date();
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-    }
-
-    let contractCustomers = JSON.parse(localStorage.getItem('contract_customers_db') || '{}');
-
-    function lookupContractCustomerAny() {
-      const p = document.getElementById('signer-phone').value.trim();
-      const n = document.getElementById('signer-name').value.trim();
-
-      const all = Object.values(contractCustomers);
-      const found = all.find(c => (p && c.phone === p) || (n && c.name === n));
-
-      if (found) {
-        document.getElementById('signer-name').value = found.name;
-        document.getElementById('signer-phone').value = found.phone;
-        document.getElementById('signer-email').value = found.email || '';
-      }
     }
   </script>
 </body>

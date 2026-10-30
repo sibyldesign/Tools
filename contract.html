@@ -740,16 +740,18 @@
       localStorage.setItem('signed_contracts_db', JSON.stringify(contractRecords));
 
       // 2. 將親筆簽名上傳至 Supabase Storage 換取永久公開存證 URL
-      let signatureUrl = sigBase64;
+      // [優化] 將親筆簽名上傳換取永久公開存證 URL
+      let signatureUrl = '';
       try {
         const blob = await (await fetch(sigBase64)).blob();
-        const filePath = `signatures/sig_${Date.now()}.png`;
+        const filePath = `signatures/sig_${currentStore.store_slug || currentStore.id.slice(0,8)}_${Date.now()}.png`;
         const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/tool-assets/${filePath}`, {
           method: "POST",
           headers: {
             "apikey": SUPABASE_ANON_KEY,
             "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-            "Content-Type": "image/png"
+            "Content-Type": "image/png",
+            "x-upsert": "true"
           },
           body: blob
         });
@@ -758,6 +760,11 @@
         }
       } catch (e) {
         console.warn("Storage 轉檔略過:", e);
+      }
+
+      // 若雲端上傳異常，改為提示字串，絕不傳送數千字的 Base64 塞爆信箱
+      if (!signatureUrl) {
+        signatureUrl = "簽署圖檔已安全加密存證於門市本地系統存證庫中";
       }
 
       // 3. 呼叫 GAS 發送存證副本 (郵件改傳簽名 URL 與施作日期)

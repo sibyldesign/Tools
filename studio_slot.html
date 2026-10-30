@@ -262,6 +262,14 @@
           <div class="grid grid-cols-3 sm:grid-cols-5 gap-2 pt-1" id="admin-slots-matrix"></div>
         </div>
 
+        <!-- [新增] LINE 瀏覽器阻擋下載防呆警示 -->
+        <div class="p-2.5 bg-rose-50 border border-rose-200 rounded-2xl text-[10.5px] text-rose-700 leading-relaxed font-bold flex items-start gap-1.5">
+          <i class="fa-solid fa-triangle-exclamation text-rose-600 mt-0.5 shrink-0"></i>
+          <div>
+            <b>下載限動圖小提醒：</b>若您是從 LINE 對話框直接點開此頁面，LINE 內建瀏覽器會限制圖片存檔！請點擊畫面右下角「<b>⋮</b>」或「分享」，選擇<b>「以 Safari / Chrome 預設瀏覽器開啟」</b>，方可順利一鍵下載高畫質限動美圖。
+          </div>
+        </div>
+        
         <!-- 戰鬥雙大按鈕：生成限動圖 ＆ 立即更新前台 -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
           <button type="button" onclick="exportStoryImage()" class="py-3.5 bg-gradient-to-r from-rose-500 to-amber-600 hover:opacity-90 text-white font-bold rounded-xl text-xs transition shadow-md flex items-center justify-center gap-2">
@@ -502,20 +510,42 @@
       `).join('');
     }
 
+    // [替換] 時段點選：打包預約資訊並彈出引導提示跳轉 LINE
     function selectSlotToBook(date, time) {
-      const msg = encodeURIComponent(`您好！我在【${currentStore.store_name}】預約表中選定了 ${date} ${time}，想預約此時段施作！`);
-      const lineUrl = (slotConfig.lineUrl || "https://line.me/R/ti/p/@480kqjoj") + `?text=${msg}`;
+      const storeName = currentStore.store_name || "沙龍門市";
+      const lineBase = slotConfig.lineUrl || currentStore.line_url || "https://line.me/R/ti/p/@480kqjoj";
+      
+      // 打包預約預填文字
+      const bookingMsg = 
+        `您好！我想預約【${storeName}】的服務時段：\n\n` +
+        `📅 預約日期：${date}\n` +
+        `⏰ 預約時段：${time}\n\n` +
+        `我已確認此時段為空檔，請協助保留並安排，謝謝！`;
+
+      const lineUrl = `${lineBase}?text=${encodeURIComponent(bookingMsg)}`;
 
       Swal.fire({
-        title: `確認預約 ${date} ${time}？`,
-        text: '點擊確定將為您複製預約文字並前往官方 LINE！',
-        icon: 'question',
+        title: '確認預約此時段？',
+        html: `
+          <div class="text-left text-xs bg-brand-50 p-3.5 rounded-2xl border border-brand-200 space-y-2 font-sans leading-relaxed">
+            <div>門市：<b>${storeName}</b></div>
+            <div>時段：<b class="text-[#8C7355] font-mono text-sm">${date} ${time}</b></div>
+            <div class="p-2.5 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 text-[11px] font-bold">
+              💬 <b>預約步驟引導：</b><br>
+              點擊下方按鈕將開啟官方 LINE，系統已為您自動填妥預約時段。<br>
+              <span class="text-rose-600 underline">請務必在 LINE 對話框按下「發送」訊息</span>，美療師收到後將即刻為您登記確認！
+            </div>
+          </div>
+        `,
+        icon: 'info',
         showCancelButton: true,
         confirmButtonText: '前往官方 LINE 送出預約',
         confirmButtonColor: '#1F4E3D',
-        cancelButtonText: '返回'
+        cancelButtonText: '返回更換時段'
       }).then(r => {
-        if (r.isConfirmed) window.open(lineUrl, '_blank');
+        if (r.isConfirmed) {
+          window.open(lineUrl, '_blank');
+        }
       });
     }
 

@@ -909,9 +909,69 @@
       });
     }
 
-    function onIndustryRadioChange(mode) {
-      contractConfig.industry = mode;
-      renderIndustryUI();
+    // 儲存合約設定至雲端 (修正：確保 industry 模式完整入庫)
+    async function saveContractSettingsToCloud(isSilent = false) {
+      contractConfig.content = document.getElementById('contract-content-input').value.trim();
+      contractConfig.services = document.getElementById('contract-services-input').value.trim();
+
+      // ★ 確保抓取當前單選所勾選的模式
+      const selectedModeRadio = document.querySelector('input[name="mgr-industry"]:checked');
+      if (selectedModeRadio) {
+        contractConfig.industry = selectedModeRadio.value;
+      }
+
+      if (!isSilent) {
+        Swal.fire({
+          title: '正在同步儲存合約設定...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        });
+      }
+
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?id=eq.${currentStore.id}`, {
+          method: "PATCH",
+          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ admin_pin: currentStore.admin_pin })
+        });
+
+        let mergedConfig = {};
+        try {
+          const fetchRes = await fetch(`${SUPABASE_URL}/rest/v1/tool_settings?store_id=eq.${currentStore.id}&select=slot_config`, {
+            headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` }
+          });
+          const existingData = await fetchRes.json();
+          if (existingData && existingData.length > 0 && existingData[0].slot_config) {
+            mergedConfig = existingData[0].slot_config;
+          }
+        } catch (e) {
+          console.warn("無法取得現有配置");
+        }
+
+        mergedConfig.contract_config = contractConfig;
+
+        await fetch(`${SUPABASE_URL}/rest/v1/tool_settings?on_conflict=store_id`, {
+          method: "POST",
+          headers: {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json",
+            "Prefer": "resolution=merge-duplicates"
+          },
+          body: JSON.stringify({
+            store_id: currentStore.id,
+            slot_config: mergedConfig,
+            store_pin: currentStore.admin_pin,
+            updated_at: new Date().toISOString()
+          })
+        });
+
+        renderIndustryUI(); // 前台即刻同步更新
+        renderContractClauses();
+        if (!isSilent) Swal.fire('契約條款與行業模式已成功更新至雲端！', '', 'success');
+      } catch (e) {
+        if (!isSilent) Swal.fire('儲存失敗', e.message, 'error');
+      }
     }
 
     // 儲存合約設定至雲端 (安全增量更新)

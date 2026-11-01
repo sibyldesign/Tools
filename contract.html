@@ -741,10 +741,11 @@
 
       // 2. 將親筆簽名上傳至 Supabase Storage 換取永久公開存證 URL
       // [優化] 將親筆簽名上傳換取永久公開存證 URL
-      let signatureUrl = '';
+      // [優化] 取得親筆簽名：優先嘗試 Storage 上傳，失敗則完整保留 Base64 供信件查看
+      let signatureUrl = sigBase64;
       try {
         const blob = await (await fetch(sigBase64)).blob();
-        const filePath = `signatures/sig_${currentStore.store_slug || currentStore.id.slice(0,8)}_${Date.now()}.png`;
+        const filePath = `signatures/sig_${currentStore.store_slug || currentStore.id.slice(0, 8)}_${Date.now()}.png`;
         const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/tool-assets/${filePath}`, {
           method: "POST",
           headers: {
@@ -759,15 +760,9 @@
           signatureUrl = `${SUPABASE_URL}/storage/v1/object/public/tool-assets/${filePath}`;
         }
       } catch (e) {
-        console.warn("Storage 轉檔略過:", e);
+        console.warn("Storage 上傳略過，改用 Base64 直接存證:", e);
       }
 
-      // 若雲端上傳異常，改為提示字串，絕不傳送數千字的 Base64 塞爆信箱
-      if (!signatureUrl) {
-        signatureUrl = "簽署圖檔已安全加密存證於門市本地系統存證庫中";
-      }
-
-      // 3. 呼叫 GAS 發送存證副本 (郵件改傳簽名 URL 與施作日期)
       // 呼叫 GAS 發送存證副本
       try {
         await fetch(GAS_API_URL, {
@@ -785,8 +780,8 @@
             petName: petName,
             isPet: isPet,
             signedAt: nowStr,
-            signatureUrl: signatureUrl,
-            contractContent: contractConfig.content || "" // ★ 補上這行，信件上方就能完整顯示條款滾動框！
+            signatureUrl: signatureUrl, // ★ 傳入真實網址或 Base64 代碼，不傳替代文字
+            contractContent: contractConfig.content || ""
           })
         });
       } catch (e) {

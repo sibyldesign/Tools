@@ -942,10 +942,11 @@
       `;
     }
 
-    function confirmBookingInsert() {
+    // [局部替換] 插單確認邏輯：具備衝撞/超限警示，但支援點擊「強制插單」破例排入
+    async function confirmBookingInsert() {
       const customTime = document.getElementById('book-start-time').value || pendingSlotInsert.timeStr;
 
-      // 1. 若為休假排入模式，優先處理，不卡顧客電話檢驗
+      // 1. 若為專員休假排入模式
       if (currentBookingMode === 'off') {
         const dur = Number(document.getElementById('off-duration-select').value);
         const reason = document.getElementById('off-reason').value.trim() || '專員休假';
@@ -978,7 +979,7 @@
         return;
       }
       
-      // 2. 顧客預約模式：先提取各欄位變數，杜絕未定義報錯
+      // 2. 顧客預約插單模式
       const phone = document.getElementById('book-phone').value.trim();
       const name = document.getElementById('book-name').value.trim();
       const line = document.getElementById('book-line').value.trim();
@@ -997,16 +998,45 @@
         }
       }
 
+      // 衝撞檢測 1：專員時間衝突檢測
+      let conflictWarning = "";
       if (checkStaffConflict(pendingSlotInsert.staffId, selectedDate, customTime, s.dur)) {
-        return Swal.fire('排程衝突！', '該時段專員已有鎖定預約，請選擇其他空檔。', 'error');
+        conflictWarning += `⚠️ <b>專員時間衝撞：</b>該時段【${pendingSlotInsert.staffName}】已有其他預約或鎖定行程。<br>`;
       }
 
+      // 衝撞檢測 2：設備容量超限檢測
       if (s.resource && s.resource !== 'none') {
         if (checkResourceCapacity(s.resource, selectedDate, customTime, s.dur)) {
-          return Swal.fire('席位設備防撞警報！', `店內【${s.resource}】在該時段已達全店容量上限！`, 'warning');
+          conflictWarning += `⚠️ <b>設備席位衝撞：</b>店內【${s.resource}】在該時段已達最大使用容量上限！<br>`;
         }
       }
 
+      // 若有衝撞，跳出提示讓店家選擇是否「強制插單」
+      if (conflictWarning) {
+        const { isConfirmed } = await Swal.fire({
+          title: '排程衝撞提醒！',
+          html: `
+            <div class="text-left text-xs bg-amber-50 p-3.5 rounded-2xl border border-amber-300 text-amber-950 space-y-2 font-sans leading-relaxed">
+              <div class="font-bold text-sm text-rose-700">發現排程衝撞狀況：</div>
+              <div class="text-[11.5px] leading-relaxed text-amber-900">${conflictWarning}</div>
+              <div class="p-2 bg-white rounded-xl border border-amber-200 text-[10.5px] text-brand-700 font-bold">
+                💡 提醒：若確認強制插單，系統將破例排入，並自動將甘特圖上該時段的色塊變窄並排於左右側。
+              </div>
+            </div>
+          `,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: '仍要強制插單',
+          confirmButtonColor: '#e11d48',
+          cancelButtonText: '取消重選時段',
+          cancelButtonColor: '#8C7355'
+        });
+
+        // 店家取消則中止
+        if (!isConfirmed) return;
+      }
+
+      // 執行排程寫入
       bookingsDb.push({
         id: `b-${Date.now().toString().slice(-5)}`,
         date: selectedDate,
@@ -1024,7 +1054,7 @@
       });
       saveBookingsDb();
 
-      // 覆蓋並儲存最新顧客資料
+      // 顧客庫自動存檔與更新
       if (!customerDb[phone]) {
         customerDb[phone] = { phone: phone, name: name, line: line, visits: 1 };
       } else {
@@ -1037,7 +1067,14 @@
 
       closeBookingModal();
       renderGanttCanvas();
-      Swal.fire({ title: '插單成功！', text: `已排入 ${pendingSlotInsert.staffName} ${customTime}`, icon: 'success', timer: 900, showConfirmButton: false });
+      
+      Swal.fire({
+        title: conflictWarning ? '已強制排入行程！' : '插單成功！',
+        text: `已排入 ${pendingSlotInsert.staffName} ${customTime}`,
+        icon: 'success',
+        timer: 1000,
+        showConfirmButton: false
+      });
     }
     
     function checkStaffConflict(staffId, date, startTime, durMins) {

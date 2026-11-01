@@ -511,33 +511,64 @@
     }
 
     // [局部替換] 客人前台選取時段：打包預約資訊至官方 LINE 對話框並彈出引導
-    function selectSlotToBook(date, time) {
+    // [局部替換] 客人前台選取時段：雙重保障（oaMessage協議自動預填 + 自動/手動複製文字）
+    async function selectSlotToBook(date, time) {
       const storeName = currentStore.store_name || "沙龍門市";
-      const lineBase = slotConfig.lineUrl || currentStore.line_url || "https://line.me/R/ti/p/@480kqjoj";
       
-      // 打包預填文字
+      // 打包預約預填文字
       const bookingMsg = 
         `您好！我想預約【${storeName}】的服務時段：\n\n` +
         `📅 預約日期：${date}\n` +
         `⏰ 預約時段：${time}\n\n` +
         `我已在線上確認此時段為空檔，請協助保留並安排，謝謝！`;
 
-      const lineUrl = `${lineBase}${lineBase.includes('?') ? '&' : '?'}text=${encodeURIComponent(bookingMsg)}`;
+      // 1. 優先嘗試自動複製到手機剪貼簿
+      try {
+        await navigator.clipboard.writeText(bookingMsg);
+      } catch (e) {
+        console.warn("自動剪貼簿略過:", e);
+      }
+
+      // 2. 提取乾淨的 LINE Basic ID (支援 @ 開頭)
+      let rawLine = slotConfig.lineUrl || currentStore.line_url || "@480kqjoj";
+      let lineAccount = "@480kqjoj";
+      const match = rawLine.match(/@[a-zA-Z0-9_\-]+/);
+      if (match) {
+        lineAccount = match[0];
+      } else if (rawLine.startsWith('@')) {
+        lineAccount = rawLine;
+      }
+
+      // 採用 LINE 官方原生預填訊息協議：https://line.me/R/oaMessage/{LINE_ID}/?{文字}
+      const lineUrl = `https://line.me/R/oaMessage/${encodeURIComponent(lineAccount)}/?${encodeURIComponent(bookingMsg)}`;
 
       Swal.fire({
-        title: '預約時段已為您打包！',
+        title: '預約時段已打包完成！',
         html: `
-          <div class="text-left text-xs bg-brand-50 p-4 rounded-2xl border border-brand-200 space-y-2.5 font-sans leading-relaxed">
-            <div>預約門市：<b class="text-brand-900">${storeName}</b></div>
-            <div>預約時段：<b class="text-[#8C7355] font-mono text-sm">${date} ${time}</b></div>
-            <div class="p-3 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 text-xs font-bold space-y-1">
+          <div class="text-left text-xs bg-brand-50 p-4 rounded-2xl border border-brand-200 space-y-3 font-sans leading-relaxed">
+            <div>門市：<b>${storeName}</b></div>
+            <div>時段：<b class="text-[#8C7355] font-mono text-sm">${date} ${time}</b></div>
+            
+            <!-- 預約資訊複製預覽框 -->
+            <div class="space-y-1">
+              <div class="flex justify-between items-center text-[10.5px] text-brand-700 font-bold">
+                <span>📋 預約資訊內容：</span>
+                <button type="button" onclick="navigator.clipboard.writeText(\`${bookingMsg.replace(/`/g, '\\`')}\`); Swal.showValidationMessage('✓ 預約資訊已複製！');" class="text-blue-600 underline hover:text-blue-800">
+                  點此單獨複製
+                </button>
+              </div>
+              <div class="p-2.5 bg-white rounded-xl border border-brand-200 font-mono text-[11px] text-gray-700 whitespace-pre-wrap select-all max-h-28 overflow-y-auto">${bookingMsg}</div>
+            </div>
+
+            <!-- 操作指引說明 -->
+            <div class="p-2.5 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 text-xs font-bold space-y-1">
               <div class="flex items-center gap-1.5 text-emerald-900 font-black">
                 <i class="fa-brands fa-line text-base text-emerald-600"></i>
-                <span>LINE 預約送出指引說明：</span>
+                <span>LINE 預約步驟指引：</span>
               </div>
-              <div>1. 點擊下方按鈕將自動開啟<b>官方 LINE</b>（尚未加好友者請點擊加入）。</div>
-              <div>2. 系統已在聊天室對話框<b>自動寫好您的預約時段</b>。</div>
-              <div class="text-rose-600 underline">3. 請直接在 LINE 對話框按下「發送」訊息，即完成時段保留！</div>
+              <div>1. 內容已<b>自動複製到剪貼簿</b>，點擊下方按鈕將開啟官方 LINE。</div>
+              <div>2. 若 LINE 對話框已自動帶入文字，<b>直接按下「發送」</b>即可。</div>
+              <div class="text-rose-600">3. 若因手機圖文選單遮蔽未自動顯示，<b>長按對話框點「貼上」並發送</b>即可完成預約！</div>
             </div>
           </div>
         `,
@@ -552,6 +583,7 @@
         }
       });
     }
+    
     // 5. 店長安全驗證與密碼修改 (失敗5次熔斷防盜)
     async function openManagerPinPrompt() {
       const lockKey = `mgr_lock_${currentStore.id}`;

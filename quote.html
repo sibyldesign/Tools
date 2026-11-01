@@ -667,7 +667,7 @@
     }
 
     // 7. 一鍵打包報價明細並跳轉官方 LINE (含引導文字說明)
-    // [局部替換] 報價明細打包至官方 LINE 對話框（指定格式）
+    // [局部替換] 報價明細打包至官方 LINE（雙重保障：oaMessage協議 + 自動/手動複製文字）
     async function copyQuoteAndRedirectLine() {
       if (selectedServices.length === 0) {
         return Swal.fire('請先選取至少一項主要服務核心項目！', '', 'warning');
@@ -679,13 +679,11 @@
 
       const storeName = currentStore.store_name || "AAA";
       
-      // 主服務格式
       const servicesText = selectedServices.map(s => `${s.name} (NT$ ${Number(s.price).toLocaleString()})`).join('、');
       
-      // 工藝加購格式（符合：- 項目名稱 (+NT$ 金額)）
       const addonText = selectedAddons.length > 0 
         ? selectedAddons.map(a => `- ${a.name} (+NT$ ${Number(a.price).toLocaleString()})`).join('\n')
-        : '無加購護理';
+        : '- 無加購護理';
 
       // 嚴格依照指定範本文字排版
       const quoteMessage = 
@@ -697,29 +695,53 @@
         `【預算小計】：NT$ ${total.toLocaleString()} 元\n\n` +
         `請問近期有哪些空檔時段可以安排施作呢？謝謝！`;
 
+      // 1. 自動複製到剪貼簿
       try {
         await navigator.clipboard.writeText(quoteMessage);
-      } catch (e) {}
+      } catch (e) {
+        console.warn("自動剪貼簿略過:", e);
+      }
 
-      const lineBase = quoteConfig.lineUrl || currentStore.line_url || "https://line.me/R/ti/p/@480kqjoj";
-      const lineUrl = `${lineBase}${lineBase.includes('?') ? '&' : '?'}text=${encodeURIComponent(quoteMessage)}`;
+      // 2. 提取乾淨的 LINE Basic ID (支援 @ 開頭)
+      let rawLine = quoteConfig.lineUrl || currentStore.line_url || "@480kqjoj";
+      let lineAccount = "@480kqjoj";
+      const match = rawLine.match(/@[a-zA-Z0-9_\-]+/);
+      if (match) {
+        lineAccount = match[0];
+      } else if (rawLine.startsWith('@')) {
+        lineAccount = rawLine;
+      }
+
+      // 採用 LINE 官方原生預填訊息協議：https://line.me/R/oaMessage/{LINE_ID}/?{文字}
+      const lineUrl = `https://line.me/R/oaMessage/${encodeURIComponent(lineAccount)}/?${encodeURIComponent(quoteMessage)}`;
 
       Swal.fire({
         title: '報價明細已打包完成！',
         html: `
-          <div class="text-left text-xs bg-brand-50 p-4 rounded-2xl border border-brand-200 space-y-2.5 font-sans leading-relaxed">
+          <div class="text-left text-xs bg-brand-50 p-4 rounded-2xl border border-brand-200 space-y-3 font-sans leading-relaxed">
             <div>門市名稱：<b>${storeName}</b></div>
-            <div>主要服務：<b>${servicesText}</b></div>
-            <div>工藝加購：${selectedAddons.length > 0 ? selectedAddons.map(a=>a.name).join('、') : '無'}</div>
-            <div>預算小計：<b class="text-[#1F4E3D] font-mono text-sm">NT$ ${total.toLocaleString()}</b></div>
-            <div class="p-3 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 text-xs font-bold space-y-1">
+            <div>預算小計：<b class="text-[#1F4E3D] font-mono text-sm">NT$ ${total.toLocaleString()}</b> 元</div>
+            
+            <!-- 報價試算明細複製預覽框 -->
+            <div class="space-y-1">
+              <div class="flex justify-between items-center text-[10.5px] text-brand-700 font-bold">
+                <span>📋 報價諮詢明細：</span>
+                <button type="button" onclick="navigator.clipboard.writeText(\`${quoteMessage.replace(/`/g, '\\`')}\`); Swal.showValidationMessage('✓ 報價明細已複製！');" class="text-blue-600 underline hover:text-blue-800">
+                  點此單獨複製
+                </button>
+              </div>
+              <div class="p-2.5 bg-white rounded-xl border border-brand-200 font-mono text-[11px] text-gray-700 whitespace-pre-wrap select-all max-h-32 overflow-y-auto">${quoteMessage}</div>
+            </div>
+
+            <!-- 操作指引說明 -->
+            <div class="p-2.5 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 text-xs font-bold space-y-1">
               <div class="flex items-center gap-1.5 text-emerald-900 font-black">
                 <i class="fa-brands fa-line text-base text-emerald-600"></i>
-                <span>LINE 諮詢送出指引說明：</span>
+                <span>LINE 預約步驟指引：</span>
               </div>
-              <div>1. 點擊下方按鈕將自動開啟<b>官方 LINE</b>（尚未加好友者請點擊加入）。</div>
-              <div>2. 系統已在聊天室對話框<b>自動寫好完整的報價試算明細</b>。</div>
-              <div class="text-rose-600 underline">3. 請直接在 LINE 對話框按下「發送」訊息，專員收到後將即刻核對檔期！</div>
+              <div>1. 明細已<b>自動複製到剪貼簿</b>，點擊下方按鈕將開啟官方 LINE。</div>
+              <div>2. 若 LINE 對話框已自動帶入文字，<b>直接按下「發送」</b>即可。</div>
+              <div class="text-rose-600">3. 若因手機圖文選單遮蔽未自動顯示，<b>長按對話框點「貼上」並發送</b>，專員將立即核對檔期！</div>
             </div>
           </div>
         `,
@@ -733,6 +755,7 @@
         }
       });
     }
+    
     // 8. 店長後台專區驗證與安全熔斷 (失敗 5 次鎖定 + alyn9999 救援金鑰)
     async function openManagerPinPrompt() {
       const lockKey = `mgr_lock_${currentStore.id}`;

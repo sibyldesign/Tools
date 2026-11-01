@@ -667,6 +667,7 @@
     }
 
     // 7. 一鍵打包報價明細並跳轉官方 LINE (含引導文字說明)
+    // [局部替換] 報價明細打包至官方 LINE 對話框（指定格式）
     async function copyQuoteAndRedirectLine() {
       if (selectedServices.length === 0) {
         return Swal.fire('請先選取至少一項主要服務核心項目！', '', 'warning');
@@ -676,45 +677,53 @@
       selectedServices.forEach(s => total += s.price);
       selectedAddons.forEach(a => total += a.price);
 
-      const servicesText = selectedServices.map(s => `• ${s.name} (NT$ ${Number(s.price).toLocaleString()})`).join('\n');
+      const storeName = currentStore.store_name || "AAA";
+      
+      // 主服務格式
+      const servicesText = selectedServices.map(s => `${s.name} (NT$ ${Number(s.price).toLocaleString()})`).join('、');
+      
+      // 工藝加購格式（符合：- 項目名稱 (+NT$ 金額)）
       const addonText = selectedAddons.length > 0 
-        ? selectedAddons.map(a => `• ${a.name} (+NT$ ${Number(a.price).toLocaleString()})`).join('\n')
+        ? selectedAddons.map(a => `- ${a.name} (+NT$ ${Number(a.price).toLocaleString()})`).join('\n')
         : '無加購護理';
 
+      // 嚴格依照指定範本文字排版
       const quoteMessage = 
         `您好！我在官網完成了線上報價試算，想諮詢以下項目之預約時段：\n\n` +
-        `【門市名稱】：${currentStore.store_name}\n` +
-        `【預約主服務】：\n${servicesText}\n` +
-        `【附加升級/工藝】：\n${addonText}\n` +
+        `【門市名稱】：${storeName}\n` +
+        `【主要服務】：${servicesText}\n` +
+        `【工藝加購】：\n${addonText}\n` +
         `─────────────\n` +
         `【預算小計】：NT$ ${total.toLocaleString()} 元\n\n` +
         `請問近期有哪些空檔時段可以安排施作呢？謝謝！`;
 
       try {
         await navigator.clipboard.writeText(quoteMessage);
-      } catch (e) {
-        console.warn("剪貼簿限制，轉由網址參數直接傳遞");
-      }
+      } catch (e) {}
 
       const lineBase = quoteConfig.lineUrl || currentStore.line_url || "https://line.me/R/ti/p/@480kqjoj";
-      const lineUrl = `${lineBase}?text=${encodeURIComponent(quoteMessage)}`;
+      const lineUrl = `${lineBase}${lineBase.includes('?') ? '&' : '?'}text=${encodeURIComponent(quoteMessage)}`;
 
       Swal.fire({
         title: '報價明細已打包完成！',
         html: `
-          <div class="text-left text-xs bg-brand-50 p-3.5 rounded-2xl border border-brand-200 space-y-2 font-sans leading-relaxed">
-            <div>門市：<b>${currentStore.store_name}</b></div>
-            <div>主服務：<b>${selectedServices.map(s=>s.name).join('、')}</b></div>
-            <div>加購項目：${selectedAddons.length > 0 ? selectedAddons.map(a=>a.name).join('、') : '無'}</div>
-            <div>試算總額：<b class="text-[#1F4E3D] font-mono text-sm">NT$ ${total.toLocaleString()}</b></div>
-            <div class="p-2.5 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 text-[11px] font-bold">
-              💬 <b>預約步驟引導：</b><br>
-              點擊下方將直接開啟官方 LINE，並自動填入此份試算明細。<br>
-              <span class="text-rose-600 underline">請直接在 LINE 對話框按下「發送」</span>，專員收到後將立即為您核對檔期！
+          <div class="text-left text-xs bg-brand-50 p-4 rounded-2xl border border-brand-200 space-y-2.5 font-sans leading-relaxed">
+            <div>門市名稱：<b>${storeName}</b></div>
+            <div>主要服務：<b>${servicesText}</b></div>
+            <div>工藝加購：${selectedAddons.length > 0 ? selectedAddons.map(a=>a.name).join('、') : '無'}</div>
+            <div>預算小計：<b class="text-[#1F4E3D] font-mono text-sm">NT$ ${total.toLocaleString()}</b></div>
+            <div class="p-3 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 text-xs font-bold space-y-1">
+              <div class="flex items-center gap-1.5 text-emerald-900 font-black">
+                <i class="fa-brands fa-line text-base text-emerald-600"></i>
+                <span>LINE 諮詢送出指引說明：</span>
+              </div>
+              <div>1. 點擊下方按鈕將自動開啟<b>官方 LINE</b>（尚未加好友者請點擊加入）。</div>
+              <div>2. 系統已在聊天室對話框<b>自動寫好完整的報價試算明細</b>。</div>
+              <div class="text-rose-600 underline">3. 請直接在 LINE 對話框按下「發送」訊息，專員收到後將即刻核對檔期！</div>
             </div>
           </div>
         `,
-        confirmButtonText: '前往官方 LINE 提出預約需求',
+        confirmButtonText: '前往官方 LINE 送出預約需求',
         confirmButtonColor: '#1F4E3D',
         showCancelButton: true,
         cancelButtonText: '返回修改'
@@ -724,7 +733,6 @@
         }
       });
     }
-
     // 8. 店長後台專區驗證與安全熔斷 (失敗 5 次鎖定 + alyn9999 救援金鑰)
     async function openManagerPinPrompt() {
       const lockKey = `mgr_lock_${currentStore.id}`;

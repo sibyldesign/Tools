@@ -768,6 +768,7 @@
       }
 
       // 3. 呼叫 GAS 發送存證副本 (郵件改傳簽名 URL 與施作日期)
+      // 呼叫 GAS 發送存證副本
       try {
         await fetch(GAS_API_URL, {
           method: "POST",
@@ -784,13 +785,14 @@
             petName: petName,
             isPet: isPet,
             signedAt: nowStr,
-            signatureUrl: signatureUrl
+            signatureUrl: signatureUrl,
+            contractContent: contractConfig.content || "" // ★ 補上這行，信件上方就能完整顯示條款滾動框！
           })
         });
       } catch (e) {
-        console.warn("存證副本發送略過:", e);
+        console.warn("存證發信略過:", e);
       }
-
+      
       Swal.fire({
         title: '數位契約簽署成功！',
         html: `

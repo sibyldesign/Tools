@@ -98,12 +98,10 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
         <div>
           <label class="block font-bold text-brand-800 text-[10.5px] mb-1">立約顧客姓名 (甲方) *：</label>
-          <!-- 綁定 onblur 與 oninput 自動比對舊客 -->
           <input type="text" id="signer-name" onblur="lookupContractCustomerAny()" placeholder="例: 王小美" class="w-full p-2.5 bg-brand-50/60 rounded-xl border border-brand-200 outline-none font-bold focus:border-[#8C7355]">
         </div>
         <div>
           <label class="block font-bold text-brand-800 text-[10.5px] mb-1">聯絡手機號碼 *：</label>
-          <!-- 綁定 onblur 與 oninput 自動比對舊客 -->
           <input type="tel" id="signer-phone" maxlength="10" onblur="lookupContractCustomerAny()" placeholder="0912345678" class="w-full p-2.5 bg-brand-50/60 rounded-xl border border-brand-200 font-mono font-bold outline-none focus:border-[#8C7355]">
         </div>
         <div>
@@ -111,7 +109,6 @@
           <input type="email" id="signer-email" placeholder="client@gmail.com" class="w-full p-2.5 bg-brand-50/60 rounded-xl border border-brand-200 font-mono outline-none focus:border-[#8C7355]">
         </div>
         <div>
-          <!-- 服務施作日期 -->
           <label class="block font-bold text-brand-800 text-[10.5px] mb-1">服務施作日期 *：</label>
           <input type="date" id="signer-service-date" class="w-full p-2.5 bg-brand-50/60 rounded-xl border border-brand-200 font-mono font-bold outline-none focus:border-[#8C7355]">
         </div>
@@ -239,7 +236,7 @@
       <!-- 滾動內容區域 -->
       <div class="p-5 overflow-y-auto space-y-4 text-xs">
 
-        <!-- [分頁 1] 條款與行業設定 (一鍵載入衛福部官方標準範本) -->
+        <!-- [分頁 1] 條款與行業設定 -->
         <div id="tab-clause-settings" class="mgr-pane space-y-4">
           <!-- PIN 碼展示與修改 -->
           <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 flex justify-between items-center">
@@ -305,7 +302,7 @@
           </button>
         </div>
 
-        <!-- [分頁 2] 已簽署存證庫 (10筆一頁分頁 + 搜尋 + 縮圖調閱 + 複製簽名圖) -->
+        <!-- [分頁 2] 已簽署存證庫 -->
         <div id="tab-records-db" class="mgr-pane space-y-3 hidden">
           <div class="flex gap-2">
             <input type="text" id="contract-search-input" oninput="filterContractsList()" placeholder="輸入電話、立約人姓名或毛孩名字搜尋..." class="flex-1 p-2.5 bg-brand-50 rounded-xl border border-brand-200 text-xs outline-none focus:border-brand-500">
@@ -417,11 +414,14 @@
       const dateEl = document.getElementById('signer-service-date');
       if (dateEl) dateEl.value = todayStr;
 
-      await loadStoreContractProfile();
+      // 1. 先用本地預設資料初始化畫面
       initSignaturePad();
       renderIndustryUI();
       renderContractClauses();
       updateFilteredContracts();
+
+      // 2. 異步載入雲端設定
+      await loadStoreContractProfile();
     });
 
     // 1. 雙軌讀取店家設定
@@ -466,6 +466,8 @@
           const cfg = data[0];
           if (cfg.slot_config && cfg.slot_config.contract_config) {
             contractConfig = Object.assign(contractConfig, cfg.slot_config.contract_config);
+            renderIndustryUI();
+            renderContractClauses();
           }
           if (cfg.store_pin) {
             currentStore.admin_pin = cfg.store_pin;
@@ -477,32 +479,62 @@
       }
     }
 
+    // ★ 關鍵修復 1：單選點選切換時立刻聯動前台顯隱與徽章
+    function onIndustryRadioChange(mode) {
+      contractConfig.industry = mode;
+      renderIndustryUI();
+    }
+
     // 2. 行業別 UI 切換 (寵美模式展開毛孩欄位)
     function renderIndustryUI() {
       const isPet = (contractConfig.industry === 'pet');
-      document.getElementById('badge-industry-mode').innerText = isPet ? '寵物美容住宿模式' : '美業沙龍模式';
-      document.getElementById('badge-industry-mode').className = isPet 
-        ? 'text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-bold border border-emerald-200'
-        : 'text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 font-bold border border-amber-200';
       
-      document.getElementById('box-pet-fields').classList.toggle('hidden', !isPet);
+      const modeBadge = document.getElementById('badge-industry-mode');
+      if (modeBadge) {
+        modeBadge.innerText = isPet ? '寵物美容住宿模式' : '美業沙龍模式';
+        modeBadge.className = isPet 
+          ? 'text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-bold border border-emerald-200'
+          : 'text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 font-bold border border-amber-200';
+      }
+      
+      // 前台毛孩名字輸入區塊顯隱控制
+      const petBox = document.getElementById('box-pet-fields');
+      if (petBox) {
+        if (isPet) {
+          petBox.classList.remove('hidden');
+        } else {
+          petBox.classList.add('hidden');
+        }
+      }
 
-      // 下拉服務清單
+      // 下拉服務清單更新
       const sel = document.getElementById('signer-service-select');
-      const serviceArray = (contractConfig.services || "").split(',').map(s => s.trim()).filter(Boolean);
-      sel.innerHTML = serviceArray.map(s => `<option value="${s}">${s}</option>`).join('');
+      if (sel) {
+        const serviceArray = (contractConfig.services || "").split(',').map(s => s.trim()).filter(Boolean);
+        sel.innerHTML = serviceArray.map(s => `<option value="${s}">${s}</option>`).join('');
+      }
 
-      // 同步後台表單現值
-      document.getElementById('contract-content-input').value = contractConfig.content || MOHW_OFFICIAL_10_CLAUSES.replace(/{{STORE_NAME}}/g, currentStore.store_name);
-      document.getElementById('contract-services-input').value = contractConfig.services || "";
-      if (document.getElementById(`rad-${contractConfig.industry}`)) {
-        document.getElementById(`rad-${contractConfig.industry}`).checked = true;
+      // 同步店長後台表單現值
+      const contentInput = document.getElementById('contract-content-input');
+      if (contentInput) {
+        contentInput.value = contractConfig.content || MOHW_OFFICIAL_10_CLAUSES.replace(/{{STORE_NAME}}/g, currentStore.store_name);
+      }
+      const servicesInput = document.getElementById('contract-services-input');
+      if (servicesInput) {
+        servicesInput.value = contractConfig.services || "";
+      }
+
+      // 同步單選按鈕勾選狀態
+      const targetRadio = document.getElementById(`rad-${contractConfig.industry}`);
+      if (targetRadio) {
+        targetRadio.checked = true;
       }
     }
 
     // 3. 渲染條款內容與智慧滾動檢測
     function renderContractClauses() {
       const body = document.getElementById('contract-clause-body');
+      if (!body) return;
       let rawText = contractConfig.content || MOHW_OFFICIAL_10_CLAUSES;
       rawText = rawText.replace(/{{STORE_NAME}}/g, currentStore.store_name);
 
@@ -593,6 +625,7 @@
     // Canvas 手寫板初始化
     function initSignaturePad() {
       canvas = document.getElementById('sig-canvas');
+      if (!canvas) return;
       ctx = canvas.getContext('2d');
 
       const resize = () => {
@@ -617,7 +650,8 @@
       const start = (e) => {
         isDrawing = true;
         hasSigned = true;
-        document.getElementById('sig-placeholder').classList.add('hidden');
+        const ph = document.getElementById('sig-placeholder');
+        if (ph) ph.classList.add('hidden');
         const pos = getPos(e);
         ctx.beginPath();
         ctx.moveTo(pos.x, pos.y);
@@ -642,9 +676,11 @@
     }
 
     function clearSignatureCanvas() {
+      if (!ctx || !canvas) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       hasSigned = false;
-      document.getElementById('sig-placeholder').classList.remove('hidden');
+      const ph = document.getElementById('sig-placeholder');
+      if (ph) ph.classList.remove('hidden');
     }
 
     // 前台：姓名、手機任意輸入失焦自動帶入其他資料
@@ -653,12 +689,17 @@
       const n = document.getElementById('signer-name').value.trim();
       const hint = document.getElementById('contract-cust-hint');
 
-      const all = Object.values(contractCustomers);
-      const found = all.find(c => (p && c.phone === p) || (n && c.name === n));
+      if (!p && !n) {
+        if (hint) hint.classList.add('hidden');
+        return;
+      }
+
+      const all = Object.values(contractCustomers || {});
+      const found = all.find(c => (p && c.phone && c.phone === p) || (n && c.name && c.name === n));
 
       if (found) {
-        document.getElementById('signer-name').value = found.name;
-        document.getElementById('signer-phone').value = found.phone;
+        document.getElementById('signer-name').value = found.name || n;
+        document.getElementById('signer-phone').value = found.phone || p;
         if (found.email) document.getElementById('signer-email').value = found.email;
 
         if (hint) {
@@ -670,7 +711,7 @@
       }
     }
 
-    // 4. 送出簽約 (修復順序，補齊存證與信件直傳網址)
+    // 4. 送出簽約 (資料驗證 ＋ 寫入本地小庫 ＋ 呼叫後端發信)
     async function submitContractSigning() {
       const agreeCb = document.getElementById('cb-agree-contract');
       if (!agreeCb || !agreeCb.checked) {
@@ -680,7 +721,6 @@
         return Swal.fire('請於手寫簽名板親筆簽署大名！', '簽章為重要數位法律存證要件，未簽署無法送出。', 'warning');
       }
 
-      // ★ 先提取變數，杜絕 ReferenceError 崩潰
       const name = document.getElementById('signer-name').value.trim();
       const phone = document.getElementById('signer-phone').value.trim();
       const email = document.getElementById('signer-email').value.trim();
@@ -688,14 +728,6 @@
       const service = document.getElementById('signer-service-select').value;
       const isPet = (contractConfig.industry === 'pet');
       const petName = isPet ? document.getElementById('pet-name').value.trim() : '';
-
-      // 檢查首次填寫完整性
-      const isExisting = contractCustomers[phone] || Object.values(contractCustomers).some(c => c.name === name);
-      if (!isExisting) {
-        if (!name || !phone || !email || !email.includes('@')) {
-          return Swal.fire('首次簽約請完整填寫！', '姓名、手機號碼與電子信箱皆為法律存證必填項目。', 'warning');
-        }
-      }
 
       if (!name || !phone || !email || !email.includes('@')) {
         return Swal.fire('請完整填寫姓名、手機號碼與正確的電子信箱！', '', 'warning');
@@ -707,7 +739,7 @@
         return Swal.fire('寵美模式請填寫毛孩名字！', '', 'warning');
       }
 
-      // 更新與覆蓋顧客資料庫 (支援姓名/手機帶入)
+      // 更新與覆蓋顧客資料庫
       contractCustomers[phone] = { name, phone, email };
       localStorage.setItem('contract_customers_db', JSON.stringify(contractCustomers));
 
@@ -739,9 +771,7 @@
       contractRecords.unshift(contractData);
       localStorage.setItem('signed_contracts_db', JSON.stringify(contractRecords));
 
-      // 2. 將親筆簽名上傳至 Supabase Storage 換取永久公開存證 URL
-      // [優化] 將親筆簽名上傳換取永久公開存證 URL
-      // [優化] 取得親筆簽名：優先嘗試 Storage 上傳，失敗則完整保留 Base64 供信件查看
+      // 2. 將親筆簽名上傳至 Supabase Storage 換取永久公開存證 URL，失敗則退回 Base64
       let signatureUrl = sigBase64;
       try {
         const blob = await (await fetch(sigBase64)).blob();
@@ -763,7 +793,7 @@
         console.warn("Storage 上傳略過，改用 Base64 直接存證:", e);
       }
 
-      // 呼叫 GAS 發送存證副本
+      // 3. 呼叫 GAS 發送存證副本
       try {
         await fetch(GAS_API_URL, {
           method: "POST",
@@ -780,14 +810,14 @@
             petName: petName,
             isPet: isPet,
             signedAt: nowStr,
-            signatureUrl: signatureUrl, // ★ 傳入真實網址或 Base64 代碼，不傳替代文字
+            signatureUrl: signatureUrl,
             contractContent: contractConfig.content || ""
           })
         });
       } catch (e) {
         console.warn("存證發信略過:", e);
       }
-      
+
       Swal.fire({
         title: '數位契約簽署成功！',
         html: `
@@ -818,7 +848,7 @@
       });
     }
 
-    // 5. 店長專區驗證 (5 次防盜熔斷 + alyn9999 金鑰)
+    // 5. 店長專區驗證
     async function openStaffManagerPrompt() {
       const lockKey = `contract_lock_${currentStore.id || 'default'}`;
       const failKey = `contract_fail_${currentStore.id || 'default'}`;
@@ -909,12 +939,11 @@
       });
     }
 
-    // 儲存合約設定至雲端 (修正：確保 industry 模式完整入庫)
+    // ★ 關鍵修復 2：單一完整、支援 industry 模式入庫的儲存函式
     async function saveContractSettingsToCloud(isSilent = false) {
       contractConfig.content = document.getElementById('contract-content-input').value.trim();
       contractConfig.services = document.getElementById('contract-services-input').value.trim();
 
-      // ★ 確保抓取當前單選所勾選的模式
       const selectedModeRadio = document.querySelector('input[name="mgr-industry"]:checked');
       if (selectedModeRadio) {
         contractConfig.industry = selectedModeRadio.value;
@@ -966,7 +995,7 @@
           })
         });
 
-        renderIndustryUI(); // 前台即刻同步更新
+        renderIndustryUI();
         renderContractClauses();
         if (!isSilent) Swal.fire('契約條款與行業模式已成功更新至雲端！', '', 'success');
       } catch (e) {
@@ -974,66 +1003,7 @@
       }
     }
 
-    // 儲存合約設定至雲端 (安全增量更新)
-    async function saveContractSettingsToCloud(isSilent = false) {
-      contractConfig.content = document.getElementById('contract-content-input').value.trim();
-      contractConfig.services = document.getElementById('contract-services-input').value.trim();
-
-      if (!isSilent) {
-        Swal.fire({
-          title: '正在同步儲存合約設定...',
-          allowOutsideClick: false,
-          didOpen: () => Swal.showLoading()
-        });
-      }
-
-      try {
-        await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?id=eq.${currentStore.id}`, {
-          method: "PATCH",
-          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json" },
-          body: JSON.stringify({ admin_pin: currentStore.admin_pin })
-        });
-
-        let mergedConfig = {};
-        try {
-          const fetchRes = await fetch(`${SUPABASE_URL}/rest/v1/tool_settings?store_id=eq.${currentStore.id}&select=slot_config`, {
-            headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` }
-          });
-          const existingData = await fetchRes.json();
-          if (existingData && existingData.length > 0 && existingData[0].slot_config) {
-            mergedConfig = existingData[0].slot_config;
-          }
-        } catch (e) {
-          console.warn("無法取得現有配置");
-        }
-
-        mergedConfig.contract_config = contractConfig;
-
-        await fetch(`${SUPABASE_URL}/rest/v1/tool_settings?on_conflict=store_id`, {
-          method: "POST",
-          headers: {
-            "apikey": SUPABASE_ANON_KEY,
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-            "Content-Type": "application/json",
-            "Prefer": "resolution=merge-duplicates"
-          },
-          body: JSON.stringify({
-            store_id: currentStore.id,
-            slot_config: mergedConfig,
-            store_pin: currentStore.admin_pin,
-            updated_at: new Date().toISOString()
-          })
-        });
-
-        renderIndustryUI();
-        renderContractClauses();
-        if (!isSilent) Swal.fire('契約條款已成功更新至雲端！', '', 'success');
-      } catch (e) {
-        if (!isSilent) Swal.fire('儲存失敗', e.message, 'error');
-      }
-    }
-
-    // 6. 電子合約存證庫 (含施作日期、簽名縮圖與複製 DataURL)
+    // 6. 電子合約存證庫
     function updateFilteredContracts() {
       filteredContracts = [...contractRecords];
       renderContractsTable();

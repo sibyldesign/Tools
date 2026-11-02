@@ -158,7 +158,6 @@
               <option value="loyalty">04. VIP 數位會員存摺 (loyalty.html)</option>
               <option value="overview">05. 全日排程席位防撞 (overview.html)</option>
               <option value="contract">06. 數位定型化契約 (contract.html)</option>
-              <option value="admin">07. 集成管理總後台 (tools-admin.html)</option>
               <option value="ALL_TOOLS">全系列微工具 (全線緊急全面大封鎖)</option>
             </select>
           </div>
@@ -283,9 +282,8 @@
       { id: "pos", name: "02. 極簡收銀小幫手", file: "pos.html" },
       { id: "quote", name: "03. 服務報價試算器", file: "quote.html" },
       { id: "loyalty", name: "04. VIP數位會員存摺", file: "loyalty.html" },
-      { id: "reminder", name: "05. LINE防放鳥推播", file: "reminder.gs" },
-      { id: "overview", name: "06. 全日排程席位防撞", file: "overview.html" },
-      { id: "contract", name: "07. 數位定型化契約", file: "contract.html" }
+      { id: "overview", name: "05. 全日排程席位防撞", file: "overview.html" },
+      { id: "contract", name: "06. 數位定型化契約", file: "contract.html" }
     ];
 
     let toolsCurrentPage = 1;
@@ -294,9 +292,9 @@
 
     // 微工具維護狀態字典
     let toolMaintenanceState = {
-      slot: false, pos: false, quote: false, loyalty: false, reminder: false, overview: false, contract: false, admin: false, ALL_TOOLS: false
+      slot: false, pos: false, quote: false, loyalty: false, overview: false, contract: false, ALL_TOOLS: false
     };
-
+    
     // 許願建議資料變數
     let allToolFeedbacksList = [];
     let currentFeedbackToolFilter = 'ALL';
@@ -541,29 +539,34 @@
               </div>
             </div>
 
-            <!-- 防盜專屬後台入口 -->
-            <div class="p-3 bg-amber-50 rounded-2xl border border-amber-200 space-y-1.5 text-xs">
-              <div class="flex items-center justify-between gap-2">
-                <div class="flex items-center gap-1.5 truncate">
-                  <span class="font-bold text-amber-950 shrink-0"><i class="fa-solid fa-shield-halved text-[#8C7355] mr-1"></i>專屬防盜後台入口：</span>
-                  <span class="font-mono text-gray-600 text-[11px] truncate">${secureAdminUrl}</span>
-                </div>
-                <div class="flex items-center gap-1 shrink-0">
-                  <a href="${secureAdminUrl}" target="_blank" class="px-2.5 py-1 bg-white border border-brand-200 text-brand-800 rounded-lg font-bold hover:bg-brand-50">檢視</a>
-                  <button type="button" onclick="navigator.clipboard.writeText('${secureAdminUrl}'); Swal.fire('已複製防盜後台網址！', '此網址附帶專屬 Token，請安心傳送給老闆', 'success');" class="px-2.5 py-1 bg-[#8C7355] text-white rounded-lg font-bold hover:bg-[#7A6246]">複製</button>
-                </div>
+            <!-- 店長管理指引卡片 (取代原本繁雜的 tools-admin 連結) -->
+            <div class="p-3 bg-amber-50 rounded-2xl border border-amber-200 space-y-1 text-xs">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-amber-950 flex items-center gap-1.5">
+                  <i class="fa-solid fa-key text-[#8C7355]"></i> 店長前台管理驗證 PIN 碼：
+                  <code class="px-2 py-0.5 bg-white border border-amber-300 rounded font-mono font-black text-amber-800">${s.admin_pin || '8888'}</code>
+                </span>
+                <button type="button" onclick="editStoreFieldPrompt('${s.id}', 'admin_pin', '後台 PIN 碼', '${s.admin_pin || '8888'}')" class="text-blue-600 underline text-[10.5px]">修改密碼</button>
               </div>
-              <div class="text-[10px] text-amber-800 font-mono">
-                此網址採用隨機不可逆金鑰防禦，無法透過修改 ID 破解，請告知店家加入手機主畫面捷徑。
+              <div class="text-[10px] text-amber-800 leading-relaxed">
+                店家只需開啟任一微工具前台，點擊右上角「店長專區」輸入 PIN 碼即可立即設定該工具與檢視存證資料。
               </div>
             </div>
 
-            <!-- 已購微工具前台網址庫 -->
+            <!-- 已購微工具前台網址庫 (新增一鍵全選複製全部網址) -->
             <div class="space-y-1.5">
-              <span class="font-bold text-xs text-brand-800 block">各微工具獨立前台網址 (可直接放官方 LINE 圖文選單)：</span>
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-xs text-brand-800">各微工具獨立前台網址：</span>
+                ${tools.length > 0 ? `
+                  <button type="button" onclick="copyAllStoreToolUrls('${s.id}')" class="px-2.5 py-1 bg-brand-500 hover:bg-brand-600 text-white rounded-lg text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
+                    <i class="fa-regular fa-copy text-[10px]"></i>
+                    <span>一鍵複製該店全部網址</span>
+                  </button>
+                ` : ''}
+              </div>
               <div class="space-y-1">${toolLinksHtml || '<div class="text-xs text-gray-400 py-1">尚未開通任何工具</div>'}</div>
             </div>
-
+            
             <!-- 可修改之詳細資料 -->
             <div class="p-3 bg-white rounded-2xl border border-brand-100 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
               <div class="flex items-center justify-between">
@@ -621,6 +624,56 @@
       }).join('');
     }
 
+    // [新增] 一鍵全選複製該店所有微工具網址
+    async function copyAllStoreToolUrls(storeId) {
+      const s = allToolStores.find(item => item.id === storeId);
+      if (!s) return;
+
+      const tools = Array.isArray(s.purchased_tools) ? s.purchased_tools : [];
+      if (tools.length === 0) {
+        return Swal.fire('該店家尚未配置任何微工具', '', 'warning');
+      }
+
+      const storeKey = s.store_slug || s.id;
+      
+      // 打包格式：店名 + 各工具名稱與完整專屬連結
+      let allText = `【${s.store_name}】專屬微工具獨立前台網址清單：\n\n`;
+      
+      tools.forEach(tKey => {
+        const toolObj = TOOLS_CATALOG.find(tc => tc.id === tKey);
+        if (toolObj) {
+          const toolUrl = `https://tools.heysibyl.com/${toolObj.file}?s=${storeKey}`;
+          allText += `• ${toolObj.name}：\n  ${toolUrl}\n`;
+        }
+      });
+
+      allText += `\n📖 線上操作教學手冊：\n  https://tools.heysibyl.com/tutorial.html\n`;
+      allText += `🔐 店長前台管理 PIN 碼：${s.admin_pin || '8888'}\n`;
+      allText += `（開啟任一工具點擊右上角「店長專區」輸入 PIN 碼即可進入管理）`;
+
+      try {
+        await navigator.clipboard.writeText(allText);
+        Swal.fire({
+          title: '已複製該店全部網址！',
+          html: `
+            <div class="text-left text-xs bg-brand-50 p-3 rounded-xl border border-brand-200 text-brand-900 space-y-1.5 font-sans leading-relaxed">
+              <div class="font-bold text-brand-900">已打包以下完整清冊至剪貼簿：</div>
+              <div class="p-2 bg-white rounded-lg border font-mono text-[10.5px] text-gray-700 whitespace-pre-wrap max-h-40 overflow-y-auto">${allText}</div>
+              <div class="text-emerald-700 font-bold pt-1">✓ 可直接貼給店家官方 LINE 或存入記事本！</div>
+            </div>
+          `,
+          icon: 'success',
+          confirmButtonColor: '#8C7355'
+        });
+      } catch (err) {
+        Swal.fire({
+          title: '複製失敗，請手動複製',
+          html: `<textarea readonly class="w-full p-2 text-xs border rounded-xl font-mono">${allText}</textarea>`,
+          confirmButtonColor: '#8C7355'
+        });
+      }
+    }
+    
     async function activateStoreById(id) {
       const s = allToolStores.find(item => item.id === id);
       if (!s) return;
@@ -708,7 +761,6 @@
             action: "sendToolStoreWelcomeEmail",
             toEmail: email,
             storeName: s.store_name,
-            adminUrl: secureAdminUrl,
             pin: s.admin_pin || '8888',
             purchasedToolsText: purchasedNames,
             frontendLinksHtml: frontendLinksHtml
@@ -721,8 +773,8 @@
             <div class="text-left text-xs bg-brand-50 p-3.5 rounded-2xl border border-brand-200 text-brand-900 space-y-1.5 font-sans">
               <div>收件信箱：<b>${email}</b></div>
               <div>店家名稱：<b>${s.store_name}</b></div>
-              <div>後台 PIN 碼：<b>${s.admin_pin || '8888'}</b></div>
-              <div class="pt-1 text-emerald-700 font-bold">✓ 信件已包含：專屬防盜後台入口、已購前台網址、線上教學手冊及客服指引！</div>
+              <div>店長 PIN 碼：<b>${s.admin_pin || '8888'}</b></div>
+              <div class="pt-1 text-emerald-700 font-bold">✓ 信件已包含各已購前台網址、操作教學手冊與客服聯絡方式！</div>
             </div>
           `,
           icon: 'success',

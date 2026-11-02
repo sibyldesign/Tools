@@ -84,7 +84,7 @@
         </button>
         <button type="button" onclick="openManagerPinPrompt()" class="px-3 py-1.5 bg-[#8C7355] hover:bg-[#7A6246] text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs">
           <i class="fa-solid fa-gear text-amber-200"></i>
-          <span>店長專區</span>
+          <span>店長管理</span>
         </button>
       </div>
     </div>
@@ -285,6 +285,25 @@
       <!-- 滾動內容區域 -->
       <div class="p-5 overflow-y-auto space-y-4 text-xs">
 
+        <!-- PIN 碼展示與修改 -->
+          <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 flex justify-between items-center">
+            <div>
+              <span class="font-bold text-brand-900 block">店長前台管理 PIN 碼：</span>
+              <span class="text-[10px] text-brand-400">進入此管理專區之驗證密碼</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <code class="px-3 py-1 bg-white border border-brand-200 rounded-xl font-mono font-black text-sm text-[#8C7355]" id="disp-manager-pin">8888</code>
+              <button type="button" onclick="changeAdminPinModal()" class="px-2.5 py-1 bg-white border border-brand-200 text-blue-600 rounded-lg text-[10.5px] font-bold hover:bg-brand-50">
+                修改密碼
+              </button>
+            </div>
+            <!-- 許願建議小按鈕 -->
+<button type="button" onclick="openFeedbackPromptModal('當前工具名稱')" class="px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
+  <i class="fa-solid fa-lightbulb text-amber-600"></i>
+  <span>功能許願</span>
+</button>
+          </div>
+        
         <!-- 營業時間與公休日配置 -->
         <div id="tab-business-settings" class="mgr-pane space-y-4">
           <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 space-y-3">
@@ -1803,6 +1822,104 @@
         serviceCatalog[idx] = Object.assign(serviceCatalog[idx], v);
         renderAdminServicesList();
         await saveOverviewConfigToCloud();
+      }
+    }
+
+    // [新增] 修改店長 PIN 碼
+    async function changeAdminPinModal() {
+      const { value: newPin } = await Swal.fire({
+        title: '修改店長管理 PIN 碼',
+        input: 'password',
+        inputPlaceholder: '請輸入新的 4~6 碼數字密碼',
+        showCancelButton: true,
+        confirmButtonText: '確認儲存',
+        confirmButtonColor: '#8C7355',
+        inputValidator: v => (!v || v.length < 4 ? '密碼長度至少需 4 碼！' : null)
+      });
+      if (newPin && newPin.trim()) {
+        currentStore.admin_pin = newPin.trim();
+        const pinDisp = document.getElementById('disp-manager-pin');
+        if (pinDisp) pinDisp.innerText = currentStore.admin_pin;
+        
+        // 增量同步更新店長 PIN 碼至雲端
+        try {
+          await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?id=eq.${currentStore.id}`, {
+            method: "PATCH",
+            headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ admin_pin: currentStore.admin_pin })
+          });
+          await saveOverviewConfigToCloud();
+          Swal.fire('PIN 碼修改成功！', `下次請使用新密碼：${currentStore.admin_pin}`, 'success');
+        } catch(e) {
+          Swal.fire('修改失敗', e.message, 'error');
+        }
+      }
+    }
+
+    // [新增] 功能許願池提交至 Supabase
+    async function openFeedbackPromptModal(toolTitle) {
+      const storeName = currentStore.store_name || "排程總覽門市";
+      
+      const { value: formValues } = await Swal.fire({
+        title: '💡 功能優化與改版許願池',
+        html: `
+          <div class="text-left text-xs space-y-2.5 p-1 font-sans">
+            <div class="text-gray-500 leading-relaxed">
+              您的現場反饋是工具進化的最大動力！請告訴我們您希望增加什麼功能或如何更好用：
+            </div>
+            <div>
+              <label class="font-bold text-brand-900 block mb-1">提案店家 / 稱呼：</label>
+              <input id="fb-user-name" class="swal2-input text-xs font-bold" value="${storeName} 店長" placeholder="請輸入稱呼">
+            </div>
+            <div>
+              <label class="font-bold text-brand-900 block mb-1">許願建議內容 *：</label>
+              <textarea id="fb-content" rows="4" class="w-full p-2.5 bg-brand-50 border border-brand-200 rounded-xl text-xs outline-none focus:border-[#8C7355] leading-relaxed" placeholder="例如：希望可以增加依設計師專長自動分類、或是增加連動休假行事曆..."></textarea>
+            </div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '送出許願建議',
+        confirmButtonColor: '#8C7355',
+        cancelButtonText: '取消',
+        preConfirm: () => {
+          const content = document.getElementById('fb-content').value.trim();
+          const userName = document.getElementById('fb-user-name').value.trim();
+          if (!content) {
+            Swal.showValidationMessage('請填寫建議內容喔！');
+            return false;
+          }
+          return { userName, content };
+        }
+      });
+
+      if (formValues) {
+        Swal.fire({ title: '正在傳送建議...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_feedbacks`, {
+            method: "POST",
+            headers: {
+              "apikey": SUPABASE_ANON_KEY,
+              "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              store_name: currentStore.store_name || "排程沙龍",
+              tool_name: toolTitle,
+              user_name: formValues.userName,
+              content: formValues.content,
+              created_at: new Date().toISOString()
+            })
+          });
+          if (!res.ok) throw new Error(await res.text());
+          Swal.fire({
+            title: '感謝您的寶貴建議！',
+            text: '希貝兒設計所已收到您的許願，我們將持續評估並在後續版本升級中加入！',
+            icon: 'success',
+            confirmButtonColor: '#8C7355'
+          });
+        } catch (err) {
+          Swal.fire('傳送未成功', err.message, 'error');
+        }
       }
     }
   </script>

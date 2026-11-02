@@ -36,7 +36,6 @@
       opacity: 0.65;
     }
 
-    /* SweetAlert2 全域確認按鈕統一套用系統質感棕色 */
     .swal2-styled.swal2-confirm {
       background-color: #8C7355 !important;
       color: #ffffff !important;
@@ -47,16 +46,12 @@
       padding: 0.625rem 1.5rem !important;
       font-size: 0.8125rem !important;
     }
-
     .swal2-styled.swal2-confirm:hover {
       background-color: #7A6246 !important;
     }
-
     .swal2-styled.swal2-confirm:focus {
       box-shadow: 0 0 0 3px rgba(140, 115, 85, 0.3) !important;
     }
-
-    /* 取消按鈕同步美化為質感米灰 */
     .swal2-styled.swal2-cancel {
       background-color: #EBE5DF !important;
       color: #5C4B3C !important;
@@ -65,7 +60,6 @@
       padding: 0.625rem 1.25rem !important;
       font-size: 0.8125rem !important;
     }
-
     .swal2-styled.swal2-cancel:hover {
       background-color: #D5C7BC !important;
     }
@@ -97,17 +91,14 @@
 
   <main class="max-w-xl mx-auto p-4 space-y-4">
 
-    <!-- 1. 9:16 活動宣傳與價目輪播圖 (高斯模糊補底 + 白點指示) -->
+    <!-- 1. 9:16 活動宣傳與價目輪播圖 -->
     <section class="bg-stone-900 rounded-3xl overflow-hidden shadow-lg border border-brand-200 relative">
       <div class="w-full aspect-[9/16] max-h-[460px] relative overflow-hidden flex items-center justify-center">
-        <!-- 模糊底圖 -->
         <div id="carousel-blur-bg" class="absolute inset-0 bg-cover bg-center blur-backdrop pointer-events-none transition-all duration-700"></div>
         <div class="absolute inset-0 bg-black/25 z-0 pointer-events-none"></div>
 
-        <!-- 清晰前景主圖 -->
         <img id="carousel-main-img" src="" alt="店內價目與活動介紹" class="max-h-full max-w-full object-contain relative z-10 transition-all duration-500 drop-shadow-2xl">
 
-        <!-- 左右滑動切換鍵 -->
         <button type="button" onclick="prevSlide()" class="absolute left-2.5 z-20 w-8 h-8 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur-sm transition">
           <i class="fa-solid fa-chevron-left text-xs"></i>
         </button>
@@ -115,12 +106,11 @@
           <i class="fa-solid fa-chevron-right text-xs"></i>
         </button>
 
-        <!-- 底部進度白點指示 -->
         <div class="absolute bottom-3 inset-x-0 z-20 flex justify-center items-center gap-1.5" id="carousel-dots-container"></div>
       </div>
     </section>
 
-    <!-- 2. 主服務核心項目挑選 (分類切換 ＋ 多選點擊) -->
+    <!-- 2. 主服務核心項目挑選 -->
     <section class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-4">
       <div class="flex justify-between items-center pb-2 border-b border-brand-100">
         <div>
@@ -130,14 +120,11 @@
         <span class="text-[10.5px] font-mono text-[#8C7355] font-bold" id="selected-service-badge">尚未選擇</span>
       </div>
 
-      <!-- 分類標籤滑動條 -->
       <div class="flex gap-2 overflow-x-auto no-scrollbar py-0.5" id="quote-category-tabs"></div>
-
-      <!-- 項目清單按鈕網格 -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5" id="quote-services-grid"></div>
     </section>
 
-    <!-- 3. 全美業通用：工藝加值與專屬護理 (複選切換) -->
+    <!-- 3. 全美業通用：工藝加值與專屬護理 -->
     <section class="bg-white p-5 rounded-3xl border border-brand-200 shadow-sm space-y-3.5">
       <div class="flex justify-between items-center pb-2 border-b border-brand-100">
         <div>
@@ -174,7 +161,7 @@
         </div>
       </div>
 
-      <!-- 奢華深林墨綠質感預約按鈕 -->
+      <!-- 預約按鈕 -->
       <button type="button" onclick="copyQuoteAndRedirectLine()" class="w-full py-3.5 bg-[#1F4E3D] hover:bg-[#183E30] text-white rounded-2xl text-xs font-bold tracking-wide transition shadow-md flex items-center justify-center gap-2 group">
         <i class="fa-brands fa-line text-lg text-emerald-300 group-hover:scale-110 transition-transform"></i>
         <span>複製報價明細，前往官方 LINE 預約時段</span>
@@ -187,7 +174,6 @@
 
   </main>
 
-  <!-- ★★★ 請貼在這裡 ★★★ -->
   <footer class="max-w-xl mx-auto py-8 px-4 text-center space-y-2 select-none">
     <div>
       <a href="https://www.heysibyl.com/" target="_blank" class="font-mono text-[10.5px] opacity-75 hover:opacity-100 text-brand-400 hover:text-brand-700 transition-colors inline-block tracking-wider">
@@ -234,13 +220,13 @@
       <!-- 滾動內容區域 -->
       <div class="p-5 overflow-y-auto space-y-4 text-xs">
 
-        <!-- [分頁 1] 主服務項目管理 (上下排序 ＋ 描述 ＋ 編輯) -->
+        <!-- [分頁 1] 主服務項目管理 -->
         <div id="tab-services-admin" class="mgr-tab-content space-y-4">
           <!-- PIN 碼展示與修改 -->
           <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 flex justify-between items-center">
             <div>
               <span class="font-bold text-brand-900 block">店長前台管理 PIN 碼：</span>
-              <span class="text-[10px] text-brand-400">進入此店長專區之驗證密碼</span>
+              <span class="text-[10px] text-brand-400">全店通用之店長專區驗證密碼</span>
             </div>
             <div class="flex items-center gap-2">
               <code class="px-3 py-1 bg-white border border-brand-200 rounded-xl font-mono font-black text-sm text-[#8C7355]" id="disp-manager-pin">8888</code>
@@ -248,11 +234,14 @@
                 修改密碼
               </button>
             </div>
-            <!-- 許願建議小按鈕 -->
-<button type="button" onclick="openFeedbackPromptModal('當前工具名稱')" class="px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
-  <i class="fa-solid fa-lightbulb text-amber-600"></i>
-  <span>功能許願</span>
-</button>
+          </div>
+
+          <!-- 許願建議小按鈕 -->
+          <div class="flex justify-end">
+            <button type="button" onclick="openFeedbackPromptModal('03. 服務報價試算器')" class="px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs">
+              <i class="fa-solid fa-lightbulb text-amber-600"></i>
+              <span>功能優化許願</span>
+            </button>
           </div>
 
           <div class="space-y-2">
@@ -276,7 +265,7 @@
           </button>
         </div>
 
-        <!-- [分頁 2] 工藝加購選項管理 (上下排序 ＋ 描述 ＋ 編輯) -->
+        <!-- [分頁 2] 工藝加購選項管理 -->
         <div id="tab-addons-admin" class="mgr-tab-content space-y-4 hidden">
           <div class="space-y-2">
             <div class="flex justify-between items-center">
@@ -303,7 +292,6 @@
               <span class="text-[10px] text-brand-500 font-mono">建議解析度 1080 × 1920</span>
             </div>
 
-            <!-- 檔案選擇與直傳按鈕 -->
             <div class="flex flex-wrap items-center gap-2">
               <input type="file" id="quote-upload-carousel-file" accept="image/*" class="text-xs text-brand-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border file:border-brand-200 file:text-xs file:font-bold file:bg-white file:text-brand-800 hover:file:bg-brand-50 cursor-pointer">
               <button type="button" onclick="uploadQuoteCarouselToSupabase()" class="px-4 py-1.5 bg-[#8C7355] hover:bg-[#7A6246] text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-1 shrink-0">
@@ -312,7 +300,6 @@
               </button>
             </div>
 
-            <!-- 手動外鏈補充框 -->
             <div class="flex gap-2 pt-1 border-t border-brand-200/60">
               <input type="url" id="admin-new-carousel-url" placeholder="亦可手動貼上圖片外部網址 (https://...)" class="flex-1 p-2 bg-white border border-brand-200 rounded-xl text-xs font-mono outline-none">
               <button type="button" onclick="addAdminCarouselImg()" class="px-3.5 py-1.5 bg-stone-900 text-white rounded-xl font-bold text-xs shadow-2xs shrink-0">
@@ -321,7 +308,6 @@
             </div>
           </div>
 
-          <!-- 已加入之輪播圖列表 (可預覽並刪除) -->
           <div class="space-y-2">
             <span class="font-bold text-brand-800 block">目前輪播海報清單 (點擊刪除圖片)：</span>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="admin-carousel-grid"></div>
@@ -376,18 +362,23 @@
     let slideTimer = null;
 
     window.addEventListener('DOMContentLoaded', async () => {
-      // 1. 先用預設資料完整初始化畫面，保證前台絕不空白
+      loadLocalQuoteConfig();
       initCarousel();
       renderCategoryTabs();
       renderServicesGrid();
       renderAddonsList();
       updateCartSummary();
 
-      // 2. 異步載入雲端專屬門市設定
       await loadStoreQuoteProfile();
     });
 
-    // 1. 讀取店家設定
+    function loadLocalQuoteConfig() {
+      const saved = localStorage.getItem('local_quote_config');
+      if (saved) {
+        try { quoteConfig = Object.assign(quoteConfig, JSON.parse(saved)); } catch (e) {}
+      }
+    }
+
     async function loadStoreQuoteProfile() {
       const urlParams = new URLSearchParams(window.location.search);
       const storeParam = urlParams.get('s') || urlParams.get('store') || urlParams.get('store_id');
@@ -405,7 +396,7 @@
         const stores = await res.json();
         if (stores && stores.length > 0) {
           currentStore = stores[0];
-          document.getElementById('quote-store-name').innerHTML = `<i class="fa-solid fa-calculator text-[#8C7355]"></i> ${currentStore.store_name}`;
+          document.getElementById('quote-store-name').innerHTML = `<i class="fa-solid fa-calculator text-[#8C7355]"></i> <span>${currentStore.store_name}</span>`;
           document.getElementById('quote-store-sub').innerText = `專屬報價試算 · ${currentStore.store_slug || currentStore.id.slice(0,8)}`;
           document.getElementById('header-line-btn').href = currentStore.line_url || "https://line.me/R/ti/p/@480kqjoj";
           
@@ -423,6 +414,9 @@
     }
 
     async function loadCloudQuoteSettings(storeId) {
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(storeId);
+      if (!isUuid) return;
+
       try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_settings?store_id=eq.${storeId}&select=*`, {
           headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` }
@@ -432,14 +426,12 @@
           const cfg = data[0];
           if (cfg.slot_config && cfg.slot_config.quote_config) {
             const remoteCfg = cfg.slot_config.quote_config;
-            // 安全覆蓋：有遠端資料才進行替換
             if (remoteCfg.services && remoteCfg.services.length > 0) quoteConfig.services = remoteCfg.services;
             if (remoteCfg.addons && remoteCfg.addons.length > 0) quoteConfig.addons = remoteCfg.addons;
             if (remoteCfg.categories && remoteCfg.categories.length > 0) quoteConfig.categories = remoteCfg.categories;
             if (remoteCfg.carouselImages && remoteCfg.carouselImages.length > 0) quoteConfig.carouselImages = remoteCfg.carouselImages;
             if (remoteCfg.lineUrl) quoteConfig.lineUrl = remoteCfg.lineUrl;
 
-            // 重新刷新前台
             initCarousel();
             renderCategoryTabs();
             renderServicesGrid();
@@ -457,7 +449,6 @@
       }
     }
 
-    // 2. 9:16 輪播圖 (高斯模糊補底 ＋ 白點進度)
     function initCarousel() {
       const images = quoteConfig.carouselImages || [];
       if (images.length === 0) return;
@@ -495,7 +486,6 @@
     function prevSlide() { showSlide(currentSlideIdx - 1); }
     function goToSlide(i) { showSlide(i); }
 
-    // 3. 分類標籤切換
     function renderCategoryTabs() {
       const container = document.getElementById('quote-category-tabs');
       const cats = ["全部", ...(quoteConfig.categories || [])];
@@ -515,7 +505,6 @@
       renderServicesGrid();
     }
 
-    // 4. 核心主服務項目渲染 (支援多選複選)
     function renderServicesGrid() {
       const grid = document.getElementById('quote-services-grid');
       const list = (activeCategory === "全部")
@@ -562,7 +551,6 @@
         selectedServices.push(found);
       }
 
-      // 若主服務全部取消，自動清空加購項目
       if (selectedServices.length === 0) {
         selectedAddons = [];
       }
@@ -575,7 +563,6 @@
       updateCartSummary();
     }
 
-    // 5. 附加升級與工藝護理 (加購需先選主服務)
     function renderAddonsList() {
       const container = document.getElementById('quote-addons-container');
       const addons = quoteConfig.addons || [];
@@ -633,7 +620,6 @@
       updateCartSummary();
     }
 
-    // 6. 更新明細與試算總金額
     function updateCartSummary() {
       const container = document.getElementById('quote-cart-items');
       const totalDisplay = document.getElementById('quote-total-price');
@@ -680,8 +666,6 @@
       updateCartSummary();
     }
 
-    // 7. 一鍵打包報價明細並跳轉官方 LINE (含引導文字說明)
-    // [局部替換] 報價明細打包至官方 LINE（雙重保障：oaMessage協議 + 自動/手動複製文字）
     async function copyQuoteAndRedirectLine() {
       if (selectedServices.length === 0) {
         return Swal.fire('請先選取至少一項主要服務核心項目！', '', 'warning');
@@ -691,7 +675,7 @@
       selectedServices.forEach(s => total += s.price);
       selectedAddons.forEach(a => total += a.price);
 
-      const storeName = currentStore.store_name || "AAA";
+      const storeName = currentStore.store_name || "沙龍門市";
       
       const servicesText = selectedServices.map(s => `${s.name} (NT$ ${Number(s.price).toLocaleString()})`).join('、');
       
@@ -699,7 +683,6 @@
         ? selectedAddons.map(a => `- ${a.name} (+NT$ ${Number(a.price).toLocaleString()})`).join('\n')
         : '- 無加購護理';
 
-      // 嚴格依照指定範本文字排版
       const quoteMessage = 
         `您好！我在官網完成了線上報價試算，想諮詢以下項目之預約時段：\n\n` +
         `【門市名稱】：${storeName}\n` +
@@ -709,14 +692,12 @@
         `【預算小計】：NT$ ${total.toLocaleString()} 元\n\n` +
         `請問近期有哪些空檔時段可以安排施作呢？謝謝！`;
 
-      // 1. 自動複製到剪貼簿
       try {
         await navigator.clipboard.writeText(quoteMessage);
       } catch (e) {
         console.warn("自動剪貼簿略過:", e);
       }
 
-      // 2. 提取乾淨的 LINE Basic ID (支援 @ 開頭)
       let rawLine = quoteConfig.lineUrl || currentStore.line_url || "@480kqjoj";
       let lineAccount = "@480kqjoj";
       const match = rawLine.match(/@[a-zA-Z0-9_\-]+/);
@@ -726,7 +707,6 @@
         lineAccount = rawLine;
       }
 
-      // 採用 LINE 官方原生預填訊息協議：https://line.me/R/oaMessage/{LINE_ID}/?{文字}
       const lineUrl = `https://line.me/R/oaMessage/${encodeURIComponent(lineAccount)}/?${encodeURIComponent(quoteMessage)}`;
 
       Swal.fire({
@@ -736,7 +716,6 @@
             <div>門市名稱：<b>${storeName}</b></div>
             <div>預算小計：<b class="text-[#1F4E3D] font-mono text-sm">NT$ ${total.toLocaleString()}</b> 元</div>
             
-            <!-- 報價試算明細複製預覽框 -->
             <div class="space-y-1">
               <div class="flex justify-between items-center text-[10.5px] text-brand-700 font-bold">
                 <span>📋 報價諮詢明細：</span>
@@ -747,7 +726,6 @@
               <div class="p-2.5 bg-white rounded-xl border border-brand-200 font-mono text-[11px] text-gray-700 whitespace-pre-wrap select-all max-h-32 overflow-y-auto">${quoteMessage}</div>
             </div>
 
-            <!-- 操作指引說明 -->
             <div class="p-2.5 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 text-xs font-bold space-y-1">
               <div class="flex items-center gap-1.5 text-emerald-900 font-black">
                 <i class="fa-brands fa-line text-base text-emerald-600"></i>
@@ -769,11 +747,11 @@
         }
       });
     }
-    
-    // 8. 店長後台專區驗證與安全熔斷 (失敗 5 次鎖定 + alyn9999 救援金鑰)
+
     async function openManagerPinPrompt() {
-      const lockKey = `mgr_lock_${currentStore.id}`;
-      const failCountKey = `mgr_fail_count_${currentStore.id}`;
+      const storeIdKey = currentStore.id || 'default';
+      const lockKey = `mgr_lock_${storeIdKey}`;
+      const failCountKey = `mgr_fail_count_${storeIdKey}`;
 
       if (localStorage.getItem(lockKey)) {
         return Swal.fire({
@@ -838,11 +816,30 @@
         inputValidator: v => (!v || v.length < 4 ? '密碼長度至少需 4 碼！' : null)
       });
       if (newPin && newPin.trim()) {
-        currentStore.admin_pin = newPin.trim();
+        const updatedPin = newPin.trim();
+        currentStore.admin_pin = updatedPin;
         const pinDisp = document.getElementById('disp-manager-pin');
-        if (pinDisp) pinDisp.innerText = currentStore.admin_pin;
-        await saveQuoteConfigToCloud(true);
-        Swal.fire('PIN 碼修改成功！', `下次請使用新密碼：${currentStore.admin_pin}`, 'success');
+        if (pinDisp) pinDisp.innerText = updatedPin;
+
+        try {
+          const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(currentStore.id);
+          if (isUuid) {
+            await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?id=eq.${currentStore.id}`, {
+              method: "PATCH",
+              headers: { 
+                "apikey": SUPABASE_ANON_KEY, 
+                "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, 
+                "Content-Type": "application/json" 
+              },
+              body: JSON.stringify({ admin_pin: updatedPin })
+            });
+          }
+          await saveQuoteConfigToCloud(true);
+          Swal.fire('PIN 碼修改成功！', `全店通用的管理密碼已更新為：${updatedPin}`, 'success');
+        } catch(e) {
+          console.error("更新密碼同步異常:", e);
+          Swal.fire('修改失敗', e.message, 'error');
+        }
       }
     }
 
@@ -863,7 +860,6 @@
       btn.className = "mgr-tab-btn py-3 px-4 border-b-2 border-[#8C7355] text-[#8C7355]";
     }
 
-    // 9. 後台主服務項目增修、排序 (▲/▼) 與直接編輯
     function renderAdminServicesSortable() {
       const container = document.getElementById('admin-services-sortable-list');
       if (!container) return;
@@ -998,7 +994,6 @@
       }
     }
 
-    // 10. 後台加購選項增修、排序 (▲/▼) 與直接編輯
     function renderAdminAddonsSortable() {
       const container = document.getElementById('admin-addons-sortable-list');
       if (!container) return;
@@ -1101,7 +1096,6 @@
       }
     }
 
-    // 11. Supabase Storage 9:16 活動海報直傳
     async function uploadQuoteCarouselToSupabase() {
       const fileInput = document.getElementById('quote-upload-carousel-file');
       if (!fileInput.files || fileInput.files.length === 0) {
@@ -1140,7 +1134,6 @@
 
         if (!res.ok) throw new Error(await res.text());
 
-        // 取得公開存取網址
         const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/${bucketName}/${filePath}`;
 
         if (!quoteConfig.carouselImages) quoteConfig.carouselImages = [];
@@ -1161,7 +1154,6 @@
       }
     }
 
-    // 12. 輪播海報渲染：顯示網址、前後移動、二次確認刪除
     function renderAdminCarouselGrid() {
       const container = document.getElementById('admin-carousel-grid');
       if (!container) return;
@@ -1229,9 +1221,19 @@
       initCarousel();
     }
 
-    // 13. 儲存設定至 Supabase 雲端 (增量防覆蓋)
     async function saveQuoteConfigToCloud(isSilent = false) {
       quoteConfig.lineUrl = document.getElementById('admin-line-url').value.trim();
+      localStorage.setItem('local_quote_config', JSON.stringify(quoteConfig));
+
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(currentStore.id);
+      if (!isUuid || currentStore.id === "default-store") {
+        renderCategoryTabs();
+        renderServicesGrid();
+        renderAddonsList();
+        initCarousel();
+        if (!isSilent) Swal.fire('報價設定已更新！', '（目前為預設示範模式，設定已暫存於本機）', 'success');
+        return;
+      }
 
       if (!isSilent) {
         Swal.fire({
@@ -1294,7 +1296,6 @@
       }
     }
 
-    // [全工具通用] 店長功能許願與改版建議收集函式
     async function openFeedbackPromptModal(toolTitle) {
       const storeName = currentStore.store_name || "門市店家";
       

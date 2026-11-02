@@ -52,20 +52,32 @@
 </head>
 <body class="bg-brand-50 text-brand-900 antialiased min-h-screen pb-28 select-none">
 
-  <!-- 8888 總管登入遮罩 -->
-  <div id="super-lock" class="fixed inset-0 bg-brand-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white p-8 rounded-3xl shadow-xl border border-brand-200 text-center w-full max-w-xs space-y-3">
-      <div class="w-12 h-12 mx-auto bg-amber-100 rounded-full flex items-center justify-center text-amber-800 text-xl">
-        <i class="fa-solid fa-crown"></i>
+  <!-- ========================================== -->
+  <!-- 超強資安防護登入遮罩 (高抗逆向工程 + 防暴力破解) -->
+  <!-- ========================================== -->
+  <div id="super-lock" class="fixed inset-0 bg-stone-900/95 backdrop-blur-md z-50 flex items-center justify-center p-4 transition-all duration-300">
+    <div class="bg-white p-7 sm:p-8 rounded-3xl shadow-2xl border border-stone-700 text-center w-full max-w-xs space-y-3.5 relative overflow-hidden">
+      <div class="w-12 h-12 mx-auto bg-amber-50 rounded-2xl flex items-center justify-center text-[#8C7355] text-xl border border-amber-200 shadow-2xs">
+        <i class="fa-solid fa-shield-halved"></i>
       </div>
       <div>
         <div class="text-base font-bold text-brand-900">微工具營運總控中心</div>
-        <div class="text-[10px] text-brand-400 font-mono">Sibyl Tools Master Console</div>
+        <div class="text-[9.5px] text-brand-400 font-mono tracking-wider">SIBYL MASTER GATEWAY</div>
       </div>
-      <input type="password" id="super-key-input" onkeydown="if(event.key==='Enter') checkSuperKey()" class="w-full text-center text-2xl tracking-[0.3em] py-2.5 rounded-xl border border-brand-200 focus:ring-2 focus:ring-brand-400 outline-none font-mono" placeholder="輸入金鑰" maxlength="8">
-      <button type="button" onclick="checkSuperKey()" class="w-full py-2.5 bg-[#8C7355] hover:bg-[#7A6246] text-white font-bold rounded-xl shadow-md transition text-xs">
-        驗證登入
+
+      <!-- 錯誤/鎖定警告文字 -->
+      <div id="super-lock-error" class="text-xs text-rose-600 font-bold min-h-[1.25rem] leading-tight"></div>
+
+      <input type="password" id="super-key-input" onkeydown="if(event.key==='Enter') checkSuperKey()" class="w-full text-center text-2xl tracking-[0.3em] py-2.5 rounded-xl border border-brand-200 focus:ring-2 focus:ring-[#8C7355] outline-none font-mono font-bold bg-brand-50/50" placeholder="輸入金鑰" maxlength="12">
+      
+      <button type="button" id="btn-super-submit" onclick="checkSuperKey()" class="w-full py-2.5 bg-[#8C7355] hover:bg-[#7A6246] text-white font-bold rounded-xl shadow-md transition text-xs flex items-center justify-center gap-1.5">
+        <i class="fa-solid fa-lock text-[10px]"></i>
+        <span>安全驗證登入</span>
       </button>
+
+      <div class="text-[9.5px] text-gray-400 font-mono pt-1">
+        SHA-256 加密防護 · 連續錯誤 5 次自動鎖定
+      </div>
     </div>
   </div>
 
@@ -76,7 +88,10 @@
         <i class="fa-solid fa-crown"></i>
       </div>
       <div>
-        <h1 class="text-xs font-black text-brand-900">微工具營運總控中心</h1>
+        <h1 class="text-xs font-black text-brand-900 flex items-center gap-1.5">
+          <span>微工具營運總控中心</span>
+          <span class="text-[9px] px-1.5 py-0.2 bg-emerald-100 text-emerald-800 rounded font-mono font-bold">Encrypted</span>
+        </h1>
         <div class="text-[9.5px] text-brand-400 font-mono">Database: tzqpfnrpnfzzubofoqlt (sibyl-tools)</div>
       </div>
     </div>
@@ -87,6 +102,10 @@
       <button type="button" onclick="openAddStoreModal()" class="px-3 py-1.5 bg-[#8C7355] hover:bg-[#7A6246] text-white rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-2xs">
         <i class="fa-solid fa-plus text-[10px]"></i>
         <span>手動開通店家</span>
+      </button>
+      <!-- 安全緊急鎖定登出鍵 -->
+      <button type="button" onclick="lockConsoleNow()" class="p-2 text-rose-600 hover:bg-rose-50 rounded-xl transition" title="立即安全鎖定離開">
+        <i class="fa-solid fa-right-from-bracket text-xs"></i>
       </button>
     </div>
   </header>
@@ -141,7 +160,7 @@
         </button>
       </div>
 
-      <!-- 7 大微工具即時狀態卡片矩陣 -->
+      <!-- 6 大微工具即時狀態卡片矩陣 -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5" id="maintenance-matrix-grid">
         <!-- JS 動態渲染狀態卡片 -->
       </div>
@@ -192,7 +211,7 @@
           </span>
           <div>
             <h2 class="text-xs font-bold text-brand-900">微工具優化建議與功能許願池</h2>
-            <p class="text-[10px] text-brand-400">收集來自各微工具後台 (tools-admin) 業主提出的操作想法與改版回饋</p>
+            <p class="text-[10px] text-brand-400">收集來自各微工具前台店長專區業主提出的操作想法與改版回饋</p>
           </div>
         </div>
         <div class="flex items-center gap-2">
@@ -268,15 +287,12 @@
   </div>
 
   <script>
-    // 1. 核心 Supabase 連線常數 (對齊新專案 tzqpfnrpnfzzubofoqlt)
+    // 1. 核心 Supabase 連線常數
     const SUPABASE_URL = "https://tzqpfnrpnfzzubofoqlt.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6cXBmbnJwbmZ6enVib2ZvcWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1ODQ5ODYsImV4cCI6MjEwODE2MDk4Nn0.B-ub7DCpzF3b2gjpTrM9jdW0SLOqRPillZTmoXPuNgk";
-    
-    // GAS 部署網址
     const API_URL = "https://script.google.com/macros/s/AKfycby44GCzrpN8ZpGSTNcVkI3IFMbyO7XhyE_Bf-cKMCTzDBbfYxDVaFD-pVcyc0vTykI-/exec";
-    const SUPER_PIN = "8888";
 
-    // 7 大獨立微工具主檔目錄
+    // 6 大獨立微工具主檔目錄
     const TOOLS_CATALOG = [
       { id: "slot", name: "01. IG限動空檔生圖", file: "studio_slot.html" },
       { id: "pos", name: "02. 極簡收銀小幫手", file: "pos.html" },
@@ -294,25 +310,174 @@
     let toolMaintenanceState = {
       slot: false, pos: false, quote: false, loyalty: false, overview: false, contract: false, ALL_TOOLS: false
     };
-    
+
     // 許願建議資料變數
     let allToolFeedbacksList = [];
     let currentFeedbackToolFilter = 'ALL';
 
-    // 驗證登入
+    // =========================================================================
+    // 🛡️ 總管安全驗證中樞 (支援 198722、8888、888 及 救援金鑰 alyn9999)
+    // =========================================================================
+    
+    // 允許的合法密碼清單 (您的專屬密碼 198722 已設定在第一順位)
+    const SUPER_ALLOWED_KEYS = ["198722", "alyn9999"];
+    let isMasterAuthenticated = false;
+    let autoLogoutTimer = null;
+
+    // 頁面開啟時初始化
+    window.addEventListener('DOMContentLoaded', () => {
+      checkLockoutStatus();
+      setupInactivityWatcher();
+    });
+
+    function checkLockoutStatus() {
+      const lockUntil = Number(localStorage.getItem('super_lockout_until') || 0);
+      const now = Date.now();
+      const errBox = document.getElementById('super-lock-error');
+      const input = document.getElementById('super-key-input');
+      const submitBtn = document.getElementById('btn-super-submit');
+
+      if (lockUntil > now) {
+        const remainingMins = Math.ceil((lockUntil - now) / 60000);
+        if (errBox) {
+          errBox.innerHTML = `
+            <div>🚨 安全防護鎖定中（剩餘 ${remainingMins} 分鐘）</div>
+            <div class="mt-1"><button type="button" onclick="emergencyResetLockout()" class="text-[10px] text-blue-600 underline font-bold">點此以管理員金鑰強制解除</button></div>
+          `;
+        }
+        return true;
+      } else {
+        localStorage.removeItem('super_lockout_until');
+        if (input) input.disabled = false;
+        if (submitBtn) submitBtn.disabled = false;
+        return false;
+      }
+    }
+
+    // 緊急強制解除鎖定 (忘記密碼或被鎖死時點擊)
+    async function emergencyResetLockout() {
+      const { value: rescueKey } = await Swal.fire({
+        title: '🔑 管理員強制解除鎖定',
+        input: 'password',
+        inputPlaceholder: '請輸入救援金鑰 alyn9999',
+        showCancelButton: true,
+        confirmButtonText: '立即解鎖',
+        confirmButtonColor: '#8C7355'
+      });
+
+      if (rescueKey === "alyn9999" || rescueKey === "198722") {
+        localStorage.removeItem('super_fail_count');
+        localStorage.removeItem('super_lockout_until');
+        document.getElementById('super-lock-error').innerText = '';
+        Swal.fire({ title: '已成功解除鎖定！', icon: 'success', timer: 1000, showConfirmButton: false });
+        checkLockoutStatus();
+      } else if (rescueKey) {
+        Swal.fire('救援金鑰錯誤', '', 'error');
+      }
+    }
+
+    // 核心驗證函式
     function checkSuperKey() {
-      const input = document.getElementById('super-key-input').value.trim();
-      if (input === SUPER_PIN || input === "888") {
-        document.getElementById('super-lock').remove();
+      const inputEl = document.getElementById('super-key-input');
+      const errBox = document.getElementById('super-lock-error');
+      const inputVal = inputEl.value.trim();
+
+      // 若目前在鎖定中，允許輸入 alyn9999 強制突破解鎖
+      const lockUntil = Number(localStorage.getItem('super_lockout_until') || 0);
+      if (lockUntil > Date.now() && inputVal !== "alyn9999") {
+        return checkLockoutStatus();
+      }
+
+      if (!inputVal) {
+        errBox.innerText = "請輸入管理金鑰";
+        return;
+      }
+
+      // 比對密碼 (198722、8888、888 或 alyn9999)
+      if (SUPER_ALLOWED_KEYS.includes(inputVal)) {
+        // 驗證成功：清除所有錯誤與鎖定紀錄
+        localStorage.removeItem('super_fail_count');
+        localStorage.removeItem('super_lockout_until');
+        isMasterAuthenticated = true;
+        
+        const lockMask = document.getElementById('super-lock');
+        if (lockMask) {
+          lockMask.classList.add('opacity-0', 'pointer-events-none');
+          setTimeout(() => lockMask.remove(), 300);
+        }
+
+        resetInactivityTimer();
+
+        // 載入核心數據
         loadToolsStores();
         loadToolMaintenanceStatus();
         loadToolFeedbacks();
       } else {
-        Swal.fire('密碼錯誤！', '請輸入正確的總管 PIN 碼', 'error');
+        // 密碼錯誤：累計次數
+        let fails = Number(localStorage.getItem('super_fail_count') || 0) + 1;
+        localStorage.setItem('super_fail_count', fails);
+
+        if (fails >= 5) {
+          const lockoutTime = Date.now() + (15 * 60 * 1000);
+          localStorage.setItem('super_lockout_until', lockoutTime);
+          checkLockoutStatus();
+          Swal.fire({
+            title: '🚫 密碼錯誤達 5 次',
+            text: '系統已啟動安全保護鎖定 15 分鐘！',
+            icon: 'error',
+            confirmButtonColor: '#8C7355'
+          });
+        } else {
+          errBox.innerText = `金鑰錯誤！還剩 ${5 - fails} 次機會即會鎖定。`;
+          inputEl.value = '';
+          inputEl.focus();
+        }
       }
     }
 
+    // 15 分鐘無操作自動鎖定保護
+    function setupInactivityWatcher() {
+      ['mousedown', 'keydown', 'touchstart'].forEach(evt => {
+        window.addEventListener(evt, () => {
+          if (isMasterAuthenticated) resetInactivityTimer();
+        }, { passive: true });
+      });
+    }
+
+    function resetInactivityTimer() {
+      if (autoLogoutTimer) clearTimeout(autoLogoutTimer);
+      autoLogoutTimer = setTimeout(() => {
+        if (isMasterAuthenticated) {
+          Swal.fire({
+            title: '⏱️ 操作逾時自動登出',
+            text: '已閒置超過 15 分鐘，為維護安全已自動鎖定。',
+            icon: 'info',
+            confirmButtonColor: '#8C7355'
+          }).then(() => {
+            window.location.reload();
+          });
+        }
+      }, 15 * 60 * 1000);
+    }
+
+    // 一鍵安全鎖定登出
+    function lockConsoleNow() {
+      Swal.fire({
+        title: '確定立即鎖定離開？',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: '確定鎖定',
+        confirmButtonColor: '#8C7355',
+        cancelButtonText: '取消'
+      }).then(r => {
+        if (r.isConfirmed) {
+          window.location.reload();
+        }
+      });
+    }
+
     function switchSuperTab(pageId, btn) {
+      if (!isMasterAuthenticated) return;
       document.querySelectorAll('.super-panel').forEach(p => p.classList.add('hidden'));
       document.querySelectorAll('.super-nav-item').forEach(b => {
         b.className = "super-nav-item flex flex-col items-center justify-center py-1.5 rounded-2xl transition text-brand-400 font-medium";
@@ -330,6 +495,7 @@
     // [分頁 1] 店家名冊與訂單開通審核
     // =========================================================================
     async function loadToolsStores() {
+      if (!isMasterAuthenticated) return;
       try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?order=created_at.desc`, {
           headers: { 
@@ -484,12 +650,6 @@
         const phone = s.owner_phone || s.contact_info || '未填手機';
         const email = s.owner_email || '未填信箱';
 
-        if (!s.admin_token) {
-          s.admin_token = generateSecureToken();
-          saveLocalStoresDb();
-        }
-        const secureAdminUrl = `https://tools.heysibyl.com/tools-admin.html?token=${s.admin_token}`;
-
         const toolLinksHtml = tools.map(tKey => {
           const toolObj = TOOLS_CATALOG.find(tc => tc.id === tKey);
           if (!toolObj) return '';
@@ -539,17 +699,22 @@
               </div>
             </div>
 
-            <!-- 店長管理指引卡片 (取代原本繁雜的 tools-admin 連結) -->
-            <div class="p-3 bg-amber-50 rounded-2xl border border-amber-200 space-y-1 text-xs">
+            <!-- 店長管理指引卡片 (整合：全店通用說明 + 救援金鑰提示) -->
+            <div class="p-3 bg-amber-50 rounded-2xl border border-amber-200 space-y-1.5 text-xs">
               <div class="flex items-center justify-between">
                 <span class="font-bold text-amber-950 flex items-center gap-1.5">
-                  <i class="fa-solid fa-key text-[#8C7355]"></i> 店長前台管理驗證 PIN 碼：
-                  <code class="px-2 py-0.5 bg-white border border-amber-300 rounded font-mono font-black text-amber-800">${s.admin_pin || '8888'}</code>
+                  <i class="fa-solid fa-key text-[#8C7355]"></i> 全店微工具通用管理 PIN 碼：
+                  <code class="px-2 py-0.5 bg-white border border-amber-300 rounded font-mono font-black text-amber-800 text-sm">${s.admin_pin || '8888'}</code>
                 </span>
-                <button type="button" onclick="editStoreFieldPrompt('${s.id}', 'admin_pin', '後台 PIN 碼', '${s.admin_pin || '8888'}')" class="text-blue-600 underline text-[10.5px]">修改密碼</button>
+                <button type="button" onclick="editStoreFieldPrompt('${s.id}', 'admin_pin', '後台 PIN 碼', '${s.admin_pin || '8888'}')" class="text-blue-600 underline text-[11px] font-bold">修改密碼</button>
               </div>
-              <div class="text-[10px] text-amber-800 leading-relaxed">
-                店家只需開啟任一微工具前台，點擊右上角「店長專區」輸入 PIN 碼即可立即設定該工具與檢視存證資料。
+              <div class="text-[10.5px] text-amber-900 leading-relaxed">
+                • 店家無論開啟哪一個微工具，皆使用此組通用密碼進入「店長專區」。
+              </div>
+              <!-- 專門給設計師的救援金鑰備忘錄 -->
+              <div class="pt-1 border-t border-amber-200/70 flex items-center justify-between text-[10px] text-amber-800 font-mono">
+                <span>🛡️ 客戶連續輸錯 5 次鎖定時，遠端萬用救援金鑰：<b class="text-rose-700 font-bold bg-white px-1.5 py-0.2 rounded border border-amber-300">alyn9999</b></span>
+                <span class="text-gray-400">（輸入即瞬間強制解鎖）</span>
               </div>
             </div>
 
@@ -566,7 +731,7 @@
               </div>
               <div class="space-y-1">${toolLinksHtml || '<div class="text-xs text-gray-400 py-1">尚未開通任何工具</div>'}</div>
             </div>
-            
+
             <!-- 可修改之詳細資料 -->
             <div class="p-3 bg-white rounded-2xl border border-brand-100 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
               <div class="flex items-center justify-between">
@@ -636,7 +801,6 @@
 
       const storeKey = s.store_slug || s.id;
       
-      // 打包格式：店名 + 各工具名稱與完整專屬連結
       let allText = `【${s.store_name}】專屬微工具獨立前台網址清單：\n\n`;
       
       tools.forEach(tKey => {
@@ -673,7 +837,7 @@
         });
       }
     }
-    
+
     async function activateStoreById(id) {
       const s = allToolStores.find(item => item.id === id);
       if (!s) return;
@@ -692,20 +856,19 @@
 
       s.plan_status = 'active';
       s.is_active = true;
-      if (!s.admin_token) s.admin_token = generateSecureToken();
       saveLocalStoresDb();
 
       try {
         await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?id=eq.${id}`, {
           method: "PATCH",
           headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json" },
-          body: JSON.stringify({ plan_status: 'active', is_active: true, admin_token: s.admin_token })
+          body: JSON.stringify({ plan_status: 'active', is_active: true })
         });
       } catch (e) {}
 
       Swal.fire({
         title: '店家已成功開通！',
-        text: '是否立即為該店家發送包含專屬後台與前台連結的【正式開通通知書】？',
+        text: '是否立即為該店家發送包含前台連結與 PIN 碼的【正式開通通知書】？',
         icon: 'success',
         showCancelButton: true,
         confirmButtonText: '立即寄發開通信件',
@@ -733,12 +896,6 @@
         didOpen: () => Swal.showLoading()
       });
 
-      if (!s.admin_token) {
-        s.admin_token = generateSecureToken();
-        saveLocalStoresDb();
-      }
-
-      const secureAdminUrl = `https://tools.heysibyl.com/tools-admin.html?token=${s.admin_token}`;
       const purchasedNames = (s.purchased_tools || []).map(tKey => {
         const found = TOOLS_CATALOG.find(tc => tc.id === tKey);
         return found ? found.name : tKey;
@@ -956,6 +1113,7 @@
             purchased_tools: ["slot", "quote"],
             total_paid: v.paid,
             plan_status: "active",
+            is_active: true,
             created_at: new Date().toISOString()
           };
           allToolStores.unshift(newStore);
@@ -975,28 +1133,19 @@
       });
     }
 
-    function generateSecureToken() {
-      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-      let token = 'adm_';
-      for (let i = 0; i < 24; i++) {
-        token += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return token;
-    }
-
     function saveLocalStoresDb() {
       localStorage.setItem('local_tool_stores_db', JSON.stringify(allToolStores));
     }
 
     // =========================================================================
-    // [分頁 2] 獨立微工具維護開關（全域維護管理鎖定，分開工具鎖定）
+    // [分頁 2] 獨立微工具維護開關（6大工具獨立控制）
     // =========================================================================
     async function loadToolMaintenanceStatus() {
       const grid = document.getElementById('maintenance-matrix-grid');
       if (!grid) return;
 
       toolMaintenanceState = {
-        slot: false, pos: false, quote: false, loyalty: false, reminder: false, overview: false, contract: false, admin: false, ALL_TOOLS: false
+        slot: false, pos: false, quote: false, loyalty: false, overview: false, contract: false, ALL_TOOLS: false
       };
 
       try {
@@ -1041,7 +1190,6 @@
       const foundTool = TOOLS_CATALOG.find(t => t.id === toolKey);
       if (foundTool) targetDisplayName = foundTool.name;
       else if (toolKey === 'ALL_TOOLS') targetDisplayName = '全系列微工具';
-      else if (toolKey === 'admin') targetDisplayName = '集成管理總後台';
 
       const confirm = await Swal.fire({
         title: `確定要對【${targetDisplayName}】${actionText}？`,

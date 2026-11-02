@@ -27,7 +27,6 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-    /* SweetAlert2 全域確認按鈕統一套用系統質感棕色 */
     .swal2-styled.swal2-confirm {
       background-color: #8C7355 !important;
       color: #ffffff !important;
@@ -38,16 +37,12 @@
       padding: 0.625rem 1.5rem !important;
       font-size: 0.8125rem !important;
     }
-
     .swal2-styled.swal2-confirm:hover {
       background-color: #7A6246 !important;
     }
-
     .swal2-styled.swal2-confirm:focus {
       box-shadow: 0 0 0 3px rgba(140, 115, 85, 0.3) !important;
     }
-
-    /* 取消按鈕同步美化為質感米灰 */
     .swal2-styled.swal2-cancel {
       background-color: #EBE5DF !important;
       color: #5C4B3C !important;
@@ -56,7 +51,6 @@
       padding: 0.625rem 1.25rem !important;
       font-size: 0.8125rem !important;
     }
-
     .swal2-styled.swal2-cancel:hover {
       background-color: #D5C7BC !important;
     }
@@ -94,10 +88,8 @@
 
     <!-- 1. 頂部日期橫向滑動膠囊與專員篩選 -->
     <section class="bg-white p-4 rounded-3xl border border-brand-200 shadow-sm space-y-3">
-      <!-- 14天滑動膠囊 -->
       <div class="flex gap-2 overflow-x-auto no-scrollbar py-1" id="date-capsules-bar"></div>
 
-      <!-- 專員過濾膠囊 -->
       <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-brand-100 text-xs">
         <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" id="staff-filter-bar"></div>
         <div class="hidden lg:flex items-center gap-3 text-[10.5px]">
@@ -108,13 +100,11 @@
       </div>
     </section>
 
-    <!-- 2. 全日排程甘特畫布 (核心畫布) -->
+    <!-- 2. 全日排程甘特畫布 -->
     <section class="bg-white rounded-3xl border border-brand-200 shadow-md overflow-hidden">
       <div class="overflow-x-auto no-scrollbar">
         <div class="min-w-[680px]">
-          <!-- 表頭：專員列表 -->
           <div class="grid border-b border-brand-200 bg-brand-50/70" id="gantt-header-row"></div>
-          <!-- 表身：時間刻度與各專員欄位網格 -->
           <div class="relative bg-white" id="gantt-body-container"></div>
         </div>
       </div>
@@ -122,7 +112,6 @@
 
   </main>
 
-  <!-- ★★★ 請貼在這裡 ★★★ -->
   <footer class="max-w-xl mx-auto py-8 px-4 text-center space-y-2 select-none">
     <div>
       <a href="https://www.heysibyl.com/" target="_blank" class="font-mono text-[10.5px] opacity-75 hover:opacity-100 text-brand-400 hover:text-brand-700 transition-colors inline-block tracking-wider">
@@ -150,7 +139,6 @@
         </button>
       </div>
 
-      <!-- 模式切換 -->
       <div class="flex p-1 bg-brand-100/60 rounded-xl gap-1 font-bold">
         <button type="button" id="btn-mode-booking" onclick="switchBookingMode('booking')" class="flex-1 py-1.5 rounded-lg bg-white shadow-2xs text-[#8C7355]">
           <i class="fa-solid fa-user-plus mr-1"></i>顧客預約排程
@@ -160,7 +148,6 @@
         </button>
       </div>
 
-      <!-- 時間微調 -->
       <div class="p-2.5 bg-brand-50 rounded-xl border border-brand-200 space-y-2">
         <div class="flex items-center justify-between">
           <label class="font-bold text-brand-800 text-[11px] flex items-center gap-1">
@@ -176,11 +163,10 @@
         <select id="book-start-time" class="w-full p-2 bg-white border border-brand-200 rounded-lg font-mono font-bold text-xs outline-none text-center"></select>
       </div>
 
-      <!-- 顧客預約表單 -->
       <div id="box-booking-mode" class="space-y-3">
         <div class="space-y-2">
           <label class="block font-bold text-brand-800">顧客手機號碼 * (輸入自動帶入)：</label>
-          <input type="tel" id="book-phone" onblur="lookupCustomerAny()" maxlength="10" placeholder="0912345678" onblur="lookupCustomer(this.value)" class="w-full p-2.5 bg-brand-50/60 rounded-xl border border-brand-200 font-mono font-bold outline-none focus:border-brand-500">
+          <input type="tel" id="book-phone" onblur="lookupCustomerAny()" maxlength="10" placeholder="0912345678" class="w-full p-2.5 bg-brand-50/60 rounded-xl border border-brand-200 font-mono font-bold outline-none focus:border-brand-500">
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block font-bold text-brand-700 text-[10.5px] mb-1">顧客姓名 *：</label>
@@ -209,7 +195,6 @@
         </div>
       </div>
 
-      <!-- 專員休假表單 -->
       <div id="box-off-mode" class="space-y-3 hidden">
         <div>
           <label class="block font-bold text-brand-700 text-[10.5px] mb-1">休假長度：</label>
@@ -228,7 +213,6 @@
         </div>
       </div>
 
-      <!-- 按鈕列 -->
       <div class="pt-2 flex gap-2">
         <button type="button" onclick="closeBookingModal()" class="w-1/3 py-2.5 bg-brand-100 text-brand-700 font-bold rounded-xl hover:bg-brand-200 transition">
           取消
@@ -278,14 +262,16 @@
           顧客庫
         </button>
         <button type="button" onclick="switchManagerTab('tab-audit-logs', this)" class="mgr-tab-btn py-3 px-3.5 text-brand-400 hover:text-brand-700 shrink-0">
-  插單審計紀錄
-</button>
+          插單審計紀錄
+        </button>
       </div>
 
       <!-- 滾動內容區域 -->
       <div class="p-5 overflow-y-auto space-y-4 text-xs">
 
-        <!-- PIN 碼展示與修改 -->
+        <!-- 營業時間與公休日配置 -->
+        <div id="tab-business-settings" class="mgr-pane space-y-4">
+          <!-- PIN 碼展示與修改 -->
           <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 flex justify-between items-center">
             <div>
               <span class="font-bold text-brand-900 block">店長前台管理 PIN 碼：</span>
@@ -297,15 +283,15 @@
                 修改密碼
               </button>
             </div>
-            <!-- 許願建議小按鈕 -->
-<button type="button" onclick="openFeedbackPromptModal('當前工具名稱')" class="px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
-  <i class="fa-solid fa-lightbulb text-amber-600"></i>
-  <span>功能許願</span>
-</button>
           </div>
-        
-        <!-- 營業時間與公休日配置 -->
-        <div id="tab-business-settings" class="mgr-pane space-y-4">
+
+          <div class="flex justify-end">
+            <button type="button" onclick="openFeedbackPromptModal('05. 全日排程席位防撞')" class="px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs">
+              <i class="fa-solid fa-lightbulb text-amber-600"></i>
+              <span>功能優化許願</span>
+            </button>
+          </div>
+
           <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 space-y-3">
             <span class="font-bold text-brand-900 block border-b border-brand-200 pb-1.5">
               <i class="fa-solid fa-clock text-[#8C7355] mr-1"></i> 營業時間與前台框格間隔
@@ -330,7 +316,6 @@
             </div>
           </div>
 
-          <!-- 每週固定公休 -->
           <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 space-y-2">
             <span class="font-bold text-brand-900 block border-b border-brand-200 pb-1.5">
               <i class="fa-solid fa-calendar-xmark text-[#8C7355] mr-1"></i> 每週固定公休日 (勾選後前台自動標註公休)
@@ -346,7 +331,6 @@
             </div>
           </div>
 
-          <!-- 指定日期公休日 -->
           <div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 space-y-2">
             <span class="font-bold text-brand-900 block border-b border-brand-200 pb-1.5">
               <i class="fa-solid fa-mug-hot text-[#8C7355] mr-1"></i> 指定日期店休 (特殊單日排休)
@@ -412,14 +396,15 @@
             <div class="flex gap-1" id="cust-page-btns"></div>
           </div>
         </div>
-        <!-- [新增分頁] 插單審計紀錄 -->
-<div id="tab-audit-logs" class="mgr-pane space-y-3 hidden">
-  <div class="flex justify-between items-center">
-    <span class="font-bold text-brand-900">歷次插單與排程建立日誌 (防漏單核對)：</span>
-    <button type="button" onclick="renderAuditLogsTable()" class="text-[11px] text-[#8C7355] underline">重新整理</button>
-  </div>
-  <div class="space-y-2 max-h-72 overflow-y-auto" id="admin-audit-table"></div>
-</div>
+
+        <!-- 插單審計紀錄 -->
+        <div id="tab-audit-logs" class="mgr-pane space-y-3 hidden">
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-brand-900">歷次插單與排程建立日誌 (防漏單核對)：</span>
+            <button type="button" onclick="renderAuditLogsTable()" class="text-[11px] text-[#8C7355] underline">重新整理</button>
+          </div>
+          <div class="space-y-2 max-h-72 overflow-y-auto" id="admin-audit-table"></div>
+        </div>
 
       </div>
     </div>
@@ -429,13 +414,12 @@
     const SUPABASE_URL = "https://tzqpfnrpnfzzubofoqlt.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6cXBmbnJwbmZ6enVib2ZvcWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1ODQ5ODYsImV4cCI6MjEwODE2MDk4Nn0.B-ub7DCpzF3b2gjpTrM9jdW0SLOqRPillZTmoXPuNgk";
 
-    // 營業時間、間隔與公休日配置模型
     let scheduleConfig = {
       startTime: "09:00",
       endTime: "21:00",
-      interval: 30, // 15, 30, 60 分鐘
-      weeklyOff: [1], // 預設週一公休 (0:日, 1:一 ... 6:六)
-      specificOffDates: [] // 例如 ["2026-10-31"]
+      interval: 30,
+      weeklyOff: [1],
+      specificOffDates: []
     };
     
     let currentStore = {
@@ -475,33 +459,29 @@
     const CUST_PAGE_SIZE = 10;
     let filteredCustList = [];
 
-    // 嚴格莫蘭迪順序：粉、橘、黃、綠、藍、紫（第一輪粉嫩，第二輪灰階加深）
     const STRICT_MORANDI_PALETTE = [
-      // 第 1 輪 (經典莫蘭迪柔彩色)
-      { bg: '#E5A9A9', border: '#D49595' }, // 0. 煙粉
-      { bg: '#E8B298', border: '#D69E83' }, // 1. 暖杏橘
-      { bg: '#EDD382', border: '#DBC06E' }, // 2. 麥香黃
-      { bg: '#9EBC9E', border: '#8AA88A' }, // 3. 鼠尾草綠
-      { bg: '#97B3C6', border: '#839FB2' }, // 4. 霧霾藍
-      { bg: '#BFA8C0', border: '#AA93AB' }, // 5. 丁香灰紫
-      // 第 2 輪 (灰階加深沉穩色，項目過多時自動遞補)
-      { bg: '#BA8B8B', border: '#A87979' }, // 6. 灰陶粉
-      { bg: '#C28B75', border: '#AF7761' }, // 7. 焦糖灰橘
-      { bg: '#C4AE6C', border: '#B09B59' }, // 8. 灰芥末黃
-      { bg: '#7D987D', border: '#6B866B' }, // 9. 灰墨綠
-      { bg: '#778D9B', border: '#657B89' }, // 10. 灰板岩藍
-      { bg: '#968197', border: '#846F85' }  // 11. 深灰紫
+      { bg: '#E5A9A9', border: '#D49595' },
+      { bg: '#E8B298', border: '#D69E83' },
+      { bg: '#EDD382', border: '#DBC06E' },
+      { bg: '#9EBC9E', border: '#8AA88A' },
+      { bg: '#97B3C6', border: '#839FB2' },
+      { bg: '#BFA8C0', border: '#AA93AB' },
+      { bg: '#BA8B8B', border: '#A87979' },
+      { bg: '#C28B75', border: '#AF7761' },
+      { bg: '#C4AE6C', border: '#B09B59' },
+      { bg: '#7D987D', border: '#6B866B' },
+      { bg: '#778D9B', border: '#657B89' },
+      { bg: '#968197', border: '#846F85' }
     ];
 
     window.addEventListener('DOMContentLoaded', async () => {
-      await loadStoreByUrlParams();
       loadLocalMockDataIfEmpty();
+      await loadStoreByUrlParams();
       initDateCapsulesBar();
       renderGanttCanvas();
       populateServiceSelect();
     });
 
-    // 1. 讀取店家與雲端排程設定
     async function loadStoreByUrlParams() {
       const urlParams = new URLSearchParams(window.location.search);
       const storeParam = urlParams.get('s') || urlParams.get('store') || urlParams.get('store_id');
@@ -524,6 +504,8 @@
             <span class="font-black">${currentStore.store_name}</span>
           `;
           document.getElementById('disp-store-subtitle').innerText = `全日排程席位防撞畫布 (${currentStore.store_slug || currentStore.id.slice(0,8)})`;
+          document.getElementById('disp-manager-pin').innerText = currentStore.admin_pin || "8888";
+
           await loadCloudOverviewSettings(currentStore.id);
         }
       } catch (err) {
@@ -532,6 +514,9 @@
     }
 
     async function loadCloudOverviewSettings(storeId) {
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(storeId);
+      if (!isUuid) return;
+
       try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/tool_settings?store_id=eq.${storeId}&select=*`, {
           headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` }
@@ -546,6 +531,11 @@
             scheduleConfig = Object.assign(scheduleConfig, cfg.scheduleConfig);
             scheduleConfig.interval = Number(scheduleConfig.interval) || 30;
           }
+          if (data[0].store_pin) currentStore.admin_pin = data[0].store_pin;
+          document.getElementById('disp-manager-pin').innerText = currentStore.admin_pin || "8888";
+          initDateCapsulesBar();
+          renderGanttCanvas();
+          populateServiceSelect();
         }
       } catch (e) {
         console.error("載入排程設定失敗:", e);
@@ -612,7 +602,6 @@
       updateFilteredCustList();
     }
 
-    // 2. 頂部 14 天日期膠囊
     function initDateCapsulesBar() {
       const container = document.getElementById('date-capsules-bar');
       if (!container) return;
@@ -677,7 +666,6 @@
       renderGanttCanvas();
     }
 
-    // 3. 核心甘特畫布
     function getSlotHeightPx() {
       const intv = Number(scheduleConfig.interval) || 30;
       if (intv === 15) return 32;
@@ -688,6 +676,7 @@
     function renderGanttCanvas() {
       const headerRow = document.getElementById('gantt-header-row');
       const bodyContainer = document.getElementById('gantt-body-container');
+      if (!headerRow || !bodyContainer) return;
 
       const displayedStaff = (activeFilterStaffId === 'ALL')
         ? staffList
@@ -750,7 +739,6 @@
       renderBookingBlocks(displayedStaff, totalStartMins, interval, slotHeight);
     }
 
-    // 動態配對項目色票（確保不同項目依序領取不同顏色）
     const serviceColorCache = {};
     let colorAssignCounter = 0;
 
@@ -765,6 +753,7 @@
 
     function renderBookingBlocks(displayedStaff, baseMins, interval, slotHeight) {
       const container = document.getElementById('gantt-body-container');
+      if (!container) return;
       const todays = bookingsDb.filter(b => b.date === selectedDate);
       const pxPerMinute = slotHeight / interval;
 
@@ -779,7 +768,6 @@
           const heightPx = b.durMins * pxPerMinute - 2;
           if (topPx < 0) return;
 
-          // 碰撞分流檢查：同專員、重疊時段
           const hasOverlap = staffBookings.some((ob, oi) => {
             if (i === oi) return false;
             const [osh, osm] = ob.startTime.split(':').map(Number);
@@ -789,7 +777,6 @@
           });
 
           const isOff = (b.isOff === true);
-          // ★ 先建立 block 實例，避免未初始化報錯
           const block = document.createElement('div');
           const itemColor = getMorandiColorByService(b.serviceName);
 
@@ -802,7 +789,6 @@
           block.style.gridColumnStart = `${staffIndex + 1}`;
           block.style.gridColumnEnd = `${staffIndex + 2}`;
 
-          // 重疊時自動變窄為 50% 寬度並排於左/右側
           if (hasOverlap) {
             const isRightSide = (i % 2 === 1);
             block.style.width = 'calc(50% - 5px)';
@@ -853,7 +839,6 @@
       });
     }
 
-    // 4. 插單排程操作與 15/30/60 分鐘間隔切換
     let currentSlotStep = 30;
 
     function setSlotStep(step) {
@@ -904,9 +889,7 @@
       document.getElementById('modal-slot-title').innerText = `${selectedDate} 快速排程`;
       document.getElementById('modal-slot-meta').innerText = `指定專員：${staffName} (${staffId})`;
 
-      // 每次開啟時重新確保服務清單為最新
       populateServiceSelect();
-
       setSlotStep(scheduleConfig.interval || 30);
       populateTimeSelectOptions(timeStr);
 
@@ -954,6 +937,7 @@
 
     function populateServiceSelect() {
       const sel = document.getElementById('book-service-select');
+      if (!sel) return;
       sel.innerHTML = serviceCatalog.map(s => `
         <option value="${s.id}">[${s.category}] ${s.name} - NT$ ${s.price} (${s.dur}分鐘)</option>
       `).join('');
@@ -970,11 +954,9 @@
       `;
     }
 
-    // [局部替換] 插單確認邏輯：具備衝撞/超限警示，但支援點擊「強制插單」破例排入
     async function confirmBookingInsert() {
       const customTime = document.getElementById('book-start-time').value || pendingSlotInsert.timeStr;
 
-      // 1. 若為專員休假排入模式
       if (currentBookingMode === 'off') {
         const dur = Number(document.getElementById('off-duration-select').value);
         const reason = document.getElementById('off-reason').value.trim() || '專員休假';
@@ -1007,7 +989,6 @@
         return;
       }
       
-      // 2. 顧客預約插單模式
       const phone = document.getElementById('book-phone').value.trim();
       const name = document.getElementById('book-name').value.trim();
       const line = document.getElementById('book-line').value.trim();
@@ -1018,7 +999,6 @@
         return Swal.fire('請完整填寫手機、顧客姓名並挑選項目！', '', 'warning');
       }
 
-      // 檢查首次填寫
       const isExisting = customerDb[phone] || Object.values(customerDb).some(c => c.name === name || (line && c.line === line));
       if (!isExisting) {
         if (!name || !phone || !line) {
@@ -1026,20 +1006,17 @@
         }
       }
 
-      // 衝撞檢測 1：專員時間衝突檢測
       let conflictWarning = "";
       if (checkStaffConflict(pendingSlotInsert.staffId, selectedDate, customTime, s.dur)) {
         conflictWarning += `⚠️ <b>專員時間衝撞：</b>該時段【${pendingSlotInsert.staffName}】已有其他預約或鎖定行程。<br>`;
       }
 
-      // 衝撞檢測 2：設備容量超限檢測
       if (s.resource && s.resource !== 'none') {
         if (checkResourceCapacity(s.resource, selectedDate, customTime, s.dur)) {
           conflictWarning += `⚠️ <b>設備席位衝撞：</b>店內【${s.resource}】在該時段已達最大使用容量上限！<br>`;
         }
       }
 
-      // 若有衝撞，跳出提示讓店家選擇是否「強制插單」
       if (conflictWarning) {
         const { isConfirmed } = await Swal.fire({
           title: '排程衝撞提醒！',
@@ -1060,11 +1037,9 @@
           cancelButtonColor: '#8C7355'
         });
 
-        // 店家取消則中止
         if (!isConfirmed) return;
       }
 
-      // 執行排程寫入
       bookingsDb.push({
         id: `b-${Date.now().toString().slice(-5)}`,
         date: selectedDate,
@@ -1082,7 +1057,6 @@
       });
       saveBookingsDb();
 
-      // 顧客庫自動存檔與更新
       if (!customerDb[phone]) {
         customerDb[phone] = { phone: phone, name: name, line: line, visits: 1 };
       } else {
@@ -1145,7 +1119,6 @@
       const b = bookingsDb.find(item => item.id === bookingId);
       if (!b) return;
 
-      // 取得專員代號與姓名
       const staffObj = staffList.find(s => s.id === b.staffId);
       const staffDisplay = staffObj ? `${staffObj.name} (${staffObj.id})` : b.staffId;
 
@@ -1178,11 +1151,10 @@
       });
     }
 
-    // 5. 店長專區驗證與分頁
     async function openManagerPinPrompt() {
-      // 1. 檢查是否已被系統鎖定
-      const lockKey = `mgr_lock_${currentStore.id}`;
-      const failCountKey = `mgr_fail_count_${currentStore.id}`;
+      const storeIdKey = currentStore.id || 'default';
+      const lockKey = `mgr_lock_${storeIdKey}`;
+      const failCountKey = `mgr_fail_count_${storeIdKey}`;
       const isLocked = localStorage.getItem(lockKey);
 
       if (isLocked) {
@@ -1212,12 +1184,9 @@
       if (!pin) return;
 
       const correctPin = currentStore.admin_pin || "8888";
-
-      // 超級管理者後門金鑰（供你緊急解鎖客戶門市，不需等待）
       const MASTER_OVERRIDE_KEY = "alyn9999";
 
       if (pin === correctPin || pin === MASTER_OVERRIDE_KEY) {
-        // 成功進入：歸零失敗計數
         localStorage.removeItem(failCountKey);
         document.getElementById('manager-modal').classList.remove('hidden');
         syncBusinessHoursForm();
@@ -1227,7 +1196,6 @@
         renderCustomerTable();
         renderAuditLogsTable();
       } else {
-        // 累計失敗次數
         let fails = Number(localStorage.getItem(failCountKey) || 0) + 1;
         localStorage.setItem(failCountKey, fails);
 
@@ -1307,7 +1275,6 @@
       }
     }
 
-    // 儲存營業時間與公休至雲端
     async function saveBusinessSettings() {
       const startVal = document.getElementById('cfg-open-start').value;
       const endVal = document.getElementById('cfg-open-end').value;
@@ -1345,7 +1312,6 @@
       }
     }
 
-    // 6. 雲端同步核心（帶有 UUID 防呆與本地離線 Fallback）
     async function saveOverviewConfigToCloud() {
       const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(currentStore.id);
 
@@ -1391,6 +1357,7 @@
           body: JSON.stringify({
             store_id: currentStore.id,
             slot_config: existingConfig,
+            store_pin: currentStore.admin_pin,
             updated_at: new Date().toISOString()
           })
         });
@@ -1402,9 +1369,9 @@
       }
     }
 
-    // 專員管理
     function renderAdminStaffList() {
       const container = document.getElementById('admin-staff-list');
+      if (!container) return;
       container.innerHTML = staffList.map((s, idx) => `
         <div class="p-2.5 bg-white rounded-xl border border-brand-200 flex justify-between items-center shadow-2xs text-xs">
           <span class="font-bold text-brand-900">${s.name} (${s.id})</span>
@@ -1450,9 +1417,9 @@
       }
     }
 
-    // 服務項目管理
     function renderAdminServicesList() {
       const container = document.getElementById('admin-services-list');
+      if (!container) return;
       container.innerHTML = serviceCatalog.map((svc, idx) => `
         <div class="p-2.5 bg-white rounded-xl border border-brand-200 flex justify-between items-center text-xs shadow-2xs">
           <div>
@@ -1460,7 +1427,6 @@
             <span class="text-[10px] text-gray-400 font-mono ml-1.5">[${svc.dur}分 | NT$${svc.price} | ${svc.type} | 設備:${svc.resource}]</span>
           </div>
           <div class="flex items-center gap-1 shrink-0">
-            <!-- 編輯按鈕 -->
             <button type="button" onclick="openEditOverviewServiceModal(${idx})" class="w-6 h-6 rounded bg-amber-50 hover:bg-amber-100 text-amber-800 flex items-center justify-center font-bold" title="編輯服務">
               <i class="fa-solid fa-pen text-[10px]"></i>
             </button>
@@ -1552,9 +1518,10 @@
         await saveOverviewConfigToCloud();
       }
     }
-    // 席位容量管理
+
     function renderAdminResourcesList() {
       const container = document.getElementById('admin-resources-list');
+      if (!container) return;
       container.innerHTML = storeResources.map((r, idx) => `
         <div class="p-2.5 bg-white rounded-xl border border-brand-200 flex justify-between items-center text-xs shadow-2xs">
           <span>設備：<b>${r.name}</b> ｜ 容量上限：<b class="font-mono text-[#8C7355] text-sm">${r.capacity}</b> 組席位</span>
@@ -1601,7 +1568,6 @@
       }
     }
 
-    // 顧客資料庫
     function updateFilteredCustList() {
       filteredCustList = Object.values(customerDb);
       renderCustomerTable();
@@ -1626,6 +1592,8 @@
       const container = document.getElementById('admin-customers-table');
       const pageInfo = document.getElementById('cust-page-info');
       const btns = document.getElementById('cust-page-btns');
+
+      if (!container) return;
 
       if (filteredCustList.length === 0) {
         container.innerHTML = '<div class="text-center py-6 text-brand-400">目前尚無符合的顧客資料</div>';
@@ -1730,7 +1698,6 @@
               <span>顧客：${b.custName} (${b.custPhone})</span>
               <span class="font-mono text-stone-400">ID: ${b.id}</span>
             </div>
-            <!-- 插單當下系統時間戳記 -->
             <div class="text-[9.5px] text-brand-400 border-t border-brand-100 pt-1 flex items-center justify-between font-mono">
               <span><i class="fa-regular fa-clock mr-1"></i>操作時間：${createdTime}</span>
               <span class="text-emerald-700 font-bold">✓ 已入庫</span>
@@ -1740,7 +1707,6 @@
       }).join('');
     }
 
-    // [優化] 三欄位任意比對顧客庫
     function lookupCustomerAny() {
       const p = document.getElementById('book-phone').value.trim();
       const n = document.getElementById('book-name').value.trim();
@@ -1765,7 +1731,6 @@
       }
     }
 
-    // [新增] 服務項目編輯功能 (含可施作專員)
     async function openEditOverviewServiceModal(idx) {
       const s = serviceCatalog[idx];
       const resOptions = storeResources.map(r => `<option value="${r.name}" ${r.name === s.resource ? 'selected' : ''}>${r.name} (容量:${r.capacity})</option>`).join('');
@@ -1825,7 +1790,6 @@
       }
     }
 
-    // [新增] 修改店長 PIN 碼
     async function changeAdminPinModal() {
       const { value: newPin } = await Swal.fire({
         title: '修改店長管理 PIN 碼',
@@ -1837,26 +1801,33 @@
         inputValidator: v => (!v || v.length < 4 ? '密碼長度至少需 4 碼！' : null)
       });
       if (newPin && newPin.trim()) {
-        currentStore.admin_pin = newPin.trim();
+        const updatedPin = newPin.trim();
+        currentStore.admin_pin = updatedPin;
         const pinDisp = document.getElementById('disp-manager-pin');
-        if (pinDisp) pinDisp.innerText = currentStore.admin_pin;
+        if (pinDisp) pinDisp.innerText = updatedPin;
         
-        // 增量同步更新店長 PIN 碼至雲端
         try {
-          await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?id=eq.${currentStore.id}`, {
-            method: "PATCH",
-            headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json" },
-            body: JSON.stringify({ admin_pin: currentStore.admin_pin })
-          });
+          const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(currentStore.id);
+          if (isUuid) {
+            await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?id=eq.${currentStore.id}`, {
+              method: "PATCH",
+              headers: { 
+                "apikey": SUPABASE_ANON_KEY, 
+                "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, 
+                "Content-Type": "application/json" 
+              },
+              body: JSON.stringify({ admin_pin: updatedPin })
+            });
+          }
           await saveOverviewConfigToCloud();
-          Swal.fire('PIN 碼修改成功！', `下次請使用新密碼：${currentStore.admin_pin}`, 'success');
+          Swal.fire('PIN 碼修改成功！', `全店通用的管理密碼已更新為：${updatedPin}`, 'success');
         } catch(e) {
+          console.error("更新密碼同步異常:", e);
           Swal.fire('修改失敗', e.message, 'error');
         }
       }
     }
 
-    // [新增] 功能許願池提交至 Supabase
     async function openFeedbackPromptModal(toolTitle) {
       const storeName = currentStore.store_name || "排程總覽門市";
       

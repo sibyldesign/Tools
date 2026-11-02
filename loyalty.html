@@ -358,22 +358,19 @@
             </div>
           </div>
 
-          <!-- PIN 碼管理與眼睛顯隱 -->
-          <div class="p-4 bg-brand-50 rounded-2xl border border-brand-200 space-y-3">
-            <span class="font-bold text-brand-900 block border-b border-brand-200 pb-1.5">
-              <i class="fa-solid fa-key text-[#8C7355] mr-1"></i> 店長管理 PIN 碼安全設定
-            </span>
-            <div class="flex items-center gap-2">
-              <div class="relative flex-1">
-                <input type="password" id="cfg-manager-pin-input" value="8888" maxlength="8" class="w-full p-2.5 pr-10 bg-white rounded-xl border border-brand-200 font-mono font-bold text-sm tracking-widest outline-none">
-                <button type="button" onclick="togglePinVisibility()" class="absolute right-3 top-3 text-brand-400 hover:text-brand-900">
-                  <i class="fa-solid fa-eye" id="pin-eye-icon"></i>
-                </button>
-              </div>
-              <button type="button" onclick="saveNewPinCode()" class="px-4 py-2.5 bg-[#8C7355] text-white rounded-xl font-bold shrink-0 shadow-xs">
-                更新密碼
-              </button>
-            </div>
+          <!-- 店長管理 PIN 碼設定卡片 -->
+<div class="p-3.5 bg-brand-50 rounded-2xl border border-brand-200 flex justify-between items-center mb-3">
+  <div>
+    <span class="font-bold text-brand-900 block text-xs">店長前台管理 PIN 碼：</span>
+    <span class="text-[10px] text-brand-400">進入此存摺管理專區之驗證密碼</span>
+  </div>
+  <div class="flex items-center gap-2">
+    <code class="px-3 py-1 bg-white border border-brand-200 rounded-xl font-mono font-black text-sm text-[#8C7355]" id="disp-manager-pin">8888</code>
+    <button type="button" onclick="changeAdminPinModal()" class="px-2.5 py-1 bg-white border border-brand-200 text-blue-600 rounded-lg text-[10.5px] font-bold hover:bg-brand-50">
+      修改密碼
+    </button>
+  </div>
+</div>
             <!-- 許願建議小按鈕 -->
 <button type="button" onclick="openFeedbackPromptModal('當前工具名稱')" class="px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
   <i class="fa-solid fa-lightbulb text-amber-600"></i>
@@ -1154,6 +1151,52 @@
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
     }
 
+    async function changeAdminPinModal() {
+  const { value: newPin } = await Swal.fire({
+    title: '修改店長管理 PIN 碼',
+    input: 'password',
+    inputPlaceholder: '請輸入新的 4~6 碼數字密碼',
+    showCancelButton: true,
+    confirmButtonText: '確認儲存',
+    confirmButtonColor: '#8C7355',
+    inputValidator: v => (!v || v.length < 4 ? '密碼長度至少需 4 碼！' : null)
+  });
+  if (newPin && newPin.trim()) {
+    const updatedPin = newPin.trim();
+    currentStore.admin_pin = updatedPin;
+    const pinDisp = document.getElementById('disp-manager-pin');
+    if (pinDisp) pinDisp.innerText = updatedPin;
+
+    try {
+      // 1. 同步回寫至 tool_stores 主表
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(currentStore.id);
+      if (isUuid) {
+        await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?id=eq.${currentStore.id}`, {
+          method: "PATCH",
+          headers: { 
+            "apikey": SUPABASE_ANON_KEY, 
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, 
+            "Content-Type": "application/json" 
+          },
+          body: JSON.stringify({ admin_pin: updatedPin })
+        });
+      }
+
+      // 2. 儲存 loyalty 自身雲端設定
+      if (typeof saveLoyaltyConfigToCloud === 'function') {
+        await saveLoyaltyConfigToCloud(true);
+      } else if (typeof saveStoreSettingsToCloud === 'function') {
+        await saveStoreSettingsToCloud(true);
+      }
+
+      Swal.fire('PIN 碼修改成功！', `全店通用的管理密碼已更新為：${updatedPin}`, 'success');
+    } catch(e) {
+      console.error("更新密碼同步異常:", e);
+      Swal.fire('修改失敗', e.message, 'error');
+    }
+  }
+}
+    
     // [全工具通用] 店長功能許願與改版建議收集函式
     async function openFeedbackPromptModal(toolTitle) {
       const storeName = currentStore.store_name || "門市店家";

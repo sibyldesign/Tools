@@ -933,11 +933,38 @@
         confirmButtonColor: '#8C7355',
         inputValidator: v => (!v || v.length < 4 ? '密碼長度至少需 4 碼！' : null)
       });
+      
       if (newPin && newPin.trim()) {
-        currentStore.admin_pin = newPin.trim();
-        document.getElementById('disp-manager-pin').innerText = currentStore.admin_pin;
-        await saveContractSettingsToCloud(true);
-        Swal.fire('PIN 碼修改成功！', `下次請使用新密碼：${currentStore.admin_pin}`, 'success');
+        const updatedPin = newPin.trim();
+        currentStore.admin_pin = updatedPin;
+        
+        // 更新畫面上顯示的 PIN 碼（若該頁面有這個 DOM）
+        const pinDisp = document.getElementById('disp-manager-pin');
+        if (pinDisp) pinDisp.innerText = updatedPin;
+
+        try {
+          // 1. 同步回寫至 tool_stores 主表（讓 super_tools 總管名冊即時看到最新密碼）
+          const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(currentStore.id);
+          if (isUuid) {
+            await fetch(`${SUPABASE_URL}/rest/v1/tool_stores?id=eq.${currentStore.id}`, {
+              method: "PATCH",
+              headers: { 
+                "apikey": SUPABASE_ANON_KEY, 
+                "Authorization": `Bearer ${SUPABASE_ANON_KEY}`, 
+                "Content-Type": "application/json" 
+              },
+              body: JSON.stringify({ admin_pin: updatedPin })
+            });
+          }
+
+          // 2. 儲存當前工具的雲端設定
+          await saveContractSettingsToCloud(true);
+
+          Swal.fire('PIN 碼修改成功！', `全店通用的管理密碼已更新為：${updatedPin}`, 'success');
+        } catch (err) {
+          console.error("更新密碼同步異常:", err);
+          Swal.fire('密碼同步雲端失敗', err.message, 'error');
+        }
       }
     }
 

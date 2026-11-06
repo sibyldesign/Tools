@@ -27,6 +27,7 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+    /* SweetAlert2 全域確認按鈕統一套用系統質感棕色 */
     .swal2-styled.swal2-confirm {
       background-color: #8C7355 !important;
       color: #ffffff !important;
@@ -53,6 +54,16 @@
     }
     .swal2-styled.swal2-cancel:hover {
       background-color: #D5C7BC !important;
+    }
+
+    /* 甘特排程卡片平滑流暢樣式 */
+    .gantt-card-transition {
+      transition: box-shadow 0.15s ease, transform 0.15s ease;
+    }
+    .gantt-card-transition:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+      z-index: 35 !important;
     }
   </style>
 </head>
@@ -100,10 +111,10 @@
       </div>
     </section>
 
-    <!-- 2. 全日排程甘特畫布 -->
+    <!-- 2. 全日排程甘特畫布 (核心畫布) -->
     <section class="bg-white rounded-3xl border border-brand-200 shadow-md overflow-hidden">
       <div class="overflow-x-auto no-scrollbar">
-        <div class="min-w-[680px]">
+        <div class="min-w-[720px]">
           <div class="grid border-b border-brand-200 bg-brand-50/70" id="gantt-header-row"></div>
           <div class="relative bg-white" id="gantt-body-container"></div>
         </div>
@@ -682,7 +693,8 @@
         ? staffList
         : staffList.filter(s => s.id === activeFilterStaffId);
 
-      headerRow.style.gridTemplateColumns = `repeat(${displayedStaff.length}, minmax(180px, 1fr))`;
+      // 調適專員直欄安全寬度為 minmax(210px, 1fr)
+      headerRow.style.gridTemplateColumns = `repeat(${displayedStaff.length}, minmax(210px, 1fr))`;
       headerRow.innerHTML = displayedStaff.map(s => `
         <div class="py-3 px-2 text-center font-black text-brand-900 border-r border-brand-200 last:border-none text-sm">
           ${s.name}
@@ -705,7 +717,7 @@
         timeSlots.push({ timeStr: `${hh}:${mm}`, totalMins: m, isHourMark: (m % 60 === 0) });
       }
 
-      bodyContainer.style.gridTemplateColumns = `repeat(${displayedStaff.length}, minmax(180px, 1fr))`;
+      bodyContainer.style.gridTemplateColumns = `repeat(${displayedStaff.length}, minmax(210px, 1fr))`;
       bodyContainer.className = "grid relative bg-white";
 
       const curDayOfWeek = new Date(selectedDate).getDay();
@@ -751,6 +763,20 @@
       return serviceColorCache[serviceName];
     }
 
+    // 格式化長項目名稱與多項目防破版
+    function formatCompactServiceName(name, isNarrow) {
+      if (!name) return '';
+      // 若包含多項目符號（如 +、、），在緊湊窄卡片情境自動濃縮
+      if (isNarrow && (name.includes('+') || name.includes('、'))) {
+        const parts = name.split(/[+、]/).map(p => p.trim()).filter(Boolean);
+        if (parts.length > 1) {
+          return `${parts[0]} +${parts.length - 1}`;
+        }
+      }
+      return name;
+    }
+
+    // 升級版動態多欄軌道演算法（Interval Graph Packing）
     function renderBookingBlocks(displayedStaff, baseMins, interval, slotHeight) {
       const container = document.getElementById('gantt-body-container');
       if (!container) return;
@@ -759,82 +785,189 @@
 
       displayedStaff.forEach((staff, staffIndex) => {
         const staffBookings = todays.filter(b => b.staffId === staff.id);
+        if (staffBookings.length === 0) return;
 
-        staffBookings.forEach((b, i) => {
+        // 轉換為帶有絕對分秒區間的模型
+        const items = staffBookings.map((b, origIdx) => {
           const [sh, sm] = b.startTime.split(':').map(Number);
-          const bStart = sh * 60 + sm;
-          const bEnd = bStart + b.durMins;
-          const topPx = (bStart - baseMins) * pxPerMinute;
-          const heightPx = b.durMins * pxPerMinute - 2;
-          if (topPx < 0) return;
+          const start = sh * 60 + sm;
+          const end = start + Number(b.durMins || 30);
+          return { data: b, origIdx, start, end };
+        });
 
-          const hasOverlap = staffBookings.some((ob, oi) => {
-            if (i === oi) return false;
-            const [osh, osm] = ob.startTime.split(':').map(Number);
-            const obStart = osh * 60 + osm;
-            const obEnd = obStart + ob.durMins;
-            return (bStart < obEnd && bEnd > obStart);
+        // 1. 依起始時間排序
+        items.sort((a, b) => a.start - b.start || a.end - b.end);
+
+        // 2. 區間分群（Connected Overlap Clusters）
+        const clusters = [];
+        let currentCluster = [];
+        let clusterEnd = -1;
+
+        items.forEach(item => {
+          if (currentCluster.length === 0) {
+            currentCluster.push(item);
+            clusterEnd = item.end;
+          } else {
+            if (item.start < clusterEnd) {
+              currentCluster.push(item);
+              clusterEnd = Math.max(clusterEnd, item.end);
+            } else {
+              clusters.push(currentCluster);
+              currentCluster = [item];
+              clusterEnd = item.end;
+            }
+          }
+        });
+        if (currentCluster.length > 0) {
+          clusters.push(currentCluster);
+        }
+
+        // 3. 對每個群組動態分配軌道（Track 分配）
+        clusters.forEach(cluster => {
+          const trackLastEnd = []; // 紀錄各軌道最後佔用結束時間
+
+          cluster.forEach(item => {
+            let placed = false;
+            for (let t = 0; t < trackLastEnd.length; t++) {
+              if (item.start >= trackLastEnd[t]) {
+                item.track = t;
+                trackLastEnd[t] = item.end;
+                placed = true;
+                break;
+              }
+            }
+            if (!placed) {
+              item.track = trackLastEnd.length;
+              trackLastEnd.push(item.end);
+            }
           });
 
-          const isOff = (b.isOff === true);
-          const block = document.createElement('div');
-          const itemColor = getMorandiColorByService(b.serviceName);
+          const totalTracks = Math.max(1, trackLastEnd.length);
 
-          block.className = `absolute z-20 rounded-xl p-1.5 shadow-md cursor-pointer transition hover:scale-[1.01] overflow-hidden flex flex-col justify-between ${
-            isOff ? 'bg-stone-200 border border-stone-300 text-stone-700' : 'text-white'
-          }`;
+          // 4. 繪製卡片
+          cluster.forEach(item => {
+            const b = item.data;
+            const topPx = (item.start - baseMins) * pxPerMinute;
+            const calcH = (item.end - item.start) * pxPerMinute - 2;
+            // 保底高度至少 18px，絕不壓扁
+            const heightPx = Math.max(18, calcH);
+            if (topPx < 0) return;
 
-          block.style.top = `${topPx}px`;
-          block.style.height = `${heightPx}px`;
-          block.style.gridColumnStart = `${staffIndex + 1}`;
-          block.style.gridColumnEnd = `${staffIndex + 2}`;
+            const isOff = (b.isOff === true);
+            const block = document.createElement('div');
+            const itemColor = getMorandiColorByService(b.serviceName);
 
-          if (hasOverlap) {
-            const isRightSide = (i % 2 === 1);
-            block.style.width = 'calc(50% - 5px)';
-            block.style.left = isRightSide ? 'calc(50% + 2px)' : '3px';
-          } else {
-            block.style.left = '3px';
-            block.style.right = '3px';
-          }
+            // 依軌道數動態計算寬度與左邊距
+            const trackWidthPercent = 100 / totalTracks;
+            const isNarrow = totalTracks >= 2;
+            const leftOffset = `calc(${item.track * trackWidthPercent}% + 2px)`;
+            const cardWidth = `calc(${trackWidthPercent}% - 4px)`;
 
-          if (!isOff) {
-            block.style.backgroundColor = itemColor.bg;
-            block.style.border = `1px solid ${itemColor.border}`;
-          }
+            block.className = `absolute z-20 rounded-xl shadow-md cursor-pointer overflow-hidden flex flex-col justify-between gantt-card-transition ${
+              isOff ? 'bg-stone-200 border border-stone-300 text-stone-700' : 'text-white'
+            }`;
 
-          const endMins = bStart + b.durMins;
-          const endTimeStr = `${String(Math.floor(endMins/60)).padStart(2,'0')}:${String(endMins%60).padStart(2,'0')}`;
+            block.style.top = `${topPx}px`;
+            block.style.height = `${heightPx}px`;
+            block.style.left = leftOffset;
+            block.style.width = cardWidth;
+            block.style.gridColumnStart = `${staffIndex + 1}`;
+            block.style.gridColumnEnd = `${staffIndex + 2}`;
 
-          if (isOff) {
-            block.innerHTML = `
-              <div>
-                <div class="text-[9px] font-mono font-bold flex justify-between">
-                  <span>${b.startTime}-${endTimeStr}</span><span>[休]</span>
-                </div>
-                <div class="font-bold text-xs mt-0.5 truncate">☕ ${b.custName || '排休'}</div>
-              </div>
-            `;
-          } else {
-            block.innerHTML = `
-              <div>
-                <div class="flex justify-between items-center text-[9px] font-mono opacity-90 pb-0.5 border-b border-white/20">
-                  <span>${b.startTime}-${endTimeStr}</span>
-                  <span class="font-bold bg-black/20 px-1 rounded">${b.durMins}分</span>
-                </div>
-                <div class="font-bold text-xs truncate mt-0.5">${b.custName} <span class="font-normal text-[9px]">(${b.custPhone.slice(-4)})</span></div>
-                <div class="text-[9.5px] truncate font-medium opacity-95">${b.serviceName}</div>
-              </div>
-              ${b.resource && b.resource !== 'none' ? `<div class="text-[8.5px] bg-black/25 rounded px-1 py-0.5 inline-block truncate mt-auto"><i class="fa-solid fa-chair text-[7px] mr-0.5"></i>${b.resource}</div>` : ''}
-            `;
-          }
+            if (!isOff) {
+              block.style.backgroundColor = itemColor.bg;
+              block.style.border = `1px solid ${itemColor.border}`;
+            }
 
-          block.onclick = (e) => {
-            e.stopPropagation();
-            viewBookingDetail(b.id);
-          };
+            const endMins = item.end;
+            const endTimeStr = `${String(Math.floor(endMins/60)).padStart(2,'0')}:${String(endMins%60).padStart(2,'0')}`;
+            const compServiceName = formatCompactServiceName(b.serviceName, isNarrow);
+            const phoneTail = b.custPhone && b.custPhone.length >= 4 ? b.custPhone.slice(-4) : '';
 
-          container.appendChild(block);
+            // 結構 A：超短時段（10~22 分鐘，高度小於 28px）-> 單行緊湊橫排
+            if (heightPx < 28) {
+              block.className += " px-1.5 py-0 flex items-center justify-start";
+              if (isOff) {
+                block.innerHTML = `
+                  <div class="text-[9.5px] font-bold truncate flex items-center gap-1 leading-none w-full">
+                    <span class="font-mono text-[9px] opacity-80 shrink-0">${b.startTime}</span>
+                    <span class="truncate">☕ ${b.custName || '排休'}</span>
+                  </div>
+                `;
+              } else {
+                block.innerHTML = `
+                  <div class="text-[9.5px] font-bold truncate flex items-center gap-1 leading-none w-full">
+                    <span class="font-mono text-[9px] opacity-85 shrink-0">${b.startTime}</span>
+                    <span class="truncate">${b.custName}</span>
+                    <span class="opacity-80 font-normal truncate hidden sm:inline">| ${compServiceName}</span>
+                  </div>
+                `;
+              }
+            }
+            // 結構 B：中等時段（25~60 分鐘，高度 28px~65px）-> 內嵌時長徽章，緊湊直排
+            else if (heightPx < 66) {
+              block.className += " p-1.5";
+              if (isOff) {
+                block.innerHTML = `
+                  <div class="leading-tight">
+                    <div class="text-[9px] font-mono opacity-80 flex items-center justify-between">
+                      <span>${b.startTime}-${endTimeStr}</span>
+                      <span class="font-bold">[休]</span>
+                    </div>
+                    <div class="font-bold text-[11px] truncate mt-0.5">☕ ${b.custName || '排休'}</div>
+                  </div>
+                `;
+              } else {
+                block.innerHTML = `
+                  <div class="leading-tight">
+                    <div class="text-[9px] font-mono opacity-90 flex items-center justify-between pb-0.5 border-b border-white/20">
+                      <span>${b.startTime} <span class="opacity-75 font-normal">(${b.durMins}m)</span></span>
+                      ${phoneTail ? `<span class="opacity-70 text-[8.5px] font-mono">${phoneTail}</span>` : ''}
+                    </div>
+                    <div class="font-bold text-[11px] truncate mt-1">${b.custName}</div>
+                    <div class="text-[9.5px] truncate font-medium opacity-90">${compServiceName}</div>
+                  </div>
+                `;
+              }
+            }
+            // 結構 C：長時段（70 分鐘以上，高度 66px 以上）-> 寬裕層次排版，帶底部標籤
+            else {
+              block.className += " p-2";
+              if (isOff) {
+                block.innerHTML = `
+                  <div class="leading-tight">
+                    <div class="text-[9.5px] font-mono font-bold flex justify-between items-center opacity-85">
+                      <span>${b.startTime} - ${endTimeStr}</span>
+                      <span class="px-1 bg-black/10 rounded">[休]</span>
+                    </div>
+                    <div class="font-black text-xs mt-1.5 truncate">☕ ${b.custName || '排休'}</div>
+                    <div class="text-[10px] text-stone-500 mt-1 opacity-80">${b.durMins} 分鐘排休</div>
+                  </div>
+                `;
+              } else {
+                block.innerHTML = `
+                  <div class="leading-tight">
+                    <div class="flex justify-between items-center text-[9.5px] font-mono opacity-90 pb-0.5 border-b border-white/20">
+                      <span>${b.startTime}-${endTimeStr}</span>
+                      <span class="font-bold bg-black/20 px-1 py-0.2 rounded text-[8.5px]">${b.durMins}m</span>
+                    </div>
+                    <div class="font-black text-xs truncate mt-1">
+                      ${b.custName} ${phoneTail ? `<span class="font-normal text-[9px] opacity-80">(${phoneTail})</span>` : ''}
+                    </div>
+                    <div class="text-[10px] truncate font-medium opacity-95 mt-0.5">${compServiceName}</div>
+                  </div>
+                  ${b.resource && b.resource !== 'none' ? `<div class="text-[8.5px] bg-black/25 rounded px-1 py-0.5 inline-block truncate mt-auto self-start"><i class="fa-solid fa-chair text-[7px] mr-0.5"></i>${b.resource}</div>` : ''}
+                `;
+              }
+            }
+
+            block.onclick = (e) => {
+              e.stopPropagation();
+              viewBookingDetail(b.id);
+            };
+
+            container.appendChild(block);
+          });
         });
       });
     }
@@ -1025,7 +1158,7 @@
               <div class="font-bold text-sm text-rose-700">發現排程衝撞狀況：</div>
               <div class="text-[11.5px] leading-relaxed text-amber-900">${conflictWarning}</div>
               <div class="p-2 bg-white rounded-xl border border-amber-200 text-[10.5px] text-brand-700 font-bold">
-                💡 提醒：若確認強制插單，系統將破例排入，並自動將甘特圖上該時段的色塊變窄並排於左右側。
+                💡 提醒：若確認強制插單，系統將使用多欄位軌道展開並排於格內，內容一目了然不遮擋。
               </div>
             </div>
           `,

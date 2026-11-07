@@ -945,84 +945,6 @@
       throw lastError || new Error('所有 Gemini 候選模型皆無法連線');
     }
 
-    async function runGeminiSmartAnalysis(apiKey, name, featuresRaw) {
-      const btn = document.getElementById('btn-run-analysis');
-      const btnText = document.getElementById('btn-run-analysis-text');
-      const originalText = btnText.innerText;
-      
-      btn.disabled = true;
-      btn.classList.add('opacity-70', 'cursor-wait');
-      btnText.innerText = 'AI 正在深度分析生活痛點與文案...';
-
-      const prompt = `你是一位精通台灣社群（Threads、Instagram Reels）的頂級生活好物文案大師與帶貨顧問。
-你的特色是：語感像真實朋友生活碎念、極具畫面感、白話自然。
-嚴格禁忌：絕對不可使用任何「無疑是」、「儀式感拉滿」、「不得不說」、「折騰老半天」、「懷疑人生」、「這款寶藏」等中國式網路詞彙或八股 AI 腔！
-
-產品名稱：${name}
-產品特點與規格：
-${featuresRaw || '無特定規格，請依生活好物推導'}
-
-請為此產品輸出結構嚴謹的純 JSON 格式，所有內容使用台灣繁體中文，JSON Schema 欄位如下：
-{
-  "category": "產品品類標籤（例如：居家生活、美甲美妝、廚房料理、3C影音等）",
-  "audiences": [
-    { "title": "具體人物身分（6個，寫給一個人，極具共鳴）", "desc": "該身分的真實日常痛點或心態（1-2句）" }
-  ],
-  "scenarios": [
-    { "title": "具體生活日常場景（6個，如：出門趕時間前、週末追劇時）", "desc": "該場景下發生的真實生活衝突畫面與挫折感" }
-  ],
-  "translations": [
-    { "feature": "原始特點文字", "benefit": "轉化為白話生活痛點好處（這項功能到底讓生活少掉什麼麻煩？帶來什麼爽度？具體可信，絕不可機械重複套版）" }
-  ],
-  "goldenSeconds": [
-    { "tag": "類型（如：衝突動作型、反常識勸退型、成果驚艷型、左右對比型、靈魂發問型、私藏低語型）", "action": "開場0-3秒鏡頭畫面動作提示", "script": "開場0-3秒口播衝擊台詞" }
-  ],
-  "script": {
-    "hook": "第一段鉤子（拋出生活衝突，先不講產品名）",
-    "empathy": "第二段共鳴（描述狼狽動作與碎念，戳中讀者痛點）",
-    "pivot": "第三段轉折（用「後來我才發現...」自然帶出產品出場）",
-    "value": "第四段價值（將規格轉化為生活改變，具體流暢）",
-    "cta": "第五段互動（像朋友分享，引導留言關鍵字領連結）"
-  },
-  "captions": {
-    "style1": "Reels說明欄條列重點型（包含痛點、3個生活亮點、留言關鍵字）",
-    "style2": "Reels說明欄真實碎念心得型（像朋友私藏掏心掏肺分享）",
-    "style3": "Reels說明欄留言領取導流型（引爆留言互動拿賣場連結）"
-  },
-  "hookInspirations": [
-    { "type": "抱怨型", "desc": "把真實生活小煩躁直接點出", "lines": ["句子1", "句子2", "句子3"] },
-    { "type": "對話型", "desc": "用一句日常真實對話把讀者拉進情境", "lines": ["句子1", "句子2", "句子3"] },
-    { "type": "反差型", "desc": "前後反差越大讀者越想看", "lines": ["句子1", "句子2", "句子3"] },
-    { "type": "結果型", "desc": "先給出驚豔結果引發好奇", "lines": ["句子1", "句子2", "句子3"] },
-    { "type": "懸念型", "desc": "欲言又止勾住注意力", "lines": ["句子1", "句子2", "句子3"] },
-    { "type": "避坑自嘲型", "desc": "反向勸退或自我調侃", "lines": ["句子1", "句子2", "句子3"] }
-  ],
-  "threadsPosts": [
-    "6篇發在Threads的極短共鳴脆主文（每篇2-4行，第一行自帶爆擊，完全無廣告味）"
-  ],
-  "threadsComments": [
-    "6則發在Threads自己留言區第一則的留言（具體交代產品亮點與如何領取）"
-  ]
-}
-
-請確保返回純 JSON，不要包含 markdown 標籤或任何引言與額外說明。`;
-
-      try {
-        const parsed = await fetchGeminiWithFallback(apiKey, prompt);
-        applyAIGeneratedResult(parsed);
-        showToast('AI 深度文案推導完成！已全面同步更新');
-      } catch (err) {
-        console.error('Gemini API Error:', err);
-        showToast(`AI 生成遇到問題（${err.message || '連線逾時'}），已自動切換離線引擎！`);
-        runLocalHeuristicAnalysis(name, featuresRaw);
-      } finally {
-        // 確保按鈕一定會解鎖，絕不會無限轉圈卡死
-        btn.disabled = false;
-        btn.classList.remove('opacity-70', 'cursor-wait');
-        btnText.innerText = originalText;
-      }
-    }
-
     function applyAIGeneratedResult(data) {
       if (data.category) {
         currentCategory = data.category;
@@ -1080,6 +1002,139 @@ ${featuresRaw || '無特定規格，請依生活好物推導'}
       triggerAutoSave();
     }
 
+    // ==========================================
+    // 強化版：自動多模型巡檢 AI 呼叫引擎
+    // ==========================================
+    async function callGeminiWithAutoRetry(apiKey, promptText) {
+      // 支援多種官方端點，依序自動嘗試連線
+      const candidateModels = [
+        'gemini-1.5-flash',
+        'gemini-1.5-flash-latest',
+        'gemini-2.0-flash',
+        'gemini-pro'
+      ];
+
+      let lastError = null;
+
+      for (const model of candidateModels) {
+        try {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: promptText }] }],
+              generationConfig: {
+                temperature: 0.7,
+                topP: 0.95
+              }
+            })
+          });
+
+          if (!response.ok) {
+            const errJson = await response.json().catch(() => ({}));
+            lastError = errJson?.error?.message || `HTTP ${response.status} on ${model}`;
+            console.warn(`嘗試模型 ${model} 失敗:`, lastError);
+            continue; // 自動換下一個模型嘗試
+          }
+
+          const data = await response.json();
+          let rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (rawText) {
+            console.log(`成功透過 ${model} 完成 AI 生成！`);
+            return rawText;
+          }
+        } catch (e) {
+          lastError = e.message;
+          console.warn(`模型 ${model} 請求例外:`, e);
+        }
+      }
+
+      throw new Error(lastError || '所有候選 AI 模型皆無法連線，請檢查 API Key 是否正確');
+    }
+
+    // 替換原本的 runGeminiSmartAnalysis
+    async function runGeminiSmartAnalysis(apiKey, name, featuresRaw) {
+      const btn = document.getElementById('btn-run-analysis');
+      const btnText = document.getElementById('btn-run-analysis-text');
+      const originalText = btnText.innerText;
+      
+      btn.disabled = true;
+      btn.classList.add('opacity-70', 'cursor-wait');
+      btnText.innerText = 'AI 正在深度分析生活痛點與全套文案...';
+
+      const prompt = `你是一位精通台灣社群（Threads、Instagram Reels）的頂級生活好物文案大師與帶貨顧問。
+你的特色是：語感像真實朋友生活碎念、極具畫面感、白話自然。
+嚴格禁忌：絕對不可使用任何「無疑是」、「儀式感拉滿」、「不得不說」、「折騰老半天」、「懷疑人生」、「這款寶藏」等中國式網路詞彙或八股 AI 腔！
+
+產品名稱：${name}
+產品特點與規格：
+${featuresRaw || '無特定規格，請依生活好物推導'}
+
+請為此產品輸出結構嚴謹的純 JSON 字串，請勿使用 markdown 格式（不要加上 \`\`\`json 標記），所有內容使用台灣繁體中文，JSON 格式如下：
+{
+  "category": "產品品類標籤（例如：美妝美甲、廚房料理、居家生活、3C影音）",
+  "audiences": [
+    { "title": "具體人物身分（請生成6個，寫給最具體的一個人，極具共鳴）", "desc": "該身分的真實日常痛點或心態（1-2句）" }
+  ],
+  "scenarios": [
+    { "title": "具體生活日常場景（請生成6個，如：在家追劇時、出門趕時間前）", "desc": "該場景下發生的真實生活衝突畫面與挫折感" }
+  ],
+  "translations": [
+    { "feature": "原始特點文字", "benefit": "轉化為白話生活痛點好處（這項功能到底讓生活少掉什麼麻煩？帶來什麼爽度？具體可信，絕不可機械重複套版）" }
+  ],
+  "goldenSeconds": [
+    { "tag": "類型（衝突動作型、反常識勸退型、成果驚艷型、左右對比型、靈魂發問型、私藏低語型）", "action": "開場0-3秒鏡頭畫面動作提示", "script": "開場0-3秒口播衝擊台詞" }
+  ],
+  "script": {
+    "hook": "第一段鉤子（拋出生活衝突，先不講產品名）",
+    "empathy": "第二段共鳴（描述狼狽動作與碎念，戳中讀者痛點）",
+    "pivot": "第三段轉折（用「後來我才發現...」自然帶出產品出場）",
+    "value": "第四段價值（將規格轉化為生活改變，具體流暢）",
+    "cta": "第五段互動（像朋友分享，引導留言關鍵字領連結）"
+  },
+  "captions": {
+    "style1": "Reels說明欄條列重點型（包含痛點、3個生活亮點、留言關鍵字）",
+    "style2": "Reels說明欄真實碎念心得型（像朋友私藏掏心掏肺分享）",
+    "style3": "Reels說明欄留言領取導流型（引爆留言互動拿賣場連結）"
+  },
+  "hookInspirations": [
+    { "type": "抱怨型", "desc": "把真實生活小煩躁直接點出", "lines": ["句子1", "句子2", "句子3"] },
+    { "type": "對話型", "desc": "用一句日常真實對話把讀者拉進情境", "lines": ["句子1", "句子2", "句子3"] },
+    { "type": "反差型", "desc": "前後反差越大讀者越想看", "lines": ["句子1", "句子2", "句子3"] },
+    { "type": "結果型", "desc": "先給出驚豔結果引發好奇", "lines": ["句子1", "句子2", "句子3"] },
+    { "type": "懸念型", "desc": "欲言又止勾住注意力", "lines": ["句子1", "句子2", "句子3"] },
+    { "type": "避坑自嘲型", "desc": "反向勸退或自我調侃", "lines": ["句子1", "句子2", "句子3"] }
+  ],
+  "threadsPosts": [
+    "6篇發在Threads的極短共鳴脆主文（每篇2-4行，第一行自帶爆擊，完全無廣告味）"
+  ],
+  "threadsComments": [
+    "6則發在Threads自己留言區第一則的留言（具體交代產品亮點與如何領取）"
+  ]
+}`;
+
+      try {
+        const rawJsonText = await callGeminiWithAutoRetry(apiKey, prompt);
+        
+        // 容錯去除任何 markdown 程式碼標記
+        const cleaned = rawJsonText.replace(/```json/gi, '').replace(/```/g, '').trim();
+        const parsed = JSON.parse(cleaned);
+        applyAIGeneratedResult(parsed);
+        showToast('AI 深度文案推導成功！已智慧適配全套內容');
+
+      } catch (err) {
+        console.error('Gemini API Error:', err);
+        showToast(`AI 生成遇到問題（${err.message}），已自動切換離線引擎！`);
+        runLocalHeuristicAnalysis(name, featuresRaw);
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('opacity-70', 'cursor-wait');
+        btnText.innerText = originalText;
+      }
+    }
+
+    // 替換原本的 retranslateFeaturesWithAI
     async function retranslateFeaturesWithAI() {
       const name = document.getElementById('input-name').value.trim() || '好物';
       const featuresRaw = document.getElementById('input-features').value.trim();
@@ -1101,22 +1156,24 @@ ${featuresRaw}
 
 將每個特點轉化為 1 句極度白話的「真實生活好處與痛點」（這項功能在生活裡具體解決了什麼心煩麻煩？帶來什麼爽度？）。
 要求：語氣像台灣朋友日常真心對話，完全不機械、不可重複套版。
-返回純 JSON 陣列格式：
+返回純 JSON 陣列（請勿包含 markdown 程式碼標記）：
 [
   { "feature": "原始特點文字", "benefit": "轉譯後的生活痛點好處" }
 ]`;
 
       try {
-        const list = await fetchGeminiWithFallback(apiKey, prompt);
+        const rawText = await callGeminiWithAutoRetry(apiKey, prompt);
+        const cleaned = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+        const list = JSON.parse(cleaned);
         if (Array.isArray(list) && list.length > 0) {
           currentTranslations = list;
           renderFeatureTranslationsInputs();
           refreshDraftsWithCurrentContext();
-          showToast('步驟 3 痛點轉譯已更新！');
+          showToast('步驟 3 痛點轉譯已智慧更新！');
         }
       } catch (e) {
         console.error(e);
-        showToast('轉譯連線失敗，已維持目前內容');
+        showToast('轉譯遇到問題，請確認網路或 API 連線');
       }
     }
 

@@ -58,10 +58,9 @@
 </head>
 <body class="min-h-screen font-sans pb-28 antialiased selection:bg-brand-200 selection:text-brand-900">
 
-  <!-- 頂部高質感導航列 -->
+  <!-- 頂部導航列 -->
   <header class="sticky top-0 z-30 bg-[#F8F6F2]/95 backdrop-blur-md border-b border-[#E7DFD5] px-4 py-3 max-w-xl mx-auto flex items-center justify-between">
     <div class="flex items-center gap-2.5">
-      <!-- 質感微奢標印 WRITER -->
       <div class="h-7 px-3 rounded-md bg-brand-900 border border-brand-700/50 text-[#FAF8F5] flex items-center justify-center font-medium text-[10px] tracking-[0.22em] shadow-sm select-none">
         WRITER
       </div>
@@ -99,7 +98,7 @@
 
     <!-- 線性工作流程導航切換列 -->
     <nav class="flex gap-1.5 p-1 bg-[#ECE5DC] rounded-2xl text-xs font-medium text-stone-600 border border-[#DFD6CB] overflow-x-auto no-scrollbar">
-      <button onclick="switchTab('analysis')" id="tab-btn-analysis" class="py-2 px-3 rounded-xl whitespace-nowrap transition-all bg-white text-brand-900 font-semibold shadow-sm flex-1 text-center">產品分析</button>
+      <button onclick="switchTab('analysis')" id="tab-btn-analysis" class="py-2 px-3 rounded-xl whitespace-nowrap transition-all bg-white text-brand-900 font-semibold shadow-sm flex-1 text-center">產品分析 (1-4)</button>
       <button onclick="switchTab('write')" id="tab-btn-write" class="py-2 px-3 rounded-xl whitespace-nowrap transition-all hover:text-brand-900 flex-1 text-center">Reels腳本</button>
       <button onclick="switchTab('reels-caption')" id="tab-btn-reels-caption" class="py-2 px-3 rounded-xl whitespace-nowrap transition-all hover:text-brand-900 flex-1 text-center">Reels貼文</button>
       <button onclick="switchTab('check')" id="tab-btn-check" class="py-2 px-3 rounded-xl whitespace-nowrap transition-all hover:text-brand-900 flex-1 text-center">發文前檢查</button>
@@ -482,9 +481,7 @@
         </label>
       </div>
 
-      <!-- ========================================== -->
-      <!-- 補回：去除 AI 感（深度生活化對照與贅詞排查） -->
-      <!-- ========================================== -->
+      <!-- 去除 AI 感模組 -->
       <div class="bg-white p-4 sm:p-5 rounded-2xl border border-[#E7DFD5] shadow-sm space-y-4 mt-4">
         <div class="space-y-1">
           <h3 class="font-bold text-xs sm:text-sm text-brand-900 flex items-center gap-2">
@@ -693,7 +690,7 @@
       updateProjectCountBadge();
       updateAIStatusUI();
       
-      const savedDraft = localStorage.getItem('copywriter_draft_v6');
+      const savedDraft = localStorage.getItem('copywriter_draft_v7');
       if (savedDraft) {
         try {
           const draft = JSON.parse(savedDraft);
@@ -716,7 +713,7 @@
 
     function saveCurrentDraftToLocalStorage() {
       const draft = getCurrentFormData();
-      localStorage.setItem('copywriter_draft_v6', JSON.stringify(draft));
+      localStorage.setItem('copywriter_draft_v7', JSON.stringify(draft));
       const ind = document.getElementById('autosave-indicator');
       if (ind) {
         ind.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-600 inline-block"></span>已於 ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})} 自動暫存`;
@@ -883,7 +880,7 @@
     }
 
     // ==========================================
-    // 智慧工作流核心：AI 與 強化型語義引擎
+    // 智慧工作流核心：具備雙模型容錯的 API 呼叫
     // ==========================================
     async function executeAnalysisWorkflow() {
       const name = document.getElementById('input-name').value.trim();
@@ -902,6 +899,50 @@
         runLocalHeuristicAnalysis(name, featuresRaw);
         showToast('已完成生活痛點分析！如需更高智慧度可於頂部設定 AI 金鑰');
       }
+    }
+
+    // 呼叫 Gemini API 核心函式（支援自動嘗試備用模型）
+    async function fetchGeminiWithFallback(apiKey, prompt) {
+      // 依序嘗試目前官方支援的模型名稱
+      const candidateModels = [
+        'gemini-2.5-flash',
+        'gemini-1.5-flash',
+        'gemini-1.5-pro'
+      ];
+
+      let lastError = null;
+
+      for (const model of candidateModels) {
+        try {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: {
+                responseMimeType: "application/json",
+                temperature: 0.7
+              }
+            })
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (text) {
+              return JSON.parse(text);
+            }
+          } else {
+            const errJson = await response.json().catch(() => ({}));
+            lastError = new Error(errJson?.error?.message || `模型 ${model} 請求失敗 (${response.status})`);
+          }
+        } catch (e) {
+          lastError = e;
+        }
+      }
+
+      throw lastError || new Error('所有 Gemini 候選模型皆無法連線');
     }
 
     async function runGeminiSmartAnalysis(apiKey, name, featuresRaw) {
@@ -967,37 +1008,15 @@ ${featuresRaw || '無特定規格，請依生活好物推導'}
 請確保返回純 JSON，不要包含 markdown 標籤或任何引言與額外說明。`;
 
       try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              responseMimeType: "application/json",
-              temperature: 0.7
-            }
-          })
-        });
-
-        if (!response.ok) {
-          const errData = await response.json().catch(() => ({}));
-          throw new Error(errData?.error?.message || `HTTP ${response.status}`);
-        }
-
-        const data = await response.json();
-        const rawJsonText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-        
-        if (!rawJsonText) throw new Error('AI 未返回有效內容');
-
-        const parsed = JSON.parse(rawJsonText);
+        const parsed = await fetchGeminiWithFallback(apiKey, prompt);
         applyAIGeneratedResult(parsed);
         showToast('AI 深度文案推導完成！已全面同步更新');
-
       } catch (err) {
         console.error('Gemini API Error:', err);
-        showToast(`AI 生成失敗：${err.message}，已啟用離線引擎`);
+        showToast(`AI 生成遇到問題（${err.message || '連線逾時'}），已自動切換離線引擎！`);
         runLocalHeuristicAnalysis(name, featuresRaw);
       } finally {
+        // 確保按鈕一定會解鎖，絕不會無限轉圈卡死
         btn.disabled = false;
         btn.classList.remove('opacity-70', 'cursor-wait');
         btnText.innerText = originalText;
@@ -1088,17 +1107,7 @@ ${featuresRaw}
 ]`;
 
       try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { responseMimeType: "application/json" }
-          })
-        });
-
-        const data = await response.json();
-        const list = JSON.parse(data?.candidates?.[0]?.content?.parts?.[0]?.text);
+        const list = await fetchGeminiWithFallback(apiKey, prompt);
         if (Array.isArray(list) && list.length > 0) {
           currentTranslations = list;
           renderFeatureTranslationsInputs();
@@ -1107,7 +1116,7 @@ ${featuresRaw}
         }
       } catch (e) {
         console.error(e);
-        showToast('轉譯失敗，請確認 API 金鑰連線');
+        showToast('轉譯連線失敗，已維持目前內容');
       }
     }
 
@@ -2182,7 +2191,7 @@ ${featuresRaw}
             <button onclick="loadProjectById('${p.id}')" class="px-2.5 py-1.5 bg-brand-800 hover:bg-brand-900 text-white rounded-lg text-xs font-medium transition-all">
               開啟
             </button>
-            <button onclick="deleteProjectById('${p.id}')" class="px-2.5 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-500 rounded-lg text-xs transition-all">
+            <button onclick="deleteProjectById('${p.id}')" class="px-2 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-500 rounded-lg text-xs transition-all">
               刪除
             </button>
           </div>
@@ -2217,7 +2226,7 @@ ${featuresRaw}
     }
 
     // ==========================================
-    // 質感客製彈窗控制器
+    // 質感客製彈窗控制器 (徹底去除原生 Alert/Prompt)
     // ==========================================
     let activeCustomConfirmHandler = null;
 

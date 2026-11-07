@@ -1003,16 +1003,42 @@
     }
 
     // ==========================================
-    // 強化版：自動多模型巡檢 AI 呼叫引擎
+    // 徹底解決：先自動詢問 Google 支援清單，再精準連線
     // ==========================================
     async function callGeminiWithAutoRetry(apiKey, promptText) {
-      // 支援多種官方端點，依序自動嘗試連線
-      const candidateModels = [
-        'gemini-1.5-flash',
-        'gemini-1.5-flash-latest',
+      // 1. 先向 Google 查詢當前 API Key 真正支援的模型清單
+      let targetModel = 'gemini-2.0-flash';
+      try {
+        const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+        if (listRes.ok) {
+          const listData = await listRes.json();
+          const availableModels = (listData.models || [])
+            .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
+            .map(m => m.name.replace('models/', ''));
+          
+          console.log('你的 API Key 當前支援的模型清單：', availableModels);
+
+          // 優先挑選當前最新的 flash 系列
+          const preferred = availableModels.find(m => m.includes('2.0-flash')) ||
+                          availableModels.find(m => m.includes('flash')) ||
+                          availableModels[0];
+          
+          if (preferred) {
+            targetModel = preferred;
+            console.log('系統自動匹配最佳模型：', targetModel);
+          }
+        }
+      } catch (e) {
+        console.warn('查詢可用模型清單失敗，嘗試使用預設 gemini-2.0-flash', e);
+      }
+
+      // 2. 備援清單（以偵測到的模型優先）
+      const candidateModels = Array.from(new Set([
+        targetModel,
         'gemini-2.0-flash',
-        'gemini-pro'
-      ];
+        'gemini-2.0-flash-exp',
+        'gemini-1.5-flash-latest'
+      ]));
 
       let lastError = null;
 
@@ -1025,8 +1051,7 @@
             body: JSON.stringify({
               contents: [{ parts: [{ text: promptText }] }],
               generationConfig: {
-                temperature: 0.7,
-                topP: 0.95
+                temperature: 0.7
               }
             })
           });
@@ -1035,22 +1060,21 @@
             const errJson = await response.json().catch(() => ({}));
             lastError = errJson?.error?.message || `HTTP ${response.status} on ${model}`;
             console.warn(`嘗試模型 ${model} 失敗:`, lastError);
-            continue; // 自動換下一個模型嘗試
+            continue;
           }
 
           const data = await response.json();
           let rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
           if (rawText) {
-            console.log(`成功透過 ${model} 完成 AI 生成！`);
+            console.log(`成功透過 ${model} 完成真 AI 生成！`);
             return rawText;
           }
         } catch (e) {
           lastError = e.message;
-          console.warn(`模型 ${model} 請求例外:`, e);
         }
       }
 
-      throw new Error(lastError || '所有候選 AI 模型皆無法連線，請檢查 API Key 是否正確');
+      throw new Error(lastError || 'API 請求失敗，請確認 API Key 是否正確');
     }
 
     // 替換原本的 runGeminiSmartAnalysis

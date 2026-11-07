@@ -7,7 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {
       theme: {
@@ -17,16 +17,16 @@
           },
           colors: {
             brand: {
-              50: '#FBF9F6',
-              100: '#F5F0E8',
-              200: '#EBDDCF',
-              300: '#DCC3AC',
-              400: '#C7A283',
-              500: '#A87C5C',
-              600: '#8C6244',
-              700: '#704D34',
-              800: '#563B27',
-              900: '#3D2A1C',
+              50: '#FAF8F5',
+              100: '#F4EFEA',
+              200: '#E8DFD5',
+              300: '#D5C5B5',
+              400: '#B8A18D',
+              500: '#8C735D',
+              600: '#6B5441',
+              700: '#4A3728',
+              800: '#34261B',
+              900: '#20160F',
             }
           }
         }
@@ -35,16 +35,16 @@
   </script>
   <style>
     body {
-      background-color: #F8F5F0;
-      color: #382D26;
+      background-color: #F8F6F2;
+      color: #29231F;
       -webkit-tap-highlight-color: transparent;
     }
     .custom-scroll::-webkit-scrollbar {
-      width: 5px;
-      height: 5px;
+      width: 4px;
+      height: 4px;
     }
     .custom-scroll::-webkit-scrollbar-thumb {
-      background: #DCC3AC;
+      background: #D5C5B5;
       border-radius: 999px;
     }
     .no-scrollbar::-webkit-scrollbar {
@@ -56,31 +56,33 @@
     }
   </style>
 </head>
-<body class="min-h-screen font-sans pb-24">
+<body class="min-h-screen font-sans pb-28 antialiased selection:bg-brand-200 selection:text-brand-900">
 
-  <!-- 頂部導航列 -->
-  <header class="sticky top-0 z-30 bg-[#F8F5F0]/95 backdrop-blur-md border-b border-[#EBDDCF] px-4 py-2.5 max-w-xl mx-auto flex items-center justify-between">
-    <div class="flex items-center gap-2">
-      <div class="w-8 h-8 rounded-xl bg-brand-700 text-white flex items-center justify-center font-bold text-sm shadow-sm">
-        文
+  <!-- 頂部高質感導航列 -->
+  <header class="sticky top-0 z-30 bg-[#F8F6F2]/95 backdrop-blur-md border-b border-[#E7DFD5] px-4 py-3 max-w-xl mx-auto flex items-center justify-between">
+    <div class="flex items-center gap-2.5">
+      <div class="w-12 h-8 rounded-lg bg-brand-800 text-white flex items-center justify-center font-semibold text-xs tracking-wider shadow-sm">
+        WRITER
       </div>
       <div>
-        <h1 class="text-base font-bold text-brand-900 leading-tight">文案製造機</h1>
-        <p id="autosave-indicator" class="text-[10px] text-emerald-600 flex items-center gap-1 font-medium">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>已即時自動暫存
+        <h1 class="text-sm font-bold tracking-tight text-brand-900">文案製造機</h1>
+        <p id="autosave-indicator" class="text-[10px] text-stone-500 font-medium flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 inline-block"></span>已即時自動暫存
         </p>
       </div>
     </div>
     
-    <div class="flex items-center gap-1.5">
-      <!-- 記事本按鈕 -->
-      <button onclick="openProjectModal()" class="px-2.5 py-1.5 bg-[#FAF7F2] hover:bg-brand-100 text-brand-900 border border-[#EBDDCF] rounded-xl text-xs font-semibold shadow-sm transition-all flex items-center gap-1 active:scale-95">
-        📁 專案記事本 <span id="project-count-badge" class="px-1.5 py-0.2 bg-brand-700 text-white text-[10px] rounded-full">0</span>
+    <div class="flex items-center gap-2">
+      <!-- 專案記事本按鈕 -->
+      <button onclick="openProjectModal()" class="px-3 py-1.5 bg-white hover:bg-brand-50 text-brand-900 border border-[#E0D6CB] rounded-xl text-xs font-medium shadow-sm transition-all flex items-center gap-1.5 active:scale-95">
+        <svg class="w-3.5 h-3.5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+        記事本 <span id="project-count-badge" class="px-1.5 py-0.2 bg-brand-100 text-brand-800 text-[10px] rounded-full font-semibold">0</span>
       </button>
 
-      <!-- 儲存為專案按鈕 -->
-      <button onclick="saveCurrentAsProject()" class="px-3 py-1.5 bg-brand-700 hover:bg-brand-800 text-white rounded-xl text-xs font-medium shadow-sm transition-all flex items-center gap-1 active:scale-95">
-        💾 另存專案
+      <!-- 另存專案按鈕 -->
+      <button onclick="openSaveProjectModal()" class="px-3 py-1.5 bg-brand-800 hover:bg-brand-900 text-white rounded-xl text-xs font-medium shadow-sm transition-all flex items-center gap-1.5 active:scale-95">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+        另存專案
       </button>
     </div>
   </header>
@@ -88,98 +90,117 @@
   <!-- 主內容容器 -->
   <main class="max-w-xl mx-auto px-4 pt-3 space-y-4">
 
-    <!-- 六大模組導航切換列（支援橫向滾動） -->
-    <nav class="flex gap-1.5 p-1 bg-[#EFE8DE] rounded-2xl text-xs font-semibold text-brand-700 border border-[#E3D4C4] overflow-x-auto no-scrollbar">
-      <button onclick="switchTab('analysis')" id="tab-btn-analysis" class="py-2 px-3 rounded-xl whitespace-nowrap transition-all bg-white text-brand-900 shadow-sm flex-1 text-center">產品分析</button>
+    <!-- 導航切換列 -->
+    <nav class="flex gap-1.5 p-1 bg-[#ECE5DC] rounded-2xl text-xs font-medium text-stone-600 border border-[#DFD6CB] overflow-x-auto no-scrollbar">
+      <button onclick="switchTab('analysis')" id="tab-btn-analysis" class="py-2 px-3 rounded-xl whitespace-nowrap transition-all bg-white text-brand-900 font-semibold shadow-sm flex-1 text-center">產品分析</button>
       <button onclick="switchTab('write')" id="tab-btn-write" class="py-2 px-3 rounded-xl whitespace-nowrap transition-all hover:text-brand-900 flex-1 text-center">Reels腳本</button>
       <button onclick="switchTab('reels-caption')" id="tab-btn-reels-caption" class="py-2 px-3 rounded-xl whitespace-nowrap transition-all hover:text-brand-900 flex-1 text-center">Reels貼文</button>
       <button onclick="switchTab('hook')" id="tab-btn-hook" class="py-2 px-3 rounded-xl whitespace-nowrap transition-all hover:text-brand-900 flex-1 text-center">開頭靈感</button>
       <button onclick="switchTab('check')" id="tab-btn-check" class="py-2 px-3 rounded-xl whitespace-nowrap transition-all hover:text-brand-900 flex-1 text-center">發文前檢查</button>
-      <button onclick="switchTab('threads')" id="tab-btn-threads" class="py-2 px-3 rounded-xl whitespace-nowrap transition-all hover:text-brand-900 flex-1 text-center bg-brand-200/60 text-brand-900 font-bold">脆 (Threads) 延伸</button>
+      <button onclick="switchTab('threads')" id="tab-btn-threads" class="py-2 px-3 rounded-xl whitespace-nowrap transition-all hover:text-brand-900 flex-1 text-center bg-brand-200/50 text-brand-900 font-semibold">脆延伸</button>
     </nav>
 
     <!-- ========================================== -->
-    <!-- 模組 1：產品分析 (含 6種對象、6種情境、痛點翻譯) -->
+    <!-- 模組 1：產品分析 -->
     <!-- ========================================== -->
     <section id="tab-analysis" class="space-y-4">
       
-      <!-- 輸入區塊 -->
-      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-[#EBDDCF] shadow-sm space-y-3.5">
+      <!-- 基礎輸入區塊 -->
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-[#E7DFD5] shadow-sm space-y-3.5">
         <div>
-          <label class="block text-xs font-semibold text-brand-700 mb-1.5">載入範例：</label>
+          <label class="block text-xs font-semibold text-brand-700 mb-1.5 tracking-wider uppercase">載入範例庫</label>
           <div class="flex flex-wrap gap-1.5">
-            <button onclick="loadSample('nail')" class="px-2.5 py-1 bg-[#F5F0E8] hover:bg-brand-200 text-brand-800 rounded-lg text-xs transition-colors">💅 美甲一步膠</button>
-            <button onclick="loadSample('timer')" class="px-2.5 py-1 bg-[#F5F0E8] hover:bg-brand-200 text-brand-800 rounded-lg text-xs transition-colors">🍅 兒童番茄鐘</button>
-            <button onclick="loadSample('vacuum')" class="px-2.5 py-1 bg-[#F5F0E8] hover:bg-brand-200 text-brand-800 rounded-lg text-xs transition-colors">🧳 真空收納袋</button>
-            <button onclick="loadSample('projector')" class="px-2.5 py-1 bg-[#F5F0E8] hover:bg-brand-200 text-brand-800 rounded-lg text-xs transition-colors">📽️ 微型投影機</button>
-            <button onclick="clearInputs()" class="px-2 py-1 text-stone-400 hover:text-stone-600 text-xs ml-auto">清空</button>
+            <button onclick="loadSample('nail')" class="px-2.5 py-1 bg-[#F5EFEA] hover:bg-brand-200 text-brand-900 rounded-lg text-xs transition-colors font-medium">美甲一步膠</button>
+            <button onclick="loadSample('timer')" class="px-2.5 py-1 bg-[#F5EFEA] hover:bg-brand-200 text-brand-900 rounded-lg text-xs transition-colors font-medium">兒童視覺番茄鐘</button>
+            <button onclick="loadSample('vacuum')" class="px-2.5 py-1 bg-[#F5EFEA] hover:bg-brand-200 text-brand-900 rounded-lg text-xs transition-colors font-medium">免抽氣收納袋</button>
+            <button onclick="loadSample('projector')" class="px-2.5 py-1 bg-[#F5EFEA] hover:bg-brand-200 text-brand-900 rounded-lg text-xs transition-colors font-medium">微型投影機</button>
+            <button onclick="clearInputs()" class="px-2.5 py-1 text-stone-400 hover:text-stone-600 text-xs ml-auto">清空</button>
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-brand-900 mb-1">產品名稱</label>
-          <input id="input-name" type="text" oninput="triggerAutoSave()" class="w-full bg-[#FAF7F2] border border-[#EBDDCF] rounded-xl px-3.5 py-2.5 text-sm text-brand-900 focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="例如：美甲一步膠、微型投影機...">
+          <label class="block text-xs font-bold text-brand-900 mb-1 tracking-tight">產品名稱</label>
+          <input id="input-name" type="text" oninput="triggerAutoSave()" class="w-full bg-[#FAF8F5] border border-[#E7DFD5] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-brand-900 focus:outline-none focus:ring-1 focus:ring-brand-500" placeholder="例如：美甲一步膠、微型投影機">
         </div>
 
         <div>
-          <div class="flex items-center justify-between mb-1">
-            <label class="block text-xs font-bold text-brand-900">產品特點 <span class="font-normal text-stone-400">(一行寫一個)</span></label>
-          </div>
-          <textarea id="input-features" rows="4" oninput="triggerAutoSave()" class="w-full bg-[#FAF7F2] border border-[#EBDDCF] rounded-xl p-3 text-sm text-brand-900 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-y" placeholder="不用底膠封層&#10;省時省力照燈快乾&#10;多款顯白色號&#10;磁吸水光貓眼超亮"></textarea>
+          <label class="block text-xs font-bold text-brand-900 mb-1 tracking-tight">產品特點 <span class="font-normal text-stone-400">（每行一個）</span></label>
+          <textarea id="input-features" rows="4" oninput="triggerAutoSave()" class="w-full bg-[#FAF8F5] border border-[#E7DFD5] rounded-xl p-3 text-xs sm:text-sm text-brand-900 focus:outline-none focus:ring-1 focus:ring-brand-500 resize-y leading-relaxed" placeholder="不用底膠封層&#10;省時省力照燈快乾&#10;多款顯白色號&#10;磁吸水光貓眼通透"></textarea>
         </div>
 
-        <button onclick="runSmartAnalysis()" class="w-full py-3 bg-brand-700 hover:bg-brand-800 text-white rounded-xl text-sm font-semibold shadow transition-all flex items-center justify-center gap-2 active:scale-[0.99]">
-          <span>✨ 智慧分析受眾、情境與痛點翻譯</span>
+        <button onclick="runSmartAnalysis()" class="w-full py-3 bg-brand-800 hover:bg-brand-900 text-white rounded-xl text-xs sm:text-sm font-semibold shadow transition-all flex items-center justify-center gap-2 active:scale-[0.99]">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          <span>智慧分析受眾、情境與痛點轉換</span>
         </button>
       </div>
 
       <!-- 分析結果區 -->
       <div id="analysis-results" class="space-y-4">
         
-        <!-- STEP 1 適合的銷售對象 (6 種) -->
-        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-[#EBDDCF] shadow-sm">
-          <div class="flex items-center justify-between mb-1.5">
+        <!-- STEP 1 適合的銷售對象 -->
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-[#E7DFD5] shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <span class="text-xs font-black tracking-wider text-brand-600 uppercase">STEP 1</span>
-              <h2 class="text-sm font-bold text-brand-900">適合的銷售對象</h2>
+              <span class="text-[10px] font-bold tracking-widest text-brand-600 uppercase">STEP 01</span>
+              <h2 class="text-xs sm:text-sm font-bold text-brand-900">適合的銷售對象</h2>
             </div>
-            <span id="detected-category" class="text-[11px] bg-brand-100 text-brand-800 px-2 py-0.5 rounded-full font-medium">判斷類型：美妝美甲</span>
+            <span id="detected-category" class="text-[10px] bg-brand-100 text-brand-800 px-2 py-0.5 rounded-md font-medium">美妝美甲</span>
           </div>
-          <p class="text-xs text-stone-500 mb-3">選一個最具體的人。寫給一個人，比寫給所有人更有感。</p>
+
+          <!-- 自訂受眾意向輸入與優化按鈕 -->
+          <div class="p-3 bg-[#FAF8F5] rounded-xl border border-[#E7DFD5] space-y-2">
+            <label class="block text-[11px] font-semibold text-brand-800">自訂受眾意向 / 關鍵方向：</label>
+            <div class="flex gap-2">
+              <input id="custom-audience-intent" type="text" placeholder="例如：在家自己做美甲的小資族、完全不想花大錢去沙龍的人" class="flex-1 bg-white border border-[#E7DFD5] rounded-lg px-3 py-1.5 text-xs text-brand-900 focus:outline-none focus:ring-1 focus:ring-brand-500">
+              <button onclick="optimizeAudiencesFromIntent()" class="px-3 py-1.5 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-xs font-medium whitespace-nowrap transition-all shadow-sm">
+                智慧優化受眾
+              </button>
+            </div>
+          </div>
+
+          <p class="text-[11px] text-stone-500">點選一項作為核心受眾，內容皆可直接點擊手動微調編輯：</p>
           
-          <div id="audience-list" class="space-y-2">
-            <!-- 動態渲染 6 種受眾 -->
-          </div>
+          <!-- 6 項可手動編輯的受眾清單 -->
+          <div id="audience-list" class="space-y-2"></div>
         </div>
 
-        <!-- STEP 2 建議使用的情境 (6 種) -->
-        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-[#EBDDCF] shadow-sm">
-          <div class="flex items-center gap-2 mb-1.5">
-            <span class="text-xs font-black tracking-wider text-brand-600 uppercase">STEP 2</span>
-            <h2 class="text-sm font-bold text-brand-900">建議使用的情境</h2>
+        <!-- STEP 2 建議使用的情境 -->
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-[#E7DFD5] shadow-sm space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-bold tracking-widest text-brand-600 uppercase">STEP 02</span>
+            <h2 class="text-xs sm:text-sm font-bold text-brand-900">建議使用的情境</h2>
           </div>
-          <p class="text-xs text-stone-500 mb-3">選一個他每天真的會遇到的畫面，這會是你開頭和共鳴段的素材。</p>
+
+          <!-- 自訂情境意向輸入與優化按鈕 -->
+          <div class="p-3 bg-[#FAF8F5] rounded-xl border border-[#E7DFD5] space-y-2">
+            <label class="block text-[11px] font-semibold text-brand-800">自訂情境意向 / 生活畫面：</label>
+            <div class="flex gap-2">
+              <input id="custom-scenario-intent" type="text" placeholder="例如：假日在家追劇順手做、不想出門花大錢卸甲" class="flex-1 bg-white border border-[#E7DFD5] rounded-lg px-3 py-1.5 text-xs text-brand-900 focus:outline-none focus:ring-1 focus:ring-brand-500">
+              <button onclick="optimizeScenariosFromIntent()" class="px-3 py-1.5 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-xs font-medium whitespace-nowrap transition-all shadow-sm">
+                智慧優化情境
+              </button>
+            </div>
+          </div>
+
+          <p class="text-[11px] text-stone-500">點選一項作為核心日常場景，內容皆可直接點擊手動微調編輯：</p>
           
-          <div id="scenario-list" class="space-y-2">
-            <!-- 動態渲染 6 種情境 -->
-          </div>
+          <!-- 6 項可手動編輯的情境清單 -->
+          <div id="scenario-list" class="space-y-2"></div>
         </div>
 
         <!-- STEP 3 功能翻譯成生活痛點 -->
-        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-[#EBDDCF] shadow-sm">
-          <div class="flex items-center gap-2 mb-1.5">
-            <span class="text-xs font-black tracking-wider text-brand-600 uppercase">STEP 3</span>
-            <h2 class="text-sm font-bold text-brand-900">功能翻譯成生活痛點</h2>
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-[#E7DFD5] shadow-sm space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-bold tracking-widest text-brand-600 uppercase">STEP 03</span>
+            <h2 class="text-xs sm:text-sm font-bold text-brand-900">功能翻譯成生活痛點</h2>
           </div>
-          <p class="text-xs text-stone-500 mb-3.5">規格轉為生活好處，去除機械贅字，直接呈現真實白話效果。</p>
+          <p class="text-[11px] text-stone-500">把硬體規格轉化為生活好處，可直接點擊修改文字內容：</p>
           
-          <div id="feature-translation-list" class="space-y-3">
-            <!-- 特點翻譯卡片 -->
-          </div>
+          <div id="feature-translation-list" class="space-y-2.5"></div>
 
-          <div class="pt-4 border-t border-stone-100 mt-4 flex gap-2">
-            <button onclick="switchTab('write')" class="flex-1 py-3 bg-brand-700 hover:bg-brand-800 text-white rounded-xl text-sm font-semibold transition-all text-center shadow-sm">
-              帶入「Reels 腳本」生成五段口播稿 →
+          <div class="pt-3 border-t border-stone-100 mt-3">
+            <button onclick="switchTab('write')" class="w-full py-2.5 bg-brand-800 hover:bg-brand-900 text-white rounded-xl text-xs font-semibold transition-all text-center shadow-sm">
+              帶入 Reels 腳本繼續生成口播稿
             </button>
           </div>
         </div>
@@ -188,367 +209,341 @@
     </section>
 
     <!-- ========================================== -->
-    <!-- 模組 2：Reels 腳本 (五段式口播稿 + 黃金三秒) -->
+    <!-- 模組 2：Reels 腳本 -->
     <!-- ========================================== -->
     <section id="tab-write" class="space-y-4 hidden">
       
       <!-- 快捷工具列 -->
-      <div class="bg-[#F3EDE3] p-3 rounded-2xl border border-[#E3D4C4] flex items-center justify-between">
-        <div class="flex items-center gap-1.5 text-xs text-brand-800">
-          <span class="font-bold">口播節奏：</span>
-          <button onclick="setWritingStyle('threads')" id="style-threads" class="px-2.5 py-1 rounded-lg bg-brand-700 text-white font-medium transition-all">短秒數快節奏 (30s)</button>
-          <button onclick="setWritingStyle('ig')" id="style-ig" class="px-2.5 py-1 rounded-lg bg-white/70 hover:bg-white text-brand-900 font-medium transition-all">細緻體驗型 (60s)</button>
+      <div class="bg-[#F0EAE1] p-3 rounded-2xl border border-[#DFD6CB] flex items-center justify-between">
+        <div class="flex items-center gap-2 text-xs text-brand-900">
+          <span class="font-semibold">口播節奏：</span>
+          <button onclick="setWritingStyle('threads')" id="style-threads" class="px-2.5 py-1 rounded-lg bg-brand-800 text-white font-medium transition-all text-[11px]">30秒短影音快奏</button>
+          <button onclick="setWritingStyle('ig')" id="style-ig" class="px-2.5 py-1 rounded-lg bg-white/70 hover:bg-white text-brand-900 font-medium transition-all text-[11px]">60秒完整深度型</button>
         </div>
-        <button onclick="generateAllDrafts()" class="px-3 py-1 bg-brand-800 hover:bg-brand-900 text-white rounded-lg text-xs font-medium transition-all shadow-sm">
-          ✨ 智慧重組口播
+        <button onclick="generateAllDrafts()" class="px-3 py-1 bg-brand-800 hover:bg-brand-900 text-white rounded-lg text-[11px] font-medium transition-all shadow-sm">
+          智慧重組稿件
         </button>
       </div>
 
-      <!-- 開頭黃金三秒 (6個高爆擊選項) -->
-      <div class="bg-white p-4 sm:p-5 rounded-2xl border border-brand-300 bg-brand-50/20 shadow-sm space-y-3">
+      <!-- 開頭黃金三秒 (6個高爆擊選項，全部皆可直接編輯) -->
+      <div class="bg-white p-4 sm:p-5 rounded-2xl border border-[#E7DFD5] shadow-sm space-y-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <span class="px-2 py-0.5 bg-amber-500 text-white rounded-md text-[10px] font-black uppercase tracking-wider">衝擊力</span>
-            <h3 class="font-bold text-sm text-brand-900">Reels 開頭黃金三秒 (點擊直接套入口播)</h3>
+            <span class="px-2 py-0.5 bg-brand-100 text-brand-800 rounded text-[10px] font-bold tracking-wider uppercase">HOOK 0-3s</span>
+            <h3 class="font-bold text-xs sm:text-sm text-brand-900">Reels 開頭黃金三秒（可手動編輯與套用）</h3>
           </div>
-          <span class="text-[11px] text-stone-500">提供 6 個衝擊點</span>
+          <span class="text-[10px] text-stone-400">共 6 款鏡頭腳本</span>
         </div>
-        <div id="golden-seconds-list" class="space-y-2">
-          <!-- 6 個黃金三秒鏡頭+台詞動態生成 -->
+        <div id="golden-seconds-list" class="space-y-3"></div>
+      </div>
+
+      <!-- 五段式口播稿 (各段獨立編輯) -->
+      <div class="space-y-3">
+        <!-- 1 鉤子 -->
+        <div class="bg-white p-4 rounded-2xl border border-[#E7DFD5] shadow-sm space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-brand-800 text-white flex items-center justify-center text-[10px] font-bold">1</span>
+              <h3 class="font-bold text-xs text-brand-900">鉤子 <span class="font-normal text-stone-400">（畫面與首句吸引停駐）</span></h3>
+            </div>
+            <button onclick="writeSpecificSection('hook')" class="text-[11px] text-brand-700 hover:text-brand-900 font-medium">換一句</button>
+          </div>
+          <textarea id="p-hook" rows="2" class="w-full bg-[#FAF8F5] border border-[#E7DFD5] rounded-xl p-3 text-xs text-stone-800 focus:outline-none focus:ring-1 focus:ring-brand-500 resize-y leading-relaxed" oninput="handleSegmentInput()"></textarea>
+        </div>
+
+        <!-- 2 共鳴 -->
+        <div class="bg-white p-4 rounded-2xl border border-[#E7DFD5] shadow-sm space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-brand-800 text-white flex items-center justify-center text-[10px] font-bold">2</span>
+              <h3 class="font-bold text-xs text-brand-900">共鳴 <span class="font-normal text-stone-400">（描繪具體日常困擾畫面）</span></h3>
+            </div>
+            <button onclick="writeSpecificSection('empathy')" class="text-[11px] text-brand-700 hover:text-brand-900 font-medium">重寫這段</button>
+          </div>
+          <textarea id="p-empathy" rows="3" class="w-full bg-[#FAF8F5] border border-[#E7DFD5] rounded-xl p-3 text-xs text-stone-800 focus:outline-none focus:ring-1 focus:ring-brand-500 resize-y leading-relaxed" oninput="handleSegmentInput()"></textarea>
+        </div>
+
+        <!-- 3 轉折 -->
+        <div class="bg-white p-4 rounded-2xl border border-[#E7DFD5] shadow-sm space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-brand-800 text-white flex items-center justify-center text-[10px] font-bold">3</span>
+              <h3 class="font-bold text-xs text-brand-900">轉折 <span class="font-normal text-stone-400">（產品以解決方案自然現身）</span></h3>
+            </div>
+            <button onclick="writeSpecificSection('pivot')" class="text-[11px] text-brand-700 hover:text-brand-900 font-medium">重寫這段</button>
+          </div>
+          <textarea id="p-pivot" rows="2" class="w-full bg-[#FAF8F5] border border-[#E7DFD5] rounded-xl p-3 text-xs text-stone-800 focus:outline-none focus:ring-1 focus:ring-brand-500 resize-y leading-relaxed" oninput="handleSegmentInput()"></textarea>
+        </div>
+
+        <!-- 4 價值 -->
+        <div class="bg-white p-4 rounded-2xl border border-[#E7DFD5] shadow-sm space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-brand-800 text-white flex items-center justify-center text-[10px] font-bold">4</span>
+              <h3 class="font-bold text-xs text-brand-900">價值 <span class="font-normal text-stone-400">（前後巨大差異與實證好處）</span></h3>
+            </div>
+            <button onclick="writeSpecificSection('value')" class="text-[11px] text-brand-700 hover:text-brand-900 font-medium">重寫這段</button>
+          </div>
+          <textarea id="p-value" rows="4" class="w-full bg-[#FAF8F5] border border-[#E7DFD5] rounded-xl p-3 text-xs text-stone-800 focus:outline-none focus:ring-1 focus:ring-brand-500 resize-y leading-relaxed" oninput="handleSegmentInput()"></textarea>
+        </div>
+
+        <!-- 5 互動 -->
+        <div class="bg-white p-4 rounded-2xl border border-[#E7DFD5] shadow-sm space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-brand-800 text-white flex items-center justify-center text-[10px] font-bold">5</span>
+              <h3 class="font-bold text-xs text-brand-900">互動 <span class="font-normal text-stone-400">（低阻力社群分享導流）</span></h3>
+            </div>
+            <button onclick="writeSpecificSection('cta')" class="text-[11px] text-brand-700 hover:text-brand-900 font-medium">換互動句</button>
+          </div>
+          <textarea id="p-cta" rows="2" class="w-full bg-[#FAF8F5] border border-[#E7DFD5] rounded-xl p-3 text-xs text-stone-800 focus:outline-none focus:ring-1 focus:ring-brand-500 resize-y leading-relaxed" oninput="handleSegmentInput()"></textarea>
         </div>
       </div>
 
-      <!-- 1 鉤子 -->
-      <div class="bg-white p-4 rounded-2xl border border-[#EBDDCF] shadow-sm space-y-2">
+      <!-- Reels 完整口播逐字稿 (支援直接編輯) -->
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-[#E7DFD5] shadow-sm space-y-2.5">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <span class="w-6 h-6 rounded-full bg-brand-700 text-white flex items-center justify-center text-xs font-bold">1</span>
-            <h3 class="font-bold text-sm text-brand-900">鉤子 <span class="text-xs font-normal text-stone-500">畫面與第一句抓住目光</span></h3>
+            <span class="w-2 h-2 rounded-full bg-brand-700"></span>
+            <h3 class="text-xs sm:text-sm font-bold text-brand-900">Reels 完整口播逐字稿（可直接手動編輯）</h3>
           </div>
-          <button onclick="writeSpecificSection('hook')" class="text-xs text-brand-700 hover:text-brand-900 font-medium">✨ 換一句</button>
-        </div>
-        <textarea id="p-hook" rows="2" class="w-full bg-[#FAF7F2] border border-[#EBDDCF] rounded-xl p-3 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-y leading-relaxed" oninput="updateFullPreview()"></textarea>
-      </div>
-
-      <!-- 2 共鳴 -->
-      <div class="bg-white p-4 rounded-2xl border border-[#EBDDCF] shadow-sm space-y-2">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="w-6 h-6 rounded-full bg-brand-700 text-white flex items-center justify-center text-xs font-bold">2</span>
-            <h3 class="font-bold text-sm text-brand-900">共鳴 <span class="text-xs font-normal text-stone-500">戳中觀眾日常真實痛處</span></h3>
-          </div>
-          <button onclick="writeSpecificSection('empathy')" class="text-xs text-brand-700 hover:text-brand-900 font-medium">✨ 重新寫</button>
-        </div>
-        <textarea id="p-empathy" rows="3" class="w-full bg-[#FAF7F2] border border-[#EBDDCF] rounded-xl p-3 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-y leading-relaxed" oninput="updateFullPreview()"></textarea>
-      </div>
-
-      <!-- 3 轉折 -->
-      <div class="bg-white p-4 rounded-2xl border border-[#EBDDCF] shadow-sm space-y-2">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="w-6 h-6 rounded-full bg-brand-700 text-white flex items-center justify-center text-xs font-bold">3</span>
-            <h3 class="font-bold text-sm text-brand-900">轉折 <span class="text-xs font-normal text-stone-500">產品自然現身救場</span></h3>
-          </div>
-          <button onclick="writeSpecificSection('pivot')" class="text-xs text-brand-700 hover:text-brand-900 font-medium">✨ 重新寫</button>
-        </div>
-        <textarea id="p-pivot" rows="2" class="w-full bg-[#FAF7F2] border border-[#EBDDCF] rounded-xl p-3 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-y leading-relaxed" oninput="updateFullPreview()"></textarea>
-      </div>
-
-      <!-- 4 價值 -->
-      <div class="bg-white p-4 rounded-2xl border border-[#EBDDCF] shadow-sm space-y-2">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="w-6 h-6 rounded-full bg-brand-700 text-white flex items-center justify-center text-xs font-bold">4</span>
-            <h3 class="font-bold text-sm text-brand-900">價值 <span class="text-xs font-normal text-stone-500">呈現前後真實巨大轉變</span></h3>
-          </div>
-          <button onclick="writeSpecificSection('value')" class="text-xs text-brand-700 hover:text-brand-900 font-medium">✨ 重新寫</button>
-        </div>
-        <textarea id="p-value" rows="4" class="w-full bg-[#FAF7F2] border border-[#EBDDCF] rounded-xl p-3 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-y leading-relaxed" oninput="updateFullPreview()"></textarea>
-      </div>
-
-      <!-- 5 互動 (單一乾淨互動) -->
-      <div class="bg-white p-4 rounded-2xl border border-[#EBDDCF] shadow-sm space-y-2">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="w-6 h-6 rounded-full bg-brand-700 text-white flex items-center justify-center text-xs font-bold">5</span>
-            <h3 class="font-bold text-sm text-brand-900">互動 <span class="text-xs font-normal text-stone-500">自然導流低阻力引導</span></h3>
-          </div>
-          <button onclick="writeSpecificSection('cta')" class="text-xs text-brand-700 hover:text-brand-900 font-medium">✨ 換句互動</button>
-        </div>
-        <textarea id="p-cta" rows="2" class="w-full bg-[#FAF7F2] border border-[#EBDDCF] rounded-xl p-3 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-y leading-relaxed" oninput="updateFullPreview()"></textarea>
-      </div>
-
-      <!-- Reels 全文預覽 -->
-      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-[#EBDDCF] shadow-sm space-y-2.5">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <div class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
-            <h3 class="text-sm font-bold text-brand-900">🎬 Reels 完整口播逐字稿</h3>
-          </div>
-          <button onclick="copyFullArticle()" class="text-xs font-medium text-brand-700 hover:text-brand-900 flex items-center gap-1">
-            一鍵複製腳本
+          <button onclick="copyFullArticle()" class="text-xs font-semibold text-brand-700 hover:text-brand-900 flex items-center gap-1">
+            一鍵複製全文
           </button>
         </div>
-        <div id="full-article-preview" class="p-3.5 bg-[#FAF7F2] border border-[#EBDDCF] rounded-xl text-xs sm:text-sm text-stone-800 whitespace-pre-wrap leading-relaxed select-all">
-          載入中...
-        </div>
+        <textarea id="full-article-preview" rows="9" class="w-full p-3.5 bg-[#FAF8F5] border border-[#E7DFD5] rounded-xl text-xs sm:text-sm text-stone-800 leading-relaxed focus:outline-none focus:ring-1 focus:ring-brand-500 resize-y" oninput="handleFullArticleDirectInput()"></textarea>
       </div>
 
     </section>
 
     <!-- ========================================== -->
-    <!-- 模組 3：Reels 下方貼文說明欄文案 (Caption 3 種) -->
+    <!-- 模組 3：Reels 貼文說明欄文案 (全篇直接可編輯) -->
     <!-- ========================================== -->
     <section id="tab-reels-caption" class="space-y-4 hidden">
-      <div class="bg-brand-50 p-3.5 rounded-2xl border border-brand-200 text-xs text-brand-800 flex items-center justify-between">
-        <span>短影音 Reels 影片吸引眼球，下方的 **Caption 說明欄** 是決定讀者停留與導購的關鍵！</span>
+      <div class="bg-white p-3.5 rounded-2xl border border-[#E7DFD5] text-xs text-stone-600">
+        短影音在畫面上抓住停留，影片下方的說明欄則是驅動留言與導購的核心。以下三種風格均可直接手動修改：
       </div>
 
       <div class="space-y-4">
-        <!-- Caption 1: 重點精簡型 -->
-        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-[#EBDDCF] shadow-sm space-y-2.5">
+        <!-- Caption 1: 條列重點型 -->
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-[#E7DFD5] shadow-sm space-y-2.5">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <span class="px-2 py-0.5 bg-blue-100 text-blue-800 text-[10px] rounded-md font-bold">款式 1</span>
-              <h4 class="font-bold text-sm text-brand-900">條列重點型（快節奏資訊整理）</h4>
+              <span class="px-2 py-0.5 bg-stone-100 text-stone-700 text-[10px] rounded font-semibold uppercase">STYLE 01</span>
+              <h4 class="font-bold text-xs sm:text-sm text-brand-900">條列重點型（快速吸收資訊）</h4>
             </div>
-            <button onclick="copyElementText('caption-1-content')" class="text-xs text-brand-700 hover:text-brand-900 font-medium">複製這篇</button>
+            <button onclick="copyTextareaValue('caption-1-content')" class="text-xs text-brand-700 hover:text-brand-900 font-medium">複製內容</button>
           </div>
-          <p class="text-[11px] text-stone-500">適合看影片沒看仔細的人快速掃過痛點與功能規格。</p>
-          <div id="caption-1-content" class="p-3 bg-[#FAF7F2] rounded-xl border border-[#EBDDCF] text-xs text-stone-800 whitespace-pre-wrap leading-relaxed"></div>
+          <textarea id="caption-1-content" rows="8" oninput="triggerAutoSave()" class="w-full p-3 bg-[#FAF8F5] rounded-xl border border-[#E7DFD5] text-xs text-stone-800 leading-relaxed focus:outline-none focus:ring-1 focus:ring-brand-500 resize-y"></textarea>
         </div>
 
-        <!-- Caption 2: 閨蜜碎念生活型 -->
-        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-[#EBDDCF] shadow-sm space-y-2.5">
+        <!-- Caption 2: 真心碎念生活型 -->
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-[#E7DFD5] shadow-sm space-y-2.5">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] rounded-md font-bold">款式 2</span>
-              <h4 class="font-bold text-sm text-brand-900">真心碎念心得型（強化真實感）</h4>
+              <span class="px-2 py-0.5 bg-stone-100 text-stone-700 text-[10px] rounded font-semibold uppercase">STYLE 02</span>
+              <h4 class="font-bold text-xs sm:text-sm text-brand-900">真實碎念心得型（好友口碑氛圍）</h4>
             </div>
-            <button onclick="copyElementText('caption-2-content')" class="text-xs text-brand-700 hover:text-brand-900 font-medium">複製這篇</button>
+            <button onclick="copyTextareaValue('caption-2-content')" class="text-xs text-brand-700 hover:text-brand-900 font-medium">複製內容</button>
           </div>
-          <p class="text-[11px] text-stone-500">像朋友私下掏心掏肺分享，讀起來完全沒有業配感。</p>
-          <div id="caption-2-content" class="p-3 bg-[#FAF7F2] rounded-xl border border-[#EBDDCF] text-xs text-stone-800 whitespace-pre-wrap leading-relaxed"></div>
+          <textarea id="caption-2-content" rows="8" oninput="triggerAutoSave()" class="w-full p-3 bg-[#FAF8F5] rounded-xl border border-[#E7DFD5] text-xs text-stone-800 leading-relaxed focus:outline-none focus:ring-1 focus:ring-brand-500 resize-y"></textarea>
         </div>
 
         <!-- Caption 3: 高互動導購型 -->
-        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-[#EBDDCF] shadow-sm space-y-2.5">
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-[#E7DFD5] shadow-sm space-y-2.5">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <span class="px-2 py-0.5 bg-purple-100 text-purple-800 text-[10px] rounded-md font-bold">款式 3</span>
-              <h4 class="font-bold text-sm text-brand-900">留言領取導流型（衝高留言數演算法）</h4>
+              <span class="px-2 py-0.5 bg-stone-100 text-stone-700 text-[10px] rounded font-semibold uppercase">STYLE 03</span>
+              <h4 class="font-bold text-xs sm:text-sm text-brand-900">留言領取導流型（引爆互動與私訊）</h4>
             </div>
-            <button onclick="copyElementText('caption-3-content')" class="text-xs text-brand-700 hover:text-brand-900 font-medium">複製這篇</button>
+            <button onclick="copyTextareaValue('caption-3-content')" class="text-xs text-brand-700 hover:text-brand-900 font-medium">複製內容</button>
           </div>
-          <p class="text-[11px] text-stone-500">用懸念引導大家在留言區刷關鍵字，觸發系統自動私訊或賣場連結。</p>
-          <div id="caption-3-content" class="p-3 bg-[#FAF7F2] rounded-xl border border-[#EBDDCF] text-xs text-stone-800 whitespace-pre-wrap leading-relaxed"></div>
+          <textarea id="caption-3-content" rows="8" oninput="triggerAutoSave()" class="w-full p-3 bg-[#FAF8F5] rounded-xl border border-[#E7DFD5] text-xs text-stone-800 leading-relaxed focus:outline-none focus:ring-1 focus:ring-brand-500 resize-y"></textarea>
         </div>
       </div>
     </section>
 
     <!-- ========================================== -->
-    <!-- 模組 4：開頭靈感 (6 種靈感型態) -->
+    <!-- 模組 4：開頭靈感 (精準連結所選情境，全可編輯) -->
     <!-- ========================================== -->
     <section id="tab-hook" class="space-y-4 hidden">
-      <div class="bg-brand-50 p-3.5 rounded-2xl border border-brand-200 text-xs text-brand-800">
-        💡 點擊任何一句開頭，就能直接替換並填入「Reels 腳本」的<strong>第 1 段鉤子</strong>中！
+      <div class="bg-white p-3.5 rounded-2xl border border-[#E7DFD5] text-xs text-stone-600">
+        開頭靈感已依據你當前選定的<strong>銷售對象</strong>與<strong>使用情境</strong>自動適配。所有句子皆可直接手動修改，點擊右側按鈕可套用至口播稿：
       </div>
 
-      <div id="hook-types-container" class="space-y-3.5">
-        <!-- 動態渲染 6 種型態 -->
-      </div>
+      <div id="hook-types-container" class="space-y-3.5"></div>
     </section>
 
     <!-- ========================================== -->
-    <!-- 模組 5：發文前檢查 (7 大項目智慧掃描) -->
+    <!-- 模組 5：發文前檢查 -->
     <!-- ========================================== -->
     <section id="tab-check" class="space-y-4 hidden">
-      <div class="bg-white p-4 sm:p-5 rounded-2xl border border-[#EBDDCF] shadow-sm space-y-3">
+      <div class="bg-white p-4 sm:p-5 rounded-2xl border border-[#E7DFD5] shadow-sm space-y-3">
         <div class="flex items-center justify-between">
           <div>
             <div class="flex items-center gap-2">
-              <span id="check-score-display" class="text-2xl font-black text-brand-900">0 / 7</span>
-              <span class="text-xs text-stone-500 font-medium">項檢查完成</span>
+              <span id="check-score-display" class="text-2xl font-bold tracking-tight text-brand-900">0 / 7</span>
+              <span class="text-xs text-stone-500 font-medium">項標準已達成</span>
             </div>
-            <p class="text-[11px] text-stone-400 mt-0.5">發文前自我審視，讓每一篇內容都能精準打中受眾。</p>
+            <p class="text-[11px] text-stone-400 mt-0.5">系統自動檢驗你的文案語感、結構與受眾錨定程度</p>
           </div>
-          <button onclick="runSmartContentAudit()" class="px-3.5 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 active:scale-95">
-            <span>🧠 一鍵智慧診斷</span>
+          <button onclick="runSmartContentAudit()" class="px-3.5 py-2 bg-brand-800 hover:bg-brand-900 text-white rounded-xl text-xs font-semibold transition-all shadow-sm flex items-center gap-1.5 active:scale-95">
+            <span>一鍵智慧診斷</span>
           </button>
         </div>
 
-        <div class="w-full bg-[#EFE8DE] h-2.5 rounded-full overflow-hidden">
+        <div class="w-full bg-[#EAE2D8] h-2 rounded-full overflow-hidden">
           <div id="check-progress-bar" class="bg-brand-700 h-full w-0 transition-all duration-300"></div>
         </div>
 
-        <div id="smart-audit-feedback" class="p-3 bg-[#FAF7F2] rounded-xl border border-[#EBDDCF] text-xs space-y-1.5 hidden">
-          <div class="font-bold text-brand-900 flex items-center gap-1.5">
-            <span>🔍 系統診斷報告：</span>
-          </div>
+        <div id="smart-audit-feedback" class="p-3 bg-[#FAF8F5] rounded-xl border border-[#E7DFD5] text-xs space-y-1.5 hidden">
+          <div class="font-bold text-brand-900">系統診斷評析：</div>
           <div id="smart-audit-details" class="text-stone-700 space-y-1"></div>
         </div>
       </div>
 
-      <!-- 7 大項目 -->
-      <div class="space-y-2.5">
-        <label class="check-item flex items-start gap-3 p-3.5 bg-white rounded-2xl border border-[#EBDDCF] shadow-sm cursor-pointer hover:border-brand-400 transition-colors">
+      <!-- 7 大檢核項目 -->
+      <div class="space-y-2">
+        <label class="flex items-start gap-3 p-3.5 bg-white rounded-2xl border border-[#E7DFD5] shadow-sm cursor-pointer hover:border-brand-400 transition-colors">
           <input type="checkbox" id="chk-1" onchange="updateCheckCount()" class="mt-0.5 w-4 h-4 text-brand-700 rounded border-stone-300 focus:ring-brand-500">
           <div class="flex-1 text-xs">
-            <span class="font-bold text-brand-900 text-sm block mb-0.5">1. 開頭前三秒有沒有吸引力？</span>
-            <span class="text-stone-500">第一句有沒有拋出衝突、對話或具體問句？讀者會不會在滑動時瞬間被鉤住停下來？</span>
+            <span class="font-bold text-brand-900 block mb-0.5">1. 開頭前三秒是否有足夠張力？</span>
+            <span class="text-stone-500">第一句是否拋出日常衝突、對話或痛點問句？讓讀者第一眼停下來。</span>
           </div>
         </label>
 
-        <label class="check-item flex items-start gap-3 p-3.5 bg-white rounded-2xl border border-[#EBDDCF] shadow-sm cursor-pointer hover:border-brand-400 transition-colors">
+        <label class="flex items-start gap-3 p-3.5 bg-white rounded-2xl border border-[#E7DFD5] shadow-sm cursor-pointer hover:border-brand-400 transition-colors">
           <input type="checkbox" id="chk-2" onchange="updateCheckCount()" class="mt-0.5 w-4 h-4 text-brand-700 rounded border-stone-300 focus:ring-brand-500">
           <div class="flex-1 text-xs">
-            <span class="font-bold text-brand-900 text-sm block mb-0.5">2. 有沒有明確的目標讀者？</span>
-            <span class="text-stone-500">文案是寫給某個特定身分的人（例如：租屋小資族、學齡前媽媽），還是空泛地寫給「所有人」？</span>
+            <span class="font-bold text-brand-900 block mb-0.5">2. 是否具備清晰具體的目標受眾？</span>
+            <span class="text-stone-500">文案是針對具體身分（如：在家自己做美甲的小資族），而非籠統寫給所有人。</span>
           </div>
         </label>
 
-        <label class="check-item flex items-start gap-3 p-3.5 bg-white rounded-2xl border border-[#EBDDCF] shadow-sm cursor-pointer hover:border-brand-400 transition-colors">
+        <label class="flex items-start gap-3 p-3.5 bg-white rounded-2xl border border-[#E7DFD5] shadow-sm cursor-pointer hover:border-brand-400 transition-colors">
           <input type="checkbox" id="chk-3" onchange="updateCheckCount()" class="mt-0.5 w-4 h-4 text-brand-700 rounded border-stone-300 focus:ring-brand-500">
           <div class="flex-1 text-xs">
-            <span class="font-bold text-brand-900 text-sm block mb-0.5">3. 有沒有真實的生活情境？</span>
-            <span class="text-stone-500">共鳴段有沒有畫面？有沒有把日常動作、房間角落或手忙腳亂的狼狽感寫出來？</span>
+            <span class="font-bold text-brand-900 block mb-0.5">3. 是否勾勒出真實生活畫面？</span>
+            <span class="text-stone-500">是否有具體場景、手忙腳亂的動作或日常內心碎念。</span>
           </div>
         </label>
 
-        <label class="check-item flex items-start gap-3 p-3.5 bg-white rounded-2xl border border-[#EBDDCF] shadow-sm cursor-pointer hover:border-brand-400 transition-colors">
+        <label class="flex items-start gap-3 p-3.5 bg-white rounded-2xl border border-[#E7DFD5] shadow-sm cursor-pointer hover:border-brand-400 transition-colors">
           <input type="checkbox" id="chk-4" onchange="updateCheckCount()" class="mt-0.5 w-4 h-4 text-brand-700 rounded border-stone-300 focus:ring-brand-500">
           <div class="flex-1 text-xs">
-            <span class="font-bold text-brand-900 text-sm block mb-0.5">4. 有沒有交代問題與自然轉折？</span>
-            <span class="text-stone-500">產品出場是不是為了解決前面的煩惱？用「後來我才發現」自然帶出，還是生硬地突然開始叫賣？</span>
+            <span class="font-bold text-brand-900 block mb-0.5">4. 問題與產品轉折是否自然無痕？</span>
+            <span class="text-stone-500">產品出場是否合情合理地解決前面問題，而非生硬切換成業配台詞。</span>
           </div>
         </label>
 
-        <label class="check-item flex items-start gap-3 p-3.5 bg-white rounded-2xl border border-[#EBDDCF] shadow-sm cursor-pointer hover:border-brand-400 transition-colors">
+        <label class="flex items-start gap-3 p-3.5 bg-white rounded-2xl border border-[#E7DFD5] shadow-sm cursor-pointer hover:border-brand-400 transition-colors">
           <input type="checkbox" id="chk-5" onchange="updateCheckCount()" class="mt-0.5 w-4 h-4 text-brand-700 rounded border-stone-300 focus:ring-brand-500">
           <div class="flex-1 text-xs">
-            <span class="font-bold text-brand-900 text-sm block mb-0.5">5. 商品價值是否具體且可信？</span>
-            <span class="text-stone-500">功能有沒有結合「生活好處」？例如「不用照好幾次燈，十指塗完不到十分鐘」，而非空洞說「效果絕佳」。</span>
+            <span class="font-bold text-brand-900 block mb-0.5">5. 商品價值是否具體且具說服力？</span>
+            <span class="text-stone-500">功能是否轉化為生活時間與體感的具體節省，而非空泛陳述規格。</span>
           </div>
         </label>
 
-        <label class="check-item flex items-start gap-3 p-3.5 bg-white rounded-2xl border border-[#EBDDCF] shadow-sm cursor-pointer hover:border-brand-400 transition-colors">
+        <label class="flex items-start gap-3 p-3.5 bg-white rounded-2xl border border-[#E7DFD5] shadow-sm cursor-pointer hover:border-brand-400 transition-colors">
           <input type="checkbox" id="chk-6" onchange="updateCheckCount()" class="mt-0.5 w-4 h-4 text-brand-700 rounded border-stone-300 focus:ring-brand-500">
           <div class="flex-1 text-xs">
-            <span class="font-bold text-brand-900 text-sm block mb-0.5">6. 念出來像不像真人日常說話？</span>
-            <span class="text-stone-500">出聲讀一遍！有沒有「無疑是」、「儀式感拉滿」、「不得不說」等假大空的書面語或八股腔？</span>
+            <span class="font-bold text-brand-900 block mb-0.5">6. 朗讀時是否如同真人平時談話？</span>
+            <span class="text-stone-500">完全剔除「無疑是」、「儀式感拉滿」、「不得不說」等假大空的書面語。</span>
           </div>
         </label>
 
-        <label class="check-item flex items-start gap-3 p-3.5 bg-white rounded-2xl border border-[#EBDDCF] shadow-sm cursor-pointer hover:border-brand-400 transition-colors">
+        <label class="flex items-start gap-3 p-3.5 bg-white rounded-2xl border border-[#E7DFD5] shadow-sm cursor-pointer hover:border-brand-400 transition-colors">
           <input type="checkbox" id="chk-7" onchange="updateCheckCount()" class="mt-0.5 w-4 h-4 text-brand-700 rounded border-stone-300 focus:ring-brand-500">
           <div class="flex-1 text-xs">
-            <span class="font-bold text-brand-900 text-sm block mb-0.5">7. 最後有沒有清楚的行動引導 (CTA)？</span>
-            <span class="text-stone-500">結尾有沒有給出低阻力的互動方式（例如：留言關鍵字、私訊領連結）？</span>
+            <span class="font-bold text-brand-900 block mb-0.5">7. 結尾是否有低門檻的行動指引？</span>
+            <span class="text-stone-500">是否提供容易留下的代碼或關鍵字，讓讀者自然索取連結。</span>
           </div>
         </label>
       </div>
 
       <div class="pt-2">
         <button onclick="switchTab('threads')" class="w-full py-3 bg-brand-800 hover:bg-brand-900 text-white rounded-xl text-xs font-bold transition-all text-center shadow-md flex items-center justify-center gap-2">
-          <span>檢查完畢！延伸生成「脆 (Threads) 極短文案與留言引導」→</span>
+          <span>檢查完畢，前往「脆 (Threads) 延伸文案與留言引導」</span>
         </button>
       </div>
     </section>
 
     <!-- ========================================== -->
-    <!-- 模組 6：脆 (Threads) 延伸 (發文前檢查後的全新步驟) -->
+    <!-- 模組 6：脆 (Threads) 延伸 (全可編輯) -->
     <!-- ========================================== -->
     <section id="tab-threads" class="space-y-4 hidden">
-      
-      <div class="bg-[#262626] text-stone-100 p-4 rounded-2xl shadow-sm space-y-1">
+      <div class="bg-brand-900 text-stone-100 p-4 rounded-2xl shadow-sm space-y-1">
         <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="w-5 h-5 rounded-full bg-white text-stone-900 flex items-center justify-center font-bold text-xs">@</span>
-            <h3 class="font-bold text-sm text-white">Threads (脆) 專屬流量擴散庫</h3>
-          </div>
-          <span class="text-[10px] text-stone-400">短篇幅 · 高共鳴 · 留言區導購</span>
+          <h3 class="font-bold text-xs sm:text-sm text-white tracking-wide">Threads 流量延伸庫</h3>
+          <span class="text-[10px] text-stone-400">短篇幅 · 深入共鳴 · 留言區導流</span>
         </div>
-        <p class="text-xs text-stone-400 leading-relaxed">
-          脆的演算法最愛「第一行就爆擊、沒有廣告感、像在發牢騷」的超短文。主文抓共鳴，<strong>留言區第一則再補上特點與連結</strong>，轉單率最高！
+        <p class="text-xs text-stone-300 leading-relaxed">
+          主文專注激發日常痛點共感，不直接叫賣；於留言串第一則補上具體優點與索取方式，導流效果最佳。下方文案皆可手動修改：
         </p>
       </div>
 
-      <!-- 6 個擊中共鳴的極短脆文案 -->
-      <div class="bg-white p-4 sm:p-5 rounded-2xl border border-[#EBDDCF] shadow-sm space-y-3">
+      <!-- 6 款擊中共鳴的極短脆文案 -->
+      <div class="bg-white p-4 sm:p-5 rounded-2xl border border-[#E7DFD5] shadow-sm space-y-3">
         <div class="flex items-center justify-between">
-          <h4 class="font-bold text-sm text-brand-900 flex items-center gap-1.5">
-            <span>💥 擊中共鳴的極短脆文案 (提供 6 款)</span>
-          </h4>
-          <span class="text-[11px] text-stone-500">點擊直接複製</span>
+          <h4 class="font-bold text-xs sm:text-sm text-brand-900">極短共鳴主文（6 款，皆可直接編輯）</h4>
         </div>
-        <div id="threads-posts-list" class="space-y-2.5">
-          <!-- 6 個極短脆文案卡片 -->
-        </div>
+        <div id="threads-posts-list" class="space-y-3"></div>
       </div>
 
-      <!-- 6 個脆下方留言引導（介紹特點與導流） -->
-      <div class="bg-white p-4 sm:p-5 rounded-2xl border border-[#EBDDCF] shadow-sm space-y-3">
+      <!-- 6 款留言區引導 -->
+      <div class="bg-white p-4 sm:p-5 rounded-2xl border border-[#E7DFD5] shadow-sm space-y-3">
         <div class="flex items-center justify-between">
-          <h4 class="font-bold text-sm text-brand-900 flex items-center gap-1.5">
-            <span>💬 脆留言第一則：特點介紹與導購引導 (提供 6 款)</span>
-          </h4>
-          <span class="text-[11px] text-stone-500">點擊直接複製</span>
+          <h4 class="font-bold text-xs sm:text-sm text-brand-900">留言區第一則特點與導流（6 款，皆可直接編輯）</h4>
         </div>
-        <p class="text-[11px] text-stone-500">發布主文後，立即在自己留言區丟出這則留言，把產品優勢交代完整！</p>
-        <div id="threads-comments-list" class="space-y-2.5">
-          <!-- 6 個留言引導卡片 -->
-        </div>
+        <div id="threads-comments-list" class="space-y-3"></div>
       </div>
-
     </section>
 
   </main>
 
   <!-- ========================================== -->
-  <!-- 專案記事本彈窗 (支援個人資料夾層級) -->
+  <!-- 專案記事本彈窗 (個人資料夾管理) -->
   <!-- ========================================== -->
-  <div id="project-modal" class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-all duration-300">
-    <div class="bg-[#F8F5F0] w-full max-w-lg rounded-t-3xl sm:rounded-2xl border border-[#EBDDCF] p-5 max-h-[88vh] flex flex-col shadow-2xl transition-transform translate-y-8 sm:translate-y-0">
+  <div id="project-modal" class="fixed inset-0 z-50 bg-stone-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-all duration-300">
+    <div class="bg-[#F8F6F2] w-full max-w-lg rounded-t-3xl sm:rounded-2xl border border-[#DFD6CB] p-5 max-h-[88vh] flex flex-col shadow-2xl transition-transform translate-y-8 sm:translate-y-0">
       
       <!-- 記事本標題 -->
-      <div class="flex items-center justify-between border-b border-[#EBDDCF] pb-3 mb-3">
+      <div class="flex items-center justify-between border-b border-[#E7DFD5] pb-3 mb-3">
         <div class="flex items-center gap-2">
-          <span class="text-xl">📁</span>
+          <div class="w-6 h-6 rounded bg-brand-800 text-white flex items-center justify-center text-xs font-bold">F</div>
           <div>
-            <h3 class="font-bold text-base text-brand-900">專案記事本</h3>
-            <p class="text-[11px] text-stone-500">依個人資料夾分類管理，切換 App 隨時查找</p>
+            <h3 class="font-bold text-sm text-brand-900">專案記事本</h3>
+            <p class="text-[10px] text-stone-500">依個人資料夾分類歸檔，跨裝置與切換應用隨時調用</p>
           </div>
         </div>
-        <button onclick="closeProjectModal()" class="w-8 h-8 rounded-full bg-stone-200/60 hover:bg-stone-200 text-stone-700 flex items-center justify-center text-sm font-bold">✕</button>
+        <button onclick="closeProjectModal()" class="w-7 h-7 rounded-full bg-stone-200/70 hover:bg-stone-200 text-stone-700 flex items-center justify-center text-xs font-semibold">
+          &#10005;
+        </button>
       </div>
 
-      <!-- 上一層：個人資料夾切換列與新增按鈕 -->
+      <!-- 上一層：個人資料夾標籤列 -->
       <div class="mb-3">
         <div class="flex items-center justify-between mb-1.5">
-          <span class="text-xs font-bold text-brand-900">📂 個人資料夾：</span>
-          <button onclick="createNewFolderPrompt()" class="text-xs font-semibold text-brand-700 hover:text-brand-900 flex items-center gap-1">
+          <span class="text-xs font-bold text-brand-900">個人資料夾：</span>
+          <button onclick="openNewFolderDialog()" class="text-xs font-semibold text-brand-700 hover:text-brand-900 flex items-center gap-1">
             + 新增資料夾
           </button>
         </div>
-        <div id="folder-chips-container" class="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-          <!-- 動態生成資料夾標籤 (如：全部、芝芝的資料夾...) -->
-        </div>
+        <div id="folder-chips-container" class="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar"></div>
       </div>
 
       <!-- 專案搜尋框 -->
       <div class="mb-3">
-        <input type="text" id="project-search-input" oninput="renderProjectsList()" placeholder="搜尋當前資料夾內的主題或產品名稱..." class="w-full bg-white border border-[#EBDDCF] rounded-xl px-3 py-2 text-xs text-brand-900 focus:outline-none focus:ring-1 focus:ring-brand-500">
+        <input type="text" id="project-search-input" oninput="renderProjectsList()" placeholder="搜尋當前資料夾內的主題或品名..." class="w-full bg-white border border-[#E7DFD5] rounded-xl px-3 py-2 text-xs text-brand-900 focus:outline-none focus:ring-1 focus:ring-brand-500">
       </div>
 
       <!-- 專案清單滾動區 -->
-      <div id="project-items-container" class="flex-1 overflow-y-auto custom-scroll space-y-2.5 pr-1 min-h-[200px]">
-        <!-- 動態渲染所選資料夾底下的專案 -->
-      </div>
+      <div id="project-items-container" class="flex-1 overflow-y-auto custom-scroll space-y-2.5 pr-1 min-h-[200px]"></div>
 
       <!-- 底部按鈕 -->
-      <div class="pt-3 border-t border-[#EBDDCF] mt-3 flex gap-2">
-        <button onclick="saveCurrentAsProject()" class="flex-1 py-2.5 bg-brand-700 hover:bg-brand-800 text-white rounded-xl text-xs font-bold transition-all text-center">
-          + 另存當前文案到此資料夾
+      <div class="pt-3 border-t border-[#E7DFD5] mt-3 flex gap-2">
+        <button onclick="openSaveProjectModal()" class="flex-1 py-2.5 bg-brand-800 hover:bg-brand-900 text-white rounded-xl text-xs font-semibold transition-all text-center">
+          + 另存當前文案至此資料夾
         </button>
         <button onclick="closeProjectModal()" class="px-4 py-2.5 bg-stone-200 hover:bg-stone-300 text-stone-800 rounded-xl text-xs font-medium transition-all">
           關閉
@@ -558,136 +553,158 @@
     </div>
   </div>
 
+  <!-- ========================================== -->
+  <!-- 質感彈窗元件 (取代所有瀏覽器原生 Prompt/Alert) -->
+  <!-- ========================================== -->
+  <div id="custom-dialog-modal" class="fixed inset-0 z-50 bg-stone-900/50 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-200">
+    <div class="bg-[#F8F6F2] w-full max-w-sm rounded-2xl border border-[#DFD6CB] p-5 shadow-2xl space-y-3.5 transition-transform scale-95">
+      <div class="space-y-1">
+        <h3 id="custom-dialog-title" class="font-bold text-sm text-brand-900">標題</h3>
+        <p id="custom-dialog-desc" class="text-xs text-stone-500 leading-relaxed">說明內容</p>
+      </div>
+
+      <div id="custom-dialog-body" class="space-y-2.5"></div>
+
+      <div class="flex items-center justify-end gap-2 pt-2 border-t border-[#E7DFD5]">
+        <button id="custom-dialog-cancel-btn" onclick="closeCustomDialog()" class="px-3.5 py-2 bg-stone-200 hover:bg-stone-300 text-stone-800 rounded-xl text-xs font-medium transition-all">取消</button>
+        <button id="custom-dialog-confirm-btn" class="px-4 py-2 bg-brand-800 hover:bg-brand-900 text-white rounded-xl text-xs font-semibold transition-all shadow-sm">確認</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 浮動通知提示框 -->
-  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-stone-900/95 text-white text-xs px-4 py-2.5 rounded-full shadow-lg transition-all duration-300 opacity-0 pointer-events-none z-50 flex items-center gap-2">
-    <span>已複製！</span>
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-stone-900/95 text-stone-100 text-xs px-4 py-2.5 rounded-full shadow-xl transition-all duration-300 opacity-0 pointer-events-none z-50 flex items-center gap-2">
+    <span>已複製</span>
   </div>
 
   <script>
     // ==========================================
-    // 預設資料庫：內建範例庫
+    // 預設示範庫
     // ==========================================
     const SAMPLES = {
       nail: {
         name: '美甲一步膠',
-        features: '不用一般美甲要好幾罐好幾層\n省時省力照燈快乾\n多款顯白高級色號\n磁吸水光貓眼超亮',
+        features: '不用一般美甲要好幾罐好幾層\n省時省力照燈快乾\n多款顯白高級色號\n磁吸水光貓眼通透',
         category: '美妝美甲',
         audiences: [
-          { title: '每天趕時間的通勤小資族', desc: '下班只想躺平，根本沒耐心去美甲店坐兩三個小時' },
-          { title: '在家擦光療的 DIY 手殘黨', desc: '每次擦底膠封層手都在抖，溢膠溢到邊緣直接毀掉' },
-          { title: '喜歡常常換造型的美甲控', desc: '沙龍做一次撐整個月早就看膩了，想兩週自由換新色' },
-          { title: '精打細算想省荷包的女生', desc: '每個月美甲花一兩千塊，日積月累錢包真的在滴血' },
-          { title: '沒空出門做指甲的忙碌媽媽', desc: '顧小孩連洗頭都像打仗，只能趁半夜小孩睡著偷偷變美' },
-          { title: '指甲薄軟容易刮傷的人', desc: '不擦指甲油容易斷，但又不想每次去沙龍拋磨甲面' }
+          { title: '在家自己做美甲的 DIY 族', desc: '以前每次塗底膠色膠封層手都在抖，溢膠弄髒邊緣要整隻卸掉超心累' },
+          { title: '沒耐性去沙龍坐三小時的通勤小資', desc: '下班只想早點休息，不想為了指甲特地花幾千元預約沙龍乾坐' },
+          { title: '喜歡兩週更換造型的美甲控', desc: '沙龍做一次要撐整個月早就看膩了，想在家自由自在換新顏色' },
+          { title: '精打細算想省荷包的女生', desc: '每個月美甲動輒一兩千，累積下來都能買幾件好看新衣服了' },
+          { title: '趁小孩睡著偷偷變美的忙碌媽媽', desc: '日常照顧家庭連洗澡都要搶時間，只能在深夜悄悄快速完成' },
+          { title: '指甲薄軟容易斷裂的保養型受眾', desc: '不擦指甲油容易撞裂，但又不想每次去沙龍打磨拋光傷甲面' }
         ],
         scenarios: [
-          { title: '週末約會出門前一小時', desc: '換好衣服才發現指甲光禿禿，急著要出門根本來不及去沙龍' },
-          { title: '沙發追劇放鬆時順手塗', desc: '邊看 Netflix 邊順手擦完，薄擦一層照燈就乾，完全不用等' },
-          { title: '沙龍指甲撐兩週後邊緣剝落', desc: '去卸甲嫌貴又浪費時間，想在家自己快速補齊不尷尬' },
-          { title: '半夜小孩睡著後的放風時光', desc: '動作必須快、不能有刺鼻化學味，悄悄在房間快速做完' },
-          { title: '辦公室打字突然看見雙手', desc: '覺得手指氣色好暗沉，想隨手換個低調顯白的低奢貓眼' },
-          { title: '出國渡假打包行李的前一晚', desc: '為了拍照好看想換指甲，行李都還沒收完只能速戰速決' }
+          { title: '週末夜晚在家追劇時順手做', desc: '邊看影片放鬆邊拿出來塗，薄擦一層照燈幾十秒就硬化完成，完全不用等' },
+          { title: '出門約會前一小時快速換色', desc: '換好衣服發現指甲斑駁，去沙龍根本來不及，在家十指十分鐘迅速搞定' },
+          { title: '原本的沙龍光療撐兩週後指尖剝落', desc: '專門跑去美甲店卸甲又貴又花時間，想自己在家快速補齊不突兀' },
+          { title: '深夜小孩睡著後的寧靜放鬆時光', desc: '動作必須快、不能有刺鼻化學味道，悄悄在房間書桌前快速做完' },
+          { title: '辦公室打字時看見雙手覺得暗沉', desc: '想隨手換個低調通透又顯手白的水光貓眼，提升日常工作好心情' },
+          { title: '出國度假打包行李的最後一晚', desc: '為了拍照好看想要換新指甲，行李都還沒收完只能速戰速決' }
         ]
       },
       timer: {
         name: '兒童視覺番茄鐘',
-        features: '可視化色塊倒數\n時間到會發出清脆提示音\n超靜音指針不滴答響\n圓角防摔安全設計',
-        category: '親子育兒',
+        features: '可視化色塊倒數\n時間到發出溫和提示音\n超靜音指針不滴答響\n圓角防摔安全包覆',
+        category: '親子生活',
         audiences: [
-          { title: '有學齡前孩子的崩潰媽媽', desc: '每天都在跟孩子討價還價「再五分鐘」，講到心力交瘁' },
-          { title: '早上出門容易著急的家長', desc: '小孩穿鞋刷牙拖拖拉拉，大人在旁邊急到快遲到抓狂' },
-          { title: '想戒掉孩子看電視成癮的爸媽', desc: '每次叫關電視都要上演全武行，急需客觀第三方規則' },
-          { title: '需要安靜讀書專注的考生學生', desc: '很容易分心滑手機，需要不看螢幕的專注時間輔助' },
-          { title: '居家辦公容易拖延的自由工作者', desc: '一眨眼兩小時就過去，工作進度完全落後' },
-          { title: '家有淺眠嬰兒或長輩的家庭', desc: '任何滴答鐘聲都會把人吵醒，需要絕對靜音的倒數' }
+          { title: '有學齡前孩子的崩潰家長', desc: '每天都在跟孩子討價還價再五分鐘，講到口乾舌燥心力交瘁' },
+          { title: '早上出門容易著急的父母', desc: '孩子穿鞋刷牙拖拖拉拉，大人在旁邊急著打卡上班差點遲到' },
+          { title: '想戒掉孩子看螢幕成癮的家庭', desc: '每次叫關電視都要上演全武行，急需客觀第三方規則輔助' },
+          { title: '需要安靜讀書專注的學生與考生', desc: '容易分心看手機，需要不依賴螢幕的專注倒數輔助' },
+          { title: '居家辦公容易拖延的自由工作者', desc: '一不留神兩小時過去，工作進度完全落後' },
+          { title: '家有淺眠嬰兒或長輩的家庭', desc: '細微的鐘錶滴答聲都會吵醒人，需要絕對靜音的倒數輔助' }
         ],
         scenarios: [
-          { title: '叫小孩關電視的時候', desc: '明明說好再看五分鐘，時間到了依舊賴在沙發捨不得關' },
-          { title: '早上趕著出門打卡上班', desc: '吃個早餐可以發呆二十分鐘，眼看上班通勤就要遲到' },
-          { title: '睡前準備洗澡刷牙講故事', desc: '每一步都要大人在屁股後面催催催，搞得全家氣氛很僵' },
-          { title: '下課寫作業拖延磨蹭', desc: '兩行生字可以寫一小時，擦子擦破作業簿大人快爆氣' },
-          { title: '深夜在房間閱讀學習', desc: '指針完全無聲不干擾思緒，時間到輕輕提醒該休息' },
-          { title: '約定玩玩具收納的時間', desc: '讓小孩看著紅色色塊變少，自己自動自發動手把玩具收好' }
+          { title: '約定關掉電視平板的時候', desc: '明明說好再看五分鐘，時間到依然賴在沙發捨不得關' },
+          { title: '早上趕著出門通勤上班前', desc: '吃個早餐可以發呆二十分鐘，眼看上班通勤就要遲到' },
+          { title: '睡前準備洗澡刷牙講故事', desc: '每一步都要大人在背後催促，搞得全家氣氛很緊繃' },
+          { title: '放學回家寫作業拖拖拉拉', desc: '兩行生字可以寫一小時，橡皮擦擦破作業本大人快按捺不住' },
+          { title: '深夜在書房閱讀與工作', desc: '指針完全無聲不干擾思緒，時間到了溫和提醒該休息' },
+          { title: '規定玩玩具與自主收納的時間', desc: '看著彩色色塊逐漸變少，孩子自己明白時間快到了自動收好' }
         ]
       },
       vacuum: {
         name: '免抽氣真空壓縮收納袋',
-        features: '手壓專利秒排氣不用抽氣泵\n高韌性防漏氣加厚材質\n最高縮小 70% 收納體積\n多種尺寸可放行李箱與衣櫃',
+        features: '手壓秒排氣免帶抽氣泵\n高韌性防漏氣加厚材質\n最高縮小70%收納體積\n多種規格適配行李箱與衣櫃',
         category: '旅行居家',
         audiences: [
-          { title: '出國一定要大買特買的購物狂', desc: '去程行李箱就半滿，超怕回程買太多戰利品直接超重爆箱' },
-          { title: '冬天去日韓賞雪的自由行旅客', desc: '羽絨衣厚毛衣塞兩件就滿了，根本沒空間放其他換洗衣物' },
-          { title: '在外租小套房空間極限的租屋族', desc: '衣櫃小到衣服只能疊在一起，換季厚被子根本塞不下' },
-          { title: '經常出差幾天就要換城市的商務客', desc: '不想拖著笨重大行李箱，只想一咖登機箱輕裝搞定' },
-          { title: '每年都要幫全家換季的主婦媽媽', desc: '全家人的大冬被和厚外套每次收納都是浩大工程' },
-          { title: '露營與戶外裝備愛好者', desc: '睡袋、保暖衣物體積超大，後車廂每次塞到快關不起來' }
+          { title: '出國一定要大買特買的購物族', desc: '去程行李箱就半滿，超怕回程戰利品太多直接超重爆箱' },
+          { title: '冬天去日韓賞雪的自由行旅客', desc: '羽絨衣厚外套塞兩件就滿了，根本沒空間放其他換洗衣物' },
+          { title: '租小套房收納空間極限的租屋族', desc: '衣櫃小到衣服只能疊在一起，換季厚被子根本塞不下' },
+          { title: '頻繁出差幾天換城市的商務客', desc: '不想拖著笨重大行李箱，只想一咖登機箱輕裝搞定' },
+          { title: '每年都要幫全家換季的主婦', desc: '全家人的大冬被和厚外套每次收納都是浩大工程' },
+          { title: '露營與戶外活動愛好者', desc: '睡袋保暖裝備體積超大，後車廂每次塞到快關不起來' }
         ],
         scenarios: [
-          { title: '出國前一天晚上整理行李箱', desc: '冬天衣服到底為什麼這麼厚！塞進去兩件拉鍊就差點拉不上' },
-          { title: '日本藥妝服飾買爆準備回飯店打包', desc: '回國前一晚在飯店地板手忙腳亂，跪在行李箱上硬壓' },
-          { title: '春夏換季把全家厚冬被收起來', desc: '三條厚棉被直接霸佔整層衣櫃，旁邊其他衣服全被擠歪' },
-          { title: '退房當天早上要快速裝箱出發', desc: '根本沒時間在那邊找插座用抽氣機，手壓三秒快速壓平' },
-          { title: '搬家換宿舍整理換洗衣物', desc: '十幾件大衣只要壓成兩小包，一趟機車腳踏板就能載走' },
-          { title: '把寶寶的大包尿布與防踢被外帶出門', desc: '出門育兒像搬家，用免抽氣袋把蓬鬆物品壓縮到最小' }
+          { title: '出國前一天晚上整理行李箱', desc: '冬天衣服厚重又蓬鬆，塞兩件拉鍊就差點拉不上' },
+          { title: '日本藥妝買爆回飯店打包時', desc: '回國前一晚在飯店地板手忙腳亂，整個人跪在行李箱上硬壓' },
+          { title: '換季時把厚被子與大衣收納歸位', desc: '三條厚棉被直接霸佔整層衣櫃，旁邊其他衣服全被擠歪' },
+          { title: '退房當天早上要快速裝箱出發', desc: '沒時間在房間找插座用抽氣機，手壓幾秒快速排氣壓平' },
+          { title: '搬家換宿舍整理換洗衣物', desc: '十幾件厚衣只要壓成兩小包，一趟機車踏板就能輕鬆載走' },
+          { title: '把寶寶大包尿布與防踢被帶出門', desc: '出門育兒像搬家，用免抽氣袋把蓬鬆物品壓縮到最小' }
         ]
       },
       projector: {
         name: '口袋微型投影機',
-        features: '手掌大小極輕便即插即用\n自動梯形校正隨便擺都方正\n內建影音串流 APP 開機直接看\n白天沒完全關燈也看得清',
+        features: '掌心大小極輕便即插即用\n自動梯形校正隨意擺放皆方正\n內建串流影音開機直接看\n開小燈亦可清晰顯影',
         category: '3C 影音',
         audiences: [
-          { title: '租屋處沒空間放電視的租屋族', desc: '搬家時大電視根本帶不走，白牆空著只想隨時能看大螢幕' },
-          { title: '下班只想躺在床上廢的追劇族', desc: '拿手機手酸、用筆電發燙，只想整個人窩進被窩投天花板' },
-          { title: '週末喜歡跟朋友露營的戶外咖', desc: '晚上在營火邊聊天，帳篷外拉個布幕就是露天電影院' },
-          { title: '家裡有小小孩想一起看卡通的爸媽', desc: '怕小孩近距離看平板傷眼，大投影漫反射畫面更柔和' },
-          { title: '情侶租屋打造浪漫房間約會', desc: '不用去電影院人擠人，關上燈爆米花準備好就是專屬包廂' },
-          { title: '遊戲打 Switch 的熱血玩家', desc: '玩派對遊戲幾個人擠小螢幕超痛苦，直接投出 100 吋同樂' }
+          { title: '租屋處沒空間放電視的租屋族', desc: '搬家時大電視根本搬不走，白牆空著想隨時享有大螢幕' },
+          { title: '下班只想窩在床上放空追劇的人', desc: '拿手機手酸、筆電發燙，只想整個人窩進被窩投天花板' },
+          { title: '週末喜歡露營的戶外愛好者', desc: '晚上在營火邊聊天，帳篷外掛塊布就是露天私人電影院' },
+          { title: '家有小小孩想一起看卡通的爸媽', desc: '怕孩子近距離盯平板傷眼，大投影漫反射畫面更柔和' },
+          { title: '想打造浪漫房間約會的情侶', desc: '不用去電影院人擠人，關上小燈爆米花準備好就是專屬包廂' },
+          { title: 'Switch 遊戲派對玩家', desc: '玩派對遊戲擠小螢幕很侷促，直接投出百吋大螢幕同樂' }
         ],
         scenarios: [
           { title: '下班回家洗完澡躺在床上', desc: '累得半死不想坐在硬椅子上，直接投天花板躺平看完兩集劇' },
-          { title: '租屋處房間狹窄擺不下電視櫃', desc: '床頭櫃斜斜擺著，自動梯形校正畫面一秒變正，完全不求人' },
-          { title: '週末露營晚上大家圍著帳篷放鬆', desc: '隨便找塊白布掛在車尾，大螢幕放球賽大家喝啤酒超有氣氛' },
-          { title: '客廳開著小夜燈喝點小酒時', desc: '不用摸黑像瞎子一樣，柔和光線下大畫面看演唱會超沉浸' },
-          { title: '朋友突然來家裡作客聚會', desc: '開機即連 Netflix 挑部恐怖片，瞬間把客廳變成電影院' },
-          { title: '想換房間看片不用拔一堆線搬電視', desc: '一手就能拿進廚房邊煮飯邊看，或是拿到浴室泡澡爽看' }
+          { title: '租屋處房間狹窄擺不下電視櫃', desc: '隨便放在床頭櫃斜斜投，自動校正畫面一秒變正不求人' },
+          { title: '週末露營晚上大家圍著帳篷放鬆', desc: '找塊白布掛在車尾，大螢幕放球賽大家喝飲料氣氛極佳' },
+          { title: '客廳開著小夜燈喝點飲品放鬆', desc: '不用摸黑像瞎子一樣，柔和光線下大畫面看演唱會極其沉浸' },
+          { title: '朋友突然來家裡作客聚會', desc: '開機連上串流挑部片，瞬間把客廳變成電影院' },
+          { title: '在不同房間之間隨時移動看片', desc: '一手就能拿進廚房邊煮邊看，或是拿到浴室泡澡爽看' }
         ]
       }
     };
 
+    // ==========================================
     // 狀態變數
+    // ==========================================
     let currentCategory = '美妝美甲';
     let selectedAudienceIndex = 0;
     let selectedScenarioIndex = 0;
     let currentAudiences = [];
     let currentScenarios = [];
     let currentTranslations = [];
-    let currentStyle = 'threads'; // 'threads' (30s) or 'ig' (60s)
+    let currentGoldenSeconds = [];
+    let currentHookInspirations = [];
+    let currentThreadsPosts = [];
+    let currentThreadsComments = [];
+    let currentStyle = 'threads'; // 'threads' or 'ig'
+    let currentSelectedFolder = '全部';
     let autoSaveTimer = null;
 
     // ==========================================
-    // 初始化與本機儲存 (Local Storage)
+    // 生命週期與本機儲存
     // ==========================================
     window.addEventListener('DOMContentLoaded', () => {
       updateProjectCountBadge();
       
-      // 檢查是否有正在暫存的草稿
-      const savedDraft = localStorage.getItem('copywriter_draft_v2');
+      const savedDraft = localStorage.getItem('copywriter_draft_v3');
       if (savedDraft) {
         try {
           const draft = JSON.parse(savedDraft);
           loadDraftData(draft);
-          showToast('已為您自動還原上次編輯的文案！');
+          showToast('已自動還原上次編輯的進度');
           return;
         } catch(e) {
           console.error(e);
         }
       }
-
-      // 若無暫存，預設載入美甲
       loadSample('nail');
     });
 
-    // 即時自動暫存（切換 App、刷新網頁不遺失）
     function triggerAutoSave() {
       clearTimeout(autoSaveTimer);
       autoSaveTimer = setTimeout(() => {
@@ -697,10 +714,10 @@
 
     function saveCurrentDraftToLocalStorage() {
       const draft = getCurrentFormData();
-      localStorage.setItem('copywriter_draft_v2', JSON.stringify(draft));
+      localStorage.setItem('copywriter_draft_v3', JSON.stringify(draft));
       const ind = document.getElementById('autosave-indicator');
       if (ind) {
-        ind.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>已於 ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})} 自動暫存`;
+        ind.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-600 inline-block"></span>已於 ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})} 自動暫存`;
       }
     }
 
@@ -715,11 +732,19 @@
         scenarios: currentScenarios,
         translations: currentTranslations,
         currentStyle,
+        goldenSeconds: currentGoldenSeconds,
+        hookInspirations: currentHookInspirations,
+        threadsPosts: currentThreadsPosts,
+        threadsComments: currentThreadsComments,
         p_hook: document.getElementById('p-hook').value,
         p_empathy: document.getElementById('p-empathy').value,
         p_pivot: document.getElementById('p-pivot').value,
         p_value: document.getElementById('p-value').value,
         p_cta: document.getElementById('p-cta').value,
+        fullArticle: document.getElementById('full-article-preview').value,
+        caption1: document.getElementById('caption-1-content').value,
+        caption2: document.getElementById('caption-2-content').value,
+        caption3: document.getElementById('caption-3-content').value,
         savedAt: new Date().toISOString()
       };
     }
@@ -734,230 +759,35 @@
       currentScenarios = draft.scenarios || [];
       currentTranslations = draft.translations || [];
       currentStyle = draft.currentStyle || 'threads';
+      currentGoldenSeconds = draft.goldenSeconds || [];
+      currentHookInspirations = draft.hookInspirations || [];
+      currentThreadsPosts = draft.threadsPosts || [];
+      currentThreadsComments = draft.threadsComments || [];
 
-      document.getElementById('detected-category').innerText = `判斷類型：${currentCategory}`;
+      document.getElementById('detected-category').innerText = currentCategory;
       renderAudienceList();
       renderScenarioList();
       renderFeatureTranslationsInputs();
-      renderHookInspirations(draft.name);
 
-      // 回填文案區塊
       document.getElementById('p-hook').value = draft.p_hook || '';
       document.getElementById('p-empathy').value = draft.p_empathy || '';
       document.getElementById('p-pivot').value = draft.p_pivot || '';
       document.getElementById('p-value').value = draft.p_value || '';
       document.getElementById('p-cta').value = draft.p_cta || '';
+      document.getElementById('full-article-preview').value = draft.fullArticle || '';
 
-      updateFullPreview();
-      generateReelsCaptions();
-      generateGoldenSeconds();
-      generateThreadsExtensions();
+      document.getElementById('caption-1-content').value = draft.caption1 || '';
+      document.getElementById('caption-2-content').value = draft.caption2 || '';
+      document.getElementById('caption-3-content').value = draft.caption3 || '';
+
+      renderGoldenSecondsList();
+      renderHookInspirationsList();
+      renderThreadsPostsList();
+      renderThreadsCommentsList();
     }
 
     // ==========================================
-    // 個人資料夾與專案記事本管理
-    // ==========================================
-    let currentSelectedFolder = '全部'; // 預設顯示全部
-
-    // 取得資料夾列表 (預設有「芝芝的資料夾」與「未分類」)
-    function getStoredFolders() {
-      try {
-        const folders = JSON.parse(localStorage.getItem('copywriter_folders_v2'));
-        if (Array.isArray(folders) && folders.length > 0) return folders;
-      } catch (e) {}
-      const defaultFolders = ['芝芝的資料夾', '常用範本'];
-      localStorage.setItem('copywriter_folders_v2', JSON.stringify(defaultFolders));
-      return defaultFolders;
-    }
-
-    // 新增個人資料夾
-    function createNewFolderPrompt() {
-      const name = prompt('請輸入新資料夾名稱（例如：芝芝的資料夾、小明的靈感庫）：');
-      if (!name || !name.trim()) return;
-      const cleanName = name.trim();
-      const folders = getStoredFolders();
-      if (folders.includes(cleanName)) {
-        showToast('該資料夾名稱已存在！');
-        return;
-      }
-      folders.push(cleanName);
-      localStorage.setItem('copywriter_folders_v2', JSON.stringify(folders));
-      currentSelectedFolder = cleanName;
-      renderFolderChips();
-      renderProjectsList();
-      showToast(`已建立資料夾：「${cleanName}」`);
-    }
-
-    // 刪除資料夾
-    function deleteFolderByName(folderName) {
-      if (!confirm(`確定要刪除「${folderName}」資料夾嗎？裡面的筆記將歸入「未分類」`)) return;
-      let folders = getStoredFolders().filter(f => f !== folderName);
-      localStorage.setItem('copywriter_folders_v2', JSON.stringify(folders));
-
-      // 把原本屬於此資料夾的專案移到未分類
-      let projects = getStoredProjects();
-      projects.forEach(p => {
-        if (p.folder === folderName) p.folder = '未分類';
-      });
-      localStorage.setItem('copywriter_projects_v2', JSON.stringify(projects));
-
-      currentSelectedFolder = '全部';
-      renderFolderChips();
-      renderProjectsList();
-      showToast('資料夾已刪除！');
-    }
-
-    // 渲染資料夾標籤列
-    function renderFolderChips() {
-      const folders = getStoredFolders();
-      const container = document.getElementById('folder-chips-container');
-      const allTabs = ['全部', ...folders];
-
-      container.innerHTML = allTabs.map(f => {
-        const isSelected = f === currentSelectedFolder;
-        const isAll = f === '全部';
-        return `
-          <div class="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs whitespace-nowrap cursor-pointer transition-all border ${
-            isSelected 
-              ? 'bg-brand-700 text-white border-brand-700 font-bold shadow-sm' 
-              : 'bg-white text-stone-700 border-[#EBDDCF] hover:bg-brand-50'
-          }">
-            <span onclick="selectFolder('${escapeForAttr(f)}')">${escapeHTML(f)}</span>
-            ${!isAll ? `<button onclick="event.stopPropagation(); deleteFolderByName('${escapeForAttr(f)}')" class="ml-1 opacity-60 hover:opacity-100 ${isSelected ? 'text-white' : 'text-stone-400 hover:text-red-600'}">✕</button>` : ''}
-          </div>
-        `;
-      }).join('');
-    }
-
-    function selectFolder(folderName) {
-      currentSelectedFolder = folderName;
-      renderFolderChips();
-      renderProjectsList();
-    }
-
-    // 取得專案列表
-    function getStoredProjects() {
-      try {
-        return JSON.parse(localStorage.getItem('copywriter_projects_v2') || '[]');
-      } catch (e) {
-        return [];
-      }
-    }
-
-    function updateProjectCountBadge() {
-      const list = getStoredProjects();
-      const badge = document.getElementById('project-count-badge');
-      if (badge) badge.innerText = list.length;
-    }
-
-    // 另存當前文案至資料夾
-    function saveCurrentAsProject() {
-      const data = getCurrentFormData();
-      const folders = getStoredFolders();
-
-      // 決定儲存目標資料夾
-      let targetFolder = currentSelectedFolder === '全部' ? (folders[0] || '芝芝的資料夾') : currentSelectedFolder;
-      
-      const defaultTitle = `${data.name || '未命名主題'} (${new Date().toLocaleDateString('zh-TW', {month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'})})`;
-      const title = prompt(`【儲存至資料夾：${targetFolder}】\n請輸入筆記主題名稱：`, defaultTitle);
-      if (!title) return;
-
-      const projects = getStoredProjects();
-      const newProj = {
-        id: 'proj_' + Date.now(),
-        title: title.trim(),
-        folder: targetFolder,
-        updatedAt: new Date().toLocaleString(),
-        data: data
-      };
-
-      projects.unshift(newProj);
-      localStorage.setItem('copywriter_projects_v2', JSON.stringify(projects));
-      updateProjectCountBadge();
-      
-      if (!document.getElementById('project-modal').classList.contains('pointer-events-none')) {
-        renderProjectsList();
-      }
-      showToast(`已儲存至「${targetFolder}」資料夾！`);
-    }
-
-    function openProjectModal() {
-      const modal = document.getElementById('project-modal');
-      modal.classList.remove('opacity-0', 'pointer-events-none');
-      renderFolderChips();
-      renderProjectsList();
-    }
-
-    function closeProjectModal() {
-      const modal = document.getElementById('project-modal');
-      modal.classList.add('opacity-0', 'pointer-events-none');
-    }
-
-    // 依當前選中資料夾與關鍵字過濾渲染專案列表
-    function renderProjectsList() {
-      const query = (document.getElementById('project-search-input').value || '').toLowerCase();
-      const projects = getStoredProjects();
-      const container = document.getElementById('project-items-container');
-
-      const filtered = projects.filter(p => {
-        const folderMatch = currentSelectedFolder === '全部' || (p.folder || '未分類') === currentSelectedFolder;
-        const textMatch = p.title.toLowerCase().includes(query) || (p.data.name && p.data.name.toLowerCase().includes(query));
-        return folderMatch && textMatch;
-      });
-
-      if (filtered.length === 0) {
-        container.innerHTML = `
-          <div class="text-center py-10 text-stone-400 text-xs">
-            「${escapeHTML(currentSelectedFolder)}」資料夾內暫無文案。<br>點擊下方「另存當前文案到此資料夾」即可存入！
-          </div>
-        `;
-        return;
-      }
-
-      container.innerHTML = filtered.map(p => `
-        <div class="bg-white p-3.5 rounded-2xl border border-[#EBDDCF] shadow-sm flex items-center justify-between hover:border-brand-500 transition-all">
-          <div class="flex-1 pr-3 cursor-pointer" onclick="loadProjectById('${p.id}')">
-            <div class="flex items-center gap-1.5 mb-1">
-              <span class="bg-stone-100 text-stone-600 px-1.5 py-0.2 rounded text-[10px] font-medium">📂 ${escapeHTML(p.folder || '未分類')}</span>
-              <span class="bg-brand-100 text-brand-800 px-1.5 py-0.2 rounded text-[10px] font-medium">${escapeHTML(p.data.name || '無品名')}</span>
-            </div>
-            <h4 class="font-bold text-xs sm:text-sm text-brand-900 line-clamp-1">${escapeHTML(p.title)}</h4>
-            <div class="mt-0.5 text-[10px] text-stone-400">🕒 ${p.updatedAt}</div>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <button onclick="loadProjectById('${p.id}')" class="px-2.5 py-1.5 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-xs font-medium transition-all">
-              開啟
-            </button>
-            <button onclick="deleteProjectById('${p.id}')" class="px-2 py-1.5 bg-stone-100 hover:bg-red-50 hover:text-red-600 text-stone-400 rounded-lg text-xs transition-all">
-              刪除
-            </button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function loadProjectById(id) {
-      const projects = getStoredProjects();
-      const target = projects.find(p => p.id === id);
-      if (!target) return;
-      loadDraftData(target.data);
-      saveCurrentDraftToLocalStorage();
-      closeProjectModal();
-      showToast(`已載入「${target.folder || '專案'}」中的「${target.title}」！`);
-    }
-
-    function deleteProjectById(id) {
-      if (!confirm('確定要刪除這份筆記嗎？')) return;
-      let projects = getStoredProjects();
-      projects = projects.filter(p => p.id !== id);
-      localStorage.setItem('copywriter_projects_v2', JSON.stringify(projects));
-      updateProjectCountBadge();
-      renderProjectsList();
-      showToast('已刪除筆記！');
-    }
-
-    // ==========================================
-    // 模組切換邏輯
+    // 模組切換
     // ==========================================
     function switchTab(tabId) {
       const tabs = ['analysis', 'write', 'reels-caption', 'hook', 'check', 'threads'];
@@ -966,24 +796,23 @@
         const btn = document.getElementById(`tab-btn-${t}`);
         if (t === tabId) {
           el.classList.remove('hidden');
-          btn.classList.add('bg-white', 'text-brand-900', 'shadow-sm');
-          btn.classList.remove('text-brand-700');
+          btn.classList.add('bg-white', 'text-brand-900', 'font-semibold', 'shadow-sm');
+          btn.classList.remove('text-stone-600');
         } else {
           el.classList.add('hidden');
-          btn.classList.remove('bg-white', 'text-brand-900', 'shadow-sm');
-          btn.classList.add('text-brand-700');
+          btn.classList.remove('bg-white', 'text-brand-900', 'font-semibold', 'shadow-sm');
+          btn.classList.add('text-stone-600');
         }
       });
-      if (tabId === 'write') updateFullPreview();
       if (tabId === 'check') updateCheckCount();
       triggerAutoSave();
     }
 
     function loadSample(key) {
-      const sample = SAMPLES[key];
-      if (!sample) return;
-      document.getElementById('input-name').value = sample.name;
-      document.getElementById('input-features').value = sample.features;
+      const s = SAMPLES[key];
+      if (!s) return;
+      document.getElementById('input-name').value = s.name;
+      document.getElementById('input-features').value = s.features;
       runSmartAnalysis();
     }
 
@@ -994,14 +823,13 @@
     }
 
     // ==========================================
-    // 核心分析模組 (STEP 1 ~ STEP 3)
+    // 核心分析：受眾、情境、痛點翻譯
     // ==========================================
     function runSmartAnalysis() {
-      const name = document.getElementById('input-name').value.trim() || '好物產品';
+      const name = document.getElementById('input-name').value.trim() || '好物';
       const featuresRaw = document.getElementById('input-features').value.trim();
-      const features = featuresRaw ? featuresRaw.split('\n').map(f => f.trim()).filter(Boolean) : ['好用方便', '省時省力', '小巧好攜帶'];
+      const features = featuresRaw ? featuresRaw.split('\n').map(f => f.trim()).filter(Boolean) : ['好用方便', '省時省力'];
 
-      // 智慧分類辨識
       let matchedKey = null;
       const lower = (name + ' ' + featuresRaw).toLowerCase();
       if (/美甲|指甲|光療|甲油|底膠|封層|貓眼/.test(lower)) matchedKey = 'nail';
@@ -1009,61 +837,64 @@
       else if (/真空|收納|行李|壓縮|羽絨|換季|棉被/.test(lower)) matchedKey = 'vacuum';
       else if (/投影|大螢幕|影音|天花板|露營|串流|4k|流明/.test(lower)) matchedKey = 'projector';
 
-      let audiences = [];
-      let scenarios = [];
-
       if (matchedKey && SAMPLES[matchedKey]) {
         currentCategory = SAMPLES[matchedKey].category;
-        audiences = [...SAMPLES[matchedKey].audiences];
-        scenarios = [...SAMPLES[matchedKey].scenarios];
+        currentAudiences = JSON.parse(JSON.stringify(SAMPLES[matchedKey].audiences));
+        currentScenarios = JSON.parse(JSON.stringify(SAMPLES[matchedKey].scenarios));
       } else {
         currentCategory = '生活日常好物';
-        audiences = [
-          { title: `經常需要用到${name}的人`, desc: '平時遇到問題都要折騰老半天，急需更省時省力的解法' },
-          { title: '追求效率、不喜歡麻煩的小資族', desc: '上班生活已經夠忙了，能少一個步驟就多賺半小時休息' },
-          { title: '精打細算不想花冤枉錢的消費者', desc: '以前買過很多華而不實的踩雷品，這次只想買真正耐用的' },
-          { title: '對生活細節要求高的極簡控', desc: '討厭家裡堆滿瓶瓶罐罐或笨重雜物，極簡順手最舒服' },
-          { title: '時間總是不夠用的忙碌上班族', desc: '希望維持高品質生活，但日常精力真的非常有限' },
-          { title: '容易手忙腳亂的新手入門者', desc: '操作越直覺越好，完全不需要翻複雜說明書就能上手' }
+        currentAudiences = [
+          { title: `經常使用${name}的日常受眾`, desc: '平時遇到問題都要折騰老半天，急需更省時省力的生活解法' },
+          { title: '追求效率、不喜歡繁複步驟的小資族', desc: '生活節奏已經夠快，能少一個步驟就能多賺半小時休息時間' },
+          { title: '精打細算不想花冤枉錢的消費者', desc: '以前買過很多華而不實的踩雷品，這次只想選用真正耐用的' },
+          { title: '對細節質感要求高的生活者', desc: '討厭家裡堆滿雜亂物件，希望維持俐落清爽的生活質感' },
+          { title: '時間總是不夠用的忙碌工作者', desc: '維持生活好狀態的同時，精力不想被繁瑣過程耗盡' },
+          { title: '容易手忙腳亂的新手入門者', desc: '操作越直覺越好，完全不需要翻複雜說明書就能輕鬆上手' }
         ];
-
-        scenarios = [
-          { title: `平時在家使用${name}時`, desc: '以前每次都要花大把時間準備，搞得手忙腳亂還常常做不好' },
-          { title: '下班回家累癱只想放鬆的片刻', desc: '精力已經耗盡，如果工具不給力真的會瞬間令人厭煩' },
-          { title: '出門前十幾分鐘的趕時間狀態', desc: '時間分秒必爭，最怕遇到突發狀況拖延到行程' },
-          { title: '週末想好好整頓房間或自己的生活時', desc: '花一點點時間整理，希望能換來接下來一整週的好心情' },
+        currentScenarios = [
+          { title: `平常在家使用${name}的時候`, desc: '以前每次都要花大把時間準備，搞得手忙腳亂還常常做不好' },
+          { title: '下班回家只想放鬆的獨處片刻', desc: '精力已經耗盡，如果工具不順手真的會讓人心情煩躁' },
+          { title: '出門前十幾分鐘的趕時間狀態', desc: '時間分秒必爭，最怕遇到突發狀況拖延到原定行程' },
+          { title: '週末想好好整頓生活的悠閒午後', desc: '花一點點時間整理，希望能換來接下來一整週的舒適感受' },
           { title: '朋友突然來訪或有聚會的前夕', desc: '需要快速展現好狀態，不能在小細節上掉鏈子' },
-          { title: '想換個心情展開新日常的一刻', desc: '用簡單順手的小工具，讓一整天的繁瑣流程順暢無比' }
+          { title: '想換個心情展開新日常的一刻', desc: '用簡單順手的小物件，讓一整天的繁瑣流程順暢無比' }
         ];
       }
 
-      currentAudiences = audiences;
-      currentScenarios = scenarios;
-      document.getElementById('detected-category').innerText = `判斷類型：${currentCategory}`;
+      selectedAudienceIndex = 0;
+      selectedScenarioIndex = 0;
+      document.getElementById('detected-category').innerText = currentCategory;
 
       renderAudienceList();
       renderScenarioList();
       renderFeatureTranslations(features);
-      renderHookInspirations(name);
 
       generateAllDrafts();
       generateReelsCaptions();
       generateGoldenSeconds();
+      generateHookInspirations(name);
       generateThreadsExtensions();
 
       triggerAutoSave();
-      showToast('智慧分析完成！已推導 6 組受眾、6 組情境與所有文案');
+      showToast('智慧分析完成！已推導受眾、情境與文案');
     }
 
+    // STEP 1 受眾手動編輯與優化
     function renderAudienceList() {
       const container = document.getElementById('audience-list');
       container.innerHTML = currentAudiences.map((aud, idx) => `
-        <div onclick="selectAudience(${idx})" class="p-3 rounded-xl border text-xs cursor-pointer transition-all ${idx === selectedAudienceIndex ? 'bg-[#F5EFE6] border-brand-600 shadow-sm' : 'bg-[#FAF7F2] border-[#EBDDCF] hover:bg-stone-50'}">
-          <div class="flex items-center gap-2">
-            <span class="w-4 h-4 rounded-full flex items-center justify-center text-[10px] ${idx === selectedAudienceIndex ? 'bg-brand-700 text-white font-bold' : 'border border-stone-300 text-transparent'}">✓</span>
-            <span class="font-bold text-brand-900">${aud.title}</span>
+        <div class="p-3 rounded-xl border text-xs transition-all ${idx === selectedAudienceIndex ? 'bg-[#F4EFEA] border-brand-700 shadow-sm' : 'bg-[#FAF8F5] border-[#E7DFD5]'}">
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="flex items-center gap-2 cursor-pointer font-bold text-brand-900">
+              <input type="radio" name="aud-select" ${idx === selectedAudienceIndex ? 'checked' : ''} onchange="selectAudience(${idx})" class="w-3.5 h-3.5 text-brand-700 focus:ring-brand-500">
+              <span>受眾 0${idx + 1}</span>
+            </label>
+            <span class="text-[10px] text-stone-400 font-mono">點擊直接編輯內容</span>
           </div>
-          <p class="text-stone-500 mt-1 pl-6 text-[11px]">${aud.desc}</p>
+          <div class="space-y-1.5 pl-5">
+            <input type="text" value="${escapeHTML(aud.title)}" onchange="updateAudienceTitle(${idx}, this.value)" class="w-full bg-white border border-[#E7DFD5] rounded-lg px-2.5 py-1 text-xs text-brand-900 font-semibold focus:outline-none focus:ring-1 focus:ring-brand-500">
+            <textarea rows="1" onchange="updateAudienceDesc(${idx}, this.value)" class="w-full bg-white border border-[#E7DFD5] rounded-lg px-2.5 py-1 text-[11px] text-stone-600 focus:outline-none focus:ring-1 focus:ring-brand-500 resize-y">${escapeHTML(aud.desc)}</textarea>
+          </div>
         </div>
       `).join('');
     }
@@ -1071,22 +902,63 @@
     function selectAudience(idx) {
       selectedAudienceIndex = idx;
       renderAudienceList();
-      generateAllDrafts();
-      generateReelsCaptions();
-      generateGoldenSeconds();
-      generateThreadsExtensions();
+      refreshDraftsWithCurrentContext();
       triggerAutoSave();
     }
 
+    function updateAudienceTitle(idx, val) {
+      if (currentAudiences[idx]) {
+        currentAudiences[idx].title = val;
+        refreshDraftsWithCurrentContext();
+        triggerAutoSave();
+      }
+    }
+
+    function updateAudienceDesc(idx, val) {
+      if (currentAudiences[idx]) {
+        currentAudiences[idx].desc = val;
+        refreshDraftsWithCurrentContext();
+        triggerAutoSave();
+      }
+    }
+
+    function optimizeAudiencesFromIntent() {
+      const intent = document.getElementById('custom-audience-intent').value.trim();
+      const name = document.getElementById('input-name').value.trim() || '好物';
+      if (!intent) {
+        showToast('請先輸入自訂受眾意向');
+        return;
+      }
+      currentAudiences[0] = { title: `${intent}（核心族群）`, desc: `專為${intent}設計，告別過去使用傳統方式的繁複與挫折感` };
+      currentAudiences[1] = { title: `不想花冤枉錢的${intent}`, desc: `渴望精簡時間與預算，在家也能獲得高品質體驗` };
+      currentAudiences[2] = { title: `講求效率與俐落手感的受眾`, desc: `步驟越少越好，幾分鐘內搞定，不再把自己弄得很狼狽` };
+      currentAudiences[3] = { title: `初次嘗試但怕翻車的手殘新手`, desc: `零經驗也能輕鬆上手，無須複雜技巧即能呈現完美質感` };
+      currentAudiences[4] = { title: `追求生活質感的小資上班族`, desc: `維持精緻外表與日常好心情，用最少力氣換取最大效果` };
+      currentAudiences[5] = { title: `只想利用碎裂時間完成的忙碌者`, desc: `隨時想做就做，完全不需要騰出大段空白時間` };
+
+      selectedAudienceIndex = 0;
+      renderAudienceList();
+      refreshDraftsWithCurrentContext();
+      showToast('已根據自訂意向智慧優化 6 組受眾！');
+      triggerAutoSave();
+    }
+
+    // STEP 2 情境手動編輯與優化
     function renderScenarioList() {
       const container = document.getElementById('scenario-list');
       container.innerHTML = currentScenarios.map((sc, idx) => `
-        <div onclick="selectScenario(${idx})" class="p-3 rounded-xl border text-xs cursor-pointer transition-all ${idx === selectedScenarioIndex ? 'bg-[#F5EFE6] border-brand-600 shadow-sm' : 'bg-[#FAF7F2] border-[#EBDDCF] hover:bg-stone-50'}">
-          <div class="flex items-center gap-2">
-            <span class="w-4 h-4 rounded-full flex items-center justify-center text-[10px] ${idx === selectedScenarioIndex ? 'bg-brand-700 text-white font-bold' : 'border border-stone-300 text-transparent'}">✓</span>
-            <span class="font-bold text-brand-900">${sc.title}</span>
+        <div class="p-3 rounded-xl border text-xs transition-all ${idx === selectedScenarioIndex ? 'bg-[#F4EFEA] border-brand-700 shadow-sm' : 'bg-[#FAF8F5] border-[#E7DFD5]'}">
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="flex items-center gap-2 cursor-pointer font-bold text-brand-900">
+              <input type="radio" name="sc-select" ${idx === selectedScenarioIndex ? 'checked' : ''} onchange="selectScenario(${idx})" class="w-3.5 h-3.5 text-brand-700 focus:ring-brand-500">
+              <span>情境 0${idx + 1}</span>
+            </label>
+            <span class="text-[10px] text-stone-400 font-mono">點擊直接編輯內容</span>
           </div>
-          <p class="text-stone-500 mt-1 pl-6 text-[11px]">${sc.desc}</p>
+          <div class="space-y-1.5 pl-5">
+            <input type="text" value="${escapeHTML(sc.title)}" onchange="updateScenarioTitle(${idx}, this.value)" class="w-full bg-white border border-[#E7DFD5] rounded-lg px-2.5 py-1 text-xs text-brand-900 font-semibold focus:outline-none focus:ring-1 focus:ring-brand-500">
+            <textarea rows="1" onchange="updateScenarioDesc(${idx}, this.value)" class="w-full bg-white border border-[#E7DFD5] rounded-lg px-2.5 py-1 text-[11px] text-stone-600 focus:outline-none focus:ring-1 focus:ring-brand-500 resize-y">${escapeHTML(sc.desc)}</textarea>
+          </div>
         </div>
       `).join('');
     }
@@ -1094,42 +966,77 @@
     function selectScenario(idx) {
       selectedScenarioIndex = idx;
       renderScenarioList();
-      generateAllDrafts();
-      generateReelsCaptions();
-      generateGoldenSeconds();
-      generateThreadsExtensions();
+      refreshDraftsWithCurrentContext();
       triggerAutoSave();
     }
 
+    function updateScenarioTitle(idx, val) {
+      if (currentScenarios[idx]) {
+        currentScenarios[idx].title = val;
+        refreshDraftsWithCurrentContext();
+        triggerAutoSave();
+      }
+    }
+
+    function updateScenarioDesc(idx, val) {
+      if (currentScenarios[idx]) {
+        currentScenarios[idx].desc = val;
+        refreshDraftsWithCurrentContext();
+        triggerAutoSave();
+      }
+    }
+
+    function optimizeScenariosFromIntent() {
+      const intent = document.getElementById('custom-scenario-intent').value.trim();
+      const name = document.getElementById('input-name').value.trim() || '好物';
+      if (!intent) {
+        showToast('請先輸入自訂情境意向');
+        return;
+      }
+      currentScenarios[0] = { title: `${intent}`, desc: `以前每次${intent}都搞得心累手忙腳亂，現在順暢度大幅提升` };
+      currentScenarios[1] = { title: `在${intent}的零碎放鬆空檔`, desc: `邊放鬆邊操作，完全不耗費多餘心神，輕鬆收尾` };
+      currentScenarios[2] = { title: `不想花大錢特地出門預約時`, desc: `隨時在自家角落搞定，省下出門奔波的大把時間` };
+      currentScenarios[3] = { title: `臨時有重要聚會前夕的應急時刻`, desc: `時間緊迫下也能十幾分鐘優雅搞定，完全不失誤` };
+      currentScenarios[4] = { title: `深夜獨處不想吵到任何人的時候`, desc: `靜謐安靜且步驟極簡，悄悄完成自己的儀式感` };
+      currentScenarios[5] = { title: `整理好心情展開新一週的午後`, desc: `乾淨俐落完成，帶給自己一整週愉悅自信的好狀態` };
+
+      selectedScenarioIndex = 0;
+      renderScenarioList();
+      refreshDraftsWithCurrentContext();
+      showToast('已根據自訂情境意向優化 6 組生活場景！');
+      triggerAutoSave();
+    }
+
+    // STEP 3 功能生活痛點翻譯
     function renderFeatureTranslations(features) {
       currentTranslations = features.map(feat => {
         let benefit = '';
         const f = feat.toLowerCase();
 
         if (f.includes('不用') || f.includes('底膠') || f.includes('多罐') || f.includes('三合一')) {
-          benefit = '桌面不用再擺得像實驗室一樣瓶瓶罐罐，省掉塗好幾層的繁瑣時間';
+          benefit = '桌面不用再擺滿瓶瓶罐罐，省掉塗好幾層的繁瑣時間與繁雜步驟';
         } else if (f.includes('省時') || f.includes('快乾') || f.includes('照燈')) {
-          benefit = '十指薄塗照燈幾十秒就乾透，再也不怕剛擦好拿手機不小心刮花重抹';
+          benefit = '十指薄塗照燈幾十秒就硬化完成，不怕剛塗好拿東西不小心刮花重擦';
         } else if (f.includes('貓眼') || f.includes('磁吸') || f.includes('水光')) {
-          benefit = '磁鐵靠上去水光圈一秒成型，自己在家就能拉出沙龍級的通透高級光澤';
+          benefit = '磁鐵靠上去水光圈一秒聚攏，自己在家就能拉出沙龍級的通透光澤';
         } else if (f.includes('顏色') || f.includes('色號') || f.includes('顯白')) {
-          benefit = '特調低飽和色調超顯手白，擦上去雙手立刻看起來乾淨精緻又有氣質';
+          benefit = '特調低飽和色調極顯手白，擦上去雙手立刻乾淨精緻且顯氣質';
         } else if (f.includes('可視化') || f.includes('倒數') || f.includes('色塊')) {
-          benefit = '時間隨著顏色色塊漸漸減少，小孩一看就懂還剩多久，根本不用在旁邊吼破喉嚨';
+          benefit = '時間隨著顏色色塊漸漸減少，孩子一看就懂還剩多久，不需在旁邊費力催促';
         } else if (f.includes('靜音') || f.includes('指針') || f.includes('無聲')) {
-          benefit = '指針完全不會有煩人的滴答聲，半夜在房間或書房用完全不吵人';
+          benefit = '指針完全無滴答聲響，深夜在房間或書房使用也不會干擾他人思緒';
         } else if (f.includes('圓角') || f.includes('防摔') || f.includes('安全')) {
-          benefit = '不怕小孩子拿在手上敲敲打打摔壞，就算不小心掉地上也不傷木地板';
+          benefit = '不怕孩子拿在手上敲敲打打摔壞，就算不小心掉到地上也不傷地板';
         } else if (f.includes('抽氣') || f.includes('免抽氣') || f.includes('手壓')) {
-          benefit = '出國根本不用再另外帶笨重的抽氣泵，整個人往上一壓，三秒就能排光空氣';
+          benefit = '出國免帶笨重抽氣泵，手壓幾秒快速排空空氣，行李多出一倍空間';
         } else if (f.includes('梯形') || f.includes('校正') || f.includes('擺放')) {
-          benefit = '隨手擺在床頭櫃斜著投，畫面也會自動方方正正，不用拿厚書墊半天調角度';
+          benefit = '隨手擺在床頭櫃斜著投，畫面也自動方正，不用拿厚書調半天角度';
         } else if (f.includes('app') || f.includes('串流') || f.includes('內建')) {
-          benefit = '開機直接用遙控器選片看劇，不用再狼狽接一堆轉接線連筆電';
+          benefit = '開機直接以遙控器選片看劇，免去狼狽轉接筆電與線材';
         } else if (f.includes('關燈') || f.includes('流明') || f.includes('亮度')) {
-          benefit = '客廳開著小燈也能看得清清楚楚，追劇再也不用每次都摸黑像在電影院';
+          benefit = '開著小夜燈也能看得清清楚楚，追劇再也不必每次都在全黑摸索';
         } else {
-          benefit = `把原本複雜麻煩的步驟直接化簡，日常使用起來順手度提升超多`;
+          benefit = `把原本複雜麻煩的步驟直接化簡，日常使用順暢度大幅提升`;
         }
         return { feature: feat, benefit };
       });
@@ -1140,10 +1047,10 @@
     function renderFeatureTranslationsInputs() {
       const container = document.getElementById('feature-translation-list');
       container.innerHTML = currentTranslations.map((item, idx) => `
-        <div class="p-3 bg-[#FAF7F2] rounded-xl border border-[#EBDDCF] space-y-1.5">
-          <div class="text-xs font-semibold text-stone-500">規格：${escapeHTML(item.feature)}</div>
-          <div class="text-xs text-brand-700 font-bold">↓ 生活好處：</div>
-          <input type="text" value="${escapeHTML(item.benefit)}" onchange="updateTranslation(${idx}, this.value)" class="w-full bg-white border border-[#EBDDCF] rounded-lg px-2.5 py-1.5 text-xs text-stone-800 focus:outline-none focus:ring-1 focus:ring-brand-500">
+        <div class="p-3 bg-[#FAF8F5] rounded-xl border border-[#E7DFD5] space-y-1.5">
+          <div class="text-[11px] font-semibold text-stone-500">規格：${escapeHTML(item.feature)}</div>
+          <div class="text-[11px] text-brand-800 font-bold">生活好處轉化：</div>
+          <input type="text" value="${escapeHTML(item.benefit)}" onchange="updateTranslation(${idx}, this.value)" class="w-full bg-white border border-[#E7DFD5] rounded-lg px-2.5 py-1.5 text-xs text-stone-800 focus:outline-none focus:ring-1 focus:ring-brand-500">
         </div>
       `).join('');
     }
@@ -1151,192 +1058,33 @@
     function updateTranslation(idx, val) {
       if (currentTranslations[idx]) {
         currentTranslations[idx].benefit = val;
-        generateAllDrafts();
-        generateReelsCaptions();
-        generateThreadsExtensions();
+        refreshDraftsWithCurrentContext();
         triggerAutoSave();
       }
     }
 
-    // ==========================================
-    // Reels 腳本開頭黃金三秒 (6 個選項)
-    // ==========================================
-    function generateGoldenSeconds() {
-      const pName = document.getElementById('input-name').value.trim() || '好物';
-      const aud = currentAudiences[selectedAudienceIndex] || { title: '大家' };
-      const sce = currentScenarios[selectedScenarioIndex] || { title: '日常' };
-
-      const options = [
-        {
-          tag: '衝突動作型',
-          action: '鏡頭特寫：雙手抱頭/面對鏡頭嘆氣，桌上一片混亂',
-          script: `「到底誰懂啊！每次${sce.title}，我都差點搞到崩潰！」`
-        },
-        {
-          tag: '反常識勸退型',
-          action: '鏡頭動作：把手掌擋在鏡頭前直搖頭',
-          script: `「沒事千萬別碰這款${pName}，因為用過一次你真的會回不去！」`
-        },
-        {
-          tag: '結果驚艷型',
-          action: '鏡頭展示：直接展示最完美的成品/效果特寫，光圈閃耀',
-          script: `「如果能早半年知道這招，我真的不用花那麼多冤枉時間！」`
-        },
-        {
-          tag: '極限對比型',
-          action: '鏡頭左右分割：一邊手忙腳亂擦汗，一邊優雅十秒完成',
-          script: `「左邊搞了快一小時，右邊用${pName}不到三分鐘搞定，差太多了吧！」`
-        },
-        {
-          tag: '靈魂發問型',
-          action: '鏡頭直視特寫：食指輕點鏡頭，眼神銳利真誠',
-          script: `「身為${aud.title}，你是不是也每次都在這一步卡關？」`
-        },
-        {
-          tag: '閨蜜私藏型',
-          action: '鏡頭湊近：像在講悄悄話一樣壓低身段湊向鏡頭',
-          script: `「這支影片我本來不想拍的，但這東西真的幫我省下太多麻煩了！」`
-        }
-      ];
-
-      const container = document.getElementById('golden-seconds-list');
-      container.innerHTML = options.map((opt, i) => `
-        <div onclick="applyGoldenSecond('${escapeForAttr(opt.script)}')" class="p-3 bg-white rounded-xl border border-[#EBDDCF] hover:border-brand-600 cursor-pointer transition-all space-y-1">
-          <div class="flex items-center justify-between">
-            <span class="px-2 py-0.2 bg-brand-100 text-brand-900 text-[10px] rounded font-bold">${opt.tag}</span>
-            <span class="text-[11px] text-brand-700 font-medium">套入口播 ↵</span>
-          </div>
-          <div class="text-[11px] text-stone-500 font-mono">🎬 畫面鏡頭：${opt.action}</div>
-          <div class="text-xs text-brand-900 font-bold">🗣️ 開頭口播：${opt.script}</div>
-        </div>
-      `).join('');
-    }
-
-    function applyGoldenSecond(text) {
-      document.getElementById('p-hook').value = text;
-      updateFullPreview();
-      showToast('已套用開頭黃金三秒至第 1 段鉤子！');
-      triggerAutoSave();
+    // 當情境、受眾或規格翻譯更新時，同步更新所有衍生文案（保持情境鎖定！）
+    function refreshDraftsWithCurrentContext() {
+      generateAllDrafts();
+      generateReelsCaptions();
+      generateGoldenSeconds();
+      generateHookInspirations();
+      generateThreadsExtensions();
     }
 
     // ==========================================
-    // Reels 下方貼文說明欄文案 (Caption 3 種)
-    // ==========================================
-    function generateReelsCaptions() {
-      const pName = document.getElementById('input-name').value.trim() || '好物';
-      const aud = currentAudiences[selectedAudienceIndex] || { title: '小資族' };
-      const sce = currentScenarios[selectedScenarioIndex] || { title: '平常生活' };
-      const benefits = currentTranslations.map(t => t.benefit);
-      let keyword = pName.length > 3 ? pName.slice(0, 2) : pName;
-
-      // 1. 條列重點型
-      const cap1 = 
-`每次${sce.title}真的會讓人很厭世⋯🫠
-這陣子換了這款【${pName}】，直接幫我把步驟簡化成傻瓜模式！
-
-幫大家整理最有感的 3 個重點：
-✨ ${benefits[0] || '操作極度省時，步驟少一大半'}
-✨ ${benefits[1] || '手感非常順暢，完全不用複雜技術'}
-✨ ${benefits[2] || '質感細緻高級，前後落差大到連自己都驚艷'}
-
-真的不要再把自己搞得那麼狼狽了！
-🔗 想要賣場連結的，底下留言「${keyword}」，我私訊發給你！
-.
-#生活好物 #${pName} #好物推薦 #省時必備`;
-
-      // 2. 閨蜜碎念型
-      const cap2 = 
-`老實說，我以前真的一直鐵齒不想換方法⋯
-直到每次${sce.title}都在那邊手忙腳亂、搞得心情超浮躁，才被朋友推坑這款${pName}！
-
-試了一次直接回不去！本來以為只是噱頭，結果${benefits[0] || '真的省掉超多繁瑣時間'}，弄完那一刻真的覺得生活被拯救了。身為${aud.title}真的要對自己好一點啦～
-
-身邊好多人在問我哪裡入手的，底下留言「${keyword}」，我把當初買的賣場私訊分享給你們！`;
-
-      // 3. 高互動導購型
-      const cap3 = 
-`「這個到底去哪裡買的？！」
-自從影片發出來私訊直接被問爆💥
-
-如果你也常常${sce.title}，拜託這篇先存起來！
-它最厲害的就是${benefits[0] || '完全不用多餘麻煩步驟'}，連手殘黨都能一次上手。
-
-怕連結直接放會被演算法吞掉：
-👉🏻 只要在底下留言「${keyword}」或「+1」
-我直接把私藏的賣場連結私訊發給你！
-（只分享給我常互動的粉絲朋友喔～）`;
-
-      document.getElementById('caption-1-content').innerText = cap1;
-      document.getElementById('caption-2-content').innerText = cap2;
-      document.getElementById('caption-3-content').innerText = cap3;
-    }
-
-    // ==========================================
-    // 脆 (Threads) 延伸模組 (6 極短文案 + 6 留言引導)
-    // ==========================================
-    function generateThreadsExtensions() {
-      const pName = document.getElementById('input-name').value.trim() || '好物';
-      const aud = currentAudiences[selectedAudienceIndex] || { title: '大家' };
-      const sce = currentScenarios[selectedScenarioIndex] || { title: '日常' };
-      const benefits = currentTranslations.map(t => t.benefit);
-      let keyword = pName.length > 3 ? pName.slice(0, 2) : pName;
-
-      // 6 個擊中共鳴的極短脆文案 (超簡短、超有共鳴)
-      const threadsPosts = [
-        `到底為什麼每次${sce.title}，永遠都要搞得像世界末日一樣狼狽啦⋯\n\n身為${aud.title}我真的快瘋掉。`,
-        `我發誓，我這輩子再也不要用以前的方法${sce.title}了。\n\n換了${pName}之後，我以前到底在折騰什麼？像個盤子一樣。`,
-        `勸大家沒事真的不要隨便試這款${pName}。\n\n因為你會發現生活原本可以這麼輕鬆，回不去了很可怕。`,
-        `跟身為${aud.title}的朋友聊到每次${sce.title}的心累程度，\n兩個人在咖啡廳差點聊到哭出來。\n\n懂的人真的懂。`,
-        `花不到沙龍/專櫃三分之一的時間，\n就把${pName}搞得跟大師級一樣精緻，\n今天看著成果發呆了十分鐘，心情超好。`,
-        `生活裡最爽的瞬間：\n就是原本每次${sce.title}都要弄一小時，\n今天十分鐘搞定，還能躺在沙發滑半小時手機。`
-      ];
-
-      const postsContainer = document.getElementById('threads-posts-list');
-      postsContainer.innerHTML = threadsPosts.map((post, idx) => `
-        <div class="p-3.5 bg-[#FAF7F2] rounded-xl border border-[#EBDDCF] hover:border-brand-500 transition-all space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold text-stone-400">款式 0${idx + 1}</span>
-            <button onclick="copyRawText('${escapeForAttr(post)}')" class="px-2 py-1 bg-white hover:bg-brand-100 text-brand-900 border border-[#EBDDCF] rounded-lg text-xs font-medium">複製這篇</button>
-          </div>
-          <div class="text-xs sm:text-sm text-stone-800 whitespace-pre-wrap leading-relaxed font-sans">${escapeHTML(post)}</div>
-        </div>
-      `).join('');
-
-      // 6 個脆留言串第一則 (介紹特點與導流)
-      const threadsComments = [
-        `怕大家找不到，我把重點補在這邊：\n這款${pName}最神的地方就是「${benefits[0] || '省掉所有繁瑣步驟'}」，真的完全不浪費時間。\n想知道賣場的留個「${keyword}」，我私訊發給你！`,
-        `補個真實細節：\n它${benefits[1] || '質感做得非常到位'}，連我這種手殘黨都沒翻車過。\n連結我放在個人首頁，需要自己去領～`,
-        `私訊好多人問色號/型號，統一回在留言區！\n這款最大優點是${benefits[0] || '操作極度直覺'}，而且${benefits[1] || '維持度很好'}。\n想避坑買對的底下留個「+1」！`,
-        `很多人問跟傳統的有什麼差？直接講結論：\n以前弄完手酸心累，現在${benefits[0] || '三兩下搞定'}。\n傳送門在留言，大家自己看～`,
-        `老實說原本買之前我也很怕踩雷，結果實測${benefits[1] || '效果出乎意料的好'}。\n真心覺得每個${aud.title}手邊都要備一個！`,
-        `連結太多人要了直接貼出來會被降流量QQ\n有需要的在底下隨便留言「${keyword}」，我一一私訊傳給你們！`
-      ];
-
-      const commentsContainer = document.getElementById('threads-comments-list');
-      commentsContainer.innerHTML = threadsComments.map((comm, idx) => `
-        <div class="p-3.5 bg-[#FAF7F2] rounded-xl border border-[#EBDDCF] hover:border-brand-500 transition-all space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold text-stone-400">留言引導 0${idx + 1}</span>
-            <button onclick="copyRawText('${escapeForAttr(comm)}')" class="px-2 py-1 bg-white hover:bg-brand-100 text-brand-900 border border-[#EBDDCF] rounded-lg text-xs font-medium">複製這則留言</button>
-          </div>
-          <div class="text-xs sm:text-sm text-stone-800 whitespace-pre-wrap leading-relaxed font-sans">${escapeHTML(comm)}</div>
-        </div>
-      `).join('');
-    }
-
-    // ==========================================
-    // Reels 腳本生成與切換
+    // Reels 腳本生成 (五段式 + 黃金三秒)
     // ==========================================
     function setWritingStyle(style) {
       currentStyle = style;
       const btnThreads = document.getElementById('style-threads');
       const btnIG = document.getElementById('style-ig');
       if (style === 'threads') {
-        btnThreads.className = 'px-2.5 py-1 rounded-lg bg-brand-700 text-white font-medium transition-all';
-        btnIG.className = 'px-2.5 py-1 rounded-lg bg-white/70 hover:bg-white text-brand-900 font-medium transition-all';
+        btnThreads.className = 'px-2.5 py-1 rounded-lg bg-brand-800 text-white font-medium transition-all text-[11px]';
+        btnIG.className = 'px-2.5 py-1 rounded-lg bg-white/70 hover:bg-white text-brand-900 font-medium transition-all text-[11px]';
       } else {
-        btnIG.className = 'px-2.5 py-1 rounded-lg bg-brand-700 text-white font-medium transition-all';
-        btnThreads.className = 'px-2.5 py-1 rounded-lg bg-white/70 hover:bg-white text-brand-900 font-medium transition-all';
+        btnIG.className = 'px-2.5 py-1 rounded-lg bg-brand-800 text-white font-medium transition-all text-[11px]';
+        btnThreads.className = 'px-2.5 py-1 rounded-lg bg-white/70 hover:bg-white text-brand-900 font-medium transition-all text-[11px]';
       }
       generateAllDrafts();
       triggerAutoSave();
@@ -1349,17 +1097,17 @@
       const isShort = currentStyle === 'threads';
 
       const benefits = currentTranslations.map(t => t.benefit);
-      const mainBenefit1 = benefits[0] || '不用再搞得手忙腳亂';
-      const mainBenefit2 = benefits[1] || '速度快超多而且質感很高級';
+      const b1 = benefits[0] || '不用再搞得手忙腳亂';
+      const b2 = benefits[1] || '速度快超多而且質感很高級';
 
-      // 1. 鉤子
+      // 1. 鉤子：緊緊扣住當前選取的情境與受眾！
       let hook = isShort
-        ? `到底為什麼每次${sce.title}，都要搞得這麼狼狽啦！`
+        ? `到底為什麼每次${sce.title}，都要搞得這麼狼狽⋯`
         : `如果你也是${aud.title}，這個東西我真的推薦你先準備起來。`;
 
-      // 2. 共鳴
+      // 2. 共鳴：嚴格使用當前選定的情境描述！
       let empathy = isShort
-        ? `身為${aud.title}真的超懂這種感覺，${sce.desc}，心情直接大受影響，每次弄完脖子跟手都很痠。`
+        ? `身為${aud.title}真的超懂這種感覺：${sce.desc}，心情直接大受影響，弄完手跟脖子都很痠。`
         : `尤其身為${aud.title}應該都懂，每次遇到${sce.title}，${sce.desc}，本來的好心情都被磨光了，真的很心累。`;
 
       // 3. 轉折
@@ -1370,15 +1118,15 @@
       // 4. 價值
       let val = '';
       if (currentCategory === '美妝美甲') {
-        val = `它直接把繁瑣步驟三合一，${mainBenefit1}。而且薄塗一層照燈就乾透，貓眼的光圈輕輕一吸水光感就出來了，顏色很透又超顯白，十根手指做完花不到十分鐘，完全不輸去沙龍做的精緻感！`;
-      } else if (currentCategory === '親子育兒') {
-        val = `它可視化色塊倒數，${mainBenefit1}；而且指針靜音完全不發出滴答聲，時間到了聲音很清脆，小孩看著色塊慢慢變少自己就懂該收心了，再也不用大人在後面催破喉嚨。`;
+        val = `它直接把繁瑣步驟三合一，${b1}。而且薄塗一層照燈就乾透，貓眼的光圈輕輕一吸水光感就出來了，顏色很透又超顯白，十根手指做完花不到十分鐘，完全不輸去沙龍做的精緻感！`;
+      } else if (currentCategory === '親子生活') {
+        val = `它可視化色塊倒數，${b1}；而且指針靜音完全不發出滴答聲，時間到了聲音很清脆，小孩看著色塊慢慢變少自己就懂該收心了，再也不用大人在後面催破喉嚨。`;
       } else if (currentCategory === '旅行居家') {
-        val = `它根本不用另外帶笨重的抽氣泵，手壓三秒直接排氣，${mainBenefit1}。原本蓬鬆佔空間的衣服一下子扁下去，行李箱直接多出一大半空間可以裝戰利品！`;
+        val = `它根本不用另外帶笨重的抽氣泵，手壓幾秒直接排氣，${b1}。原本蓬鬆佔空間的衣服一下子扁下去，行李箱直接多出一大半空間可以裝戰利品！`;
       } else if (currentCategory === '3C 影音') {
-        val = `它小巧輕便一手就能拿起，自動梯形校正超聰明，隨手放在床頭櫃斜著投，畫面也自動方方正正。而且開機內建串流隨點隨看，晚上窩在被窩裡投天花板看大螢幕，真的爽度破表！`;
+        val = `它小巧輕便一手就能拿起，自動梯形校正超聰明，隨手放在床頭櫃斜著投，畫面也自動方方正正。而且開機內建串流隨點隨看，晚上窩在被窩裡投天花板看大螢幕，真的享受！`;
       } else {
-        val = `它最大優點就是${mainBenefit1}，而且${mainBenefit2}。用起來順手度提升非常多，完全解決以前最討厭的麻煩事！`;
+        val = `它最大優點就是${b1}，而且${b2}。用起來順手度提升非常多，完全解決以前最討厭的麻煩事！`;
       }
 
       // 5. 互動
@@ -1393,7 +1141,27 @@
       document.getElementById('p-value').value = val;
       document.getElementById('p-cta').value = cta;
 
-      updateFullPreview();
+      assembleFullArticleFromSegments();
+    }
+
+    // 口播稿五段與全文的雙向同步編輯
+    function handleSegmentInput() {
+      assembleFullArticleFromSegments();
+      triggerAutoSave();
+    }
+
+    function assembleFullArticleFromSegments() {
+      const h = document.getElementById('p-hook').value.trim();
+      const e = document.getElementById('p-empathy').value.trim();
+      const p = document.getElementById('p-pivot').value.trim();
+      const v = document.getElementById('p-value').value.trim();
+      const c = document.getElementById('p-cta').value.trim();
+      const full = [h, e, p, v, c].filter(Boolean).join('\n\n');
+      document.getElementById('full-article-preview').value = full;
+    }
+
+    function handleFullArticleDirectInput() {
+      triggerAutoSave();
     }
 
     function writeSpecificSection(sec) {
@@ -1403,7 +1171,7 @@
 
       if (sec === 'hook') {
         const hooks = [
-          `到底為什麼每次${sce.title}，永遠都要搞得這麼狼狽啦！`,
+          `到底為什麼每次${sce.title}，永遠都要搞得這麼狼狽⋯`,
           `「又來了啦！」每次${sce.title}，我家都會上演這一幕。`,
           `以前最怕${sce.title}，現在反而一點都不擔心了。`,
           `自從用了${pName}，${sce.title}我竟然一點都沒手忙腳亂！`,
@@ -1414,8 +1182,8 @@
       } else if (sec === 'empathy') {
         const emps = [
           `身為${aud.title}真的超懂這種感覺，每次${sce.title}都要折騰老半天，搞得心情超浮躁。`,
-          `尤其每次遇到${sce.title}，手忙腳亂還弄不好，真的常常讓人很懷疑人生。`,
-          `有遇到過這種狀況的人應該懂吧！本來想放鬆，結果反而越弄越心累。`
+          `尤其每次遇到${sce.title}，手忙腳亂還弄不好，真的常常讓人很無力。`,
+          `有遇到過這種狀況的人應該懂吧！本來想好好完成，結果反而越弄越心累。`
         ];
         document.getElementById('p-empathy').value = emps[Math.floor(Math.random() * emps.length)];
       } else if (sec === 'pivot') {
@@ -1438,50 +1206,178 @@
         document.getElementById('p-cta').value = ctas[Math.floor(Math.random() * ctas.length)];
       }
 
-      updateFullPreview();
+      assembleFullArticleFromSegments();
       triggerAutoSave();
-      showToast(`已重新生成第 ${sec} 段！`);
-    }
-
-    function updateFullPreview() {
-      const h = document.getElementById('p-hook').value.trim();
-      const e = document.getElementById('p-empathy').value.trim();
-      const p = document.getElementById('p-pivot').value.trim();
-      const v = document.getElementById('p-value').value.trim();
-      const c = document.getElementById('p-cta').value.trim();
-
-      const parts = [h, e, p, v, c].filter(Boolean);
-      const full = parts.length > 0 ? parts.join('\n\n') : '尚未產生文案。';
-      document.getElementById('full-article-preview').innerText = full;
-      triggerAutoSave();
+      showToast(`已重新生成第 ${sec} 段`);
     }
 
     function copyFullArticle() {
-      const text = document.getElementById('full-article-preview').innerText;
+      const text = document.getElementById('full-article-preview').value;
       copyRawText(text);
     }
 
     // ==========================================
-    // 6 種開頭靈感
+    // Reels 開頭黃金三秒 (6款，全可手動編輯)
     // ==========================================
-    function renderHookInspirations(productName) {
+    function generateGoldenSeconds() {
+      const pName = document.getElementById('input-name').value.trim() || '好物';
+      const aud = currentAudiences[selectedAudienceIndex] || { title: '大家' };
+      const sce = currentScenarios[selectedScenarioIndex] || { title: '日常' };
+
+      currentGoldenSeconds = [
+        {
+          tag: '衝突動作型',
+          action: `鏡頭特寫嘆氣與桌面混亂，真實呈現「${sce.title}」時手忙腳亂的挫敗感`,
+          script: `「到底誰懂啊！每次${sce.title}，我都差點搞到崩潰！」`
+        },
+        {
+          tag: '反常識勸退型',
+          action: `對著鏡頭直搖頭，以過來人勸阻姿態引發好奇`,
+          script: `「沒事千萬別碰這款${pName}，因為用過一次你真的會回不去！」`
+        },
+        {
+          tag: '成果驚艷型',
+          action: `開場直接展示無瑕成果特寫，光澤晶亮奪目`,
+          script: `「如果能早半年知道這招，我真的不用花那麼多冤枉時間！」`
+        },
+        {
+          tag: '左右對比型',
+          action: `畫面分割：一邊手忙腳亂滿頭大汗，另一邊三兩下輕鬆完成`,
+          script: `「左邊折騰一小時，右邊用${pName}不到十分鐘搞定，差距太誇張了！」`
+        },
+        {
+          tag: '靈魂發問型',
+          action: `鏡頭湊近直視，真誠點頭引發認同`,
+          script: `「身為${aud.title}，你是不是也每次在『${sce.title}』這一步卡關？」`
+        },
+        {
+          tag: '私藏低語型',
+          action: `壓低聲線像是跟閨蜜分享秘密寶藏一樣`,
+          script: `「這支影片我本來不想拍的，但這東西真的幫我省下太多麻煩了！」`
+        }
+      ];
+
+      renderGoldenSecondsList();
+    }
+
+    function renderGoldenSecondsList() {
+      const container = document.getElementById('golden-seconds-list');
+      container.innerHTML = currentGoldenSeconds.map((opt, i) => `
+        <div class="p-3 bg-[#FAF8F5] rounded-xl border border-[#E7DFD5] space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="px-2 py-0.5 bg-brand-100 text-brand-900 text-[10px] rounded font-semibold">${opt.tag}</span>
+            <button onclick="applyGoldenSecond(${i})" class="px-2 py-0.5 bg-white hover:bg-brand-100 text-brand-800 border border-[#E7DFD5] rounded text-[11px] font-medium transition-colors">
+              套用至口播稿第1段
+            </button>
+          </div>
+          <div class="space-y-1">
+            <label class="block text-[10px] text-stone-400 font-mono">畫面鏡頭動作（可編輯）：</label>
+            <input type="text" value="${escapeHTML(opt.action)}" onchange="updateGoldenSecondAction(${i}, this.value)" class="w-full bg-white border border-[#E7DFD5] rounded-lg px-2.5 py-1 text-xs text-stone-700 focus:outline-none focus:ring-1 focus:ring-brand-500">
+          </div>
+          <div class="space-y-1">
+            <label class="block text-[10px] text-stone-400 font-mono">黃金三秒口播台詞（可編輯）：</label>
+            <textarea rows="1" onchange="updateGoldenSecondScript(${i}, this.value)" class="w-full bg-white border border-[#E7DFD5] rounded-lg px-2.5 py-1 text-xs text-brand-900 font-semibold focus:outline-none focus:ring-1 focus:ring-brand-500 resize-y">${escapeHTML(opt.script)}</textarea>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateGoldenSecondAction(idx, val) {
+      if (currentGoldenSeconds[idx]) {
+        currentGoldenSeconds[idx].action = val;
+        triggerAutoSave();
+      }
+    }
+
+    function updateGoldenSecondScript(idx, val) {
+      if (currentGoldenSeconds[idx]) {
+        currentGoldenSeconds[idx].script = val;
+        triggerAutoSave();
+      }
+    }
+
+    function applyGoldenSecond(idx) {
+      const text = currentGoldenSeconds[idx]?.script;
+      if (!text) return;
+      document.getElementById('p-hook').value = text;
+      assembleFullArticleFromSegments();
+      showToast('已套用至 Reels 腳本第 1 段鉤子！');
+      switchTab('write');
+      triggerAutoSave();
+    }
+
+    // ==========================================
+    // Reels 貼文說明欄文案 (Caption 3款，直接可編輯)
+    // ==========================================
+    function generateReelsCaptions() {
+      const pName = document.getElementById('input-name').value.trim() || '好物';
+      const aud = currentAudiences[selectedAudienceIndex] || { title: '小資族' };
+      const sce = currentScenarios[selectedScenarioIndex] || { title: '平常生活' };
+      const benefits = currentTranslations.map(t => t.benefit);
+      let keyword = pName.length > 3 ? pName.slice(0, 2) : pName;
+
+      // 1. 條列重點型
+      const cap1 = 
+`每次${sce.title}真的會讓人很心累⋯
+這陣子換了這款【${pName}】，直接幫我把複雜流程精簡化！
+
+幫大家整理最有感的 3 個重點：
+· ${benefits[0] || '操作極度省時，步驟少一大半'}
+· ${benefits[1] || '手感非常順暢，完全不用繁複技術'}
+· ${benefits[2] || '質感細緻高級，前後落差大到連自己都驚艷'}
+
+真的不要再把自己搞得那麼狼狽了。
+想要賣場連結的，底下留言「${keyword}」，我私訊分享給你！
+.
+#生活好物 #${pName} #好物推薦 #省時必備`;
+
+      // 2. 閨蜜碎念型
+      const cap2 = 
+`老實說，我以前真的一直鐵齒不想換方法⋯
+直到每次${sce.title}都在那邊手忙腳亂、搞得心情超煩躁，才被朋友推坑這款${pName}！
+
+試了一次直接回不去。本來以為只是噱頭，結果${benefits[0] || '真的省掉超多繁瑣時間'}，弄完那一刻真的覺得生活被拯救了。身為${aud.title}真的要對自己好一點～
+
+身邊好多人在問我哪裡入手的，底下留言「${keyword}」，我把當初買的賣場私訊分享給你們！`;
+
+      // 3. 高互動導購型
+      const cap3 = 
+`「這個到底去哪裡買的？！」
+自從影片發出來私訊直接被問滿！
+
+如果你也常常${sce.title}，拜託這篇先存起來。
+它最厲害的就是${benefits[0] || '完全不用多餘麻煩步驟'}，連新手都能一次上手。
+
+怕連結直接放會被演算法吞掉：
+只要在底下留言「${keyword}」或「+1」
+我直接把私藏的賣場連結私訊發給你！`;
+
+      document.getElementById('caption-1-content').value = cap1;
+      document.getElementById('caption-2-content').value = cap2;
+      document.getElementById('caption-3-content').value = cap3;
+    }
+
+    // ==========================================
+    // 開頭靈感 (嚴格鎖定當前所選情境與受眾，全可編輯)
+    // ==========================================
+    function generateHookInspirations(productName) {
       const pName = productName || document.getElementById('input-name').value.trim() || '好物';
       const aud = currentAudiences[selectedAudienceIndex] || { title: '大家', desc: '日常生活' };
       const sce = currentScenarios[selectedScenarioIndex] || { title: '平時', desc: '遇到問題' };
 
-      const hookTypes = [
+      currentHookInspirations = [
         {
           type: '抱怨型',
-          desc: '把生活裡的小崩潰直接講出來，瞬間引起共感',
+          desc: '把真實生活小煩躁直接點出，精準抓住痛點',
           lines: [
-            `到底為什麼每次${sce.title}，永遠都要搞得這麼狼狽啦！`,
-            `每次遇到${sce.title}，明明想好好弄，結果最後還是手忙腳亂，真的超崩潰！`,
-            `身為${aud.title}應該都懂，每次${sce.title}真的會讓人很想直接放棄！`
+            `到底為什麼每次${sce.title}，永遠都要搞得這麼狼狽⋯`,
+            `每次遇到${sce.title}，明明想好好完成，結果最後還是手忙腳亂，真的很無奈！`,
+            `身為${aud.title}應該都懂，每次${sce.title}真的會讓人很想直接放棄。`
           ]
         },
         {
           type: '對話型',
-          desc: '用一句真實日常對話把讀者拉進生活現場',
+          desc: '用一句日常真實對話把讀者拉進情境現場',
           lines: [
             `「又來了啦！」每次${sce.title}，我家真的都會上演這一幕。`,
             `朋友上次問我：「你每次${sce.title}都不會覺得心很累嗎？」我說以前真的超煩！`,
@@ -1499,7 +1395,7 @@
         },
         {
           type: '結果型',
-          desc: '先給出誘人結果，讓人忍不住好奇是怎麼辦到的',
+          desc: '先給出誘人結果，讓人好奇是怎麼辦到的',
           lines: [
             `自從用了${pName}，${sce.title}再也沒手忙腳亂過，整個人輕鬆超多！`,
             `真的不用花大錢去折騰，只要用對方法，十分鐘就能搞定。`,
@@ -1508,7 +1404,7 @@
         },
         {
           type: '懸念型',
-          desc: '欲言又止留一個沒說完的答案，勾住注意力',
+          desc: '欲言又止留一個沒說完的答案，勾住好奇心',
           lines: [
             `如果你也是${aud.title}，這個東西我真的推薦你先私藏起來。`,
             `在我開始${sce.title}之前，我一定會先在手邊準備好這個。`,
@@ -1517,27 +1413,33 @@
         },
         {
           type: '避坑自嘲型',
-          desc: '反向勸退或自我調侃，完全沒有推銷味卻讓人超想看',
+          desc: '反向勸退或自我調侃，完全沒有業配感',
           lines: [
-            `勸大家沒事真的不要隨便試這款${pName}，因為用過之後回不去，會覺得以前的自己像個盤子。`,
+            `勸大家沒事真的不要隨便試這款${pName}，因為用過之後回不去，會覺得以前的自己很傻。`,
             `我承認我以前真的很鐵齒，每次${sce.title}都硬要用傳統方法，直到被朋友徹底點醒。`,
             `如果你也是那種超級討厭麻煩、連多一個步驟都會厭世的人，拜託這篇直接存起來避坑！`
           ]
         }
       ];
 
+      renderHookInspirationsList();
+    }
+
+    function renderHookInspirationsList() {
       const container = document.getElementById('hook-types-container');
-      container.innerHTML = hookTypes.map(ht => `
-        <div class="bg-white p-4 rounded-2xl border border-[#EBDDCF] shadow-sm space-y-2.5">
+      container.innerHTML = currentHookInspirations.map((ht, gIdx) => `
+        <div class="bg-white p-4 rounded-2xl border border-[#E7DFD5] shadow-sm space-y-2.5">
           <div class="flex items-center justify-between">
-            <h4 class="font-bold text-sm text-brand-900">${ht.type}</h4>
-            <span class="text-[11px] text-stone-400 font-normal">${ht.desc}</span>
+            <h4 class="font-bold text-xs sm:text-sm text-brand-900">${ht.type}</h4>
+            <span class="text-[10px] text-stone-400">${ht.desc}</span>
           </div>
-          <div class="space-y-1.5">
-            ${ht.lines.map(line => `
-              <div onclick="applyHook('${escapeForAttr(line)}')" class="p-2.5 bg-[#FAF7F2] hover:bg-brand-100/60 rounded-xl border border-[#EBDDCF] text-xs text-stone-800 cursor-pointer transition-colors active:scale-[0.99] flex items-center justify-between group">
-                <span class="pr-2">${escapeHTML(line)}</span>
-                <span class="text-[11px] text-brand-700 opacity-0 group-hover:opacity-100 transition-opacity font-medium whitespace-nowrap">選用 ↵</span>
+          <div class="space-y-2">
+            ${ht.lines.map((line, lIdx) => `
+              <div class="flex items-center gap-2">
+                <input type="text" value="${escapeHTML(line)}" onchange="updateHookLine(${gIdx}, ${lIdx}, this.value)" class="flex-1 bg-[#FAF8F5] border border-[#E7DFD5] rounded-xl px-3 py-1.5 text-xs text-stone-800 focus:outline-none focus:ring-1 focus:ring-brand-500">
+                <button onclick="applyHookFromList(${gIdx}, ${lIdx})" class="px-2.5 py-1.5 bg-white hover:bg-brand-100 text-brand-800 border border-[#E7DFD5] rounded-xl text-xs font-medium whitespace-nowrap transition-colors">
+                  套用
+                </button>
               </div>
             `).join('')}
           </div>
@@ -1545,16 +1447,105 @@
       `).join('');
     }
 
-    function applyHook(hookText) {
-      document.getElementById('p-hook').value = hookText;
-      updateFullPreview();
-      showToast('已套用至「Reels 腳本」第 1 段鉤子！');
+    function updateHookLine(groupIndex, lineIndex, val) {
+      if (currentHookInspirations[groupIndex]?.lines[lineIndex] !== undefined) {
+        currentHookInspirations[groupIndex].lines[lineIndex] = val;
+        triggerAutoSave();
+      }
+    }
+
+    function applyHookFromList(groupIndex, lineIndex) {
+      const text = currentHookInspirations[groupIndex]?.lines[lineIndex];
+      if (!text) return;
+      document.getElementById('p-hook').value = text;
+      assembleFullArticleFromSegments();
+      showToast('已套用至 Reels 腳本第 1 段鉤子！');
       switchTab('write');
       triggerAutoSave();
     }
 
     // ==========================================
-    // 發文前檢查 (7 項健檢診斷)
+    // 脆 (Threads) 延伸 (極短文案 + 留言引導，全可編輯)
+    // ==========================================
+    function generateThreadsExtensions() {
+      const pName = document.getElementById('input-name').value.trim() || '好物';
+      const aud = currentAudiences[selectedAudienceIndex] || { title: '大家' };
+      const sce = currentScenarios[selectedScenarioIndex] || { title: '日常' };
+      const benefits = currentTranslations.map(t => t.benefit);
+      let keyword = pName.length > 3 ? pName.slice(0, 2) : pName;
+
+      currentThreadsPosts = [
+        `到底為什麼每次${sce.title}，永遠都要搞得像大掃除一樣狼狽⋯\n\n身為${aud.title}我真的快瘋掉。`,
+        `我發誓，我這輩子再也不要用以前的方法${sce.title}了。\n\n換了${pName}之後，我以前到底在折騰什麼？像個傻子一樣。`,
+        `勸大家沒事真的不要隨便試這款${pName}。\n\n因為你會發現生活原本可以這麼輕鬆，回不去了很可怕。`,
+        `跟身為${aud.title}的朋友聊到每次${sce.title}的心累程度，\n兩個人在咖啡廳差點聊到落淚。\n\n懂的人真的懂。`,
+        `花不到沙龍或外頭三分之一的時間，\n就把${pName}弄得跟專業級一樣精緻，\n今天看著成果發呆了十分鐘，心情超好。`,
+        `生活裡最舒爽的瞬間：\n就是原本每次${sce.title}都要弄一小時，\n今天十分鐘搞定，還能多躺在沙發滑半小時手機。`
+      ];
+
+      currentThreadsComments = [
+        `怕大家找不到，我把重點補在這邊：\n這款${pName}最神的地方就是「${benefits[0] || '省掉所有繁瑣步驟'}」，真的完全不浪費時間。\n想知道賣場的留個「${keyword}」，我私訊發給你！`,
+        `補個真實細節：\n它${benefits[1] || '質感做得非常到位'}，連我這種手殘黨都沒翻車過。\n連結我放在個人主頁，需要自己去領～`,
+        `私訊好多人問型號與細節，統一回在留言區！\n這款最大優點是${benefits[0] || '操作極度直覺'}，而且${benefits[1] || '維持度很好'}。\n想避坑買對的底下留個「+1」！`,
+        `很多人問跟傳統的有什麼差？直接講結論：\n以前弄完手酸心累，現在${benefits[0] || '三兩下搞定'}。\n傳送門在留言，大家自己看～`,
+        `老實說原本買之前我也很怕踩雷，結果實測${benefits[1] || '效果出乎意料的好'}。\n真心覺得每個${aud.title}手邊都要備一個！`,
+        `連結太多人要了直接貼出來會被降流量。\n有需要的在底下隨便留言「${keyword}」，我一一私訊傳給你們！`
+      ];
+
+      renderThreadsPostsList();
+      renderThreadsCommentsList();
+    }
+
+    function renderThreadsPostsList() {
+      const container = document.getElementById('threads-posts-list');
+      container.innerHTML = currentThreadsPosts.map((post, idx) => `
+        <div class="p-3.5 bg-[#FAF8F5] rounded-xl border border-[#E7DFD5] space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">POST 0${idx + 1}</span>
+            <button onclick="copyThreadsPost(${idx})" class="px-2.5 py-1 bg-white hover:bg-brand-100 text-brand-900 border border-[#E7DFD5] rounded-lg text-xs font-medium">複製這篇</button>
+          </div>
+          <textarea rows="3" onchange="updateThreadsPost(${idx}, this.value)" class="w-full bg-white border border-[#E7DFD5] rounded-lg p-2.5 text-xs text-stone-800 leading-relaxed focus:outline-none focus:ring-1 focus:ring-brand-500 resize-y">${escapeHTML(post)}</textarea>
+        </div>
+      `).join('');
+    }
+
+    function updateThreadsPost(idx, val) {
+      if (currentThreadsPosts[idx] !== undefined) {
+        currentThreadsPosts[idx] = val;
+        triggerAutoSave();
+      }
+    }
+
+    function copyThreadsPost(idx) {
+      copyRawText(currentThreadsPosts[idx]);
+    }
+
+    function renderThreadsCommentsList() {
+      const container = document.getElementById('threads-comments-list');
+      container.innerHTML = currentThreadsComments.map((comm, idx) => `
+        <div class="p-3.5 bg-[#FAF8F5] rounded-xl border border-[#E7DFD5] space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-semibold text-stone-500 uppercase tracking-wider">COMMENT 0${idx + 1}</span>
+            <button onclick="copyThreadsComment(${idx})" class="px-2.5 py-1 bg-white hover:bg-brand-100 text-brand-900 border border-[#E7DFD5] rounded-lg text-xs font-medium">複製留言</button>
+          </div>
+          <textarea rows="3" onchange="updateThreadsComment(${idx}, this.value)" class="w-full bg-white border border-[#E7DFD5] rounded-lg p-2.5 text-xs text-stone-800 leading-relaxed focus:outline-none focus:ring-1 focus:ring-brand-500 resize-y">${escapeHTML(comm)}</textarea>
+        </div>
+      `).join('');
+    }
+
+    function updateThreadsComment(idx, val) {
+      if (currentThreadsComments[idx] !== undefined) {
+        currentThreadsComments[idx] = val;
+        triggerAutoSave();
+      }
+    }
+
+    function copyThreadsComment(idx) {
+      copyRawText(currentThreadsComments[idx]);
+    }
+
+    // ==========================================
+    // 發文前檢查 (7 大項目智慧掃描)
     // ==========================================
     function updateCheckCount() {
       let count = 0;
@@ -1568,15 +1559,14 @@
     }
 
     function runSmartContentAudit() {
+      const fullText = document.getElementById('full-article-preview').value.trim();
       const h = document.getElementById('p-hook').value.trim();
-      const e = document.getElementById('p-empathy').value.trim();
       const p = document.getElementById('p-pivot').value.trim();
       const v = document.getElementById('p-value').value.trim();
       const c = document.getElementById('p-cta').value.trim();
-      const fullText = [h, e, p, v, c].join(' ');
 
       if (!fullText || fullText.length < 10) {
-        showToast('請先有文案再進行健檢！');
+        showToast('請先有文案內容再進行健檢');
         return;
       }
 
@@ -1586,30 +1576,30 @@
       if (h.includes('？') || h.includes('！') || h.includes('到底') || h.includes('每次') || h.includes('「') || h.includes('如果你') || h.includes('自從')) {
         scores[1] = true;
       } else {
-        suggestions.push('開頭較平淡，建議加入對話「」或生活衝突問句（如：到底為什麼...）！');
+        suggestions.push('開頭較為平淡，建議加入對話引號「」或生活衝突問句（如：到底為什麼⋯）');
       }
 
-      const audWords = ['媽媽', '小資', '學生', '女生', '新手', '上班族', '租屋', '大家', '朋友', '愛好者', '考生'];
+      const audWords = ['媽媽', '小資', '學生', '女生', '新手', '上班族', '租屋', '大家', '朋友', '愛好者', '考生', '受眾'];
       if (audWords.some(w => fullText.includes(w))) {
         scores[2] = true;
       } else {
         suggestions.push('受眾對象不明顯，建議在共鳴段點出具體身分');
       }
 
-      const sceWords = ['每次', '在家', '房間', '客廳', '出門', '下班', '半夜', '沙發', '出國', '行李', '睡前'];
+      const sceWords = ['每次', '在家', '房間', '客廳', '出門', '下班', '深夜', '沙發', '出國', '行李', '睡前', '時候'];
       if (sceWords.some(w => fullText.includes(w))) {
         scores[3] = true;
       } else {
-        suggestions.push('生活畫面感不足，請具體點出是在家裡哪個角落或什麼情境');
+        suggestions.push('生活畫面感不足，請具體點出是在家裡哪個角落或特定情境');
       }
 
       if (p.includes('後來') || p.includes('所以') || p.includes('結果') || p.includes('發現') || p.includes('試了') || p.includes('推薦')) {
         scores[4] = true;
       } else {
-        suggestions.push('轉折段建議用「後來朋友推坑...」或「所以這次我就試了...」自然帶出');
+        suggestions.push('轉折段建議用「後來朋友推坑⋯」或「所以這次我就試了⋯」自然帶出');
       }
 
-      if (v.length >= 25 && !v.includes('有了「') && (v.includes('而且') || v.includes('直接') || v.includes('不用') || v.includes('分鐘'))) {
+      if (v.length >= 20 && !v.includes('有了「') && (v.includes('而且') || v.includes('直接') || v.includes('不用') || v.includes('分鐘'))) {
         scores[5] = true;
       } else {
         suggestions.push('產品價值稍嫌抽象，建議將具體使用時間或前後落差寫出來');
@@ -1617,16 +1607,16 @@
 
       const aiBuzz = ['無疑是', '儀式感拉滿', '不得不說', '折騰老半天', '懷疑人生', '為您帶來'];
       const hasAIBuzz = aiBuzz.some(b => fullText.includes(b));
-      if (!hasAIBuzz && fullText.length > 30) {
+      if (!hasAIBuzz && fullText.length > 25) {
         scores[6] = true;
       } else {
-        suggestions.push('偵測到較生硬的八股詞，建議出聲念一次，換成更自然的碎念語氣');
+        suggestions.push('偵測到較生硬的八股詞彙，建議朗讀一次，換成更自然的談話語氣');
       }
 
       if (c.includes('留言') || c.includes('私訊') || c.includes('連結') || c.includes('賣場') || c.includes('+1')) {
         scores[7] = true;
       } else {
-        suggestions.push('結尾缺少明確互動，建議加上「底下留言關鍵字，我把賣場私給你」');
+        suggestions.push('結尾缺少明確互動，建議加上「底下留言關鍵字，我把賣場私訊給你」');
       }
 
       for (let i = 1; i <= 7; i++) {
@@ -1641,8 +1631,8 @@
 
       if (suggestions.length === 0) {
         detailsBox.innerHTML = `
-          <div class="text-emerald-700 font-semibold">🎉 恭喜！文案達到 7/7 全面達標！</div>
-          <p class="text-stone-600 mt-0.5">情境具體、語感自然、開頭吸睛且無 AI 味，可以直接複製發文或延伸至脆發布！</p>
+          <div class="text-emerald-700 font-semibold">恭喜！文案達到 7/7 全面達標。</div>
+          <p class="text-stone-600 mt-0.5">情境具體、語感自然、開頭吸睛且無 AI 味，可直接發布或延伸至脆！</p>
         `;
       } else {
         detailsBox.innerHTML = `
@@ -1657,17 +1647,313 @@
     }
 
     // ==========================================
-    // 輔助工具函式
+    // 專案記事本與個人資料夾管理 (含美感自訂彈窗)
     // ==========================================
-    function copyElementText(elemId) {
-      const el = document.getElementById(elemId);
-      if (el) copyRawText(el.innerText);
+    function getStoredFolders() {
+      try {
+        const folders = JSON.parse(localStorage.getItem('copywriter_folders_v3'));
+        if (Array.isArray(folders) && folders.length > 0) return folders;
+      } catch (e) {}
+      const defaultFolders = ['芝芝的資料夾', '常用範本'];
+      localStorage.setItem('copywriter_folders_v3', JSON.stringify(defaultFolders));
+      return defaultFolders;
+    }
+
+    function openNewFolderDialog() {
+      openCustomDialog({
+        title: '新增個人資料夾',
+        desc: '請輸入資料夾名稱（例如：芝芝的資料夾、美甲專案庫）：',
+        bodyHtml: `<input type="text" id="dlg-new-folder-name" placeholder="資料夾名稱" class="w-full bg-white border border-[#E7DFD5] rounded-xl px-3 py-2 text-xs text-brand-900 focus:outline-none focus:ring-1 focus:ring-brand-500">`,
+        onConfirm: () => {
+          const name = document.getElementById('dlg-new-folder-name').value.trim();
+          if (!name) return;
+          const folders = getStoredFolders();
+          if (folders.includes(name)) {
+            showToast('該資料夾名稱已存在');
+            return;
+          }
+          folders.push(name);
+          localStorage.setItem('copywriter_folders_v3', JSON.stringify(folders));
+          currentSelectedFolder = name;
+          renderFolderChips();
+          renderProjectsList();
+          closeCustomDialog();
+          showToast(`已建立資料夾：「${name}」`);
+        }
+      });
+    }
+
+    function deleteFolderByName(folderName) {
+      openCustomDialog({
+        title: '確認刪除資料夾',
+        desc: `確定要刪除「${folderName}」資料夾嗎？裡面的筆記將歸入「未分類」。`,
+        onConfirm: () => {
+          let folders = getStoredFolders().filter(f => f !== folderName);
+          localStorage.setItem('copywriter_folders_v3', JSON.stringify(folders));
+
+          let projects = getStoredProjects();
+          projects.forEach(p => {
+            if (p.folder === folderName) p.folder = '未分類';
+          });
+          localStorage.setItem('copywriter_projects_v3', JSON.stringify(projects));
+
+          currentSelectedFolder = '全部';
+          renderFolderChips();
+          renderProjectsList();
+          closeCustomDialog();
+          showToast('資料夾已刪除');
+        }
+      });
+    }
+
+    function renderFolderChips() {
+      const folders = getStoredFolders();
+      const container = document.getElementById('folder-chips-container');
+      const allTabs = ['全部', ...folders];
+
+      container.innerHTML = allTabs.map(f => {
+        const isSelected = f === currentSelectedFolder;
+        const isAll = f === '全部';
+        return `
+          <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs whitespace-nowrap cursor-pointer transition-all border ${
+            isSelected 
+              ? 'bg-brand-800 text-white border-brand-800 font-semibold shadow-sm' 
+              : 'bg-white text-stone-700 border-[#E7DFD5] hover:bg-brand-50'
+          }">
+            <span onclick="selectFolder('${escapeForAttr(f)}')">${escapeHTML(f)}</span>
+            ${!isAll ? `<button onclick="event.stopPropagation(); deleteFolderByName('${escapeForAttr(f)}')" class="ml-1 opacity-60 hover:opacity-100 ${isSelected ? 'text-white' : 'text-stone-400 hover:text-stone-700'}">&#10005;</button>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectFolder(folderName) {
+      currentSelectedFolder = folderName;
+      renderFolderChips();
+      renderProjectsList();
+    }
+
+    function getStoredProjects() {
+      try {
+        return JSON.parse(localStorage.getItem('copywriter_projects_v3') || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function updateProjectCountBadge() {
+      const list = getStoredProjects();
+      const badge = document.getElementById('project-count-badge');
+      if (badge) badge.innerText = list.length;
+    }
+
+    // 另存專案彈窗（可下拉選取現有資料夾，或建立新資料夾）
+    function openSaveProjectModal() {
+      const data = getCurrentFormData();
+      const folders = getStoredFolders();
+      const defaultTitle = `${data.name || '未命名主題'} (${new Date().toLocaleDateString('zh-TW', {month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'})})`;
+      
+      const folderOptions = folders.map(f => `<option value="${escapeHTML(f)}" ${f === currentSelectedFolder ? 'selected' : ''}>${escapeHTML(f)}</option>`).join('');
+
+      openCustomDialog({
+        title: '另存專案至記事本',
+        desc: '設定專案標題與目標存放資料夾：',
+        bodyHtml: `
+          <div class="space-y-2">
+            <div>
+              <label class="block text-[11px] font-semibold text-brand-900 mb-1">筆記標題：</label>
+              <input type="text" id="dlg-save-project-title" value="${escapeHTML(defaultTitle)}" class="w-full bg-white border border-[#E7DFD5] rounded-xl px-3 py-2 text-xs text-brand-900 focus:outline-none focus:ring-1 focus:ring-brand-500">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-brand-900 mb-1">存放個人資料夾：</label>
+              <select id="dlg-save-project-folder" class="w-full bg-white border border-[#E7DFD5] rounded-xl px-3 py-2 text-xs text-brand-900 focus:outline-none focus:ring-1 focus:ring-brand-500">
+                ${folderOptions}
+                <option value="__NEW__">+ 建立新資料夾...</option>
+              </select>
+            </div>
+            <div id="dlg-save-new-folder-wrap" class="hidden">
+              <label class="block text-[11px] font-semibold text-brand-900 mb-1">新資料夾名稱：</label>
+              <input type="text" id="dlg-save-new-folder-input" placeholder="例如：美甲貼文企劃" class="w-full bg-white border border-[#E7DFD5] rounded-xl px-3 py-2 text-xs text-brand-900 focus:outline-none focus:ring-1 focus:ring-brand-500">
+            </div>
+          </div>
+        `,
+        onConfirm: () => {
+          const title = document.getElementById('dlg-save-project-title').value.trim();
+          let folderSelect = document.getElementById('dlg-save-project-folder').value;
+          
+          if (!title) {
+            showToast('請輸入筆記標題');
+            return;
+          }
+
+          if (folderSelect === '__NEW__') {
+            const newFolderName = document.getElementById('dlg-save-new-folder-input').value.trim();
+            if (!newFolderName) {
+              showToast('請輸入新資料夾名稱');
+              return;
+            }
+            const curFolders = getStoredFolders();
+            if (!curFolders.includes(newFolderName)) {
+              curFolders.push(newFolderName);
+              localStorage.setItem('copywriter_folders_v3', JSON.stringify(curFolders));
+            }
+            folderSelect = newFolderName;
+          }
+
+          const projects = getStoredProjects();
+          const newProj = {
+            id: 'proj_' + Date.now(),
+            title: title,
+            folder: folderSelect,
+            updatedAt: new Date().toLocaleString(),
+            data: data
+          };
+
+          projects.unshift(newProj);
+          localStorage.setItem('copywriter_projects_v3', JSON.stringify(projects));
+          updateProjectCountBadge();
+          currentSelectedFolder = folderSelect;
+          renderFolderChips();
+          renderProjectsList();
+          closeCustomDialog();
+          showToast(`已儲存至「${folderSelect}」資料夾`);
+        }
+      });
+
+      // 監聽下拉選單切換至新建資料夾
+      setTimeout(() => {
+        const sel = document.getElementById('dlg-save-project-folder');
+        const wrap = document.getElementById('dlg-save-new-folder-wrap');
+        if (sel && wrap) {
+          sel.onchange = () => {
+            if (sel.value === '__NEW__') wrap.classList.remove('hidden');
+            else wrap.classList.add('hidden');
+          };
+        }
+      }, 50);
+    }
+
+    function openProjectModal() {
+      const modal = document.getElementById('project-modal');
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      renderFolderChips();
+      renderProjectsList();
+    }
+
+    function closeProjectModal() {
+      const modal = document.getElementById('project-modal');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    function renderProjectsList() {
+      const query = (document.getElementById('project-search-input').value || '').toLowerCase();
+      const projects = getStoredProjects();
+      const container = document.getElementById('project-items-container');
+
+      const filtered = projects.filter(p => {
+        const folderMatch = currentSelectedFolder === '全部' || (p.folder || '未分類') === currentSelectedFolder;
+        const textMatch = p.title.toLowerCase().includes(query) || (p.data.name && p.data.name.toLowerCase().includes(query));
+        return folderMatch && textMatch;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-10 text-stone-400 text-xs">
+            「${escapeHTML(currentSelectedFolder)}」資料夾內暫無文案<br>點擊下方按鈕即可儲存當前內容。
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(p => `
+        <div class="bg-white p-3.5 rounded-2xl border border-[#E7DFD5] shadow-sm flex items-center justify-between hover:border-brand-500 transition-all">
+          <div class="flex-1 pr-3 cursor-pointer" onclick="loadProjectById('${p.id}')">
+            <div class="flex items-center gap-1.5 mb-1">
+              <span class="bg-stone-100 text-stone-600 px-1.5 py-0.2 rounded text-[10px] font-medium">${escapeHTML(p.folder || '未分類')}</span>
+              <span class="bg-brand-100 text-brand-800 px-1.5 py-0.2 rounded text-[10px] font-medium">${escapeHTML(p.data.name || '無品名')}</span>
+            </div>
+            <h4 class="font-bold text-xs sm:text-sm text-brand-900 line-clamp-1">${escapeHTML(p.title)}</h4>
+            <div class="mt-0.5 text-[10px] text-stone-400">${p.updatedAt}</div>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button onclick="loadProjectById('${p.id}')" class="px-2.5 py-1.5 bg-brand-800 hover:bg-brand-900 text-white rounded-lg text-xs font-medium transition-all">
+              開啟
+            </button>
+            <button onclick="deleteProjectById('${p.id}')" class="px-2 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-500 rounded-lg text-xs transition-all">
+              刪除
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function loadProjectById(id) {
+      const projects = getStoredProjects();
+      const target = projects.find(p => p.id === id);
+      if (!target) return;
+      loadDraftData(target.data);
+      saveCurrentDraftToLocalStorage();
+      closeProjectModal();
+      showToast(`已載入「${target.folder || '專案'}」的「${target.title}」`);
+    }
+
+    function deleteProjectById(id) {
+      openCustomDialog({
+        title: '確認刪除筆記',
+        desc: '確定要刪除這份專案筆記嗎？此操作無法還原。',
+        onConfirm: () => {
+          let projects = getStoredProjects();
+          projects = projects.filter(p => p.id !== id);
+          localStorage.setItem('copywriter_projects_v3', JSON.stringify(projects));
+          updateProjectCountBadge();
+          renderProjectsList();
+          closeCustomDialog();
+          showToast('已刪除筆記');
+        }
+      });
+    }
+
+    // ==========================================
+    // 質感客製彈窗控制器 (徹底去除瀏覽器原生 Alert/Prompt/Confirm)
+    // ==========================================
+    let activeCustomConfirmHandler = null;
+
+    function openCustomDialog({ title, desc, bodyHtml = '', onConfirm }) {
+      document.getElementById('custom-dialog-title').innerText = title;
+      document.getElementById('custom-dialog-desc').innerText = desc || '';
+      document.getElementById('custom-dialog-body').innerHTML = bodyHtml;
+      
+      activeCustomConfirmHandler = onConfirm;
+
+      const confirmBtn = document.getElementById('custom-dialog-confirm-btn');
+      confirmBtn.onclick = () => {
+        if (typeof activeCustomConfirmHandler === 'function') {
+          activeCustomConfirmHandler();
+        }
+      };
+
+      const modal = document.getElementById('custom-dialog-modal');
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+    }
+
+    function closeCustomDialog() {
+      const modal = document.getElementById('custom-dialog-modal');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      activeCustomConfirmHandler = null;
+    }
+
+    // ==========================================
+    // 通用輔助函式
+    // ==========================================
+    function copyTextareaValue(id) {
+      const el = document.getElementById(id);
+      if (el) copyRawText(el.value);
     }
 
     function copyRawText(text) {
       if (!text) return;
       navigator.clipboard.writeText(text).then(() => {
-        showToast('已成功複製到剪貼簿！');
+        showToast('已成功複製到剪貼簿');
       }).catch(() => {
         showToast('複製失敗，請手動複製');
       });
@@ -1679,12 +1965,12 @@
       toast.classList.remove('opacity-0', 'pointer-events-none');
       setTimeout(() => {
         toast.classList.add('opacity-0', 'pointer-events-none');
-      }, 2200);
+      }, 2000);
     }
 
     function escapeHTML(str) {
       if (!str) return '';
-      return str.replace(/[&<>'"]/g, tag => ({
+      return String(str).replace(/[&<>'"]/g, tag => ({
         '&': '&amp;',
         '<': '&lt;',
         '>': '&gt;',
@@ -1695,7 +1981,7 @@
 
     function escapeForAttr(str) {
       if (!str) return '';
-      return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+      return String(str).replace(/'/g, "\\'").replace(/"/g, '&quot;');
     }
   </script>
 </body>

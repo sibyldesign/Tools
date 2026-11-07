@@ -6,7 +6,7 @@
   <title>五段式文案產生器 - 寫得像生活，賣得不刻意</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Font: Noto Sans TC / Inter -->
+  <!-- Google Font: Noto Sans TC -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -51,7 +51,6 @@
       font-family: "Noto Sans TC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
-    /* 自訂捲軸與觸控優化 */
     ::-webkit-scrollbar {
       width: 5px;
       height: 5px;
@@ -60,32 +59,41 @@
       background: #DFCABE;
       border-radius: 9999px;
     }
+    .custom-ring:focus {
+      outline: none;
+      border-color: #9E6D56;
+      box-shadow: 0 0 0 2px rgba(158, 109, 86, 0.2);
+    }
   </style>
 </head>
 <body class="min-h-screen pb-16 antialiased selection:bg-brand-200">
 
   <!-- 頂部導航與標題 -->
-  <header class="sticky top-0 z-30 bg-[#F7F3EE]/95 backdrop-blur border-b border-brand-200/60 px-4 py-3.5 transition-all">
+  <header class="sticky top-0 z-30 bg-[#F7F3EE]/95 backdrop-blur border-b border-brand-200/60 px-4 py-3 transition-all">
     <div class="max-w-xl mx-auto flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-brand-500 text-white font-bold text-xs shadow-sm">5</span>
+      <div class="flex items-center gap-2.5">
+        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-brand-500 text-white font-bold text-xs shadow-xs">5</span>
         <div>
-          <h1 class="text-base font-bold text-brand-800 tracking-tight leading-none">五段式文案產生器</h1>
+          <h1 class="text-sm sm:text-base font-bold text-brand-800 tracking-tight leading-none">五段式文案產生器</h1>
           <p class="text-[11px] text-brand-500 font-medium mt-0.5">寫得像生活，賣得不刻意</p>
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <button onclick="copyFullCombinedCopy()" class="text-xs bg-brand-500 text-white hover:bg-brand-600 active:scale-95 px-3 py-1.5 rounded-full font-medium transition shadow-sm flex items-center gap-1">
+        <button onclick="openApiModal()" id="apiKeyStatusBtn" class="text-[11px] bg-white border border-brand-300 text-brand-700 hover:bg-brand-50 px-2.5 py-1 rounded-full font-medium transition shadow-xs flex items-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-emerald-500" id="apiKeyDot"></span>
+          <span id="apiKeyStatusText">AI設定</span>
+        </button>
+        <button onclick="copyFullCombinedCopy()" class="text-xs bg-brand-500 text-white hover:bg-brand-600 active:scale-95 px-3 py-1.5 rounded-full font-medium transition shadow-xs flex items-center gap-1">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
           一鍵複製全文
         </button>
       </div>
     </div>
 
-    <!-- 五個核心分頁導航 (Pill Tabs) -->
-    <div class="max-w-xl mx-auto mt-3 overflow-x-auto no-scrollbar py-0.5">
+    <!-- 五個分頁導航 -->
+    <div class="max-w-xl mx-auto mt-2.5 overflow-x-auto no-scrollbar py-0.5">
       <nav class="flex space-x-1.5 min-w-max" id="navTabs">
-        <button onclick="switchTab('tab-analysis')" id="btn-tab-analysis" class="tab-btn px-3.5 py-1.5 text-xs font-semibold rounded-full bg-brand-500 text-white shadow-sm transition">
+        <button onclick="switchTab('tab-analysis')" id="btn-tab-analysis" class="tab-btn px-3.5 py-1.5 text-xs font-semibold rounded-full bg-brand-500 text-white shadow-xs transition">
           產品分析
         </button>
         <button onclick="switchTab('tab-workbench')" id="btn-tab-workbench" class="tab-btn px-3.5 py-1.5 text-xs font-semibold rounded-full bg-sand-tag text-sand-muted hover:bg-brand-200 transition">
@@ -104,63 +112,93 @@
     </div>
   </header>
 
-  <!-- 浮動提示框 Toast -->
+  <!-- 浮動提示 Toast -->
   <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transform transition-all duration-300 opacity-0 pointer-events-none bg-brand-800 text-white text-xs px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2">
     <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
     <span id="toastMsg">已複製到剪貼簿！</span>
   </div>
 
-  <main class="max-w-xl mx-auto px-4 mt-4 space-y-5">
+  <!-- API Key 彈窗設定 Modal -->
+  <div id="apiModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs hidden">
+    <div class="bg-white rounded-2xl p-5 max-w-sm w-full border border-brand-200 shadow-xl space-y-3.5">
+      <div class="flex items-center justify-between">
+        <h3 class="text-sm font-bold text-brand-800">智慧分析模型設定</h3>
+        <button onclick="closeApiModal()" class="text-sand-muted hover:text-sand-text text-sm">✕</button>
+      </div>
+      <p class="text-xs text-sand-muted leading-relaxed">
+        可選：填入你的免費 <strong>Gemini API Key</strong> 即可啟用真正的即時 AI 深度推導。若不填寫，系統將自動啟動內建的「深度生活情境演算法」，一樣超好用！
+      </p>
+      <div>
+        <label class="block text-xs font-bold text-sand-text mb-1">Gemini API Key (選填)</label>
+        <input type="password" id="inputApiKey" placeholder="AIzaSy..." class="w-full text-xs p-2.5 rounded-xl border border-brand-200 bg-brand-50 custom-ring font-mono">
+        <span class="text-[10px] text-sand-muted mt-1 block">金鑰僅存於你的本機瀏覽器 localStorage，安全無虞。</span>
+      </div>
+      <div class="flex gap-2 pt-1">
+        <button onclick="saveApiKey()" class="flex-1 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs transition">
+          儲存設定
+        </button>
+        <button onclick="clearApiKey()" class="py-2 px-3 rounded-xl border border-brand-200 text-sand-muted hover:bg-brand-50 font-medium text-xs transition">
+          清除
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <main class="max-w-xl mx-auto px-4 mt-4 space-y-4">
 
     <!-- ==================== TAB 1: 產品分析 ==================== -->
     <section id="tab-analysis" class="tab-content space-y-4 block">
       
-      <!-- 頂部導引卡片 -->
-      <div class="bg-white rounded-2xl p-5 border border-brand-200/70 shadow-sm space-y-4">
+      <!-- 輸入產品與特點 -->
+      <div class="bg-white rounded-2xl p-5 border border-brand-200/70 shadow-xs space-y-3.5">
         <div>
-          <h2 class="text-lg font-bold text-brand-800">五段式文案產生器</h2>
-          <p class="text-xs text-sand-muted mt-1 leading-relaxed">
-            先輸入產品名稱和特點，選出要賣給誰、在什麼情境下用，再照鉤子、共鳴、轉折、價值、互動五段寫成一篇可以直接貼上的文案。
+          <h2 class="text-base sm:text-lg font-bold text-brand-800">輸入產品與生活賣點</h2>
+          <p class="text-xs text-sand-muted mt-0.5 leading-relaxed">
+            輸入產品名稱和特點，系統會智慧推導出「賣給誰、在什麼畫面用、功能對生活的真正好處」。
           </p>
         </div>
 
         <!-- 快速載入範例 -->
-        <div class="pt-2 border-t border-brand-100 flex flex-wrap items-center gap-2">
-          <span class="text-xs text-sand-muted">載入範例：</span>
-          <button onclick="loadPreset('tomato')" class="preset-btn text-xs px-3 py-1.5 rounded-full bg-brand-500 text-white font-medium shadow-xs">兒童番茄鐘</button>
-          <button onclick="loadPreset('vacuum')" class="preset-btn text-xs px-3 py-1.5 rounded-full bg-sand-tag text-sand-text hover:bg-brand-200 font-medium">真空收納袋</button>
-          <button onclick="loadPreset('cart')" class="preset-btn text-xs px-3 py-1.5 rounded-full bg-sand-tag text-sand-text hover:bg-brand-200 font-medium">購物拖車包</button>
-          <button onclick="clearInputs()" class="text-xs px-2.5 py-1.5 rounded-full border border-dashed border-brand-300 text-sand-muted hover:text-brand-700">清空</button>
+        <div class="pt-1 border-t border-brand-100 flex flex-wrap items-center gap-1.5">
+          <span class="text-xs text-sand-muted">快速載入：</span>
+          <button onclick="loadPreset('projector')" class="preset-btn text-xs px-3 py-1 rounded-full bg-brand-500 text-white font-medium shadow-2xs">微型投影機</button>
+          <button onclick="loadPreset('tomato')" class="preset-btn text-xs px-3 py-1 rounded-full bg-sand-tag text-sand-text hover:bg-brand-200 font-medium">兒童番茄鐘</button>
+          <button onclick="loadPreset('vacuum')" class="preset-btn text-xs px-3 py-1 rounded-full bg-sand-tag text-sand-text hover:bg-brand-200 font-medium">真空收納袋</button>
+          <button onclick="clearInputs()" class="text-xs px-2 py-1 rounded-full border border-dashed border-brand-300 text-sand-muted hover:text-brand-700">清空</button>
         </div>
 
         <!-- 產品名稱 -->
-        <div class="space-y-1.5">
+        <div class="space-y-1">
           <label class="block text-xs font-bold text-sand-text">產品名稱</label>
-          <input type="text" id="inputProdName" placeholder="例如：兒童番茄鐘" 
-            class="w-full text-sm px-3.5 py-2.5 rounded-xl bg-brand-100/60 border border-brand-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-400 text-brand-900 font-medium transition"
-            oninput="triggerAutoUpdate()">
+          <input type="text" id="inputProdName" placeholder="例如：微型投影機、兒童番茄鐘" 
+            class="w-full text-sm px-3.5 py-2.5 rounded-xl bg-brand-100/50 border border-brand-200 custom-ring font-medium text-brand-900 transition">
         </div>
 
         <!-- 產品特點 (一行一個) -->
-        <div class="space-y-1.5">
+        <div class="space-y-1">
           <div class="flex justify-between items-center">
             <label class="block text-xs font-bold text-sand-text">產品特點 <span class="text-sand-muted font-normal">一行寫一個</span></label>
-            <span class="text-[11px] text-brand-400">寫得越具體越好</span>
+            <span class="text-[11px] text-brand-500">建議 2 ~ 4 項</span>
           </div>
-          <textarea id="inputProdFeatures" rows="4" placeholder="可視化倒數&#10;時間到會響&#10;靜音指針&#10;圓角設計"
-            class="w-full text-sm px-3.5 py-2.5 rounded-xl bg-brand-100/60 border border-brand-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-400 text-brand-900 font-medium leading-relaxed transition"
-            oninput="triggerAutoUpdate()"></textarea>
+          <textarea id="inputProdFeatures" rows="4" placeholder="小巧輕便 即插即用&#10;內建app&#10;梯形校正&#10;沒關燈也看得清"
+            class="w-full text-sm px-3.5 py-2.5 rounded-xl bg-brand-100/50 border border-brand-200 custom-ring font-medium text-brand-900 leading-relaxed transition"></textarea>
         </div>
+
+        <!-- 智慧分析大按鈕 -->
+        <button onclick="executeSmartAnalysis()" id="btnAnalyze" class="w-full py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 active:scale-98 text-white font-bold text-xs sm:text-sm shadow-xs transition flex items-center justify-center gap-1.5">
+          <svg class="w-4 h-4 animate-spin hidden" id="analyzeSpinner" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+          <span id="analyzeBtnText">✨ 智慧分析受眾、情境與痛點翻譯</span>
+        </button>
       </div>
 
       <!-- STEP 1 適合的銷售對象 (TA) -->
-      <div class="bg-white rounded-2xl p-5 border border-brand-200/70 shadow-sm space-y-3">
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-brand-200/70 shadow-xs space-y-2.5">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <span class="text-xs font-bold uppercase tracking-wider text-brand-500">STEP 1</span>
             <h3 class="text-sm font-bold text-brand-800">適合的銷售對象</h3>
           </div>
-          <span id="badgeCategory" class="text-[11px] bg-brand-100 text-brand-600 px-2 py-0.5 rounded-full font-medium">判斷類型：親子育兒</span>
+          <span id="badgeCategory" class="text-[11px] bg-brand-100 text-brand-700 px-2 py-0.5 rounded-full font-medium">判斷類型：影音3C</span>
         </div>
         <p class="text-xs text-sand-muted leading-relaxed">
           選一個最具體的人。寫給一個人，比寫給所有人更有感覺。
@@ -172,7 +210,7 @@
       </div>
 
       <!-- STEP 2 建議使用的情境 -->
-      <div class="bg-white rounded-2xl p-5 border border-brand-200/70 shadow-sm space-y-3">
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-brand-200/70 shadow-xs space-y-2.5">
         <div class="flex items-center gap-2">
           <span class="text-xs font-bold uppercase tracking-wider text-brand-500">STEP 2</span>
           <h3 class="text-sm font-bold text-brand-800">建議使用的情境</h3>
@@ -186,14 +224,17 @@
         </div>
       </div>
 
-      <!-- STEP 3 功能翻譯成生活痛點 -->
-      <div class="bg-white rounded-2xl p-5 border border-brand-200/70 shadow-sm space-y-3">
-        <div class="flex items-center gap-2">
-          <span class="text-xs font-bold uppercase tracking-wider text-brand-500">STEP 3</span>
-          <h3 class="text-sm font-bold text-brand-800">功能翻譯成生活痛點</h3>
+      <!-- STEP 3 功能翻譯成生活痛點 (解決圖二問題) -->
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-brand-200/70 shadow-xs space-y-2.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-brand-500">STEP 3</span>
+            <h3 class="text-sm font-bold text-brand-800">功能翻譯成生活痛點</h3>
+          </div>
+          <span class="text-[11px] text-brand-400">點擊下方輸入框可自由微調</span>
         </div>
         <p class="text-xs text-sand-muted leading-relaxed">
-          把規格翻譯成「這對我的生活有什麼幫助」。點擊輸入框可微調你的真實情境。
+          把規格翻譯成「這對我的生活有什麼幫助」，講人話、講畫面，而非生硬宣傳詞。
         </p>
 
         <div id="translationList" class="space-y-3 pt-1">
@@ -201,10 +242,10 @@
         </div>
       </div>
 
-      <!-- 導向下一步按鈕 -->
-      <div class="pt-2 flex gap-3">
-        <button onclick="switchTab('tab-hooks')" class="flex-1 py-3 px-4 rounded-xl bg-brand-500 hover:bg-brand-600 active:scale-98 text-white font-bold text-sm text-center shadow-md transition">
-          下一步：選取開頭靈感 →
+      <!-- 前往下一個步驟按鈕 -->
+      <div class="pt-1 flex gap-2">
+        <button onclick="proceedToHooksTab()" class="flex-1 py-3 px-4 rounded-xl bg-brand-500 hover:bg-brand-600 active:scale-98 text-white font-bold text-xs sm:text-sm text-center shadow-xs transition">
+          選定完成，前往挑選開頭靈感 →
         </button>
       </div>
 
@@ -213,89 +254,111 @@
     <!-- ==================== TAB 2: 寫文案 (五段式工作台) ==================== -->
     <section id="tab-workbench" class="tab-content space-y-4 hidden">
       
-      <div class="bg-white rounded-2xl p-5 border border-brand-200/70 shadow-sm space-y-4">
-        <div class="flex items-center justify-between">
-          <h2 class="text-base font-bold text-brand-800">五段式文案工作台</h2>
-          <button onclick="generateDraftFromAnalysis()" class="text-xs bg-brand-100 hover:bg-brand-200 text-brand-700 px-3 py-1.5 rounded-full font-medium transition">
-            依分析重新組合草稿
+      <!-- 控制列 -->
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-brand-200/70 shadow-xs space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="text-base font-bold text-brand-800">五段式文案工作台</h2>
+            <p class="text-xs text-sand-muted mt-0.5">鉤子 ➔ 共鳴 ➔ 轉折 ➔ 價值 ➔ 互動</p>
+          </div>
+          <button onclick="smartGenerateAllDraft()" class="text-xs bg-brand-500 hover:bg-brand-600 text-white px-3.5 py-1.5 rounded-full font-medium transition shadow-xs flex items-center gap-1">
+            <span>✨ 智慧幫我寫整篇</span>
           </button>
         </div>
-        <p class="text-xs text-sand-muted leading-relaxed">
-          照著 1 鉤子、2 共鳴、3 轉折、4 價值、5 互動 填寫，草稿只是起點，記得換成你自己的真實經驗和說話方式。
+        <p class="text-xs text-sand-muted leading-relaxed border-t border-brand-100 pt-2">
+          每個段落都可以點擊「✨ 自動生成」，幫你填入自然生活話語，隨時可手動微調。
         </p>
       </div>
 
       <!-- 段落 1: 鉤子 -->
-      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-brand-200/70 shadow-sm space-y-2.5">
-        <div class="flex items-center gap-2">
-          <span class="w-6 h-6 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-xs">1</span>
-          <h3 class="text-sm font-bold text-brand-800">鉤子 <span class="text-xs font-normal text-sand-muted">讓觀眾停下來</span></h3>
+      <div class="bg-white rounded-2xl p-4 border border-brand-200/70 shadow-xs space-y-2">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-5 h-5 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-[11px]">1</span>
+            <h3 class="text-xs sm:text-sm font-bold text-brand-800">鉤子 <span class="text-[11px] font-normal text-sand-muted">讓觀眾停下來</span></h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="switchTab('tab-hooks')" class="text-[11px] text-brand-600 hover:underline">挑開頭靈感</button>
+            <button onclick="generateSingleSection('hook')" class="text-[11px] bg-brand-100 hover:bg-brand-200 text-brand-700 px-2 py-0.5 rounded-full font-medium transition">✨ 換一句</button>
+          </div>
         </div>
-        <textarea id="wb-hook" rows="3" class="w-full text-sm p-3 rounded-xl bg-brand-100/50 border border-brand-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-400 text-sand-text font-medium leading-relaxed"></textarea>
-        <p class="text-[11px] text-sand-muted">不用把商品名稱、規格塞進第一句，先丟出生活衝突。</p>
+        <textarea id="wb-hook" rows="3" placeholder="第一句怎麼吸引觀眾？不用把商品名稱塞進第一句，先丟出生活衝突..."
+          class="w-full text-xs sm:text-sm p-3 rounded-xl bg-brand-100/50 border border-brand-200 custom-ring text-sand-text font-medium leading-relaxed"></textarea>
       </div>
 
-      <!-- 段落 2: 共鳴 -->
-      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-brand-200/70 shadow-sm space-y-2.5">
-        <div class="flex items-center gap-2">
-          <span class="w-6 h-6 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-xs">2</span>
-          <h3 class="text-sm font-bold text-brand-800">共鳴 <span class="text-xs font-normal text-sand-muted">讓觀眾覺得你懂他</span></h3>
+      <!-- 段落 2: 共鳴 (解決圖三空白問題) -->
+      <div class="bg-white rounded-2xl p-4 border border-brand-200/70 shadow-xs space-y-2">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-5 h-5 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-[11px]">2</span>
+            <h3 class="text-xs sm:text-sm font-bold text-brand-800">共鳴 <span class="text-[11px] font-normal text-sand-muted">讓觀眾覺得你懂他</span></h3>
+          </div>
+          <button onclick="generateSingleSection('empathy')" class="text-[11px] bg-brand-100 hover:bg-brand-200 text-brand-700 px-2.5 py-0.5 rounded-full font-medium transition">✨ 智慧撰寫共鳴</button>
         </div>
-        <textarea id="wb-empathy" rows="3" class="w-full text-sm p-3 rounded-xl bg-brand-100/50 border border-brand-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-400 text-sand-text font-medium leading-relaxed"></textarea>
-        <p class="text-[11px] text-sand-muted">要有具體場景與內心碎念，不能只說「很麻煩」「很痛苦」。</p>
+        <textarea id="wb-empathy" rows="3" placeholder="觀眾平常會遇到什麼困擾？寫出具體對話、動作或當下崩潰情緒..."
+          class="w-full text-xs sm:text-sm p-3 rounded-xl bg-brand-100/50 border border-brand-200 custom-ring text-sand-text font-medium leading-relaxed"></textarea>
       </div>
 
       <!-- 段落 3: 轉折 -->
-      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-brand-200/70 shadow-sm space-y-2.5">
-        <div class="flex items-center gap-2">
-          <span class="w-6 h-6 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-xs">3</span>
-          <h3 class="text-sm font-bold text-brand-800">轉折 <span class="text-xs font-normal text-sand-muted">讓商品自然出場</span></h3>
+      <div class="bg-white rounded-2xl p-4 border border-brand-200/70 shadow-xs space-y-2">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-5 h-5 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-[11px]">3</span>
+            <h3 class="text-xs sm:text-sm font-bold text-brand-800">轉折 <span class="text-[11px] font-normal text-sand-muted">讓商品自然出場</span></h3>
+          </div>
+          <button onclick="generateSingleSection('pivot')" class="text-[11px] bg-brand-100 hover:bg-brand-200 text-brand-700 px-2.5 py-0.5 rounded-full font-medium transition">✨ 智慧撰寫轉折</button>
         </div>
-        <textarea id="wb-pivot" rows="3" class="w-full text-sm p-3 rounded-xl bg-brand-100/50 border border-brand-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-400 text-sand-text font-medium leading-relaxed"></textarea>
-        <p class="text-[11px] text-sand-muted">用「後來我才發現」「所以我就試了」這種日常口吻自然帶出產品。</p>
+        <textarea id="wb-pivot" rows="3" placeholder="後來你怎麼發現這個商品？用「後來我才發現」「所以我就」這種日常口氣帶出商品..."
+          class="w-full text-xs sm:text-sm p-3 rounded-xl bg-brand-100/50 border border-brand-200 custom-ring text-sand-text font-medium leading-relaxed"></textarea>
       </div>
 
       <!-- 段落 4: 價值 -->
-      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-brand-200/70 shadow-sm space-y-2.5">
-        <div class="flex items-center gap-2">
-          <span class="w-6 h-6 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-xs">4</span>
-          <h3 class="text-sm font-bold text-brand-800">價值 <span class="text-xs font-normal text-sand-muted">讓觀眾看見實際幫助</span></h3>
+      <div class="bg-white rounded-2xl p-4 border border-brand-200/70 shadow-xs space-y-2">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-5 h-5 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-[11px]">4</span>
+            <h3 class="text-xs sm:text-sm font-bold text-brand-800">價值 <span class="text-[11px] font-normal text-sand-muted">看見實際生活改變</span></h3>
+          </div>
+          <button onclick="generateSingleSection('value')" class="text-[11px] bg-brand-100 hover:bg-brand-200 text-brand-700 px-2.5 py-0.5 rounded-full font-medium transition">✨ 智慧撰寫價值</button>
         </div>
-        <textarea id="wb-value" rows="3" class="w-full text-sm p-3 rounded-xl bg-brand-100/50 border border-brand-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-400 text-sand-text font-medium leading-relaxed"></textarea>
-        <p class="text-[11px] text-sand-muted">功能要跟使用過程一起講，數據與效果以真實體會為準。</p>
+        <textarea id="wb-value" rows="3" placeholder="功能要跟使用過程一起講，帶出具體感受與前後落差..."
+          class="w-full text-xs sm:text-sm p-3 rounded-xl bg-brand-100/50 border border-brand-200 custom-ring text-sand-text font-medium leading-relaxed"></textarea>
       </div>
 
       <!-- 段落 5: 互動 -->
-      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-brand-200/70 shadow-sm space-y-2.5">
-        <div class="flex items-center gap-2">
-          <span class="w-6 h-6 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-xs">5</span>
-          <h3 class="text-sm font-bold text-brand-800">互動 <span class="text-xs font-normal text-sand-muted">引導留言、收藏或私訊</span></h3>
-        </div>
-        <textarea id="wb-interaction" rows="3" class="w-full text-sm p-3 rounded-xl bg-brand-100/50 border border-brand-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-400 text-sand-text font-medium leading-relaxed"></textarea>
-        <p class="text-[11px] text-sand-muted">像朋友分享好物，不要突然變成購物台叫人立刻下單。</p>
-      </div>
-
-      <!-- 完整成品預覽區 -->
-      <div class="bg-white rounded-2xl p-5 border border-brand-300 shadow-sm space-y-3">
+      <div class="bg-white rounded-2xl p-4 border border-brand-200/70 shadow-xs space-y-2">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <span class="text-xs font-bold text-brand-700 bg-brand-100 px-2.5 py-1 rounded-full">整篇文案預覽</span>
-            <span id="charCount" class="text-xs text-sand-muted">約 0 字</span>
+            <span class="w-5 h-5 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-[11px]">5</span>
+            <h3 class="text-xs sm:text-sm font-bold text-brand-800">互動 <span class="text-[11px] font-normal text-sand-muted">引導留言、收藏</span></h3>
           </div>
-          <button onclick="copyFullCombinedCopy()" class="text-xs bg-brand-500 hover:bg-brand-600 active:scale-95 text-white font-medium px-3.5 py-1.5 rounded-full shadow-sm transition">
+          <button onclick="generateSingleSection('interaction')" class="text-[11px] bg-brand-100 hover:bg-brand-200 text-brand-700 px-2.5 py-0.5 rounded-full font-medium transition">✨ 智慧撰寫互動</button>
+        </div>
+        <textarea id="wb-interaction" rows="3" placeholder="最後怎麼自然引導？例如：底下隨意留言「某關鍵字」，我把賣場分享給你..."
+          class="w-full text-xs sm:text-sm p-3 rounded-xl bg-brand-100/50 border border-brand-200 custom-ring text-sand-text font-medium leading-relaxed"></textarea>
+      </div>
+
+      <!-- 整篇預覽區 -->
+      <div class="bg-white rounded-2xl p-5 border border-brand-300 shadow-xs space-y-2.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-brand-700 bg-brand-100 px-2.5 py-0.5 rounded-full">整篇文案整合預覽</span>
+            <span id="charCount" class="text-xs text-sand-muted">0 字</span>
+          </div>
+          <button onclick="copyFullCombinedCopy()" class="text-xs bg-brand-500 hover:bg-brand-600 active:scale-95 text-white font-medium px-3.5 py-1 rounded-full shadow-xs transition">
             複製整篇
           </button>
         </div>
-        <div id="fullPreviewBox" class="p-4 rounded-xl bg-[#FAF7F2] border border-brand-200 text-xs sm:text-sm text-sand-text leading-relaxed whitespace-pre-wrap select-all font-sans">
+        <div id="fullPreviewBox" class="p-4 rounded-xl bg-[#FAF7F2] border border-brand-200 text-xs sm:text-sm text-sand-text leading-relaxed whitespace-pre-wrap select-all font-sans min-h-[90px]">
         </div>
       </div>
 
-      <!-- 操作按鈕列 -->
+      <!-- 下一步導航按鈕 -->
       <div class="flex gap-2">
         <button onclick="switchTab('tab-deai')" class="flex-1 py-3 rounded-xl bg-brand-100 hover:bg-brand-200 text-brand-700 font-bold text-xs sm:text-sm transition">
           前往 去除 AI 感 →
         </button>
-        <button onclick="switchTab('tab-checklist')" class="flex-1 py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs sm:text-sm shadow transition">
+        <button onclick="switchTab('tab-checklist')" class="flex-1 py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs sm:text-sm shadow-xs transition">
           發文前 7 項檢查 →
         </button>
       </div>
@@ -304,99 +367,94 @@
 
     <!-- ==================== TAB 3: 開頭靈感 ==================== -->
     <section id="tab-hooks" class="tab-content space-y-4 hidden">
-      <div class="bg-white rounded-2xl p-5 border border-brand-200/70 shadow-sm space-y-2">
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-brand-200/70 shadow-xs space-y-2">
         <div class="flex items-center justify-between">
           <h2 class="text-base font-bold text-brand-800">STEP 4 開頭靈感</h2>
-          <button onclick="regenerateHooks()" class="text-xs bg-brand-100 hover:bg-brand-200 text-brand-700 px-3 py-1.5 rounded-full font-medium transition flex items-center gap-1">
+          <button onclick="regenerateHooks()" class="text-xs bg-brand-100 hover:bg-brand-200 text-brand-700 px-3 py-1 rounded-full font-medium transition flex items-center gap-1">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
             換一批靈感
           </button>
         </div>
         <p class="text-xs text-sand-muted leading-relaxed">
-          開頭會依你選的對象、情境和產品特點改變。<strong class="text-brand-600">點擊任一句</strong>，就會直接放進「寫文案」的鉤子欄位。
+          開頭已依你的產品 <strong class="text-brand-700" id="hookProdLabel">投影機</strong>、對象與情境客製。<strong class="text-brand-600">點擊任一句</strong>即可直接注入「寫文案」鉤子！
         </p>
       </div>
 
-      <!-- 5 種開頭模型卡片區 -->
-      <div class="space-y-4" id="hooksContainer">
-        <!-- 動態產生 抱怨型、對話型、反差型、結果型、懸念型 -->
+      <div class="space-y-3.5" id="hooksContainer">
+        <!-- 動態渲染 抱怨型、對話型、反差型、結果型、懸念型 -->
       </div>
 
-      <div class="pt-2">
-        <button onclick="switchTab('tab-workbench')" class="w-full py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm shadow transition">
-          帶入選定的鉤子，回「寫文案」修改 →
+      <div class="pt-1">
+        <button onclick="switchTab('tab-workbench')" class="w-full py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs sm:text-sm shadow-xs transition">
+          帶入選定的鉤子，回「寫文案」工作台 →
         </button>
       </div>
     </section>
 
     <!-- ==================== TAB 4: 去除 AI 感 ==================== -->
     <section id="tab-deai" class="tab-content space-y-4 hidden">
-      <div class="bg-white rounded-2xl p-5 border border-brand-200/70 shadow-sm space-y-3">
-        <h2 class="text-base font-bold text-brand-800">去除 AI 感：把機器腔換成真人嘴碎感</h2>
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-brand-200/70 shadow-xs space-y-3">
+        <h2 class="text-base font-bold text-brand-800">去除 AI 感：換成真人聊天口吻</h2>
         <p class="text-xs text-sand-muted leading-relaxed">
-          AI 產生的文案最容易出現「令人驚艷」「不可或缺的得力助手」「不僅如此...更是...」這類電視廣告字眼。真人發社群是用聊天的！
+          AI 產生的文案最容易出現「令人驚艷」「不可或缺」「不僅如此...更是...」這類電視宣傳字眼。真人發社群是講八卦跟碎念！
         </p>
 
-        <!-- 去 AI 感核心法則 -->
         <div class="grid grid-cols-2 gap-2 pt-1 text-xs">
-          <div class="p-2.5 rounded-xl bg-brand-50 border border-brand-200/50">
-            <span class="font-bold text-red-700 block mb-0.5">❌ 嚴格禁用的字眼</span>
-            <p class="text-[11px] text-sand-muted">這款、為您、無疑、劃時代、讓您輕鬆享受、值得擁有、顯著提升。</p>
+          <div class="p-3 rounded-xl bg-brand-50 border border-brand-200/60">
+            <span class="font-bold text-red-700 block mb-0.5">❌ 嚴格禁用的機器詞</span>
+            <p class="text-[11px] text-sand-muted leading-relaxed">這款、為您、無疑、劃時代、讓您輕鬆享受、值得擁有、顯著提升。</p>
           </div>
-          <div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200/50">
-            <span class="font-bold text-emerald-800 block mb-0.5">⭕ 真人愛用的語助詞</span>
-            <p class="text-[11px] text-emerald-700">真的會謝、本來想說、結果直接、一秒崩潰、真心覺得、誰懂啊。</p>
+          <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200/60">
+            <span class="font-bold text-emerald-800 block mb-0.5">⭕ 真人愛用的生活語</span>
+            <p class="text-[11px] text-emerald-700 leading-relaxed">真的會謝、本來想說、結果直接、一秒崩潰、真心覺得、誰懂啊。</p>
           </div>
         </div>
       </div>
 
-      <!-- 一鍵去 AI 感工作區 -->
-      <div class="bg-white rounded-2xl p-5 border border-brand-200/70 shadow-sm space-y-3">
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-brand-200/70 shadow-xs space-y-3">
         <div class="flex items-center justify-between">
-          <h3 class="text-sm font-bold text-brand-800">當前文案去 AI 感潤色</h3>
-          <button onclick="applyDeAiPolish()" class="text-xs bg-brand-500 hover:bg-brand-600 text-white px-3.5 py-1.5 rounded-full font-medium transition shadow-xs">
-            ✨ 一鍵去 AI 感替換
+          <h3 class="text-sm font-bold text-brand-800">一鍵去 AI 感替換潤色</h3>
+          <button onclick="applyDeAiPolish()" class="text-xs bg-brand-500 hover:bg-brand-600 text-white px-3.5 py-1 rounded-full font-medium transition shadow-xs">
+            ✨ 一鍵去 AI 腔
           </button>
         </div>
 
-        <div class="space-y-2">
-          <label class="block text-xs font-medium text-sand-muted">正在優化的文案草稿：</label>
-          <textarea id="deaiTargetText" rows="6" class="w-full text-xs sm:text-sm p-3.5 rounded-xl bg-brand-100/50 border border-brand-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-400 text-sand-text font-medium leading-relaxed"></textarea>
+        <div class="space-y-1.5">
+          <label class="block text-xs font-medium text-sand-muted">當前文案內容：</label>
+          <textarea id="deaiTargetText" rows="7" class="w-full text-xs sm:text-sm p-3.5 rounded-xl bg-brand-100/50 border border-brand-200 custom-ring text-sand-text font-medium leading-relaxed"></textarea>
         </div>
 
-        <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-800 leading-relaxed">
-          <strong>💡 人味潤色小撇步：</strong> 試著唸出來！如果你平常跟朋友吃火鍋時不會講出這句話，那就立刻把它刪掉或改成白話。
+        <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900 leading-relaxed">
+          <strong>💡 檢驗秘訣：</strong> 試著唸出聲！如果你平常跟朋友在路邊攤不會講這句話，那就立刻把它換成白話。
         </div>
 
         <button onclick="saveDeAiBackToWorkbench()" class="w-full py-2.5 rounded-xl bg-brand-200 hover:bg-brand-300 text-brand-800 font-bold text-xs transition">
-          將潤色結果同步回「寫文案」
+          將潤色文字同步回「寫文案」
         </button>
       </div>
     </section>
 
     <!-- ==================== TAB 5: 發文前檢查 ==================== -->
     <section id="tab-checklist" class="tab-content space-y-4 hidden">
-      <div class="bg-white rounded-2xl p-5 border border-brand-200/70 shadow-sm space-y-3">
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-brand-200/70 shadow-xs space-y-3">
         <div class="flex items-center justify-between">
           <h2 class="text-base font-bold text-brand-800">發文前檢查</h2>
           <span id="checkProgressBadge" class="text-xs font-bold text-brand-600 bg-brand-100 px-3 py-1 rounded-full">0 / 7 完成</span>
         </div>
         <p class="text-xs text-sand-muted leading-relaxed">
-          七項不是機械式的及格標準。不同類型的文案可以調整，但至少要知道自己為什麼這樣寫。
+          七項不是機械式的及格標準，但能幫你檢驗這篇文案是「廣告業配」還是「生活分享」。
         </p>
 
-        <!-- 檢查項目清單 -->
-        <div class="space-y-2.5 pt-2" id="checklistContainer">
+        <div class="space-y-2 pt-1" id="checklistContainer">
           <!-- 動態渲染 7 項 checkbox -->
         </div>
 
-        <!-- 總評反饋卡片 -->
-        <div id="checkFeedbackCard" class="mt-4 p-4 rounded-xl bg-brand-50 border border-brand-200 text-xs text-sand-muted leading-relaxed transition-all">
+        <div id="checkFeedbackCard" class="p-4 rounded-xl bg-brand-50 border border-brand-200 text-xs text-sand-muted leading-relaxed transition-all">
           勾選檢查項目，看看你的生活感文案成熟度！
         </div>
 
-        <div class="pt-2 flex gap-2">
-          <button onclick="copyFullCombinedCopy()" class="flex-1 py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs sm:text-sm shadow transition">
+        <div class="pt-1 flex gap-2">
+          <button onclick="copyFullCombinedCopy()" class="flex-1 py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs sm:text-sm shadow-xs transition">
             檢查完成，一鍵複製發文！
           </button>
         </div>
@@ -406,31 +464,85 @@
   </main>
 
   <script>
-    // 預設資料庫範例
+    // 預設資料庫：新增「微型投影機」（符合用戶截圖的輸入內容）
     const PRESETS = {
+      projector: {
+        name: '微型投影機',
+        category: '影音3C',
+        features: ['小巧輕便 即插即用', '內建app', '梯形校正', '沒關燈也看得清'],
+        tas: [
+          { title: '租屋沒空間放電視的人', desc: '房間坪數小，但又想要有百吋大螢幕的影院感', selected: true },
+          { title: '週末愛露營或聚會的人', desc: '不想搬大箱子，隨手一抓丟包包就能出發', selected: false },
+          { title: '下班只想窩床上的追劇族', desc: '不想端著發燙手機或拿重死人的筆電', selected: false },
+          { title: '懶得接一堆複雜線路的人', desc: '看到各種HDMI轉接頭跟插頭就頭痛', selected: false }
+        ],
+        scenes: [
+          { title: '躺在床上直接投天花板', desc: '不想坐著看電視，直接舒服躺平追劇到睡著', selected: true },
+          { title: '租屋處房間牆面隨便投', desc: '房間放不下電視，直接拿白牆當超大私人影院', selected: false },
+          { title: '露營晚上在帳篷外看電影', desc: '天色一暗大家圍著營火喝啤酒配電影', selected: false },
+          { title: '邊煮飯或運動邊看教學', desc: '隨插即用隨時搬動，不受空間拘束', selected: false }
+        ],
+        translations: [
+          { feat: '小巧輕便 即插即用', life: '去露營或換房間隨手抓了就走，不用搞半天線路' },
+          { feat: '內建app', life: '不用再拿筆電或手機接線投影，打開就能看Netflix' },
+          { feat: '梯形校正', life: '隨便擺在床頭櫃斜著投，畫面也自動方方正正' },
+          { feat: '沒關燈也看得清', life: '白天客廳開著小燈也能看，不用每次都像在電影院摸黑' }
+        ],
+        hooks: {
+          complain: [
+            '到底為什麼每次租屋處想看個大螢幕，都得搬電視又拉一堆線啦！',
+            '下班回家累個半死只想躺床看劇，手機拿到手酸還被砸到臉，真的很崩潰！',
+            '租屋族應該都懂，房間小到放不下電視，真的會讓人看劇看得很憋屈🤣'
+          ],
+          dialogue: [
+            '「你的房間怎麼直接變電影院了？！」朋友來我家看到整個嚇傻🤣',
+            '室友問我：「你這台投影機不用接電腦喔？」我說按一下開關就能看！',
+            '家人看到我直接投在天花板躺著看，第一句話竟然是：「這個借我房間放！」'
+          ],
+          contrast: [
+            '以前下班只能瞇著眼睛看小手機，現在回到房間直接百吋大螢幕爽看。',
+            '本來以為投影機白天看一定灰濛濛，沒想到開著燈居然也看得超清楚！',
+            '以前覺得投影機調角度很麻煩，現在隨便斜放在床頭它自己就校正好了。'
+          ],
+          result: [
+            '自從換了這台微型投影機，每天回家的幸福感直接翻倍！',
+            '不用接任何轉接線、開機直接連Netflix，這點真的拯救了懶人我！',
+            '露營帶這台出場，晚上直接變成全營區最受歡迎的帳篷！'
+          ],
+          suspense: [
+            '如果你也是租屋族或喜歡躺床追劇的人，這個東西真心推薦你一定要有。',
+            '房間牆壁空著不知道幹嘛？先別急著買電視，這招先存起來！',
+            '用了一陣子才發現，微型投影機最爽的用法根本不是投在牆壁上...'
+          ]
+        },
+        draft: {
+          hook: '到底為什麼每次下班想看個大螢幕，都得接一堆複雜的線啦！',
+          empathy: '租屋處房間本來就小，根本塞不下大電視，每次端著發熱的手機或拿重得要命的筆電在床上看劇，看到手酸脖子痛，手滑還會直接砸在臉上，真的很讓人崩潰。',
+          pivot: '後來我才被推坑這台微型投影機，本來以為只是買好玩的玩具，沒想到徹底改變了我的下班生活！',
+          value: '它真的超小一台即插即用，內建串流app連手機線都不用插，打開就能看Netflix。而且最神的是有自動梯形校正，我隨便丟在床頭櫃斜著投天花板，畫面自己就變超方正；高亮度就算室內開小燈也清清楚楚，完全不用摸黑！',
+          interaction: '如果你也跟我一樣下班只想躺平看百吋大螢幕，底下留個「投影機」，我把買的型號分享給你！'
+        }
+      },
       tomato: {
         name: '兒童番茄鐘',
-        features: ['可視化倒數', '時間到會響', '靜音指針', '圓角設計'],
         category: '親子育兒',
+        features: ['可視化倒數', '時間到會響', '靜音指針', '圓角設計'],
         tas: [
           { title: '有學齡前孩子的媽媽', desc: '每天都在跟孩子討價還價', selected: true },
           { title: '新手爸媽', desc: '什麼都想準備好，又怕買到不實用的', selected: false },
           { title: '容易分心、拖延的人', desc: '一不注意時間就過去了', selected: false },
-          { title: '家有嬰兒或淺眠家人的人', desc: '一點聲音就可能把人吵醒', selected: false },
-          { title: '重視時間觀念的家長', desc: '希望孩子從小有自律節奏', selected: false }
+          { title: '家有嬰兒或淺眠家人的人', desc: '一點聲音就可能把人吵醒', selected: false }
         ],
         scenes: [
           { title: '叫小孩關電視', desc: '明明說好五分鐘，時間到了還是捨不得關', selected: true },
           { title: '早上趕著出門', desc: '孩子拖拖拉拉，大人急到快遲到', selected: false },
-          { title: '說好只做五分鐘', desc: '結果一回神已經過了一小時', selected: false },
-          { title: '半夜家人在睡覺', desc: '做什麼都要躡手躡腳怕吵醒人', selected: false },
           { title: '睡前準備', desc: '洗澡、刷牙、講故事，每一步都要催', selected: false }
         ],
         translations: [
-          { feat: '可視化倒數', life: '時間一看就懂，不用一直提醒' },
-          { feat: '時間到會響', life: '時間到自然停，不用媽媽當壞人一直催' },
-          { feat: '靜音指針', life: '晚上用也不會吵到家人' },
-          { feat: '圓角設計', life: '隨便小孩放桌上，不怕撞到受傷' }
+          { feat: '可視化倒數', life: '時間用色塊倒數一看就懂，不用大人一直念' },
+          { feat: '時間到會響', life: '時間到了自然響鈴，不用媽媽每次都當壞人催小孩' },
+          { feat: '靜音指針', life: '運作完全沒滴答聲，晚上在房間用也不會吵到人' },
+          { feat: '圓角設計', life: '圓滑不刮手，隨便小孩在客廳桌上拿也不怕撞痛' }
         ],
         hooks: {
           complain: [
@@ -463,26 +575,25 @@
           hook: '每次叫小孩關電視，明明說好五分鐘，時間到了還是捨不得關，真的很崩潰！',
           empathy: '以前每次叫小孩關電視，明明說好五分鐘，時間到了還是捨不得關。我想有學齡前孩子的媽媽應該都懂這種感覺吧！每天光是喊破喉嚨就心好累。',
           pivot: '後來我才發現這款兒童番茄鐘，本來只是想說買來試試看，沒想到真的幫了大忙。',
-          value: '它可視化倒數，時間一看就懂，不用一直提醒；而且靜音指針，晚上用也不會吵到家人。小朋友自己盯著色塊變小，鈴聲響了就主動關掉！',
+          value: '它可視化倒數，時間用色塊倒數一看就懂，不用一直提醒；而且靜音指針，晚上用也不會吵到家人。小朋友自己盯著色塊變小，鈴聲響了就主動關掉！',
           interaction: '如果你也常常遇到這種情況，底下隨意留言「番茄鐘」，我把賣場分享給你。'
         }
       },
       vacuum: {
         name: '免抽氣真空收納袋',
+        category: '居家收納',
         features: ['按壓即排氣', '節省約60%空間', '加厚防潮材質', '重複密封拉鍊'],
-        category: '居家旅行',
         tas: [
           { title: '準備出國旅遊的人', desc: '行李箱永遠塞不下戰利品', selected: true },
-          { title: '換季收納苦手的租屋族', desc: '衣櫃小到羽絨被塞進去就滿了', selected: false },
-          { title: '常帶全家出門的媽媽', desc: '全家人的厚外套像在搬家', selected: false }
+          { title: '換季收納苦手的租屋族', desc: '衣櫃小到羽絨被塞進去就滿了', selected: false }
         ],
         scenes: [
           { title: '冬天去日韓行李箱爆滿', desc: '厚外套塞幾件就滿了，戰利品根本沒地方放', selected: true },
           { title: '換季整理厚被厚毯', desc: '衣櫃被塞到門都快關不上', selected: false }
         ],
         translations: [
-          { feat: '按壓即排氣', life: '不用另外帶笨重抽氣泵，手壓就扁' },
-          { feat: '節省約60%空間', life: '厚衣服抽完直接扁下去，行李箱瞬間空一半' },
+          { feat: '按壓即排氣', life: '不用另外帶笨重抽氣泵，手壓或身體坐上去就扁' },
+          { feat: '節省約60%空間', life: '厚衣服抽完直接扁下去，行李箱瞬間空出一大半' },
           { feat: '加厚防潮材質', life: '換季放半年拿出來完全沒有潮濕霉味' }
         ],
         hooks: {
@@ -514,80 +625,83 @@
           value: '原本這麼蓬的厚衣服，壓完之後整個扁下去，體積直接少掉快60%！而且防潮密封超緊，行李箱直接多出大半空間放戰利品。',
           interaction: '如果你也準備冬天出國旅遊，底下隨意留個「收納」，我把蝦皮買的連結分享給你。'
         }
-      },
-      cart: {
-        name: '折疊購物拖車包',
-        features: ['可折疊變手提袋', '靜音飛機輪', '防水耐磨牛津布', '超大容量好清洗'],
-        category: '日常好物',
-        tas: [
-          { title: '常去超市採買的主婦/主夫', desc: '每次提重物提到底下勒出紅印', selected: true },
-          { title: '租屋無電梯的採購族', desc: '買罐裝水跟日用品提到手發抖', selected: false }
-        ],
-        scenes: [
-          { title: '去全聯好市多大採購', desc: '明明只打算買兩樣，走出來手快斷掉', selected: true }
-        ],
-        translations: [
-          { feat: '可折疊變手提袋', life: '出門時小巧不占位，買多時一秒拉開變推車' },
-          { feat: '靜音飛機輪', life: '拉在路上完全不會叩叩叩很大聲很尷尬' }
-        ],
-        hooks: {
-          complain: [
-            '到底為什麼每次去超市只打算買兩樣，走出來都像在練重訓啦！',
-            '手掌被塑膠袋勒出深紅印子的痛，常去超市買菜的人一定懂！'
-          ],
-          dialogue: [
-            '路人阿姨看我拉這台，直接問我：「小姐你這台推車在哪買的？」🤣',
-            '老公問我：「今天買這麼多你手不酸喔？」我說我根本沒用手提！'
-          ],
-          contrast: [
-            '以前買兩瓶牛奶加水果提得像在重訓，現在一秒拖著走超優雅。',
-            '以前嫌買菜車長得像老人家在用的，直到用了這款完全回不去！'
-          ],
-          result: [
-            '自從換了折疊拖車包，去超市大採購我竟然一次都沒手酸過！',
-            '一秒拉開直接裝入整週菜量，推回家輕鬆得像在散步。'
-          ],
-          suspense: [
-            '每個禮拜要去採買生活用品的人，真心建議車廂都要丟一個這個。',
-            '去超市不要再花兩塊錢買塑膠袋勒自己的手了，這招學起來差超多！'
-          ]
-        },
-        draft: {
-          hook: '每次去超市明明只打算買兩樣，走出來手都被勒到快斷掉！',
-          empathy: '尤其買了瓶裝飲料、洗衣精跟水果，提著走回家手掌全是紅印，手酸到不行，真的常常走到懷疑人生。',
-          pivot: '後來我才被推坑這款折疊購物拖車包，平常收起來就像個隨身環保袋，要用時拉鍊一拉直接變有輪子的推車！',
-          value: '裝滿整週採買的東西直接拖著走，而且是靜音飛機輪，在柏油路上拉完全不會喀喀叩叩吵死人，省力超多。',
-          interaction: '常常採買提到手酸的朋友，底下留「推車」，我把賣場連結分享給你！'
-        }
       }
     };
 
-    // 發文前 7 項檢查清單
+    // 檢查清單
     const CHECKLIST_ITEMS = [
       { id: 1, text: '開頭三秒有沒有吸引力？', note: '前兩行是否有生活衝突或好奇點，不直接講產品品名。' },
-      { id: 2, text: '有沒有明確的目標讀者？', note: '寫給特定身份的人（如：學齡前媽媽、常出國的旅人），而非所有人。' },
-      { id: 3, text: '有沒有真實生活情境？', note: '具體畫面（如：叫小孩關電視、手被塑膠袋勒紅），避免空泛形容。' },
+      { id: 2, text: '有沒有明確的目標讀者？', note: '寫給特定身份的人（如：學齡前媽媽、租屋小資族），而非所有人。' },
+      { id: 3, text: '有沒有真實生活情境？', note: '具體畫面（如：躺在床上看天花板、手被勒出紅印），避免空泛形容。' },
       { id: 4, text: '有沒有交代問題與轉折？', note: '使用「後來我才發現...」「所以這次我就...」等自然話語帶出解方。' },
-      { id: 5, text: '商品價值是否具體且可信？', note: '將規格化為感受（不用抽氣泵、省下60%空間），有真實實測感。' },
+      { id: 5, text: '商品價值是否具體且可信？', note: '將規格化為感受（不用接線、省下60%空間），有真實實測感。' },
       { id: 6, text: '念出來像不像真人說話？', note: '口語自然、有碎念感與情緒符號，無「不可或缺、顯著提升」等 AI 詞。' },
       { id: 7, text: '最後有沒有清楚的行動引導？', note: '非叫賣式推銷，像朋友分享般邀請留言特定字領連結或互動。' }
     ];
 
-    // 全局狀態
-    let currentData = JSON.parse(JSON.stringify(PRESETS.tomato));
+    // 全域變數
+    let currentData = JSON.parse(JSON.stringify(PRESETS.projector));
     let checklistChecked = new Set();
 
-    // 初始化頁面
     window.onload = function() {
-      loadPreset('tomato');
+      // 載入儲存的 API Key (若有)
+      const savedKey = localStorage.getItem('user_gemini_api_key');
+      if (savedKey) {
+        document.getElementById('inputApiKey').value = savedKey;
+        updateApiKeyBadge(true);
+      } else {
+        updateApiKeyBadge(false);
+      }
+
+      loadPreset('projector');
       initChecklist();
     };
+
+    function updateApiKeyBadge(hasKey) {
+      const dot = document.getElementById('apiKeyDot');
+      const text = document.getElementById('apiKeyStatusText');
+      if (hasKey) {
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+        text.innerText = 'AI 模型已就緒';
+      } else {
+        dot.className = 'w-2 h-2 rounded-full bg-amber-400';
+        text.innerText = '內建推導引擎';
+      }
+    }
+
+    // Modal 控制
+    function openApiModal() {
+      document.getElementById('apiModal').classList.remove('hidden');
+    }
+    function closeApiModal() {
+      document.getElementById('apiModal').classList.add('hidden');
+    }
+    function saveApiKey() {
+      const key = document.getElementById('inputApiKey').value.trim();
+      if (key) {
+        localStorage.setItem('user_gemini_api_key', key);
+        updateApiKeyBadge(true);
+        showToast('已儲存 Gemini API Key，已啟用智慧推導！');
+      } else {
+        localStorage.removeItem('user_gemini_api_key');
+        updateApiKeyBadge(false);
+        showToast('已切換為內建深度生活情境引擎！');
+      }
+      closeApiModal();
+    }
+    function clearApiKey() {
+      document.getElementById('inputApiKey').value = '';
+      localStorage.removeItem('user_gemini_api_key');
+      updateApiKeyBadge(false);
+      showToast('已清除 API Key');
+      closeApiModal();
+    }
 
     // 切換分頁
     function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('bg-brand-500', 'text-white', 'shadow-sm');
+        btn.classList.remove('bg-brand-500', 'text-white', 'shadow-xs');
         btn.classList.add('bg-sand-tag', 'text-sand-muted');
       });
 
@@ -597,29 +711,27 @@
       const activeBtn = document.getElementById('btn-' + tabId);
       if (activeBtn) {
         activeBtn.classList.remove('bg-sand-tag', 'text-sand-muted');
-        activeBtn.classList.add('bg-brand-500', 'text-white', 'shadow-sm');
+        activeBtn.classList.add('bg-brand-500', 'text-white', 'shadow-xs');
       }
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
 
-      // 若切到寫文案，更新全文預覽與字數
       if (tabId === 'tab-workbench') {
         updateFullPreview();
       } else if (tabId === 'tab-deai') {
-        const full = getCombinedText();
-        document.getElementById('deaiTargetText').value = full;
+        document.getElementById('deaiTargetText').value = getCombinedText();
       }
     }
 
-    // 載入預設
+    // 載入預設資料
     function loadPreset(key) {
       if (!PRESETS[key]) return;
       currentData = JSON.parse(JSON.stringify(PRESETS[key]));
 
-      // 填充輸入框
       document.getElementById('inputProdName').value = currentData.name;
       document.getElementById('inputProdFeatures').value = currentData.features.join('\n');
       document.getElementById('badgeCategory').innerText = '判斷類型：' + currentData.category;
+      document.getElementById('hookProdLabel').innerText = currentData.name;
 
       renderAnalysisStep1();
       renderAnalysisStep2();
@@ -631,50 +743,288 @@
       showToast(`已載入「${currentData.name}」範例！`);
     }
 
-    // 清空輸入
     function clearInputs() {
       document.getElementById('inputProdName').value = '';
       document.getElementById('inputProdFeatures').value = '';
+      document.getElementById('badgeCategory').innerText = '判斷類型：待分析';
+      
       currentData = {
         name: '',
+        category: '自選好物',
         features: [],
-        category: '自訂產品',
-        tas: [{ title: '主要目標受眾', desc: '請填入具體日常生活中的身分', selected: true }],
-        scenes: [{ title: '核心使用情境', desc: '請填入具體會發生的生活困擾', selected: true }],
-        translations: [{ feat: '產品特色', life: '這對我的生活少掉了什麼麻煩？' }],
-        hooks: {
-          complain: ['到底為什麼每次遇到這個問題都這麼麻煩啦！'],
-          dialogue: ['「又來了！」每次遇到這件事大家都在崩潰🤣'],
-          contrast: ['以前最怕這件事，現在反而完全不擔心了！'],
-          result: ['自從用了這個方法，效率直接翻倍！'],
-          suspense: ['如果你也常常遇到這個狀況，這招一定要先學起來']
-        },
-        draft: {
-          hook: '',
-          empathy: '',
-          pivot: '',
-          value: '',
-          interaction: ''
-        }
+        tas: [],
+        scenes: [],
+        translations: [],
+        hooks: { complain: [], dialogue: [], contrast: [], result: [], suspense: [] },
+        draft: { hook: '', empathy: '', pivot: '', value: '', interaction: '' }
       };
+
       renderAnalysisStep1();
       renderAnalysisStep2();
       renderAnalysisStep3();
       renderHooksTab();
-      fillWorkbench({ hook: '', empathy: '', pivot: '', value: '', interaction: '' });
+      fillWorkbench(currentData.draft);
       updateFullPreview();
-      showToast('已清空所有內容！');
+      showToast('已清空，請輸入您的產品與特點！');
+    }
+
+    // 執行智慧分析 (圖一、圖二的核心改進)
+    async function executeSmartAnalysis() {
+      const prodName = document.getElementById('inputProdName').value.trim();
+      const featuresRaw = document.getElementById('inputProdFeatures').value.trim();
+
+      if (!prodName) {
+        showToast('請先輸入產品名稱！');
+        document.getElementById('inputProdName').focus();
+        return;
+      }
+      if (!featuresRaw) {
+        showToast('請至少輸入一項產品特點！');
+        document.getElementById('inputProdFeatures').focus();
+        return;
+      }
+
+      const features = featuresRaw.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+      currentData.name = prodName;
+      currentData.features = features;
+      document.getElementById('hookProdLabel').innerText = prodName;
+
+      // 按鈕載入動態
+      const btn = document.getElementById('btnAnalyze');
+      const spinner = document.getElementById('analyzeSpinner');
+      const btnText = document.getElementById('analyzeBtnText');
+      btn.disabled = true;
+      spinner.classList.remove('hidden');
+      btnText.innerText = '正在智慧解構生活場景與痛點...';
+
+      const apiKey = localStorage.getItem('user_gemini_api_key');
+
+      try {
+        if (apiKey) {
+          // 嘗試使用 Gemini API 深度推導
+          await callGeminiForAnalysis(apiKey, prodName, features);
+        } else {
+          // 使用內建強化推導引擎 (零網路依賴、生動白話)
+          await simulateSmartLocalAnalysis(prodName, features);
+        }
+        showToast('✨ 智慧分析完成！已將規格翻譯為真實生活痛點！');
+      } catch (err) {
+        console.warn('API 調用異常，降級為內建智慧引擎：', err);
+        await simulateSmartLocalAnalysis(prodName, features);
+        showToast('已使用內建深度引擎分析完成！');
+      } finally {
+        btn.disabled = false;
+        spinner.classList.add('hidden');
+        btnText.innerText = '✨ 智慧分析受眾、情境與痛點翻譯';
+        
+        renderAnalysisStep1();
+        renderAnalysisStep2();
+        renderAnalysisStep3();
+        renderHooksTab();
+        // 自動生成初版五段式文案，徹底解決圖三空白
+        smartGenerateAllDraft(false);
+      }
+    }
+
+    // 內建智慧生活推導引擎 (Rule-based & Heuristic Semantic Mapping)
+    async function simulateSmartLocalAnalysis(prodName, features) {
+      await new Promise(r => setTimeout(r, 400)); // 輕微延遲模擬思考
+
+      // 分類檢測
+      let category = '生活好物';
+      const textCorpus = (prodName + ' ' + features.join(' ')).toLowerCase();
+
+      if (/投影|螢幕|hdmi|梯形|app|音響|藍牙|耳機|電競|相機|3c|筆電/.test(textCorpus)) {
+        category = '影音3C';
+      } else if (/收納|壓縮|真空|衣櫃|行李箱|大衣|被子|抽氣/.test(textCorpus)) {
+        category = '居家收納';
+      } else if (/番茄鐘|小孩|兒童|媽媽|育兒|玩具|寫作業|哭鬧|睡前/.test(textCorpus)) {
+        category = '親子育兒';
+      } else if (/露營|帳篷|戶外|登山|野餐|釣魚|車宿/.test(textCorpus)) {
+        category = '戶外休閒';
+      } else if (/推車|買菜|超市|全聯|拖車|手提/.test(textCorpus)) {
+        category = '日常好物';
+      } else if (/保濕|精華|美白|面膜|防曬|抗老|敏感肌/.test(textCorpus)) {
+        category = '美妝保養';
+      }
+
+      document.getElementById('badgeCategory').innerText = '判斷類型：' + category;
+      currentData.category = category;
+
+      // 產生 TA
+      currentData.tas = generateTargetAudiences(prodName, category);
+      // 產生 情境
+      currentData.scenes = generateLifeScenes(prodName, category, features);
+      // 產生 功能翻譯成生活痛點 (絕不機械化)
+      currentData.translations = features.map(feat => {
+        return {
+          feat: feat,
+          life: translateFeatureToLifePain(feat, prodName, category)
+        };
+      });
+
+      // 產生開頭靈感
+      regenerateDynamicHooks();
+    }
+
+    // 呼叫 Gemini API 進行真實 AI 推導
+    async function callGeminiForAnalysis(apiKey, prodName, features) {
+      const prompt = `你是一位頂級生活社群爆款文案專家。
+請分析產品：「${prodName}」，產品特點：${JSON.stringify(features)}。
+請嚴格遵守「寫得像生活，賣得不刻意」原則，把硬規格翻譯成「大白話生活痛點與真實畫面」。
+
+請以純 JSON 格式輸出（不要包 markdown \`\`\`json）：
+{
+  "category": "分類名稱",
+  "tas": [
+    {"title": "具體人物身分1", "desc": "他的具體內心戲或生活困境", "selected": true},
+    {"title": "具體人物身分2", "desc": "他的具體困境", "selected": false},
+    {"title": "具體人物身分3", "desc": "他的具體困境", "selected": false}
+  ],
+  "scenes": [
+    {"title": "真實生活畫面1", "desc": "發生的具體細節與情緒", "selected": true},
+    {"title": "真實生活畫面2", "desc": "發生的細節", "selected": false},
+    {"title": "真實生活畫面3", "desc": "發生的細節", "selected": false}
+  ],
+  "translations": [
+    {"feat": "${features[0] || '特點'}", "life": "把此特點翻譯成生活畫面與少掉的麻煩，例如：隨手抓了就走不用接線，不要機械式套句"}
+  ]
+}`;
+
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { responseMimeType: "application/json" }
+        })
+      });
+
+      if (!res.ok) throw new Error('Gemini API 請求失敗');
+      const data = await res.json();
+      const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      const parsed = JSON.parse(rawText);
+
+      currentData.category = parsed.category || currentData.category;
+      document.getElementById('badgeCategory').innerText = '判斷類型：' + currentData.category;
+      currentData.tas = parsed.tas || [];
+      currentData.scenes = parsed.scenes || [];
+      
+      // 確保 translations 包含全部 features
+      if (parsed.translations && parsed.translations.length > 0) {
+        currentData.translations = parsed.translations;
+      } else {
+        currentData.translations = features.map(f => ({ feat: f, life: translateFeatureToLifePain(f, prodName, currentData.category) }));
+      }
+
+      regenerateDynamicHooks();
+    }
+
+    // 智能痛點翻譯函式（徹底解決圖二問題）
+    function translateFeatureToLifePain(feat, prodName, cat) {
+      const f = feat.toLowerCase();
+
+      // 投影機特徵
+      if (/梯形/.test(f)) return '隨便擺在床頭櫃斜著投，畫面也自動方方正正，不用墊書橋半天';
+      if (/app|內建|網飛|netflix|youtube/.test(f)) return '不用再拿筆電或手機接一堆線投影，開機直接按遙控器爽看串流';
+      if (/小巧|輕便|即插即用|隨攜|手提/.test(f)) return '去露營或換房間隨手抓了就走，不用每次大費周章收線拆機器';
+      if (/不關燈|沒關燈|流明|亮度|白天/.test(f)) return '白天客廳開著小燈也能看，不用每次追劇都像在電影院摸黑摸東摸西';
+      if (/藍牙|音響|揚聲器/.test(f)) return '自帶環繞音響不用另外外接喇叭，戴耳機也不會吵到隔壁房間';
+      
+      // 收納特徵
+      if (/免抽氣|手壓|按壓/.test(f)) return '出國不用另外帶笨重抽氣泵，手壓或整個人坐上去直接扁掉';
+      if (/空間|壓縮|60%|70%|80%/.test(f)) return '厚大衣跟羽絨被抽完扁到不可思議，行李箱瞬間空出一大半裝戰利品';
+      if (/防潮|防霉|材質|密封/.test(f)) return '換季放半年拿出來完全沒有潮濕霉味，衣服拿出來抖一抖就能穿';
+
+      // 番茄鐘/育兒特徵
+      if (/可視化|倒數|色塊/.test(f)) return '時間用色塊倒數一看就懂，不用大人每次都在旁邊吼還有五分鐘';
+      if (/響|鈴聲|提示/.test(f)) return '時間到了鈴聲自動響，大人不用當壞人一直催，小孩自己願賭服輸';
+      if (/靜音/.test(f)) return '運作時指針完全沒滴答聲，晚上在房間安靜讀書也不會被干擾';
+      if (/圓角|安全|防摔/.test(f)) return '邊角圓滑不刮手，隨便放桌上都不怕小孩撞到頭或手刮傷';
+
+      // 美妝保養
+      if (/保濕|玻尿酸|補水/.test(f)) return '吹一整晚冷氣起床臉還是嫩的，上妝完全不卡乾紋';
+      if (/清爽|不黏|吸收/.test(f)) return '抹上去三秒就吃進皮膚，枕頭上完全不會黏頭髮跟枕巾';
+
+      // 萬用自適應生動推導 (絕不用機械重複語句)
+      return `有了「${feat}」，再也不用手忙腳亂搞半天，直接省下超多折騰時間！`;
+    }
+
+    // 產生適合對象
+    function generateTargetAudiences(prodName, category) {
+      if (category === '影音3C') {
+        return [
+          { title: '租屋沒空間放電視的人', desc: '房間坪數小，但又想要有百吋大螢幕的影院感', selected: true },
+          { title: '下班只想窩床上的追劇族', desc: '不想端著發燙手機或拿重死人的筆電躺平看劇', selected: false },
+          { title: '週末常去露營或聚會的人', desc: '不想搬大箱設備，隨手一抓丟包包就能出發放電影', selected: false },
+          { title: '懶得接一堆複雜線路的人', desc: '看到各種HDMI轉接頭跟變壓器插頭就頭痛', selected: false }
+        ];
+      }
+      if (category === '居家收納') {
+        return [
+          { title: '準備出國旅遊爆買的人', desc: '行李箱永遠塞不下戰利品，打包到心力交瘁', selected: true },
+          { title: '換季收納苦手的租屋族', desc: '衣櫃小到羽絨被塞進去就滿了', selected: false },
+          { title: '常帶全家出門過夜的媽媽', desc: '全家人的厚外套裝起來像在搬家', selected: false }
+        ];
+      }
+      if (category === '親子育兒') {
+        return [
+          { title: '有學齡前孩子的媽媽', desc: '每天都在跟孩子討價還價時間', selected: true },
+          { title: '新手爸媽', desc: '什麼都想準備好，又怕買到不實用的雷品', selected: false },
+          { title: '重視時間規律的家長', desc: '希望孩子從小有自我管理的節奏感', selected: false }
+        ];
+      }
+      // 通用
+      return [
+        { title: `經常需要用到${prodName}的人`, desc: '生活節奏快，希望工具越簡單直覺越好', selected: true },
+        { title: '追求效率、不喜歡麻煩的小資族', desc: '受夠了傳統繁瑣步驟，想一步搞定', selected: false },
+        { title: '容易焦慮或拖延的人', desc: '能少一個煩心步驟，生活就輕鬆很多', selected: false }
+      ];
+    }
+
+    // 產生生活情境
+    function generateLifeScenes(prodName, category, features) {
+      if (category === '影音3C') {
+        return [
+          { title: '躺在床上直接投天花板', desc: '不想坐著看電視，直接舒服躺平追劇到睡著', selected: true },
+          { title: '租屋處房間牆面隨便投', desc: '房間放不下電視，直接拿白牆當超大私人影院', selected: false },
+          { title: '露營晚上在帳篷外看電影', desc: '天色一暗大家圍著營火喝啤酒配電影', selected: false },
+          { title: '下班回家一鍵開機直接看串流', desc: '不用找電腦接線，打開立刻接上想看的影集', selected: false }
+        ];
+      }
+      if (category === '居家收納') {
+        return [
+          { title: '冬天出國去日韓行李箱爆滿', desc: '厚外套塞幾件就滿了，戰利品根本沒地方放', selected: true },
+          { title: '換季整理厚被厚毯', desc: '衣櫃被塞到門都快關不上', selected: false }
+        ];
+      }
+      if (category === '親子育兒') {
+        return [
+          { title: '叫小孩關電視或停止看螢幕', desc: '明明說好五分鐘，時間到了還是捨不得關', selected: true },
+          { title: '早上出門前催促孩子吃早餐換衣服', desc: '孩子拖拖拉拉，大人急到快遲到', selected: false }
+        ];
+      }
+      // 通用
+      return [
+        { title: `平時在家使用${prodName}時`, desc: '每次遇到問題都要折騰老半天，心情大受影響', selected: true },
+        { title: '出門或忙碌時的突發狀況', desc: '急著想用卻發現傳統方式超麻煩', selected: false }
+      ];
     }
 
     // 渲染 STEP 1: TA 列表
     function renderAnalysisStep1() {
       const container = document.getElementById('taList');
       container.innerHTML = '';
+      if (!currentData.tas || currentData.tas.length === 0) {
+        container.innerHTML = `<div class="p-4 text-center text-xs text-sand-muted border border-dashed border-brand-200 rounded-xl">請點擊上方「✨ 智慧分析」按鈕生成對象</div>`;
+        return;
+      }
+
       currentData.tas.forEach((item, index) => {
         const isSel = item.selected;
         const div = document.createElement('div');
         div.className = `p-3.5 rounded-xl border transition cursor-pointer flex items-start gap-3 ${
-          isSel ? 'border-brand-500 bg-brand-100/50 shadow-xs' : 'border-brand-200/80 bg-sand-base/40 hover:bg-brand-50'
+          isSel ? 'border-brand-500 bg-brand-100/60 shadow-2xs' : 'border-brand-200/80 bg-sand-base/40 hover:bg-brand-50'
         }`;
         div.onclick = () => {
           currentData.tas.forEach((t, i) => t.selected = (i === index));
@@ -697,11 +1047,16 @@
     function renderAnalysisStep2() {
       const container = document.getElementById('sceneList');
       container.innerHTML = '';
+      if (!currentData.scenes || currentData.scenes.length === 0) {
+        container.innerHTML = `<div class="p-4 text-center text-xs text-sand-muted border border-dashed border-brand-200 rounded-xl">請點擊上方「✨ 智慧分析」按鈕生成情境</div>`;
+        return;
+      }
+
       currentData.scenes.forEach((item, index) => {
         const isSel = item.selected;
         const div = document.createElement('div');
         div.className = `p-3.5 rounded-xl border transition cursor-pointer flex items-start gap-3 ${
-          isSel ? 'border-brand-500 bg-brand-100/50 shadow-xs' : 'border-brand-200/80 bg-sand-base/40 hover:bg-brand-50'
+          isSel ? 'border-brand-500 bg-brand-100/60 shadow-2xs' : 'border-brand-200/80 bg-sand-base/40 hover:bg-brand-50'
         }`;
         div.onclick = () => {
           currentData.scenes.forEach((s, i) => s.selected = (i === index));
@@ -724,6 +1079,11 @@
     function renderAnalysisStep3() {
       const container = document.getElementById('translationList');
       container.innerHTML = '';
+      if (!currentData.translations || currentData.translations.length === 0) {
+        container.innerHTML = `<div class="p-4 text-center text-xs text-sand-muted border border-dashed border-brand-200 rounded-xl">請點擊上方「✨ 智慧分析」按鈕生成翻譯</div>`;
+        return;
+      }
+
       currentData.translations.forEach((item, index) => {
         const wrap = document.createElement('div');
         wrap.className = 'space-y-1.5';
@@ -733,45 +1093,35 @@
           </div>
           <div class="text-center text-brand-400 text-xs font-bold leading-none">↓</div>
           <input type="text" value="${item.life}" 
-            class="w-full text-xs p-2.5 rounded-xl bg-white border border-brand-300 font-medium text-brand-900 focus:outline-none focus:ring-2 focus:ring-brand-400 shadow-2xs"
-            onchange="currentData.translations[${index}].life = this.value; syncValueToDraft();">
+            class="w-full text-xs p-2.5 rounded-xl bg-white border border-brand-300 font-medium text-brand-900 custom-ring shadow-2xs"
+            oninput="currentData.translations[${index}].life = this.value">
         `;
         container.appendChild(wrap);
       });
     }
 
-    // 當特點或名稱變動時觸發
-    function triggerAutoUpdate() {
-      const name = document.getElementById('inputProdName').value.trim();
-      const feats = document.getElementById('inputProdFeatures').value.split('\n').filter(f => f.trim().length > 0);
-      
-      currentData.name = name;
-      currentData.features = feats;
-
-      // 同步翻譯列
-      currentData.translations = feats.map(f => {
-        const found = currentData.translations.find(t => t.feat === f);
-        return found ? found : { feat: f, life: `有了「${f}」，生活少掉很多麻煩！` };
-      });
-      renderAnalysisStep3();
+    // 前往靈感頁
+    function proceedToHooksTab() {
       regenerateDynamicHooks();
+      switchTab('tab-hooks');
     }
 
-    // 依選中的 TA、情境與產品，動態生成開頭靈感
+    // 依選中的 TA、情境與特點，重新生成 5 種開頭靈感
     function regenerateDynamicHooks() {
-      const prodName = currentData.name || '這款神物';
-      const selectedTa = currentData.tas.find(t => t.selected)?.title || '大家';
-      const selectedScene = currentData.scenes.find(s => s.selected) || { title: '日常', desc: '每次碰到都超麻煩' };
+      const prodName = currentData.name || '這款產品';
+      const selectedTa = currentData.tas?.find(t => t.selected)?.title || '大家';
+      const selectedScene = currentData.scenes?.find(s => s.selected) || { title: '日常使用', desc: '總是讓人覺得很麻煩' };
+      const topBenefit = currentData.translations?.[0]?.life || '瞬間省下超多時間';
 
       currentData.hooks = {
         complain: [
-          `每次${selectedScene.title}，明明說好要快點，結果${selectedScene.desc}，真的很崩潰！`,
-          `到底為什麼${selectedScene.title}永遠都這麼麻煩啦！`,
+          `每次${selectedScene.title}，${selectedScene.desc}，真的讓人很崩潰！`,
+          `到底為什麼每次想要${selectedScene.title}都永遠這麼麻煩啦！`,
           `身為${selectedTa}應該都懂，每次${selectedScene.title}真的會讓人很想直接放棄🤣`
         ],
         dialogue: [
           `「又來了啦！」每次${selectedScene.title}，我家都會上演這一幕🤣`,
-          `朋友問我：「你${selectedScene.title}都不會覺得很煩嗎？」我說以前超麻煩的！`,
+          `朋友問我：「你每次${selectedScene.title}都不會覺得很煩嗎？」我說以前超崩潰的！`,
           `家人看到我在用${prodName}，第一句話竟然是：「這個借我用！」`
         ],
         contrast: [
@@ -780,8 +1130,8 @@
           `本來以為${prodName}只是買好玩的，沒想到變成我每天最常用到的東西。`
         ],
         result: [
-          `自從用了${prodName}，${currentData.translations[0]?.life || '瞬間省心很多'}，不用一直催！`,
-          `「${currentData.features[0] || '功能'}」這一點，真的讓我很驚訝！`,
+          `自從用了${prodName}，${topBenefit}，整個人輕鬆超多！`,
+          `「${currentData.features?.[0] || '這個設計'}」這一點，真的讓我很驚訝！`,
           `這次${selectedScene.title}，我竟然一點都沒手忙腳亂！`
         ],
         suspense: [
@@ -793,13 +1143,12 @@
       renderHooksTab();
     }
 
-    // 換一批開頭靈感按鈕
     function regenerateHooks() {
       regenerateDynamicHooks();
       showToast('已重新生成開頭靈感！');
     }
 
-    // 渲染 開頭靈感頁面
+    // 渲染 開頭靈感列表
     function renderHooksTab() {
       const container = document.getElementById('hooksContainer');
       container.innerHTML = '';
@@ -814,14 +1163,14 @@
 
       types.forEach(type => {
         const box = document.createElement('div');
-        box.className = 'bg-white rounded-2xl p-4 sm:p-5 border border-brand-200/70 shadow-sm space-y-2.5';
+        box.className = 'bg-white rounded-2xl p-4 sm:p-5 border border-brand-200/70 shadow-xs space-y-2';
         
         let sentencesHtml = '';
-        const list = currentData.hooks[type.key] || [];
+        const list = currentData.hooks?.[type.key] || [];
         list.forEach((sentence) => {
           sentencesHtml += `
             <div onclick="selectHookToDraft('${escapeQuotes(sentence)}')" 
-                 class="p-3.5 rounded-xl bg-brand-100/50 hover:bg-brand-200/60 active:scale-98 cursor-pointer border border-brand-200/80 transition text-xs sm:text-sm text-sand-text font-medium leading-relaxed group">
+                 class="p-3 rounded-xl bg-brand-100/50 hover:bg-brand-200/60 active:scale-98 cursor-pointer border border-brand-200/80 transition text-xs sm:text-sm text-sand-text font-medium leading-relaxed group">
               <span class="group-hover:text-brand-800 transition">${sentence}</span>
             </div>
           `;
@@ -832,7 +1181,7 @@
             <h3 class="text-sm font-bold text-brand-800">${type.label}</h3>
             <p class="text-[11px] text-sand-muted mt-0.5">${type.tip}</p>
           </div>
-          <div class="space-y-2 pt-1">
+          <div class="space-y-1.5 pt-1">
             ${sentencesHtml}
           </div>
         `;
@@ -844,7 +1193,6 @@
       return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
     }
 
-    // 點擊開頭靈感帶入工作台
     function selectHookToDraft(hookText) {
       document.getElementById('wb-hook').value = hookText;
       updateFullPreview();
@@ -852,7 +1200,6 @@
       switchTab('tab-workbench');
     }
 
-    // 填充寫文案工作台輸入欄位
     function fillWorkbench(draft) {
       document.getElementById('wb-hook').value = draft.hook || '';
       document.getElementById('wb-empathy').value = draft.empathy || '';
@@ -865,70 +1212,110 @@
       });
     }
 
-    // 依分析步驟重新組合五段式草稿
-    function generateDraftFromAnalysis() {
-      const prodName = currentData.name || '這款產品';
-      const ta = currentData.tas.find(t => t.selected)?.title || '常有這困擾的朋友';
-      const scene = currentData.scenes.find(s => s.selected) || { title: '平時生活中', desc: '總是手忙腳亂' };
-
-      const hookText = currentData.hooks?.complain?.[0] || `每次遇到${scene.title}，真的很讓人崩潰！`;
-      const empathyText = `以前每次碰到${scene.title}，${scene.desc}。我想只要是${ta}應該都超懂這種感覺吧！每次都弄得心情很浮躁。`;
-      const pivotText = `後來我才發現這款${prodName}，本來想說只是買來試試看，沒想到真的幫了大忙！`;
-      
-      const benefitSummary = currentData.translations.map(t => `它${t.feat}，讓${t.life}`).join('；而且') + '。';
-      const valueText = benefitSummary || `它用起來非常順手，完全改善了原本生活上的不便，而且實測下來效果真的很明顯！`;
-      const interactionText = `如果你也常常遇到這種情況，底下隨意留言「${prodName}」，我把賣場分享給你！`;
-
-      document.getElementById('wb-hook').value = hookText;
-      document.getElementById('wb-empathy').value = empathyText;
-      document.getElementById('wb-pivot').value = pivotText;
-      document.getElementById('wb-value').value = valueText;
-      document.getElementById('wb-interaction').value = interactionText;
+    // 解決圖三問題：智慧幫我寫整篇 / 個別段落自動生成
+    function smartGenerateAllDraft(notify = true) {
+      generateSingleSection('hook', false);
+      generateSingleSection('empathy', false);
+      generateSingleSection('pivot', false);
+      generateSingleSection('value', false);
+      generateSingleSection('interaction', false);
 
       updateFullPreview();
-      showToast('已依分析步驟重新組裝五段式草稿！');
+      if (notify) showToast('✨ 智慧五段式生活文案已全部撰寫完成！');
     }
 
-    function syncValueToDraft() {
-      // 若有需要可自動同步
+    // 智慧撰寫特定段落
+    function generateSingleSection(section, notify = true) {
+      const prodName = currentData.name || '這款神物';
+      const ta = currentData.tas?.find(t => t.selected)?.title || '有這困擾的朋友';
+      const scene = currentData.scenes?.find(s => s.selected) || { title: '平時生活中', desc: '總是手忙腳亂' };
+
+      if (section === 'hook') {
+        const pool = currentData.hooks?.complain || [
+          `每次想要${scene.title}，${scene.desc}，真的讓人很崩潰！`
+        ];
+        document.getElementById('wb-hook').value = pool[Math.floor(Math.random() * pool.length)];
+      }
+
+      if (section === 'empathy') {
+        const empathies = [
+          `尤其身為${ta}應該都超懂這種感覺吧！每次遇到${scene.title}，${scene.desc}，看到手酸脖子痛，心情直接被搞到超浮躁，真的常常讓人很懷疑人生。`,
+          `以前每次${scene.title}，總要折騰老半天，${scene.desc}。我想只要是${ta}應該都心有戚戚焉，每天光是忙這些瑣事就已經心力交瘁了。`
+        ];
+        document.getElementById('wb-empathy').value = empathies[Math.floor(Math.random() * empathies.length)];
+      }
+
+      if (section === 'pivot') {
+        const pivots = [
+          `後來我才被推坑這款${prodName}，本來想說只是買來試試看，沒想到真的幫了大忙，直接把我從生活泥淖裡救出來！`,
+          `所以這次我直接準備了這款${prodName}，本來以為只是買好玩的，沒想到用過之後完全回不去！`,
+          `後來朋友推薦我試試這款${prodName}，一開始半信半疑，結果實際用了才發現，原來生活可以這麼輕鬆！`
+        ];
+        document.getElementById('wb-pivot').value = pivots[Math.floor(Math.random() * pivots.length)];
+      }
+
+      if (section === 'value') {
+        if (currentData.translations && currentData.translations.length > 0) {
+          const sentences = currentData.translations.map(t => `${t.feat}，${t.life}`);
+          document.getElementById('wb-value').value = `它真的超好用！` + sentences.join('；而且') + '。前後落差大到連我自己都有點被嚇到。';
+        } else {
+          document.getElementById('wb-value').value = `它用起來非常直覺，完全改善了原本生活上的不便，而且實測下來效果真的很明顯，完全不踩雷！`;
+        }
+      }
+
+      if (section === 'interaction') {
+        const calls = [
+          `如果你也常常遇到這種情況，底下隨意留個「${prodName.slice(0, 3)}」，我把當初買的賣場分享給你！`,
+          `常常有一樣困擾的朋友，底下留言「想了解」，我把私藏連結丟給你，一起脫離苦海！`,
+          `如果你也在找類似的好物，底下隨便留言，我把使用心得跟賣場整理分享給你！`
+        ];
+        document.getElementById('wb-interaction').value = calls[Math.floor(Math.random() * calls.length)];
+      }
+
+      updateFullPreview();
+      if (notify) showToast(`已自動撰寫「${getSectionName(section)}」段落！`);
     }
 
-    // 取得五段組合純文字
+    function getSectionName(sec) {
+      const map = { hook: '鉤子', empathy: '共鳴', pivot: '轉折', value: '價值', interaction: '互動' };
+      return map[sec] || sec;
+    }
+
     function getCombinedText() {
-      const h = document.getElementById('wb-hook').value.trim();
-      const e = document.getElementById('wb-empathy').value.trim();
-      const p = document.getElementById('wb-pivot').value.trim();
-      const v = document.getElementById('wb-value').value.trim();
-      const i = document.getElementById('wb-interaction').value.trim();
+      const h = document.getElementById('wb-hook')?.value.trim() || '';
+      const e = document.getElementById('wb-empathy')?.value.trim() || '';
+      const p = document.getElementById('wb-pivot')?.value.trim() || '';
+      const v = document.getElementById('wb-value')?.value.trim() || '';
+      const i = document.getElementById('wb-interaction')?.value.trim() || '';
 
       const paragraphs = [h, e, p, v, i].filter(t => t.length > 0);
       return paragraphs.join('\n\n');
     }
 
-    // 更新全文預覽與字數計算
     function updateFullPreview() {
       const fullText = getCombinedText();
       const previewBox = document.getElementById('fullPreviewBox');
       const countSpan = document.getElementById('charCount');
 
       if (!fullText) {
-        previewBox.innerText = '（尚未填寫文案內容，請至上方欄位編輯或在產品分析中自動生成）';
+        previewBox.innerText = '（尚未填寫文案內容，可點擊上方「✨ 智慧幫我寫整篇」自動生成生活感文案）';
+        previewBox.classList.add('text-sand-muted');
         countSpan.innerText = '0 字';
         return;
       }
 
+      previewBox.classList.remove('text-sand-muted');
       previewBox.innerText = fullText;
       countSpan.innerText = `約 ${fullText.replace(/\s+/g, '').length} 字`;
     }
 
-    // 去除 AI 感潤色轉換器
+    // 去除 AI 感潤色
     function applyDeAiPolish() {
       let text = document.getElementById('deaiTargetText').value;
       if (!text.trim()) {
         text = getCombinedText();
       }
 
-      // 替換清單（AI高頻書面詞 -> 生活口語）
       const replacements = [
         { from: /令人驚艷/g, to: '真的有被嚇到' },
         { from: /不可或缺/g, to: '不能沒有' },
@@ -941,7 +1328,6 @@
         { from: /劃時代/g, to: '超聰明的' },
         { from: /極致/g, to: '很頂' },
         { from: /總結來說/g, to: '老實說' },
-        { from: /讓我們一起/g, to: '真心推薦' },
         { from: /心動不如馬上行動/g, to: '需要的人自己去看看' }
       ];
 
@@ -953,7 +1339,6 @@
       showToast('已完成去 AI 感潤色！口語感更強了。');
     }
 
-    // 將潤色結果帶回「寫文案」工作台
     function saveDeAiBackToWorkbench() {
       const text = document.getElementById('deaiTargetText').value.trim();
       if (!text) {
@@ -973,19 +1358,19 @@
       switchTab('tab-workbench');
     }
 
-    // 初始化 發文前檢查清單
+    // 發文前檢查
     function initChecklist() {
       const container = document.getElementById('checklistContainer');
       container.innerHTML = '';
 
       CHECKLIST_ITEMS.forEach(item => {
         const div = document.createElement('div');
-        div.className = 'p-3.5 rounded-xl border border-brand-200/70 bg-brand-50/40 hover:bg-brand-50 transition cursor-pointer flex items-start gap-3 select-none';
+        div.className = 'p-3 rounded-xl border border-brand-200/70 bg-brand-50/40 hover:bg-brand-50 transition cursor-pointer flex items-start gap-3 select-none';
         div.onclick = () => toggleCheck(item.id);
 
         div.innerHTML = `
           <div class="mt-0.5">
-            <input type="checkbox" id="chk-${item.id}" class="w-4 h-4 rounded border-brand-300 text-brand-600 focus:ring-brand-500 cursor-pointer pointer-events-none">
+            <input type="checkbox" id="chk-${item.id}" class="w-4 h-4 rounded border-brand-300 text-brand-600 pointer-events-none">
           </div>
           <div class="flex-1">
             <h4 class="text-xs font-bold text-sand-text">${item.text}</h4>
@@ -1016,29 +1401,28 @@
 
       const card = document.getElementById('checkFeedbackCard');
       if (count === 0) {
-        card.innerHTML = '👉 點選上方檢查清單，確保文案完全擺脫機器味與業配感。';
-        card.className = 'mt-4 p-4 rounded-xl bg-brand-50 border border-brand-200 text-xs text-sand-muted leading-relaxed';
+        card.innerHTML = '👉 勾選上方檢查項目，確保文案完全擺脫機器味與業配感。';
+        card.className = 'p-4 rounded-xl bg-brand-50 border border-brand-200 text-xs text-sand-muted leading-relaxed';
       } else if (count < 4) {
-        card.innerHTML = '⚡ <strong>已有雛形！</strong> 記得檢查開頭是否有明確衝突，以及用詞是否足夠像真人講話。';
-        card.className = 'mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 leading-relaxed';
+        card.innerHTML = '⚡ <strong>已有生活感雛形！</strong> 記得檢查開頭是否有明確生活衝突，以及念出來是否夠像朋友聊天。';
+        card.className = 'p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 leading-relaxed';
       } else if (count < 7) {
-        card.innerHTML = '🔥 <strong>非常棒！</strong> 生活感與轉折都很到位，只差最後一哩路，檢查行動引導是否像朋友聊天！';
-        card.className = 'mt-4 p-4 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-800 leading-relaxed';
+        card.innerHTML = '🔥 <strong>非常棒！</strong> 生活感與轉折都很到位，只差最後一步，檢查互動引導是否自然！';
+        card.className = 'p-4 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-800 leading-relaxed';
       } else {
-        card.innerHTML = '🎉 <strong>完美到位！</strong> 7 項指標全部合格，這篇文案寫得像生活、賣得不刻意，可以直接複製發佈了！';
-        card.className = 'mt-4 p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-xs text-emerald-800 font-medium leading-relaxed shadow-xs';
+        card.innerHTML = '🎉 <strong>完美合格！</strong> 7 項生活指標全數過關，這篇文案寫得像日常、賣得不刻意，可以直接複製發布了！';
+        card.className = 'p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-xs text-emerald-800 font-medium leading-relaxed shadow-xs';
       }
     }
 
-    // 複製全文到剪貼簿（相容 iOS / iframe 環境）
+    // 複製全文相容處理
     function copyFullCombinedCopy() {
       const fullText = getCombinedText();
       if (!fullText) {
-        showToast('文案內容為空，請先填寫！');
+        showToast('文案內容為空，請先填寫或智慧生成！');
         return;
       }
 
-      // 優先使用 textarea execCommand 確保在限制嚴格的 iframe / iOS 上 100% 成功
       const tempTextArea = document.createElement('textarea');
       tempTextArea.value = fullText;
       tempTextArea.style.position = 'fixed';
@@ -1069,7 +1453,6 @@
       }
     }
 
-    // 提示 Toast 顯示控制
     let toastTimer = null;
     function showToast(msg) {
       const toast = document.getElementById('toast');

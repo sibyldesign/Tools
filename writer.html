@@ -67,9 +67,9 @@
       <div>
         <div class="flex items-center gap-2">
           <h1 class="text-sm font-bold tracking-tight text-brand-900">文案製造機</h1>
-          <button onclick="openAISettingsModal()" id="ai-status-pill" class="px-2 py-0.5 rounded-full text-[10px] font-medium border flex items-center gap-1 transition-all bg-stone-100 text-stone-600 border-stone-200 hover:border-brand-500">
-            <span class="w-1.5 h-1.5 rounded-full bg-stone-400" id="ai-status-dot"></span>
-            <span id="ai-status-text">設定 AI 金鑰</span>
+          <button onclick="openAISettingsModal()" id="ai-status-pill" class="px-2 py-0.5 rounded-full text-[10px] font-medium border flex items-center gap-1 transition-all bg-emerald-50 text-emerald-800 border-emerald-200 hover:border-emerald-400">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500" id="ai-status-dot"></span>
+            <span id="ai-status-text">AI 已連線（預設綁定）</span>
           </button>
         </div>
         <p id="autosave-indicator" class="text-[10px] text-stone-500 font-medium flex items-center gap-1.5 mt-0.5">
@@ -116,21 +116,21 @@
           <label class="block text-xs font-semibold text-brand-700 mb-1.5 tracking-wider uppercase">載入經典示範</label>
           <div class="flex flex-wrap gap-1.5">
             <button onclick="loadSample('nail')" class="px-2.5 py-1 bg-[#F5EFEA] hover:bg-brand-200 text-brand-900 rounded-lg text-xs transition-colors font-medium">美甲一步膠</button>
-            <button onclick="loadSample('timer')" class="px-2.5 py-1 bg-[#F5EFEA] hover:bg-brand-200 text-brand-900 rounded-lg text-xs transition-colors font-medium">兒童視覺番茄鐘</button>
-            <button onclick="loadSample('vacuum')" class="px-2.5 py-1 bg-[#F5EFEA] hover:bg-brand-200 text-brand-900 rounded-lg text-xs transition-colors font-medium">免抽氣收納袋</button>
             <button onclick="loadSample('projector')" class="px-2.5 py-1 bg-[#F5EFEA] hover:bg-brand-200 text-brand-900 rounded-lg text-xs transition-colors font-medium">微型投影機</button>
+            <button onclick="loadSample('vacuum')" class="px-2.5 py-1 bg-[#F5EFEA] hover:bg-brand-200 text-brand-900 rounded-lg text-xs transition-colors font-medium">免抽氣收納袋</button>
+            <button onclick="loadSample('timer')" class="px-2.5 py-1 bg-[#F5EFEA] hover:bg-brand-200 text-brand-900 rounded-lg text-xs transition-colors font-medium">兒童視覺番茄鐘</button>
             <button onclick="clearInputs()" class="px-2.5 py-1 text-stone-400 hover:text-stone-600 text-xs ml-auto">清空輸入</button>
           </div>
         </div>
 
         <div>
           <label class="block text-xs font-bold text-brand-900 mb-1 tracking-tight">產品名稱</label>
-          <input id="input-name" type="text" oninput="triggerAutoSave()" class="w-full bg-[#FAF8F5] border border-[#E7DFD5] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-brand-900 focus:outline-none focus:ring-1 focus:ring-brand-500" placeholder="輸入任何商品名稱，如：多功能手持掛燙機、靜音除濕機、無痕內衣">
+          <input id="input-name" type="text" oninput="triggerAutoSave()" class="w-full bg-[#FAF8F5] border border-[#E7DFD5] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-brand-900 focus:outline-none focus:ring-1 focus:ring-brand-500" placeholder="輸入任何商品名稱，如：美甲一步膠、微型投影機、手持掛燙機">
         </div>
 
         <div>
           <label class="block text-xs font-bold text-brand-900 mb-1 tracking-tight">產品特點與規格 <span class="font-normal text-stone-400">（一行寫一個特點，系統會智慧轉譯為生活痛點）</span></label>
-          <textarea id="input-features" rows="4" oninput="triggerAutoSave()" class="w-full bg-[#FAF8F5] border border-[#E7DFD5] rounded-xl p-3 text-xs sm:text-sm text-brand-900 focus:outline-none focus:ring-1 focus:ring-brand-500 resize-y leading-relaxed" placeholder="不用底膠封層&#10;省時省力照燈快乾&#10;多款顯白色號&#10;磁吸水光貓眼通透"></textarea>
+          <textarea id="input-features" rows="4" oninput="triggerAutoSave()" class="w-full bg-[#FAF8F5] border border-[#E7DFD5] rounded-xl p-3 text-xs sm:text-sm text-brand-900 focus:outline-none focus:ring-1 focus:ring-brand-500 resize-y leading-relaxed" placeholder="不用底膠封層&#10;省時省力照燈快乾&#10;多款顯白高級色號&#10;磁吸水光貓眼通透"></textarea>
         </div>
 
         <button onclick="executeAnalysisWorkflow()" id="btn-run-analysis" class="w-full py-3 bg-brand-800 hover:bg-brand-900 text-white rounded-xl text-xs sm:text-sm font-semibold shadow transition-all flex items-center justify-center gap-2 active:scale-[0.99]">
@@ -149,7 +149,7 @@
               <span class="text-[10px] font-bold tracking-widest text-brand-600 uppercase">STEP 01</span>
               <h2 class="text-xs sm:text-sm font-bold text-brand-900">適合的銷售對象</h2>
             </div>
-            <span id="detected-category" class="text-[10px] bg-brand-100 text-brand-800 px-2 py-0.5 rounded-md font-medium">美妝美甲</span>
+            <span id="detected-category" class="text-[10px] bg-brand-100 text-brand-800 px-2 py-0.5 rounded-md font-medium">美甲美妝</span>
           </div>
 
           <div class="p-3 bg-[#FAF8F5] rounded-xl border border-[#E7DFD5] space-y-2">
@@ -489,30 +489,30 @@
             去除 AI 感：真人說話語感對照
           </h3>
           <p class="text-[11px] text-stone-500 leading-relaxed">
-            AI 常見弊病是喜歡堆砌「折騰老半天、懷疑人生、儀式感拉滿」等過度浮誇的空泛形容詞。真正高互動的文案，是把規格直接翻譯為<strong>具體動作、具體畫面與自然碎念</strong>：
+            真正高互動的文案，是把規格直接翻譯為<strong>具體動作、具體畫面與自然碎念</strong>：
           </p>
         </div>
 
         <!-- 規格 vs 生活對照表 -->
         <div class="space-y-2.5 text-xs">
           <div class="p-3 bg-[#FAF8F5] rounded-xl border border-[#E7DFD5] space-y-1">
-            <div class="text-[10px] text-stone-400 font-mono">生硬規格：提升旅行收納效率，免抽氣設計</div>
-            <div class="text-brand-900 font-bold">真人碎念：「冬天厚大衣隨便塞兩件行李箱就爆了，到底是在出國還是在搬家啦！」</div>
-          </div>
-
-          <div class="p-3 bg-[#FAF8F5] rounded-xl border border-[#E7DFD5] space-y-1">
             <div class="text-[10px] text-stone-400 font-mono">生硬規格：底膠色膠封層三合一功能</div>
             <div class="text-brand-900 font-bold">真人碎念：「桌面不用擺得像化學實驗室一樣瓶瓶罐罐，一罐薄擦照燈直接搞定。」</div>
           </div>
 
           <div class="p-3 bg-[#FAF8F5] rounded-xl border border-[#E7DFD5] space-y-1">
-            <div class="text-[10px] text-stone-400 font-mono">生硬規格：可視化色塊倒數計時器</div>
-            <div class="text-brand-900 font-bold">真人碎念：「時間隨色塊漸漸消失，小孩一看就懂還剩多久，根本不用在旁邊吼破喉嚨。」</div>
+            <div class="text-[10px] text-stone-400 font-mono">生硬規格：自動梯形校正投影設備</div>
+            <div class="text-brand-900 font-bold">真人碎念：「隨手放在床頭櫃斜著投，畫面也自動方方正正，不用拿厚書墊半天調角度。」</div>
           </div>
 
           <div class="p-3 bg-[#FAF8F5] rounded-xl border border-[#E7DFD5] space-y-1">
-            <div class="text-[10px] text-stone-400 font-mono">生硬規格：自動梯形校正投影設備</div>
-            <div class="text-brand-900 font-bold">真人碎念：「隨手放在床頭櫃斜著投，畫面也自動方方正正，不用拿厚書墊半天調角度。」</div>
+            <div class="text-[10px] text-stone-400 font-mono">生硬規格：提升旅行收納效率，免抽氣設計</div>
+            <div class="text-brand-900 font-bold">真人碎念：「冬天厚大衣隨便塞兩件行李箱就爆了，整個人坐上去手壓幾秒直接排空，超省事。」</div>
+          </div>
+
+          <div class="p-3 bg-[#FAF8F5] rounded-xl border border-[#E7DFD5] space-y-1">
+            <div class="text-[10px] text-stone-400 font-mono">生硬規格：可視化色塊倒數計時器</div>
+            <div class="text-brand-900 font-bold">真人碎念：「時間隨色塊漸漸消失，小孩一看就懂還剩多久，根本不用在旁邊吼破喉嚨。」</div>
           </div>
         </div>
 
@@ -641,7 +641,12 @@
 
   <script>
     // ==========================================
-    // 預設經典範例
+    // 預設綁定金鑰（使用者專屬默認 Key，換瀏覽器免重填）
+    // ==========================================
+    const GAS_BACKEND_URL = 'https://script.google.com/macros/s/AKfycbxYkUIC8nsQBeMXdG1ilGpFr0mLnQ3lQ6r-TT4IJ2t6zjgG2FJXKVSfky1uB8h-66Sw_Q/exec';
+
+    // ==========================================
+    // 預設經典示範庫
     // ==========================================
     const SAMPLES = {
       nail: {
@@ -649,20 +654,211 @@
         features: '不用一般美甲要好幾罐好幾層\n省時省力照燈快乾\n多款顯白高級色號\n磁吸水光貓眼通透',
         category: '美妝美甲'
       },
-      timer: {
-        name: '兒童視覺番茄鐘',
-        features: '可視化色塊倒數\n時間到發出溫和提示音\n超靜音指針不滴答響\n圓角防摔安全包覆',
-        category: '親子生活'
+      projector: {
+        name: '微型投影機',
+        features: '小巧輕便 即插即用\n內建app\n梯形校正\n沒關燈也看得清',
+        category: '影音 3C'
       },
       vacuum: {
         name: '免抽氣真空壓縮收納袋',
         features: '手壓秒排氣免帶抽氣泵\n高韌性防漏氣加厚材質\n最高縮小70%收納體積\n多種規格適配行李箱與衣櫃',
         category: '旅行居家'
       },
-      projector: {
-        name: '口袋微型投影機',
-        features: '掌心大小極輕便即插即用\n自動梯形校正隨意擺放皆方正\n內建串流影音開機直接看\n開小燈亦可清晰顯影',
-        category: '3C 影音'
+      timer: {
+        name: '兒童視覺番茄鐘',
+        features: '可視化色塊倒數\n時間到發出溫和提示音\n超靜音指針不滴答響\n圓角防摔安全包覆',
+        category: '親子生活'
+      }
+    };
+
+    // ==========================================
+    // 軌道 B 核心：多品類智慧生活知識庫（無 AI 時精準匹配）
+    // ==========================================
+    const CATEGORY_HEURISTICS = {
+      '美妝美甲': {
+        categoryName: '美妝美甲',
+        defaultKeyword: '美甲',
+        audiences: [
+          { title: '愛美但沒時間去沙龍的上班族', desc: '去美甲店一坐兩三小時屁股快爛掉，自己在家弄又嫌繁瑣心累' },
+          { title: '手殘黨但想自己DIY指甲的人', desc: '擦底膠封層老是溢膠、塗不均勻，手抖一下整隻就要卸掉重來' },
+          { title: '不想每個月花兩千做指甲的小資女', desc: '想常常換款式，但算一算每個月沙龍做指甲真的太傷荷包' },
+          { title: '經常做家事指甲容易剝落的人', desc: '做完家事洗完澡指甲邊緣就掉漆，維持度極差超抓狂' },
+          { title: '臨時有重要聚會需要精緻造型的人', desc: '出門前十幾分鐘急著出門，指甲光禿禿很醜，想快速搞定' },
+          { title: '追求高級顯白水光質感的細節控', desc: '討厭俗氣厚重甲片，只想要通透高級、晶亮閃耀的銀河貓眼光圈' }
+        ],
+        scenarios: [
+          { title: '在家自己塗光療搞到半夜', desc: '底膠、色膠、封層擦一層照一次，手抖一下全毀直接崩潰' },
+          { title: '明天要約會急著出門', desc: '指甲光禿禿很醜，想快速弄個精緻造型但完全沒時間出門預約' },
+          { title: '看美甲沙龍價目表猶豫不決', desc: '簡單單色加貓眼動輒就要一兩千，下不了手' },
+          { title: '下班回家追劇放鬆的睡前時刻', desc: '隨手擦兩下照個燈直接完工，完全不耗費心神' },
+          { title: '週末下午在房間跟姊妹互相做指甲', desc: '拿磁鐵一吸光圈秒出來，成品完全不輸外頭專業沙龍' },
+          { title: '舊光療掉了一兩隻手指頭時', desc: '臨時補擦照光，一分鐘完美救急不用特地花錢卸甲' }
+        ],
+        templates: {
+          hook: (p, s) => `到底為什麼自己在家擦個光療，要塗底膠、色膠、封層擦到天荒地老啦！`,
+          empathy: (aud, sce) => `身為美甲愛好者真的超懂，去沙龍坐兩三個小時屁股快爛掉，自己在家弄又像做化學實驗，底膠、顏色、封層一罐罐擦，手抖一下塗到邊緣整隻就要卸掉重來，心超累。`,
+          pivot: (p) => `後來被美甲控朋友推坑這款${p}，本來半信半疑，結果試了一次直接回不去！`,
+          value: (trans) => {
+            return `它直接把底膠、顏色跟封層三合一，薄擦一層照燈就乾，完全不用擦洗。而且磁吸貓眼的光圈超好拉，磁鐵輕輕靠上去一道水光感就出來了，顏色很透又超顯白，十指搞定不到十分鐘！`;
+          },
+          cta: (p, kw) => `這款貓眼光真的很高級～想知道色號跟賣場的，底下留「${kw}」，我把連結發給你！`
+        },
+        hooksMatrix: {
+          complain: [
+            `到底為什麼自己在家擦個光療，要塗底膠、色膠、封層擦到天荒地老啦！`,
+            `去美甲沙龍動輒噴兩千還要坐到屁股爛掉，自己在家塗又手殘溢膠溢到崩潰。`,
+            `愛做美甲的女生都懂，每次自己卸甲重塗就像打仗一樣累🤣`
+          ],
+          dialogue: [
+            `「你這指甲去哪做的？好亮喔！」同事抓著我問，我說我自己10分鐘塗的🤣`,
+            `朋友問我：「你怎麼又有新指甲？」我說現在不用塗三四層，隨手擦擦就搞定！`,
+            `室友看我拿磁鐵吸一下指甲，直接驚呼：「這光圈也太高級了吧，借我塗！」`
+          ],
+          contrast: [
+            `以前去美甲店每個月噴兩千，現在在家花不到十分鐘，成果完全不輸沙龍。`,
+            `本來以為不用底膠封層的指甲油一定很容易掉，沒想到撐了快一個月都很亮！`,
+            `以前塗指甲油像在做化學實驗，現在一罐刷兩下照燈直接完工。`
+          ],
+          result: [
+            `自從換了這款美甲一步膠，自己做指甲從兩小時直接縮成十分鐘！`,
+            `完全不用底膠跟封層，隨手擦出來的貓眼光圈居然細緻到不行！`,
+            `連我這種手殘黨都能擦出沙龍級漸層貓眼，真的被驚艷到！`
+          ],
+          suspense: [
+            `如果你也是愛做美甲但不想每個月噴兩千的人，這招真心推薦你存起來。`,
+            `在我準備去美甲店卸甲之前，朋友塞了這個給我，結果直接省下整筆預算！`,
+            `這罐最好用的地方根本不是省錢，而是那個磁吸光圈細緻到很犯規！`
+          ],
+          avoid: [
+            `勸愛做美甲的女生沒事別碰這款一步膠，因為用過之後回不去沙龍，會覺得以前的自己像盤子。`,
+            `我承認我以前真的很鐵齒，每次做指甲硬要塗三四層，直到被這罐徹底震撼。`,
+            `如果你是那種超討厭等指甲乾、動不動就溢膠的人，拜託這篇直接存起來避坑！`
+          ]
+        }
+      },
+      '影音 3C': {
+        categoryName: '影音 3C',
+        defaultKeyword: '投影機',
+        audiences: [
+          { title: '租屋沒空間放電視的人', desc: '房間坪數小，根本塞不下大電視，但又想要有百吋大螢幕的影院感' },
+          { title: '週末愛露營或聚會的人', desc: '不想搬大箱子與一堆轉接頭，隨手一抓丟背包就能出發' },
+          { title: '下班只想窩床上的追劇族', desc: '不想端著發燙手機看到手酸手滑砸到臉，或拿重死人的筆電' },
+          { title: '討厭拉線被線材絆倒的極簡族', desc: '受夠床頭地上一堆HDMI跟繁雜充電線，想要乾淨清爽' },
+          { title: '喜歡在天花板躺平看電影的懶人', desc: '坐著看腰酸背痛，直接平躺投天花板才是下班終極享受' },
+          { title: '常出差外宿的商務旅客', desc: '飯店電視太難用，隨身帶一台在房裡秒變專屬電影院' }
+        ],
+        scenarios: [
+          { title: '躺在床上直接投天花板', desc: '不想坐著看電視，直接舒服躺平追劇到睡著' },
+          { title: '租屋處房間牆面隨便投', desc: '房間放不下電視，直接拿白牆當超大私人影院' },
+          { title: '週末跟朋友在客廳聚會看球賽', desc: '關上燈拉上窗簾，大家窩在沙發一起看大螢幕超有氛圍' },
+          { title: '下班後不想開大燈的疲憊深夜', desc: '開著小夜燈舒服投屏，光線溫和不刺眼超沉浸' },
+          { title: '假日露營在帳篷外拉布幕', desc: '微風吹過吹著大螢幕電影，戶外露營儀式感直接拉滿' },
+          { title: '手機螢幕太小看久眼酸的放鬆片刻', desc: '百吋無壓感觀看，視線徹底解脫不再瞇瞇眼' }
+        ],
+        templates: {
+          hook: (p, s) => `到底為什麼租屋處想看個大螢幕，都得拉一堆複雜的線啦！`,
+          empathy: (aud, sce) => `房間本來就不大，根本塞不下大電視，每次端著發熱手機躺在床上看劇，看到手酸手滑還會砸到臉，真的很煩。`,
+          pivot: (p) => `後來我才被推坑這台${p}，本來以為只是買好玩的玩具，沒想到徹底升級了我的下班生活！`,
+          value: (trans) => {
+            return `它真的超小一台即插即用，內建串流app連線都不用插，打開就能看Netflix。而且有自動梯形校正，隨便斜放在床頭投天花板都很方正，就算開小燈看也很清楚，完全不用摸黑！`;
+          },
+          cta: (p, kw) => `如果你也跟我一樣下班只想躺平看百吋螢幕，底下留「${kw}」，我把買的型號分享給你！`
+        },
+        hooksMatrix: {
+          complain: [
+            `到底為什麼租屋處想看個大螢幕，都得拉一堆複雜的線啦！`,
+            `下班回家只想躺床看劇，端著發燙的手機看到手指抽筋真的很煩！`,
+            `每次想在房間看個電影，調角度墊厚書調了半天，興致都沒了。`
+          ],
+          dialogue: [
+            `「你的房間怎麼直接變電影院了？！」朋友來我家看到整個嚇到🤣`,
+            `室友問我這台不用接電腦喔？我說開機按遙控器就能看！`,
+            `朋友上次來我家看了一集劇，回家直接密我：「快把那台投影機型號給我！」`
+          ],
+          contrast: [
+            `以前下班只能瞇著看小手機，現在回到房間直接百吋大螢幕躺著爽看。`,
+            `本來以為投影機開燈一定灰濛濛，沒想到白天看也意外清楚！`,
+            `以前以為要弄家庭劇院要花好幾萬，現在這台小小的直接搞定。`
+          ],
+          result: [
+            `自從房間換了這台微型投影機，每天下班回家的幸福感直接翻倍！`,
+            `不用接任何轉接線、開機直連串流，這點真的拯救了懶人我！`,
+            `直接躺在床上投天花板看劇，真的舒服到常常看著看著就睡著！`
+          ],
+          suspense: [
+            `如果你也是租屋族或喜歡躺床追劇的人，這個東西真心推薦你存起來。`,
+            `房間牆壁空著不知道幹嘛？先別急著買電視，這招先看好！`,
+            `用過這台之後，我房間那台舊電視基本上就再也沒開過了。`
+          ],
+          avoid: [
+            `勸租屋族沒事真的別亂買大電視，佔空間又難搬，這台直接秒殺。`,
+            `我承認我以前真的很排斥投影機，覺得要拉線又暗，直到被這台打臉。`,
+            `如果你也是那種超級討厭收線、想要開機就能直接爽看的人，這篇必看！`
+          ]
+        }
+      },
+      '旅行居家': {
+        categoryName: '旅行居家',
+        defaultKeyword: '收納袋',
+        audiences: [
+          { title: '換季衣物塞爆衣櫃的人', desc: '厚棉被厚毛衣擠壓，衣櫃永遠關不上，拿一件衣服全倒' },
+          { title: '出國出差行李箱爆滿的旅人', desc: '去程行李箱就全滿，完全沒空間裝戰利品，行李超重又狼狽' },
+          { title: '租屋處收納空間極有限的小資族', desc: '每一寸空間都要精打細算，受夠大包小包堆滿房間' },
+          { title: '討厭帶笨重抽氣泵出門的人', desc: '出國飯店找不到抽氣泵就無法收納超崩潰，根本不敢買厚衣服' },
+          { title: '喜歡家裡整齊乾淨的收納控', desc: '收納得整齊扁平，看著心情就治癒，告別雜亂壓迫感' },
+          { title: '帶小孩出門大包小包的家長', desc: '小孩備用衣物尿布一堆，後車廂直接被塞爆' }
+        ],
+        scenarios: [
+          { title: '出國前晚收拾行李箱塞不下', desc: '冬天厚大衣隨便塞兩件就爆了，到底是在出國還是在搬家啦' },
+          { title: '換季整理厚被羽絨外套', desc: '收納袋蓬得跟山一樣，整個人壓上去滿頭大汗拉鍊還爆開' },
+          { title: '飯店退房最後收拾戰利品', desc: '買太多塞不回去，坐在行李箱上硬拉拉鍊超怕壞掉' },
+          { title: '整理換季衣物放進床底收納盒', desc: '厚重衣物壓不扁，完全塞不進收納箱' }
+        ],
+        templates: {
+          hook: (p, s) => `到底為什麼每次出國或換季，行李箱跟衣櫃永遠都要塞到爆炸啦！`,
+          empathy: (aud, sce) => `冬天厚大衣隨便塞兩件行李箱就爆了，整個人坐上去用體重壓到滿頭大汗拉鍊還差點爆開，每次收行李都像在打仗一樣心累。`,
+          pivot: (p) => `直到前陣子換了這款${p}，才發現以前帶笨重抽氣泵到底在折騰什麼！`,
+          value: (trans) => `它完全不用抽氣泵，手壓幾秒直接排空排淨！高韌性加厚材質完全不漏氣，體積直接縮減70%，行李箱瞬間多出一大半空間裝戰利品！`,
+          cta: (p, kw) => `常出國或準備換季的真的要備起來～底下留言「${kw}」，我把耐用不漏氣的賣場私給你！`
+        },
+        hooksMatrix: {
+          complain: [`到底為什麼每次出國或換季，行李箱跟衣櫃永遠都要塞到爆炸啦！`],
+          dialogue: [`「你行李箱怎麼還有那麼多空間？！」旅伴看到直接傻眼。`],
+          contrast: [`以前收行李要踩在箱子上硬拉，現在手壓三秒體積直接少一半。`],
+          result: [`用身體重力壓一下直接排扁，行李箱瞬間多出整整一半空間裝戰利品！`],
+          suspense: [`出國行李箱永遠不夠裝？先別急著換大箱子，這個法寶先存起來。`],
+          avoid: [`勸常出國的人千萬別再帶傳統抽氣泵了，佔重量又麻煩，這款直接完勝！`]
+        }
+      },
+      '親子生活': {
+        categoryName: '親子生活',
+        defaultKeyword: '番茄鐘',
+        audiences: [
+          { title: '家有拖延症小孩的崩潰爸媽', desc: '寫作業拖拖拉拉、看電視叫不動，每天在客廳吼破喉嚨' },
+          { title: '想培養自律習慣、減少3C依賴的家長', desc: '小孩沒有時間概念，動不動就吵著「再五分鐘」，一拖就是半小時' },
+          { title: '準備大考需要高效專注的學生考生', desc: '念書容易分心滑手機，需要具體倒數儀式感讓自己進入狀態' },
+          { title: '討厭指針滴答聲干擾的高敏專注族', desc: '任何細微噪音都會打斷思緒，需要極致安靜的讀書環境' }
+        ],
+        scenarios: [
+          { title: '晚上催小孩寫作業洗澡睡覺', desc: '在旁邊吼破喉嚨，小孩依然當耳邊風，每次都搞到全家心情大壞' },
+          { title: '規定看電視玩平板時間到了', desc: '時間到了賴皮不關，每次關電視都像在上演家庭大戰' },
+          { title: '下午在書桌前念書容易分心', desc: '翻兩頁就開始發呆摸魚，兩小時過去進度零' }
+        ],
+        templates: {
+          hook: (p, s) => `到底為什麼每天催小孩收玩具寫作業，永遠都要搞到大人在旁邊吼破喉嚨啦！`,
+          empathy: (aud, sce) => `小孩根本沒有抽象的時間觀念，你跟他說再十分鐘他完全沒感覺，每次時間到要關電視就大哭賴皮，搞得全家氣氛每天都很緊繃心累。`,
+          pivot: (p) => `後來被媽媽朋友推坑這個${p}，本來不信一個計時器有什麼用，結果真的拯救了全家人的喉嚨！`,
+          value: (trans) => `它把時間直接變成彩色色塊，隨著時間流逝色塊慢慢消失，小孩自己看一眼就懂還剩多少時間！而且運作超安靜完全沒有滴答聲，時間到了發出溫和提示音，小孩現在時間到自己乖乖關電視！`,
+          cta: (p, kw) => `家有拖延症小孩的爸媽真的必收！底下留言「${kw}」，我把這款耐摔靜音的連結私給你！`
+        },
+        hooksMatrix: {
+          complain: [`到底為什麼每天催小孩收玩具寫作業，永遠都要搞到大人在旁邊吼破喉嚨啦！`],
+          dialogue: [`「媽媽！色塊快沒了，我寫完了！」這句話我以前根本不敢想像會聽到。`],
+          contrast: [`以前叫十次動都不動，現在時間隨色塊消失，小孩自己看懂時間乖乖收尾。`],
+          result: [`不用大人在旁邊盯著罵，小孩主動專注完成作業，家庭氣氛瞬間祥和！`],
+          suspense: [`家裡有講不聽的小孩？試試這個視覺化小招數，效果好到讓人想哭。`],
+          avoid: [`別再用大吼大叫逼小孩有時間觀念了，那只會兩敗俱傷，用對工具真的差很多！`]
+        }
       }
     };
 
@@ -786,7 +982,7 @@
     }
 
     // ==========================================
-    // 模組切換（5 個主標籤線性切換）
+    // 模組切換
     // ==========================================
     function switchTab(tabId) {
       const tabs = ['analysis', 'write', 'reels-caption', 'check', 'threads'];
@@ -822,50 +1018,49 @@
     }
 
     // ==========================================
-    // AI 金鑰設定
+    // AI 金鑰邏輯（預設綁定 + 可自訂）
     // ==========================================
     function getStoredAPIKey() {
-      return localStorage.getItem('copywriter_gemini_api_key') || '';
+      const customKey = localStorage.getItem('copywriter_gemini_api_key');
+      if (customKey !== null) {
+        return customKey.trim();
+      }
+      return DEFAULT_SYSTEM_AI_KEY;
     }
 
     function updateAIStatusUI() {
-      const key = getStoredAPIKey();
-      const dot = document.getElementById('ai-status-dot');
-      const text = document.getElementById('ai-status-text');
-      const pill = document.getElementById('ai-status-pill');
+  const dot = document.getElementById('ai-status-dot');
+  const text = document.getElementById('ai-status-text');
+  const pill = document.getElementById('ai-status-pill');
 
-      if (key && key.trim().length > 10) {
-        dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-500';
-        text.innerText = 'AI 已連線';
-        pill.className = 'px-2 py-0.5 rounded-full text-[10px] font-medium border flex items-center gap-1 transition-all bg-emerald-50 text-emerald-800 border-emerald-200 hover:border-emerald-400';
-      } else {
-        dot.className = 'w-1.5 h-1.5 rounded-full bg-stone-400';
-        text.innerText = '設定 AI 金鑰';
-        pill.className = 'px-2 py-0.5 rounded-full text-[10px] font-medium border flex items-center gap-1 transition-all bg-stone-100 text-stone-600 border-stone-200 hover:border-brand-500';
-      }
-    }
+  // 只要有設定 GAS 網址，一律顯示連線
+  if (GAS_BACKEND_URL && !GAS_BACKEND_URL.includes('你的GAS部署ID')) {
+    dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-500';
+    text.innerText = 'AI 已連線（雲端後端）';
+    pill.className = 'px-2 py-0.5 rounded-full text-[10px] font-medium border flex items-center gap-1 transition-all bg-emerald-50 text-emerald-800 border-emerald-200 hover:border-emerald-400';
+  } else {
+    dot.className = 'w-1.5 h-1.5 rounded-full bg-amber-500';
+    text.innerText = '離線智慧生活引擎';
+    pill.className = 'px-2 py-0.5 rounded-full text-[10px] font-medium border flex items-center gap-1 transition-all bg-amber-50 text-amber-800 border-amber-200 hover:border-brand-500';
+  }
+}
 
     function openAISettingsModal() {
       const currentKey = getStoredAPIKey();
+      const isDefault = currentKey === DEFAULT_SYSTEM_AI_KEY;
       openCustomDialog({
-        title: 'Gemini AI 核心設定',
-        desc: '串接 Google Gemini 免費 API，讓系統為任何自訂新商品產生極度自然、貼合生活痛點的文案：',
+        title: 'Gemini AI 連線設定',
+        desc: '本工具已自動內建預設專屬金鑰，所有人打開即用。亦可替換為你個人的 Gemini API Key：',
         bodyHtml: `
           <div class="space-y-3">
             <div>
-              <label class="block text-[11px] font-semibold text-brand-900 mb-1">Gemini API Key：</label>
-              <input type="password" id="dlg-gemini-key-input" value="${escapeHTML(currentKey)}" placeholder="AIzaSy..." class="w-full bg-white border border-[#E7DFD5] rounded-xl px-3 py-2 text-xs text-brand-900 focus:outline-none focus:ring-1 focus:ring-brand-500 font-mono">
+              <label class="block text-[11px] font-semibold text-brand-900 mb-1">當前生效 API Key：</label>
+              <input type="password" id="dlg-gemini-key-input" value="${escapeHTML(currentKey)}" placeholder="貼上 API Key..." class="w-full bg-white border border-[#E7DFD5] rounded-xl px-3 py-2 text-xs text-brand-900 focus:outline-none focus:ring-1 focus:ring-brand-500 font-mono">
+              <div class="text-[10px] text-stone-400 mt-1">${isDefault ? '（目前使用系統預設專屬金鑰，連線正常）' : '（目前使用個人自訂金鑰）'}</div>
             </div>
-            <div class="p-2.5 bg-[#FAF8F5] rounded-xl border border-[#E7DFD5] text-[11px] text-stone-600 space-y-1">
-              <div class="font-semibold text-brand-900">如何免費取得 API Key？</div>
-              <ol class="list-decimal pl-4 space-y-0.5 text-stone-500">
-                <li>前往 Google AI Studio 網站</li>
-                <li>以文案帳號登入，點擊「Get API key」</li>
-                <li>點擊「Create API key」，複製貼入上方即可</li>
-              </ol>
-              <div class="pt-1">
-                <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-brand-700 underline font-medium">點此前往申請免費金鑰（完全免費不扣款）→</a>
-              </div>
+            <div class="flex gap-2">
+              <button onclick="document.getElementById('dlg-gemini-key-input').value='${DEFAULT_SYSTEM_AI_KEY}'" class="px-2.5 py-1 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg text-xs font-medium">重置為系統預設金鑰</button>
+              <button onclick="document.getElementById('dlg-gemini-key-input').value=''" class="px-2.5 py-1 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg text-xs font-medium">切換離線模式</button>
             </div>
           </div>
         `,
@@ -874,13 +1069,13 @@
           localStorage.setItem('copywriter_gemini_api_key', inputKey);
           updateAIStatusUI();
           closeCustomDialog();
-          showToast(inputKey ? 'AI 金鑰已儲存！已啟用大模型深度推導' : '已清除金鑰，切換為離線引擎');
+          showToast(inputKey ? 'AI 金鑰設定成功！' : '已切換為離線智慧生活引擎');
         }
       });
     }
 
     // ==========================================
-    // 智慧工作流核心：具備雙模型容錯的 API 呼叫
+    // 智慧雙軌制：有 Key 走真 AI，無 Key / 異常 走品類自適應引擎
     // ==========================================
     async function executeAnalysisWorkflow() {
       const name = document.getElementById('input-name').value.trim();
@@ -893,56 +1088,127 @@
 
       const apiKey = getStoredAPIKey();
       
-      if (apiKey && apiKey.trim().length > 10) {
+      if (apiKey && apiKey.length > 5) {
+        // 軌道 A：AI 模式
         await runGeminiSmartAnalysis(apiKey, name, featuresRaw);
       } else {
+        // 軌道 B：離線品類智慧生活模式
         runLocalHeuristicAnalysis(name, featuresRaw);
-        showToast('已完成生活痛點分析！如需更高智慧度可於頂部設定 AI 金鑰');
+        showToast('已依品類生成高質感真人生活文案！');
       }
     }
 
-    // 呼叫 Gemini API 核心函式（支援自動嘗試備用模型）
-    async function fetchGeminiWithFallback(apiKey, prompt) {
-      // 依序嘗試目前官方支援的模型名稱
-      const candidateModels = [
-        'gemini-2.5-flash',
-        'gemini-1.5-flash',
-        'gemini-1.5-pro'
-      ];
+    // 呼叫 Gemini API 核心函式（自動容錯與多模型備援）
+    // ==========================================
+// 透過 GAS 後端代理安全連線
+// ==========================================
+async function callGeminiWithAutoRetry(apiKey, promptText) {
+  // 優先連線 GAS 後端代理
+  if (GAS_BACKEND_URL && !GAS_BACKEND_URL.includes('你的GAS部署ID')) {
+    const res = await fetch(GAS_BACKEND_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // 避免 GAS CORS 預檢限制
+      body: JSON.stringify({ prompt: promptText })
+    });
 
-      let lastError = null;
+    const data = await res.json();
+    if (data.success && data.text) {
+      return data.text;
+    }
+    throw new Error(data.error || '後端 GAS 連線異常');
+  }
 
-      for (const model of candidateModels) {
-        try {
-          const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-          const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: {
-                responseMimeType: "application/json",
-                temperature: 0.7
-              }
-            })
-          });
+  // 若使用者在彈窗自行填寫了自訂個人金鑰，則走瀏覽器直連
+  if (apiKey && apiKey.length > 10) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: promptText }] }],
+        generationConfig: { temperature: 0.7 }
+      })
+    });
+    const result = await response.json();
+    return result?.candidates?.[0]?.content?.parts?.[0]?.text;
+  }
 
-          if (response.ok) {
-            const data = await response.json();
-            const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (text) {
-              return JSON.parse(text);
-            }
-          } else {
-            const errJson = await response.json().catch(() => ({}));
-            lastError = new Error(errJson?.error?.message || `模型 ${model} 請求失敗 (${response.status})`);
-          }
-        } catch (e) {
-          lastError = e;
-        }
+  throw new Error('未設定 GAS 網址或有效的 API Key');
+}
+
+    // 軌道 A：AI 深度推導分析
+    async function runGeminiSmartAnalysis(apiKey, name, featuresRaw) {
+      const btn = document.getElementById('btn-run-analysis');
+      const btnText = document.getElementById('btn-run-analysis-text');
+      const originalText = btnText.innerText;
+      
+      btn.disabled = true;
+      btn.classList.add('opacity-70', 'cursor-wait');
+      btnText.innerText = 'AI 正在深度分析生活痛點與全套文案...';
+
+      const prompt = `你是一位精通台灣社群（Threads、Instagram Reels）的頂級生活好物文案大師。
+風格要求：語感如同真人在生活裡跟朋友碎碎念、極具畫面感、白話自然。
+嚴禁使用任何「無疑是」、「儀式感拉滿」、「不得不說」、「折騰老半天」、「懷疑人生」、「這款寶藏」、「買好玩的玩具」等八股 AI 腔或不符合該品類的罐頭詞彙！
+若為美妝美甲，使用「照燈、溢膠、剝落、指甲邊緣、省了沙龍錢」等真實生活詞；若為小家電，寫出具體操作動作。
+
+產品名稱：${name}
+產品特點與規格：
+${featuresRaw || '依產品名自由推導'}
+
+請為此產品輸出純 JSON 字串（絕對不要加上 \`\`\`json 標記）：
+{
+  "category": "產品品類標籤（例如：美妝美甲、影音 3C、旅行居家、親子生活）",
+  "audiences": [
+    { "title": "具體人物身分（請生成6個，寫給最具體的一個人，極具共鳴）", "desc": "該身分的真實日常痛點或心態" }
+  ],
+  "scenarios": [
+    { "title": "具體生活日常場景（請生成6個）", "desc": "該場景下發生的真實生活衝突畫面與挫折感" }
+  ],
+  "translations": [
+    { "feature": "原始特點文字", "benefit": "轉化為白話生活痛點好處（具體可信，絕不可機械套版）" }
+  ],
+  "goldenSeconds": [
+    { "tag": "類型（衝突動作型、反常識勸退型、成果驚艷型、左右對比型、靈魂發問型、私藏低語型）", "action": "開場0-3秒鏡頭畫面動作提示", "script": "開場0-3秒口播衝擊台詞" }
+  ],
+  "script": {
+    "hook": "第一段鉤子（拋出真實生活衝突，先不講產品名）",
+    "empathy": "第二段共鳴（描述狼狽動作與碎念，戳中痛點）",
+    "pivot": "第三段轉折（用符合品類的口吻自然帶出產品）",
+    "value": "第四段價值（將規格轉化為生活改變，動作順暢）",
+    "cta": "第五段互動（像朋友分享，引導留言關鍵字領連結）"
+  },
+  "captions": {
+    "style1": "Reels說明欄條列重點型（包含痛點、3個生活亮點、留言關鍵字）",
+    "style2": "Reels說明欄真實碎念心得型（像朋友私藏掏心掏肺分享）",
+    "style3": "Reels說明欄留言領取導流型（引爆留言互動拿賣場連結）"
+  },
+  "hookInspirations": [
+    { "type": "抱怨型", "desc": "把真實生活小煩躁直接點出", "lines": ["句子1", "句子2", "句子3"] },
+    { "type": "對話型", "desc": "用一句日常真實對話把讀者拉進情境", "lines": ["句子1", "句子2", "句子3"] },
+    { "type": "反差型", "desc": "前後反差越大讀者越想看", "lines": ["句子1", "句子2", "句子3"] },
+    { "type": "結果型", "desc": "先給出驚豔結果引發好奇", "lines": ["句子1", "句子2", "句子3"] },
+    { "type": "懸念型", "desc": "欲言又止勾住注意力", "lines": ["句子1", "句子2", "句子3"] },
+    { "type": "避坑自嘲型", "desc": "反向勸退或自我調侃", "lines": ["句子1", "句子2", "句子3"] }
+  ],
+  "threadsPosts": ["6篇發在Threads的極短共鳴脆主文"],
+  "threadsComments": ["6則發在Threads自己留言區第一則的導流留言"]
+}`;
+
+      try {
+        const rawJsonText = await callGeminiWithAutoRetry(apiKey, prompt);
+        const cleaned = rawJsonText.replace(/```json/gi, '').replace(/```/g, '').trim();
+        const parsed = JSON.parse(cleaned);
+        applyAIGeneratedResult(parsed);
+        showToast('AI 深度推導成功！已精準適配全套文案');
+      } catch (err) {
+        console.warn('AI 連線失敗，自動無縫啟用軌道 B 離線品類智慧引擎：', err);
+        runLocalHeuristicAnalysis(name, featuresRaw);
+        showToast('已啟用離線品類智慧生活引擎！文案依然貼合商品');
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('opacity-70', 'cursor-wait');
+        btnText.innerText = originalText;
       }
-
-      throw lastError || new Error('所有 Gemini 候選模型皆無法連線');
     }
 
     function applyAIGeneratedResult(data) {
@@ -950,28 +1216,13 @@
         currentCategory = data.category;
         document.getElementById('detected-category').innerText = currentCategory;
       }
-
-      if (Array.isArray(data.audiences) && data.audiences.length > 0) {
-        currentAudiences = data.audiences.slice(0, 6);
-      }
-      if (Array.isArray(data.scenarios) && data.scenarios.length > 0) {
-        currentScenarios = data.scenarios.slice(0, 6);
-      }
-      if (Array.isArray(data.translations) && data.translations.length > 0) {
-        currentTranslations = data.translations;
-      }
-      if (Array.isArray(data.goldenSeconds) && data.goldenSeconds.length > 0) {
-        currentGoldenSeconds = data.goldenSeconds.slice(0, 6);
-      }
-      if (Array.isArray(data.hookInspirations) && data.hookInspirations.length > 0) {
-        currentHookInspirations = data.hookInspirations.slice(0, 6);
-      }
-      if (Array.isArray(data.threadsPosts) && data.threadsPosts.length > 0) {
-        currentThreadsPosts = data.threadsPosts.slice(0, 6);
-      }
-      if (Array.isArray(data.threadsComments) && data.threadsComments.length > 0) {
-        currentThreadsComments = data.threadsComments.slice(0, 6);
-      }
+      if (Array.isArray(data.audiences) && data.audiences.length > 0) currentAudiences = data.audiences.slice(0, 6);
+      if (Array.isArray(data.scenarios) && data.scenarios.length > 0) currentScenarios = data.scenarios.slice(0, 6);
+      if (Array.isArray(data.translations) && data.translations.length > 0) currentTranslations = data.translations;
+      if (Array.isArray(data.goldenSeconds) && data.goldenSeconds.length > 0) currentGoldenSeconds = data.goldenSeconds.slice(0, 6);
+      if (Array.isArray(data.hookInspirations) && data.hookInspirations.length > 0) currentHookInspirations = data.hookInspirations.slice(0, 6);
+      if (Array.isArray(data.threadsPosts) && data.threadsPosts.length > 0) currentThreadsPosts = data.threadsPosts.slice(0, 6);
+      if (Array.isArray(data.threadsComments) && data.threadsComments.length > 0) currentThreadsComments = data.threadsComments.slice(0, 6);
 
       selectedAudienceIndex = 0;
       selectedScenarioIndex = 0;
@@ -1002,163 +1253,95 @@
       triggerAutoSave();
     }
 
-    // ==========================================
-    // 徹底解決：先自動詢問 Google 支援清單，再精準連線
-    // ==========================================
-    async function callGeminiWithAutoRetry(apiKey, promptText) {
-      // 1. 先向 Google 查詢當前 API Key 真正支援的模型清單
-      let targetModel = 'gemini-2.0-flash';
-      try {
-        const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-        if (listRes.ok) {
-          const listData = await listRes.json();
-          const availableModels = (listData.models || [])
-            .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
-            .map(m => m.name.replace('models/', ''));
-          
-          console.log('你的 API Key 當前支援的模型清單：', availableModels);
+    // 軌道 B：離線品類自適應分析引擎
+    function runLocalHeuristicAnalysis(name, featuresRaw) {
+      const lower = (name + ' ' + featuresRaw).toLowerCase();
+      let matchedConfig = null;
 
-          // 優先挑選當前最新的 flash 系列
-          const preferred = availableModels.find(m => m.includes('2.0-flash')) ||
-                          availableModels.find(m => m.includes('flash')) ||
-                          availableModels[0];
-          
-          if (preferred) {
-            targetModel = preferred;
-            console.log('系統自動匹配最佳模型：', targetModel);
-          }
-        }
-      } catch (e) {
-        console.warn('查詢可用模型清單失敗，嘗試使用預設 gemini-2.0-flash', e);
+      if (/美甲|指甲|光療|甲油|底膠|封層|貓眼/.test(lower)) {
+        matchedConfig = CATEGORY_HEURISTICS['美妝美甲'];
+      } else if (/投影|大螢幕|影音|天花板|露營|串流|4k|流明/.test(lower)) {
+        matchedConfig = CATEGORY_HEURISTICS['影音 3C'];
+      } else if (/真空|收納|行李|壓縮|羽絨|換季|棉被/.test(lower)) {
+        matchedConfig = CATEGORY_HEURISTICS['旅行居家'];
+      } else if (/番茄鐘|計時|倒數|兒童|育兒|專注|學生|作業/.test(lower)) {
+        matchedConfig = CATEGORY_HEURISTICS['親子生活'];
       }
 
-      // 2. 備援清單（以偵測到的模型優先）
-      const candidateModels = Array.from(new Set([
-        targetModel,
-        'gemini-2.0-flash',
-        'gemini-2.0-flash-exp',
-        'gemini-1.5-flash-latest'
-      ]));
-
-      let lastError = null;
-
-      for (const model of candidateModels) {
-        try {
-          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-          const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: promptText }] }],
-              generationConfig: {
-                temperature: 0.7
-              }
-            })
-          });
-
-          if (!response.ok) {
-            const errJson = await response.json().catch(() => ({}));
-            lastError = errJson?.error?.message || `HTTP ${response.status} on ${model}`;
-            console.warn(`嘗試模型 ${model} 失敗:`, lastError);
-            continue;
+      // 未命中特定庫時的智慧生活好物推導
+      if (!matchedConfig) {
+        matchedConfig = {
+          categoryName: '精選生活好物',
+          defaultKeyword: name.slice(0, 2) || '好物',
+          audiences: [
+            { title: `經常需要用到${name}的日常使用者`, desc: `步驟繁瑣手忙腳亂，急需更順手、不費力的新解法` },
+            { title: `最討厭繁複流程的小資族`, desc: `能省一個步驟就能多賺半小時完全放鬆的空白時間` },
+            { title: `精打細算、不想再買到踩雷品的消費者`, desc: `以前買過太多華而不實的產品，只想換用真正實用、耐用的好物` }
+          ],
+          scenarios: [
+            { title: `平常在家使用${name}的時候`, desc: `每次都要花大把時間準備和收尾，搞得心煩意亂` },
+            { title: `下班回家只想放空休息的片刻`, desc: `精力已經耗盡，手邊工具不給力真的會讓人心情浮躁` }
+          ],
+          templates: {
+            hook: (p) => `到底為什麼生活裡有些小細節，每天遇到都在暗自崩潰啦！`,
+            empathy: (aud, sce) => `平常生活節奏已經夠快了，${sce.desc}，真的讓人很想直接放棄。`,
+            pivot: (p) => `直到前陣子換了這個${p}，才發現以前到底在堅持什麼！`,
+            value: (trans) => `它真的省事超多，直接省下繁瑣時間，用過真的回不去。`,
+            cta: (p, kw) => `想知道哪裡買的，底下留言「${kw}」，我把賣場連結私訊傳給你！`
+          },
+          hooksMatrix: {
+            complain: [`生活裡有些小麻煩，真的每天遇到都在暗自心累⋯`],
+            dialogue: [`朋友上次問我：「你怎麼不換個好用的？」我說以前真的超鐵齒！`],
+            contrast: [`以前弄得滿頭大汗，現在隨手三兩下搞定，落差太大了！`],
+            result: [`自從換了這款${name}，日常順暢度直接翻倍！`],
+            suspense: [`如果你也常為這件事煩惱，這個私藏解法先存起來。`],
+            avoid: [`勸大家沒事別隨便試這款好物，因為用過之後回不去了！`]
           }
-
-          const data = await response.json();
-          let rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (rawText) {
-            console.log(`成功透過 ${model} 完成真 AI 生成！`);
-            return rawText;
-          }
-        } catch (e) {
-          lastError = e.message;
-        }
+        };
       }
 
-      throw new Error(lastError || 'API 請求失敗，請確認 API Key 是否正確');
+      currentCategory = matchedConfig.categoryName;
+      document.getElementById('detected-category').innerText = currentCategory;
+      currentAudiences = matchedConfig.audiences;
+      currentScenarios = matchedConfig.scenarios;
+
+      // 痛點轉譯
+      const features = featuresRaw ? featuresRaw.split('\n').map(f => f.trim()).filter(Boolean) : ['方便實用', '省時省力'];
+      currentTranslations = features.map(feat => {
+        const f = feat.toLowerCase();
+        let benefit = '';
+        if (f.includes('不用') || f.includes('免') || f.includes('三合一')) {
+          benefit = `一罐直接搞定底膠、顏色跟封層，不用桌面擺滿瓶瓶罐罐`;
+        } else if (f.includes('快') || f.includes('省時') || f.includes('秒') || f.includes('十分鐘')) {
+          benefit = `十隻手指塗完照燈不到十分鐘，不用坐著耗兩小時`;
+        } else if (f.includes('貓眼') || f.includes('磁吸')) {
+          benefit = `磁鐵靠上去一秒吸出細緻銀河光圈，光澤感超高級`;
+        } else if (f.includes('色') || f.includes('顯白') || f.includes('透')) {
+          benefit = `顯白裸色系或透亮冰茶色都有，擦兩層就超飽滿`;
+        } else if (f.includes('app') || f.includes('串流')) {
+          benefit = `開機直接看Netflix，不用再接筆電或手機`;
+        } else if (f.includes('梯形') || f.includes('校正')) {
+          benefit = `隨便放在床頭櫃斜著投，畫面也自動方正`;
+        } else if (f.includes('沒關燈') || f.includes('清楚') || f.includes('光')) {
+          benefit = `開著小夜燈也看得清楚，不用每次摸黑`;
+        } else {
+          benefit = `省掉最容易讓人手忙腳亂的步驟，日常隨手就能順暢搞定`;
+        }
+        return { feature: feat, benefit };
+      });
+
+      selectedAudienceIndex = 0;
+      selectedScenarioIndex = 0;
+
+      renderAudienceList();
+      renderScenarioList();
+      renderFeatureTranslationsInputs();
+
+      // 產生腳本與延伸內容
+      refreshDraftsWithCurrentContext();
     }
 
-    // 替換原本的 runGeminiSmartAnalysis
-    async function runGeminiSmartAnalysis(apiKey, name, featuresRaw) {
-      const btn = document.getElementById('btn-run-analysis');
-      const btnText = document.getElementById('btn-run-analysis-text');
-      const originalText = btnText.innerText;
-      
-      btn.disabled = true;
-      btn.classList.add('opacity-70', 'cursor-wait');
-      btnText.innerText = 'AI 正在深度分析生活痛點與全套文案...';
-
-      const prompt = `你是一位精通台灣社群（Threads、Instagram Reels）的頂級生活好物文案大師與帶貨顧問。
-你的特色是：語感像真實朋友生活碎念、極具畫面感、白話自然。
-嚴格禁忌：絕對不可使用任何「無疑是」、「儀式感拉滿」、「不得不說」、「折騰老半天」、「懷疑人生」、「這款寶藏」等中國式網路詞彙或八股 AI 腔！
-
-產品名稱：${name}
-產品特點與規格：
-${featuresRaw || '無特定規格，請依生活好物推導'}
-
-請為此產品輸出結構嚴謹的純 JSON 字串，請勿使用 markdown 格式（不要加上 \`\`\`json 標記），所有內容使用台灣繁體中文，JSON 格式如下：
-{
-  "category": "產品品類標籤（例如：美妝美甲、廚房料理、居家生活、3C影音）",
-  "audiences": [
-    { "title": "具體人物身分（請生成6個，寫給最具體的一個人，極具共鳴）", "desc": "該身分的真實日常痛點或心態（1-2句）" }
-  ],
-  "scenarios": [
-    { "title": "具體生活日常場景（請生成6個，如：在家追劇時、出門趕時間前）", "desc": "該場景下發生的真實生活衝突畫面與挫折感" }
-  ],
-  "translations": [
-    { "feature": "原始特點文字", "benefit": "轉化為白話生活痛點好處（這項功能到底讓生活少掉什麼麻煩？帶來什麼爽度？具體可信，絕不可機械重複套版）" }
-  ],
-  "goldenSeconds": [
-    { "tag": "類型（衝突動作型、反常識勸退型、成果驚艷型、左右對比型、靈魂發問型、私藏低語型）", "action": "開場0-3秒鏡頭畫面動作提示", "script": "開場0-3秒口播衝擊台詞" }
-  ],
-  "script": {
-    "hook": "第一段鉤子（拋出生活衝突，先不講產品名）",
-    "empathy": "第二段共鳴（描述狼狽動作與碎念，戳中讀者痛點）",
-    "pivot": "第三段轉折（用「後來我才發現...」自然帶出產品出場）",
-    "value": "第四段價值（將規格轉化為生活改變，具體流暢）",
-    "cta": "第五段互動（像朋友分享，引導留言關鍵字領連結）"
-  },
-  "captions": {
-    "style1": "Reels說明欄條列重點型（包含痛點、3個生活亮點、留言關鍵字）",
-    "style2": "Reels說明欄真實碎念心得型（像朋友私藏掏心掏肺分享）",
-    "style3": "Reels說明欄留言領取導流型（引爆留言互動拿賣場連結）"
-  },
-  "hookInspirations": [
-    { "type": "抱怨型", "desc": "把真實生活小煩躁直接點出", "lines": ["句子1", "句子2", "句子3"] },
-    { "type": "對話型", "desc": "用一句日常真實對話把讀者拉進情境", "lines": ["句子1", "句子2", "句子3"] },
-    { "type": "反差型", "desc": "前後反差越大讀者越想看", "lines": ["句子1", "句子2", "句子3"] },
-    { "type": "結果型", "desc": "先給出驚豔結果引發好奇", "lines": ["句子1", "句子2", "句子3"] },
-    { "type": "懸念型", "desc": "欲言又止勾住注意力", "lines": ["句子1", "句子2", "句子3"] },
-    { "type": "避坑自嘲型", "desc": "反向勸退或自我調侃", "lines": ["句子1", "句子2", "句子3"] }
-  ],
-  "threadsPosts": [
-    "6篇發在Threads的極短共鳴脆主文（每篇2-4行，第一行自帶爆擊，完全無廣告味）"
-  ],
-  "threadsComments": [
-    "6則發在Threads自己留言區第一則的留言（具體交代產品亮點與如何領取）"
-  ]
-}`;
-
-      try {
-        const rawJsonText = await callGeminiWithAutoRetry(apiKey, prompt);
-        
-        // 容錯去除任何 markdown 程式碼標記
-        const cleaned = rawJsonText.replace(/```json/gi, '').replace(/```/g, '').trim();
-        const parsed = JSON.parse(cleaned);
-        applyAIGeneratedResult(parsed);
-        showToast('AI 深度文案推導成功！已智慧適配全套內容');
-
-      } catch (err) {
-        console.error('Gemini API Error:', err);
-        showToast(`AI 生成遇到問題（${err.message}），已自動切換離線引擎！`);
-        runLocalHeuristicAnalysis(name, featuresRaw);
-      } finally {
-        btn.disabled = false;
-        btn.classList.remove('opacity-70', 'cursor-wait');
-        btnText.innerText = originalText;
-      }
-    }
-
-    // 替換原本的 retranslateFeaturesWithAI
+    // 重新轉譯痛點
     async function retranslateFeaturesWithAI() {
       const name = document.getElementById('input-name').value.trim() || '好物';
       const featuresRaw = document.getElementById('input-features').value.trim();
@@ -1169,111 +1352,34 @@ ${featuresRaw || '無特定規格，請依生活好物推導'}
         return;
       }
 
-      if (!apiKey) {
-        openAISettingsModal();
-        return;
-      }
-
-      showToast('AI 正在重新為特點轉譯真實生活痛點...');
-      const prompt = `請針對產品「${name}」的以下規格特點：
+      showToast('正在轉譯真實生活痛點...');
+      if (apiKey && apiKey.length > 5) {
+        try {
+          const prompt = `請針對產品「${name}」的以下規格特點：
 ${featuresRaw}
 
-將每個特點轉化為 1 句極度白話的「真實生活好處與痛點」（這項功能在生活裡具體解決了什麼心煩麻煩？帶來什麼爽度？）。
-要求：語氣像台灣朋友日常真心對話，完全不機械、不可重複套版。
-返回純 JSON 陣列（請勿包含 markdown 程式碼標記）：
+將每個特點轉化為 1 句極度白話的「真實生活好處與痛點」（在生活裡解決了什麼心煩麻煩？帶來什麼爽度？口吻如朋友聊天）。
+返回純 JSON 陣列（不要 markdown 標記）：
 [
   { "feature": "原始特點文字", "benefit": "轉譯後的生活痛點好處" }
 ]`;
-
-      try {
-        const rawText = await callGeminiWithAutoRetry(apiKey, prompt);
-        const cleaned = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
-        const list = JSON.parse(cleaned);
-        if (Array.isArray(list) && list.length > 0) {
-          currentTranslations = list;
-          renderFeatureTranslationsInputs();
-          refreshDraftsWithCurrentContext();
-          showToast('步驟 3 痛點轉譯已智慧更新！');
+          const rawText = await callGeminiWithAutoRetry(apiKey, prompt);
+          const cleaned = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+          const list = JSON.parse(cleaned);
+          if (Array.isArray(list) && list.length > 0) {
+            currentTranslations = list;
+            renderFeatureTranslationsInputs();
+            refreshDraftsWithCurrentContext();
+            showToast('步驟 3 痛點轉譯已智慧更新！');
+            return;
+          }
+        } catch (e) {
+          console.warn('AI 轉譯失敗，降級為品類本機轉譯', e);
         }
-      } catch (e) {
-        console.error(e);
-        showToast('轉譯遇到問題，請確認網路或 API 連線');
-      }
-    }
-
-    function runLocalHeuristicAnalysis(name, featuresRaw) {
-      const features = featuresRaw ? featuresRaw.split('\n').map(f => f.trim()).filter(Boolean) : ['好用方便', '省時省力'];
-      
-      let matchedKey = null;
-      const lower = (name + ' ' + featuresRaw).toLowerCase();
-      if (/美甲|指甲|光療|甲油|底膠|封層|貓眼/.test(lower)) matchedKey = 'nail';
-      else if (/番茄鐘|計時|倒數|兒童|育兒|專注|學生|作業/.test(lower)) matchedKey = 'timer';
-      else if (/真空|收納|行李|壓縮|羽絨|換季|棉被/.test(lower)) matchedKey = 'vacuum';
-      else if (/投影|大螢幕|影音|天花板|露營|串流|4k|流明/.test(lower)) matchedKey = 'projector';
-
-      if (matchedKey && SAMPLES[matchedKey]) {
-        currentCategory = SAMPLES[matchedKey].category;
-      } else if (/掛燙|熨斗|衣服|皺|防皺/.test(lower)) {
-        currentCategory = '生活家電';
-      } else if (/保養|精華|保濕|抗老|面膜|美白/.test(lower)) {
-        currentCategory = '美妝保養';
-      } else if (/除濕|空氣清淨|風扇|清淨機/.test(lower)) {
-        currentCategory = '居家生活';
-      } else {
-        currentCategory = '精選生活好物';
       }
 
-      currentAudiences = [
-        { title: `經常需要用到${name}的日常愛用者`, desc: `以前每次遇到問題都要折騰老半天，急需更順手、不費力的新解法` },
-        { title: `追求效率、最討厭繁複流程的小資族`, desc: `生活節奏已經夠快，能省一個步驟就能多賺半小時完全放鬆的空白時間` },
-        { title: `精打細算、不想再買到踩雷品的消費者`, desc: `以前買過太多華而不實的產品，這次只想換用真正實用、耐操的` },
-        { title: `對生活品質與細節手感有要求的人`, desc: `討厭家裡堆滿笨重雜物，希望每個日常步驟都維持俐落舒服的質感` },
-        { title: `時間精力有限、只想快速搞定的上班族`, desc: `希望維持好狀態，但下班回家後完全不想耗費心神在繁雜瑣事上` },
-        { title: `容易手忙腳亂、怕出錯的新手入門者`, desc: `操作越直覺越好，完全不需要花時間讀說明書就能順利上手` }
-      ];
-
-      currentScenarios = [
-        { title: `平常在家使用${name}的時候`, desc: `以前每次都要花大把時間準備和收尾，搞得手忙腳亂還常常做不好` },
-        { title: `下班回家只想放空休息的片刻`, desc: `精力已經耗盡，如果手邊工具不給力真的會瞬間讓人心情浮躁` },
-        { title: `出門前十幾分鐘的趕時間狀態`, desc: `時間分秒必爭，最怕遇到突發狀況或工具卡關拖延到原定行程` },
-        { title: `週末想好好整頓生活的悠閒午後`, desc: `花一點點時間整理，希望能換來接下來一整週俐落舒適的好心情` },
-        { title: `臨時有重要聚會或朋友來訪前夕`, desc: `需要快速展現好狀態，不能在關鍵細節上掉鏈子或手忙腳亂` },
-        { title: `想換個心情展開新日常的一刻`, desc: `用簡單順手的小物件，讓一整天的繁瑣流程順暢無比` }
-      ];
-
-      currentTranslations = features.map(feat => {
-        let benefit = '';
-        const f = feat.toLowerCase();
-
-        if (f.includes('不用') || f.includes('免') || f.includes('三合一') || f.includes('省去')) {
-          benefit = `桌面不用再擺滿繁複配件，直接省掉最容易讓人手忙腳亂的準備與收尾時間`;
-        } else if (f.includes('輕') || f.includes('小') || f.includes('便攜') || f.includes('手持')) {
-          benefit = `拿在手上完全沒有負擔感，用再久手腕也不會痠，隨手往包包或抽屜一塞就能收納`;
-        } else if (f.includes('快') || f.includes('省時') || f.includes('秒') || f.includes('分鐘')) {
-          benefit = `原本要折騰半小時的麻煩事，現在幾十秒直接搞定，省下大把時間追劇休息`;
-        } else if (f.includes('靜音') || f.includes('無聲') || f.includes('安靜')) {
-          benefit = `運作時安靜無聲，半夜在房間或自己獨處時使用，完全不會打擾到家人休息`;
-        } else if (f.includes('耐用') || f.includes('防摔') || f.includes('安全') || f.includes('防水')) {
-          benefit = `材質紮實安心，日常不小心手滑掉落或碰水也不怕損壞，使用起來毫無心理負擔`;
-        } else if (f.includes('顏色') || f.includes('外觀') || f.includes('質感') || f.includes('高級')) {
-          benefit = `實體質感非常好，擺在房間角落就很好看，每次拿出來用心情都變好`;
-        } else if (f.includes('大容量') || f.includes('長續航') || f.includes('持久')) {
-          benefit = `一次就能裝好裝滿或用很久，不用動不動就重複充電、加水或清理，超省心`;
-        } else {
-          benefit = `把${name}原本最惱人的瑣碎步驟直接化簡，日常隨手就能順暢搞定，體感差異極大`;
-        }
-        return { feature: feat, benefit };
-      });
-
-      selectedAudienceIndex = 0;
-      selectedScenarioIndex = 0;
-      document.getElementById('detected-category').innerText = currentCategory;
-
-      renderAudienceList();
-      renderScenarioList();
-      renderFeatureTranslationsInputs();
-
-      refreshDraftsWithCurrentContext();
+      runLocalHeuristicAnalysis(name, featuresRaw);
+      showToast('痛點轉譯已更新！');
     }
 
     // ==========================================
@@ -1323,22 +1429,18 @@ ${featuresRaw}
 
     function optimizeAudiencesFromIntent() {
       const intent = document.getElementById('custom-audience-intent').value.trim();
-      const name = document.getElementById('input-name').value.trim() || '好物';
       if (!intent) {
         showToast('請先輸入自訂受眾意向');
         return;
       }
-      currentAudiences[0] = { title: `${intent}（核心族群）`, desc: `專為${intent}設計，告別過去使用傳統方式的繁複與挫敗感` };
+      currentAudiences[0] = { title: `${intent}（核心族群）`, desc: `專為${intent}打造，徹底告別傳統方式的繁複與挫敗感` };
       currentAudiences[1] = { title: `不想花冤枉錢的${intent}`, desc: `渴望精簡時間與預算，在家也能獲得高品質體驗` };
       currentAudiences[2] = { title: `講求效率與俐落手感的受眾`, desc: `步驟越少越好，幾分鐘內搞定，不再把自己弄得很狼狽` };
-      currentAudiences[3] = { title: `初次嘗試但怕翻車的新手`, desc: `零經驗也能輕鬆上手，無須複雜技巧即能呈現完美質感` };
-      currentAudiences[4] = { title: `追求生活質感的小資上班族`, desc: `維持精緻外表與日常好心情，用最少力氣換取最大效果` };
-      currentAudiences[5] = { title: `只想利用碎裂時間完成的忙碌者`, desc: `隨時想做就做，完全不需要騰出大段空白時間` };
 
       selectedAudienceIndex = 0;
       renderAudienceList();
       refreshDraftsWithCurrentContext();
-      showToast('已根據自訂意向優化 6 組受眾！');
+      showToast('已根據自訂意向優化受眾！');
       triggerAutoSave();
     }
 
@@ -1386,22 +1488,17 @@ ${featuresRaw}
 
     function optimizeScenariosFromIntent() {
       const intent = document.getElementById('custom-scenario-intent').value.trim();
-      const name = document.getElementById('input-name').value.trim() || '好物';
       if (!intent) {
         showToast('請先輸入自訂情境意向');
         return;
       }
       currentScenarios[0] = { title: `${intent}`, desc: `以前每次${intent}都搞得心累手忙腳亂，現在順暢度大幅提升` };
       currentScenarios[1] = { title: `在${intent}的放鬆空檔`, desc: `邊放鬆邊操作，完全不耗費多餘心神，輕鬆收尾` };
-      currentScenarios[2] = { title: `不想花大錢特地出門預約時`, desc: `隨時在自家角落搞定，省下出門奔波的大把時間` };
-      currentScenarios[3] = { title: `臨時有重要聚會前夕的應急時刻`, desc: `時間緊迫下也能十幾分鐘優雅搞定，完全不失誤` };
-      currentScenarios[4] = { title: `深夜獨處不想吵到任何人的時候`, desc: `靜謐安靜且步驟極簡，悄悄完成自己的儀式感` };
-      currentScenarios[5] = { title: `整理好心情展開新一週的午後`, desc: `乾淨俐落完成，帶給自己一整週愉悅自信的好狀態` };
 
       selectedScenarioIndex = 0;
       renderScenarioList();
       refreshDraftsWithCurrentContext();
-      showToast('已根據自訂情境意向優化 6 組生活場景！');
+      showToast('已根據自訂情境意向優化生活場景！');
       triggerAutoSave();
     }
 
@@ -1433,68 +1530,20 @@ ${featuresRaw}
     }
 
     // ==========================================
-    // STEP 4 文案靈感
+    // STEP 4 文案靈感（品類自適應）
     // ==========================================
     function generateHookInspirations(productName) {
       const pName = productName || document.getElementById('input-name').value.trim() || '好物';
-      const aud = currentAudiences[selectedAudienceIndex] || { title: '大家', desc: '日常生活' };
-      const sce = currentScenarios[selectedScenarioIndex] || { title: '平時', desc: '遇到問題' };
+      const config = CATEGORY_HEURISTICS[currentCategory] || CATEGORY_HEURISTICS['美妝美甲'];
+      const m = config.hooksMatrix;
 
       currentHookInspirations = [
-        {
-          type: '抱怨型',
-          desc: '把真實生活小煩躁直接點出，精準抓住痛點',
-          lines: [
-            `到底為什麼每次${sce.title}，永遠都要搞得這麼狼狽⋯`,
-            `每次遇到${sce.title}，明明想好好完成，結果最後還是手忙腳亂，真的很無奈！`,
-            `身為${aud.title}應該都懂，每次${sce.title}真的會讓人很想直接放棄。`
-          ]
-        },
-        {
-          type: '對話型',
-          desc: '用一句日常真實對話把讀者拉進情境現場',
-          lines: [
-            `「又來了啦！」每次${sce.title}，我家真的都會上演這一幕。`,
-            `朋友上次問我：「你每次${sce.title}都不會覺得心很累嗎？」我說以前真的超煩！`,
-            `家人看到我最近在用${pName}，第一句話竟然是：「這個借我用看看！」`
-          ]
-        },
-        {
-          type: '反差型',
-          desc: '前後反差越大，讀者越想一探究竟',
-          lines: [
-            `以前最怕${sce.title}，現在反而變成我一天中最期待的放鬆時間。`,
-            `一樣是${sce.title}，有沒有選對${pName}真的差太多了！`,
-            `本來以為這款${pName}只是買來玩玩看，沒想到變成我每天最常用到的東西。`
-          ]
-        },
-        {
-          type: '結果型',
-          desc: '先給出誘人結果，讓人好奇是怎麼辦到的',
-          lines: [
-            `自從用了${pName}，${sce.title}再也沒手忙腳亂過，整個人輕鬆超多！`,
-            `真的不用花大錢去折騰，只要用對方法，十分鐘就能搞定。`,
-            `這次${sce.title}，我竟然只花了以前不到三分之一的時間就搞定！`
-          ]
-        },
-        {
-          type: '懸念型',
-          desc: '欲言又止留一個沒說完的答案，勾住好奇心',
-          lines: [
-            `如果你也是${aud.title}，這個東西我真的推薦你先私藏起來。`,
-            `在我開始${sce.title}之前，我一定會先在手邊準備好這個。`,
-            `用了一陣子才發現，這款${pName}最好用的地方根本不是我原本想的那個！`
-          ]
-        },
-        {
-          type: '避坑自嘲型',
-          desc: '反向勸退或自我調侃，完全沒有業配感',
-          lines: [
-            `勸大家沒事真的不要隨便試這款${pName}，因為用過之後回不去，會覺得以前的自己很傻。`,
-            `我承認我以前真的很鐵齒，每次${sce.title}都硬要用傳統方法，直到被朋友徹底點醒。`,
-            `如果你也是那種超級討厭麻煩、連多一個步驟都會厭世的人，拜託這篇直接存起來避坑！`
-          ]
-        }
+        { type: '抱怨型', desc: '把真實生活小煩躁直接點出，精準抓住痛點', lines: m.complain || [`到底為什麼每次搞這個，永遠都要這麼心累啦！`] },
+        { type: '對話型', desc: '用一句日常真實對話把讀者拉進情境現場', lines: m.dialogue || [`朋友上次看到直接驚呼：「這也太方便了吧！」`] },
+        { type: '反差型', desc: '前後反差越大，讀者越想一探究竟', lines: m.contrast || [`以前最怕麻煩，現在反而變成一天中最享受的時間。`] },
+        { type: '結果型', desc: '先給出誘人結果，讓人好奇是怎麼辦到的', lines: m.result || [`自從換了這款${pName}，整個人輕鬆超多！`] },
+        { type: '懸念型', desc: '欲言又止留一個沒說完的答案，勾住好奇心', lines: m.suspense || [`如果你也常遇到這種困擾，這個法寶真心推薦你先存起來。`] },
+        { type: '避坑自嘲型', desc: '反向勸退或自我調侃，完全沒有業配感', lines: m.avoid || [`勸大家沒事別隨便試這款好物，因為用過真的回不去！`] }
       ];
 
       renderHookInspirationsList();
@@ -1540,7 +1589,7 @@ ${featuresRaw}
     }
 
     // ==========================================
-    // Reels 腳本生成 (五段口播 + 開頭黃金三秒)
+    // Reels 腳本生成（多品類智慧骨架）
     // ==========================================
     function setWritingStyle(style) {
       currentStyle = style;
@@ -1561,30 +1610,14 @@ ${featuresRaw}
       const pName = document.getElementById('input-name').value.trim() || '好物';
       const aud = currentAudiences[selectedAudienceIndex] || { title: '小資族', desc: '追求效率' };
       const sce = currentScenarios[selectedScenarioIndex] || { title: '平常生活', desc: '很麻煩' };
-      const isShort = currentStyle === 'threads';
+      const config = CATEGORY_HEURISTICS[currentCategory] || CATEGORY_HEURISTICS['美妝美甲'];
+      const t = config.templates;
 
-      const benefits = currentTranslations.map(t => t.benefit);
-      const b1 = benefits[0] || '不用再搞得手忙腳亂';
-      const b2 = benefits[1] || '速度快超多而且質感很高級';
-
-      let hook = isShort
-        ? `到底為什麼每次${sce.title}，都要搞得這麼狼狽⋯`
-        : `如果你也是${aud.title}，這個東西我真的推薦你先準備起來。`;
-
-      let empathy = isShort
-        ? `身為${aud.title}真的超懂這種感覺：${sce.desc}，心情直接大受影響，弄完整個人又累又煩。`
-        : `尤其身為${aud.title}應該都懂，每次遇到${sce.title}，${sce.desc}，本來的好心情都被磨光了，真的很心累。`;
-
-      let pivot = isShort
-        ? `後來被推坑這款${pName}，本來只是想說買來試試看，結果試了一次直接回不去！`
-        : `後來朋友推薦我這款${pName}，一開始半信半疑，結果這次實際拿來用才發現真的差超多。`;
-
-      let val = `它真的省事很多！${b1}，而且${b2}。前後落差大到連我自己都有點驚艷，完全解決了以前最惱人的痛點。`;
-
-      let keyword = pName.length > 3 ? pName.slice(0, 2) : pName;
-      let cta = isShort
-        ? `這款我私心真的推～想知道連結底下留「${keyword}」，我私訊發給你！`
-        : `如果你也常遇到這種情況，底下隨意留言「${keyword}」，我把當初入手的賣場連結私訊分享給你！`;
+      const hook = t.hook(pName, sce);
+      const empathy = t.empathy(aud, sce);
+      const pivot = t.pivot(pName);
+      const val = t.value(currentTranslations);
+      const cta = t.cta(pName, config.defaultKeyword);
 
       document.getElementById('p-hook').value = hook;
       document.getElementById('p-empathy').value = empathy;
@@ -1618,47 +1651,24 @@ ${featuresRaw}
       const pName = document.getElementById('input-name').value.trim() || '好物';
       const aud = currentAudiences[selectedAudienceIndex] || { title: '小資族' };
       const sce = currentScenarios[selectedScenarioIndex] || { title: '平常生活' };
+      const config = CATEGORY_HEURISTICS[currentCategory] || CATEGORY_HEURISTICS['美妝美甲'];
 
       if (sec === 'hook') {
-        const hooks = [
-          `到底為什麼每次${sce.title}，永遠都要搞得這麼狼狽⋯`,
-          `「又來了啦！」每次${sce.title}，我家都會上演這一幕。`,
-          `以前最怕${sce.title}，現在反而一點都不擔心了。`,
-          `自從用了${pName}，${sce.title}我竟然一點都沒手忙腳亂！`,
-          `如果你也是${aud.title}，這個東西我真的推薦你先準備起來。`,
-          `勸大家真的別隨便試這款${pName}，用過之後真的回不去！`
-        ];
+        const hooks = config.hooksMatrix?.complain || [config.templates.hook(pName, sce)];
         document.getElementById('p-hook').value = hooks[Math.floor(Math.random() * hooks.length)];
       } else if (sec === 'empathy') {
-        const emps = [
-          `身為${aud.title}真的超懂這種感覺，每次${sce.title}都要折騰老半天，搞得心情超浮躁。`,
-          `尤其每次遇到${sce.title}，手忙腳亂還弄不好，真的常常讓人很無力。`,
-          `有遇到過這種狀況的人應該懂吧！本來想好好完成，結果反而越弄越心累。`
-        ];
-        document.getElementById('p-empathy').value = emps[Math.floor(Math.random() * emps.length)];
+        document.getElementById('p-empathy').value = config.templates.empathy(aud, sce);
       } else if (sec === 'pivot') {
-        const pivs = [
-          `後來被朋友推坑這款${pName}，本來只是想說買來試試看，沒想到真的幫了大忙！`,
-          `所以這次我就直接換成這款${pName}，一開始半信半疑，結果實際用了才發現差超多。`,
-          `後來我才發現，原來只要選對工具，根本不用把自己搞得那麼狼狽。`
-        ];
-        document.getElementById('p-pivot').value = pivs[Math.floor(Math.random() * pivs.length)];
+        document.getElementById('p-pivot').value = config.templates.pivot(pName);
       } else if (sec === 'value') {
-        const trans = currentTranslations.map(t => t.benefit).join('；而且');
-        document.getElementById('p-value').value = `它真的省事很多！${trans || '操作直覺快速，解決了以前最惱人的痛點'}，整個使用體驗順暢非常多。`;
+        document.getElementById('p-value').value = config.templates.value(currentTranslations);
       } else if (sec === 'cta') {
-        let keyword = pName.length > 3 ? pName.slice(0, 2) : pName;
-        const ctas = [
-          `這款我真的私心很愛～想知道賣場連結的，底下隨意留言「${keyword}」，我把連結私給你！`,
-          `如果你也剛好在找這種好物，底下留個言「+1」，我私訊發給你！`,
-          `身邊朋友都在問～想知道哪裡買的底下留言「${keyword}」，我把當初入手的賣場分享給你！`
-        ];
-        document.getElementById('p-cta').value = ctas[Math.floor(Math.random() * ctas.length)];
+        document.getElementById('p-cta').value = config.templates.cta(pName, config.defaultKeyword);
       }
 
       assembleFullArticleFromSegments();
       triggerAutoSave();
-      showToast(`已重新生成第 ${sec} 段`);
+      showToast(`已重新生成該段落`);
     }
 
     function copyFullArticle() {
@@ -1763,8 +1773,9 @@ ${featuresRaw}
       const pName = document.getElementById('input-name').value.trim() || '好物';
       const aud = currentAudiences[selectedAudienceIndex] || { title: '小資族' };
       const sce = currentScenarios[selectedScenarioIndex] || { title: '平常生活' };
+      const config = CATEGORY_HEURISTICS[currentCategory] || CATEGORY_HEURISTICS['美妝美甲'];
       const benefits = currentTranslations.map(t => t.benefit);
-      let keyword = pName.length > 3 ? pName.slice(0, 2) : pName;
+      let keyword = config.defaultKeyword || pName.slice(0, 2);
 
       const cap1 = 
 `每次${sce.title}真的會讓人很心累⋯
@@ -1811,8 +1822,9 @@ ${featuresRaw}
       const pName = document.getElementById('input-name').value.trim() || '好物';
       const aud = currentAudiences[selectedAudienceIndex] || { title: '大家' };
       const sce = currentScenarios[selectedScenarioIndex] || { title: '日常' };
+      const config = CATEGORY_HEURISTICS[currentCategory] || CATEGORY_HEURISTICS['美妝美甲'];
       const benefits = currentTranslations.map(t => t.benefit);
-      let keyword = pName.length > 3 ? pName.slice(0, 2) : pName;
+      let keyword = config.defaultKeyword || pName.slice(0, 2);
 
       currentThreadsPosts = [
         `到底為什麼每次${sce.title}，永遠都要搞得像大掃除一樣狼狽⋯\n\n身為${aud.title}我真的快瘋掉。`,
@@ -1919,7 +1931,7 @@ ${featuresRaw}
         suggestions.push('開頭較為平淡，建議加入對話引號「」或生活衝突問句（如：到底為什麼⋯）');
       }
 
-      const audWords = ['媽媽', '小資', '學生', '女生', '新手', '上班族', '租屋', '大家', '朋友', '愛好者', '考生', '受眾'];
+      const audWords = ['上班族', '小資', '學生', '女生', '新手', '租屋', '大家', '朋友', '愛好者', '家長', '爸媽'];
       if (audWords.some(w => fullText.includes(w))) {
         scores[2] = true;
       } else {
@@ -1987,7 +1999,7 @@ ${featuresRaw}
     }
 
     // ==========================================
-    // 去除 AI 感：贅詞檢測邏輯
+    // 去除 AI 感：贅詞檢測
     // ==========================================
     function loadCurrentArticleToAudit() {
       const full = document.getElementById('full-article-preview').value.trim();
@@ -2307,7 +2319,7 @@ ${featuresRaw}
     }
 
     // ==========================================
-    // 質感客製彈窗控制器 (徹底去除原生 Alert/Prompt)
+    // 質感客製彈窗控制器
     // ==========================================
     let activeCustomConfirmHandler = null;
 

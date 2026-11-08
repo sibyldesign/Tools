@@ -578,12 +578,13 @@
           </div>
           <div class="flex gap-1.5">
             <button onclick="loadFluffPreset('bigcity')" class="px-2 py-0.5 bg-white/10 hover:bg-white/20 text-stone-200 rounded text-[10px]">巨城手扶梯</button>
+            <button onclick="loadFluffPreset('blindbox')" class="px-2 py-0.5 bg-white/10 hover:bg-white/20 text-stone-200 rounded text-[10px]">盲盒隱藏版</button>
             <button onclick="loadFluffPreset('blanket')" class="px-2 py-0.5 bg-white/10 hover:bg-white/20 text-stone-200 rounded text-[10px]">棉被置入</button>
             <button onclick="loadFluffPreset('system')" class="px-2 py-0.5 bg-white/10 hover:bg-white/20 text-stone-200 rounded text-[10px]">預約系統</button>
           </div>
         </div>
         <p class="text-xs text-stone-300 leading-relaxed">
-          不用跑前面 1-4 步驟！直接輸入今天遇到的生活鳥事或想吐槽的日常，主文只勾情緒與共感（抓泛流量），<strong>留言區依序排好 5 階分鏡轉單</strong>。
+          不用跑前面 1-4 步驟！直接輸入今天遇到的生活鳥事或想吐槽的日常，系統會自動根據內容語義產生對應文案，<strong>留言區依序排好 5 階分鏡轉單</strong>。
         </p>
       </div>
 
@@ -600,26 +601,25 @@
           </button>
         </div>
 
-        <!-- 生活事件輸入 -->
+        <!-- 生活事件輸入（含一鍵清空） -->
         <div>
           <div class="flex items-center justify-between mb-1">
             <label class="block text-xs font-bold text-brand-900">生活荒謬事件 / 吐槽點</label>
-            <span class="text-[10px] text-stone-400">人事時地物 ＋ 崩潰點</span>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] text-stone-400">人事時地物 ＋ 崩潰點</span>
+              <button type="button" onclick="clearFluffEventInput()" class="text-[11px] text-stone-500 hover:text-stone-900 underline font-semibold">清空</button>
+            </div>
           </div>
-          <textarea id="fluff-event-input" rows="3" class="w-full bg-[#FAF8F5] border border-[#E7DFD5] rounded-xl p-3 text-xs text-brand-900 focus:outline-none focus:ring-1 focus:ring-brand-500 leading-relaxed resize-y" placeholder="例：今天去巨城要上去手扶梯快到壞掉，要離開下扶梯又在快到時壞掉，而且是不同台..."></textarea>
+          <textarea id="fluff-event-input" rows="3" class="w-full bg-[#FAF8F5] border border-[#E7DFD5] rounded-xl p-3 text-xs text-brand-900 focus:outline-none focus:ring-1 focus:ring-brand-500 leading-relaxed resize-y" placeholder="例：看到森林家族新款盲包，老公說買啊～～抽到隱藏版..."></textarea>
         </div>
 
-        <!-- 情緒字眼快選標籤 -->
+        <!-- 情緒字眼標籤池（可新增、可刪除） -->
         <div>
-          <label class="block text-[11px] font-semibold text-stone-500 mb-1.5">點擊插入情緒開場：</label>
-          <div class="flex flex-wrap gap-1.5">
-            <button type="button" onclick="addFluffEmotion('太扯了吧！')" class="px-2 py-0.5 bg-[#FAF8F5] hover:bg-brand-100 text-stone-700 rounded-md text-[11px] border border-[#E7DFD5]">太扯了吧！</button>
-            <button type="button" onclick="addFluffEmotion('我真的會笑死')" class="px-2 py-0.5 bg-[#FAF8F5] hover:bg-brand-100 text-stone-700 rounded-md text-[11px] border border-[#E7DFD5]">我真的會笑死</button>
-            <button type="button" onclick="addFluffEmotion('今天到底是什麼地獄副本？？？')" class="px-2 py-0.5 bg-[#FAF8F5] hover:bg-brand-100 text-stone-700 rounded-md text-[11px] border border-[#E7DFD5]">地獄副本？？？</button>
-            <button type="button" onclick="addFluffEmotion('大傻眼')" class="px-2 py-0.5 bg-[#FAF8F5] hover:bg-brand-100 text-stone-700 rounded-md text-[11px] border border-[#E7DFD5]">大傻眼</button>
-            <button type="button" onclick="addFluffEmotion('現在是能笑的時候嗎？')" class="px-2 py-0.5 bg-[#FAF8F5] hover:bg-brand-100 text-stone-700 rounded-md text-[11px] border border-[#E7DFD5]">現在是能笑的時候嗎？</button>
-            <button type="button" onclick="addFluffEmotion('我整個人原地裂開')" class="px-2 py-0.5 bg-[#FAF8F5] hover:bg-brand-100 text-stone-700 rounded-md text-[11px] border border-[#E7DFD5]">原地裂開</button>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-[11px] font-semibold text-stone-600">插入情緒開場（點擊文字插入，點叉號刪除）：</label>
+            <button type="button" onclick="openAddEmotionDialog()" class="text-[11px] text-brand-700 hover:text-brand-900 font-bold">+ 新增標籤</button>
           </div>
+          <div class="flex flex-wrap gap-1.5" id="fluff-emotion-pills-container"></div>
         </div>
 
         <!-- 導購產品輸入欄位（選產品模式時展開） -->
@@ -2553,10 +2553,11 @@
     }
 
     // ==========================================
-    // 獨立「生活廢文/轉單」分頁專用邏輯
+    // 獨立「生活廢文/轉單」專用邏輯（語義對應 + 標籤增刪 + 一鍵清空）
     // ==========================================
     let currentFluffMode = 'pure_fluff';
 
+    // 預設示範
     const FLUFF_PRESETS = {
       bigcity: {
         mode: 'pure_fluff',
@@ -2565,22 +2566,115 @@
         benefit: '',
         keyword: ''
       },
+      blindbox: {
+        mode: 'pure_fluff',
+        event: '看到森林家族新款盲包，老公說買啊～～結果一抽直接抽到隱藏版！',
+        product: '',
+        benefit: '',
+        keyword: ''
+      },
       blanket: {
         mode: 'product_funnel',
-        event: '今天去巨城爬手扶梯整雙腿快廢掉，回家只想直接裝死。還好洗完澡撲倒在床上那一秒，整個人被軟軟包住直接原地重生⋯',
+        event: '今天在外面奔波一整天雙腿快廢掉，回家只想直接裝死。還好洗完澡撲倒在床上那一秒，整個人被軟軟包住直接原地重生⋯',
         product: '正韓四季微涼被',
         benefit: '整件丟洗衣機水洗不結塊、超細纖維像麻糬一樣軟糯親膚',
         keyword: '棉被'
       },
       system: {
         mode: 'product_funnel',
-        event: '一人工作室日常：左手拿磨甲機做客人，右手想抓手機回訊息，客人問我「妳手不會抽筋嗎？」差點抽筋，所以我現在直接叫他們自己按網址約🙃',
+        event: '一人工作室日常：左手拿磨甲機做客人，右手想抓手機回訊息，客人問我「妳手不會抽筋嗎？」差點抽筋，所以我現在直接叫他們自己按網址約。',
         product: '美業微型預約系統',
         benefit: '客人免載App線上自選時段、自動排進行事曆、前一天自動通知防放鳥',
         keyword: '預約'
       }
     };
 
+    // 1. 情緒標籤庫（支援 LocalStorage 儲存）
+    function getStoredFluffEmotions() {
+      try {
+        const stored = JSON.parse(localStorage.getItem('copywriter_fluff_emotions_v1'));
+        if (Array.isArray(stored) && stored.length > 0) return stored;
+      } catch (e) {}
+      const defaultEmotions = [
+        '太扯了吧！',
+        '我真的會笑死',
+        '今天到底是什麼地獄副本？？？',
+        '大傻眼',
+        '現在是能笑的時候嗎？',
+        '我整個人原地裂開',
+        '有夠離譜',
+        '這操作我看傻了'
+      ];
+      localStorage.setItem('copywriter_fluff_emotions_v1', JSON.stringify(defaultEmotions));
+      return defaultEmotions;
+    }
+
+    // 渲染情緒標籤按鈕（含刪除鈕）
+    function renderFluffEmotionPills() {
+      const container = document.getElementById('fluff-emotion-pills-container');
+      if (!container) return;
+      const list = getStoredFluffEmotions();
+
+      container.innerHTML = list.map((item, idx) => `
+        <div class="inline-flex items-center bg-[#FAF8F5] border border-[#E7DFD5] rounded-md text-[11px] text-stone-700 overflow-hidden hover:border-brand-500 transition-colors">
+          <button type="button" onclick="insertFluffEmotion('${escapeForAttr(item)}')" class="px-2 py-1 hover:bg-brand-50 font-medium">
+            ${escapeHTML(item)}
+          </button>
+          <button type="button" onclick="deleteFluffEmotion(${idx})" class="px-1.5 py-1 text-stone-400 hover:text-red-600 hover:bg-stone-100 border-l border-[#E7DFD5] transition-colors" title="刪除此標籤">
+            ×
+          </button>
+        </div>
+      `).join('');
+    }
+
+    // 點擊插入情緒開場
+    function insertFluffEmotion(phrase) {
+      const el = document.getElementById('fluff-event-input');
+      if (!el) return;
+      el.value = phrase + '\n' + el.value;
+      el.focus();
+    }
+
+    // 新增情緒標籤
+    function openAddEmotionDialog() {
+      openCustomDialog({
+        title: '新增情緒開場標籤',
+        desc: '請輸入常用情緒短語（例如：瘋掉！、這能忍？、太誇張了吧）：',
+        bodyHtml: `<input type="text" id="dlg-new-emotion-input" placeholder="輸入情緒短語..." class="w-full bg-white border border-[#E7DFD5] rounded-xl px-3 py-2 text-xs text-brand-900 focus:outline-none focus:ring-1 focus:ring-brand-500">`,
+        onConfirm: () => {
+          const val = document.getElementById('dlg-new-emotion-input').value.trim();
+          if (!val) return;
+          const list = getStoredFluffEmotions();
+          if (!list.includes(val)) {
+            list.push(val);
+            localStorage.setItem('copywriter_fluff_emotions_v1', JSON.stringify(list));
+            renderFluffEmotionPills();
+            showToast('已新增情緒標籤');
+          }
+          closeCustomDialog();
+        }
+      });
+    }
+
+    // 刪除情緒標籤
+    function deleteFluffEmotion(idx) {
+      const list = getStoredFluffEmotions();
+      list.splice(idx, 1);
+      localStorage.setItem('copywriter_fluff_emotions_v1', JSON.stringify(list));
+      renderFluffEmotionPills();
+    }
+
+    // 一鍵清空生活事件輸入框
+    function clearFluffEventInput() {
+      const el = document.getElementById('fluff-event-input');
+      if (el) {
+        el.value = '';
+        el.focus();
+        showToast('已清空內容');
+      }
+    }
+
+    // 模式切換
     function setFluffMode(mode) {
       currentFluffMode = mode;
       const btnPure = document.getElementById('btn-fluff-pure');
@@ -2609,36 +2703,88 @@
       setFluffMode(data.mode);
     }
 
-    function addFluffEmotion(phrase) {
-      const el = document.getElementById('fluff-event-input');
-      el.value = phrase + '\n' + el.value;
-      el.focus();
-    }
-
+    // ==========================================
+    // 核心生成：動態關聯輸入內容的語義分析引擎
+    // ==========================================
     function generateFluffThreads() {
-      const eventText = document.getElementById('fluff-event-input').value.trim() || '今天出門遇到一堆荒謬鳥事';
+      const eventText = document.getElementById('fluff-event-input').value.trim() || '今天出門遇到一堆荒謬事';
       const prod = document.getElementById('fluff-prod-name').value.trim() || '好物';
       const benefit = document.getElementById('fluff-prod-benefit').value.trim() || '省掉所有繁雜步驟，三兩下搞定';
       const kw = document.getElementById('fluff-prod-kw').value.trim() || '好物';
+
+      const lower = eventText.toLowerCase();
+
+      // 語意主題辨識（判斷是盲盒/抽獎、樓梯/體力、工作、家庭、還是通用日常）
+      const isBlindBoxOrLuck = /盲盒|盲包|抽到|隱藏版|一番賞|扭蛋|開箱|中獎|手氣|公仔|三麗鷗|森林家族/.test(lower);
+      const isStairsOrWalking = /手扶梯|電梯|樓梯|爬樓梯|鐵腿|跑步|運動|走很多路|巨城|百貨/.test(lower);
+      const isWork = /加班|老闆|主管|同事|開會|打卡|下班|客戶|工作|辦公室/.test(lower);
+      const isHusbandOrFamily = /老公|男友|另一半|家事|洗衣服|小孩|兒子|女兒/.test(lower);
 
       let posts = [];
       let comments = [];
 
       if (currentFluffMode === 'pure_fluff') {
-        // 純生活廢文（衝泛流量）
-        posts = [
-          `${eventText}\n\n我真的會笑死，今天是在暗示我運動量不足嗎🙃誰懂這種崩潰感？？？`,
-          `太扯了吧！\n${eventText}\n\n到底誰能懂這種原地裂開的荒謬感？現在是能笑的時候嗎？`,
-          `勸大家今天沒事真的別亂跑⋯\n${eventText}\n\n走完我整雙腿已經不是自己的了，明天上班一定鐵腿。`
-        ];
+        // 【純生活廢文模式】依內容精準輸出主文與留言
+        if (isBlindBoxOrLuck) {
+          posts = [
+            `${eventText}\n\n這手氣我真的會笑死，今天運氣直接開到外太空，誰懂這種拆開時心跳漏一拍的快樂！`,
+            `太扯了吧！\n${eventText}\n\n本來只想隨手試試看，現在看著它傻笑半小時，現在是能這麼幸運的時候嗎？`,
+            `勸大家沒事真的別亂買⋯\n${eventText}\n\n拆開那一秒心跳直接漏一拍，一整天被爛事消耗的能量原地被治癒！`
+          ];
+          comments = [
+            { tag: '置頂釣魚留言', desc: '吸引同好狂刷留言吸歐氣', text: `有沒有同好也買過這款？快告訴我這隻隱藏版機率到底有多低！` },
+            { tag: '幽默生活細節', desc: '展現真實人設', text: `回到家立刻給它找了最顯眼的 C 位擺好，看著它心情好上一整天。` },
+            { tag: '互動反問引導', desc: '激發粉絲分享自己的戰績', text: `大家最近買東西或抽盲盒手氣如何？說出來讓大家吸一下好運！` }
+          ];
+        } else if (isStairsOrWalking) {
+          posts = [
+            `${eventText}\n\n我真的會笑死，今天是在暗示我運動量不足嗎？誰懂這種雙腿發抖的崩潰感！`,
+            `太扯了吧！\n${eventText}\n\n到底誰能懂這種原地裂開的荒謬感？現在是能笑的時候嗎？`,
+            `勸大家今天沒事真的別亂跑⋯\n${eventText}\n\n走完全程我整雙腿已經不是自己的了，明天上班一定鐵腿。`
+          ];
+          comments = [
+            { tag: '置頂釣魚留言', desc: '引爆地方苦主共感', text: `有沒有今天也在現場爬樓梯的苦主？讓我知道我不孤單。` },
+            { tag: '幽默自嘲延伸', desc: '加深活人真實感', text: `回到家坐在沙發上，我雙腿還在隱隱發抖，明天上班一定會鐵腿。` },
+            { tag: '反問留言互動', desc: '驅動讀者留言分享倒楣事', text: `大家最近遇過最荒謬的倒楣事是什麼？說出來讓我安慰一下。` }
+          ];
+        } else if (isWork) {
+          posts = [
+            `${eventText}\n\n我真的會笑死，今天到底是什麼職場地獄副本？現在是能笑的時候嗎？`,
+            `太扯了吧！\n${eventText}\n\n到底誰懂這種當場原地裂開的心情？社畜的理智線今天徹底斷光。`,
+            `勸大家上班遇到這種事真的深呼吸三次⋯\n${eventText}\n\n經歷完我整個人發呆了十分鐘，這口氣真的太難吞下去了。`
+          ];
+          comments = [
+            { tag: '置頂釣魚留言', desc: '引發上班族強烈共鳴', text: `有沒有同款苦主今天也在經歷這種鳥事？快來簽到讓我取暖一下。` },
+            { tag: '幽默自嘲延伸', desc: '拉近與粉絲距離', text: `下班打卡的那一刻，我甚至懷疑自己今天到底為了幾千塊在受什麼罪。` },
+            { tag: '互動反問引導', desc: '激發職場吐槽爆量互動', text: `大家上班遇過最讓人白眼翻到後腦勺的事情是什麼？留言區開放發洩。` }
+          ];
+        } else if (isHusbandOrFamily) {
+          posts = [
+            `${eventText}\n\n我真的會笑死，男人的邏輯到底是什麼迷之操作？誰懂這種無奈感！`,
+            `太扯了吧！\n${eventText}\n\n這種神展開我看傻了，現在是能笑的時候嗎？`,
+            `生活裡最讓人哭笑不得的瞬間：\n${eventText}\n\n深呼吸三次，告訴自己這都是自己選的。`
+          ];
+          comments = [
+            { tag: '置頂釣魚留言', desc: '引發人妻/伴侶同理共鳴', text: `快告訴我不是只有我家的隊友會這樣做？留言區讓我知道我不孤單。` },
+            { tag: '幽默自嘲延伸', desc: '建立幽默家庭日常人設', text: `有時候真的想把他送去二手拍賣，看能不能換兩杯奶茶回來。` },
+            { tag: '互動反問引導', desc: '引爆吐槽大戰', text: `大家的另一半最近幹過最荒謬的事是什麼？說出來讓大家笑一下。` }
+          ];
+        } else {
+          // 通用生活廢文（嚴禁硬塞爬樓梯或運動字眼）
+          posts = [
+            `${eventText}\n\n我真的會笑死，今天到底是什麼荒謬展開？誰懂這種當場愣住的心情！`,
+            `太扯了吧！\n${eventText}\n\n到底誰能懂這種原地裂開的感覺？現在是能笑的時候嗎？`,
+            `勸大家遇到這種事真的深呼吸三次⋯\n${eventText}\n\n經歷完我整個人在原地發呆五分鐘，今天真的太離譜了。`
+          ];
+          comments = [
+            { tag: '置頂釣魚留言', desc: '引爆共鳴', text: `有沒有人也遇過類似這種情況？讓我知道我不孤單。` },
+            { tag: '幽默自嘲延伸', desc: '加深活人真實感', text: `回到家坐下來深呼吸，越想越覺得今天這齣實在有夠荒謬。` },
+            { tag: '反問留言互動', desc: '驅動讀者留言留言分享', text: `大家最近遇過最無言的突發狀況是什麼？說出來讓我平衡一下心情。` }
+          ];
+        }
 
-        comments = [
-          { tag: '置頂釣魚留言', desc: '引爆地方苦主共感', text: `有沒有今天也在現場爬樓梯的苦主？？？讓我知道我不孤單🥲` },
-          { tag: '幽默自嘲延伸', desc: '加深活人真實感', text: `回到家坐在沙發上，我雙腿還在隱隱發抖，明天上班一定會鐵腿🙃` },
-          { tag: '反問留言互動', desc: '驅動讀者留言留言分享', text: `大家最近遇過最荒謬的倒楣事是什麼？說出來讓我安慰一下😂` }
-        ];
       } else {
-        // 生活文導產品 ＋ 留言區 5 階轉單分鏡
+        // 【生活文導產品 ＋ 留言區 5 階轉單分鏡】
         posts = [
           `太扯了吧！${eventText}\n\n還好衝回家洗完澡撲倒在床上那一刻，整個人被【${prod}】軟軟包住直接原地重生⋯\n生活已經夠心累了，回到家真的不能再委屈自己。`,
           `${eventText}\n\n以前遇到這種狀況整個人煩躁到不行，還好換了【${prod}】，${benefit}，直接拯救了我整晚的心情！懂的人真的懂。`,
@@ -2662,9 +2808,9 @@
           <div class="p-3 bg-[#FAF8F5] rounded-xl border border-[#E7DFD5] space-y-1.5">
             <div class="flex items-center justify-between">
               <span class="text-[10px] font-bold text-stone-500 uppercase">切角 0${idx + 1}</span>
-              <button onclick="copyRawText('${post.replace(/\n/g, '\\n').replace(/'/g, "\\'")}')" class="px-2 py-0.5 bg-white border border-[#E7DFD5] rounded text-xs font-semibold text-brand-900">複製主文</button>
+              <button onclick="copyRawText('${escapeForAttr(post)}')" class="px-2.5 py-1 bg-white hover:bg-brand-50 border border-[#E7DFD5] rounded-lg text-xs font-semibold text-brand-900 transition-colors">複製主文</button>
             </div>
-            <textarea rows="3" class="w-full bg-white border border-[#E7DFD5] rounded-lg p-2 text-xs text-stone-800 leading-relaxed resize-y">${post}</textarea>
+            <textarea rows="3" class="w-full bg-white border border-[#E7DFD5] rounded-lg p-2 text-xs text-stone-800 leading-relaxed resize-y focus:outline-none focus:ring-1 focus:ring-brand-500">${escapeHTML(post)}</textarea>
           </div>
         `).join('');
       }
@@ -2676,16 +2822,21 @@
           <div class="p-3 bg-[#FAF8F5] rounded-xl border border-[#E7DFD5] space-y-1.5">
             <div class="flex items-center justify-between">
               <div>
-                <span class="text-xs font-bold text-brand-900">${c.tag}</span>
-                <span class="text-[10px] text-stone-400 ml-1 font-normal">（${c.desc}）</span>
+                <span class="text-xs font-bold text-brand-900">${escapeHTML(c.tag)}</span>
+                <span class="text-[10px] text-stone-400 ml-1 font-normal">（${escapeHTML(c.desc)}）</span>
               </div>
-              <button onclick="copyRawText('${c.text.replace(/\n/g, '\\n').replace(/'/g, "\\'")}')" class="px-2 py-0.5 bg-white border border-[#E7DFD5] rounded text-xs font-semibold text-brand-900">複製留言</button>
+              <button onclick="copyRawText('${escapeForAttr(c.text)}')" class="px-2.5 py-1 bg-white hover:bg-brand-50 border border-[#E7DFD5] rounded-lg text-xs font-semibold text-brand-900 transition-colors">複製留言</button>
             </div>
-            <textarea rows="3" class="w-full bg-white border border-[#E7DFD5] rounded-lg p-2 text-xs text-stone-800 leading-relaxed resize-y">${c.text}</textarea>
+            <textarea rows="3" class="w-full bg-white border border-[#E7DFD5] rounded-lg p-2 text-xs text-stone-800 leading-relaxed resize-y focus:outline-none focus:ring-1 focus:ring-brand-500">${escapeHTML(c.text)}</textarea>
           </div>
         `).join('');
       }
     }
+
+    // 頁面初始化時自動掛載情緒標籤
+    window.addEventListener('DOMContentLoaded', () => {
+      renderFluffEmotionPills();
+    });
   </script>
 </body>
 </html>

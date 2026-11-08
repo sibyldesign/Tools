@@ -1067,11 +1067,81 @@
     let currentSelectedFolder = '全部';
     let autoSaveTimer = null;
 
+    // ==========================================
+    // 永久穩定儲存鍵值（未來任何版本更新一律沿用，永不更動）
+    // ==========================================
+    const STORAGE_KEYS = {
+      PROJECTS: 'sibyl_writer_projects_master',
+      FOLDERS: 'sibyl_writer_folders_master',
+      DRAFT: 'sibyl_writer_draft_master',
+      EMOTIONS: 'sibyl_writer_emotions_master',
+      API_KEY: 'sibyl_writer_gemini_api_key'
+    };
+
+    // ==========================================
+    // 舊版本資料相容遷移（自動抓取舊版專案、資料夾與草稿並合併）
+    // ==========================================
+    function migrateLegacyStorage() {
+      try {
+        // 1. 遷移資料夾
+        if (!localStorage.getItem(STORAGE_KEYS.FOLDERS)) {
+          const legacyFolders = localStorage.getItem('copywriter_folders_v6') ||
+                                localStorage.getItem('copywriter_folders_v5');
+          if (legacyFolders) {
+            localStorage.setItem(STORAGE_KEYS.FOLDERS, legacyFolders);
+          } else {
+            localStorage.setItem(STORAGE_KEYS.FOLDERS, JSON.stringify(['芝芝的資料夾', '常用範本']));
+          }
+        }
+
+        // 2. 遷移專案筆記
+        if (!localStorage.getItem(STORAGE_KEYS.PROJECTS)) {
+          const legacyProjects = localStorage.getItem('copywriter_projects_v6') ||
+                                 localStorage.getItem('copywriter_projects_v5');
+          if (legacyProjects) {
+            localStorage.setItem(STORAGE_KEYS.PROJECTS, legacyProjects);
+          } else {
+            localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify([]));
+          }
+        }
+
+        // 3. 遷移草稿
+        if (!localStorage.getItem(STORAGE_KEYS.DRAFT)) {
+          const legacyDraft = localStorage.getItem('copywriter_draft_v8') ||
+                              localStorage.getItem('copywriter_draft_v7') ||
+                              localStorage.getItem('copywriter_draft_v6');
+          if (legacyDraft) {
+            localStorage.setItem(STORAGE_KEYS.DRAFT, legacyDraft);
+          }
+        }
+
+        // 4. 遷移情緒標籤
+        if (!localStorage.getItem(STORAGE_KEYS.EMOTIONS)) {
+          const legacyEmotions = localStorage.getItem('copywriter_fluff_emotions_v1');
+          if (legacyEmotions) {
+            localStorage.setItem(STORAGE_KEYS.EMOTIONS, legacyEmotions);
+          }
+        }
+      } catch (e) {
+        console.warn('資料遷移略過:', e);
+      }
+    }
+
+    // ==========================================
+    // 頁面初始化與防流失生命週期監聽
+    // ==========================================
     window.addEventListener('DOMContentLoaded', () => {
+      // 優先執行資料庫繼承遷移
+      migrateLegacyStorage();
+
       updateProjectCountBadge();
       updateAIStatusUI();
-      
-      const savedDraft = localStorage.getItem('copywriter_draft_v7');
+      if (typeof renderFluffEmotionPills === 'function') {
+        renderFluffEmotionPills();
+      }
+
+      // 檢查是否有儲存進度
+      const savedDraft = localStorage.getItem(STORAGE_KEYS.DRAFT);
       if (savedDraft) {
         try {
           const draft = JSON.parse(savedDraft);
@@ -1082,29 +1152,48 @@
           console.error(e);
         }
       }
+
+      // 僅在完全無任何暫存紀錄時，才載入初始示範
       loadSample('nail');
     });
 
+    // 手機切換 App、縮小瀏覽器、分頁隱藏或關閉時，強制同步儲存當前進度
+    window.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        saveCurrentDraftToLocalStorage();
+      }
+    });
+    window.addEventListener('pagehide', () => {
+      saveCurrentDraftToLocalStorage();
+    });
+    window.addEventListener('beforeunload', () => {
+      saveCurrentDraftToLocalStorage();
+    });
+
+    // ==========================================
+    // 草稿暫存與自動存檔核心
+    // ==========================================
     function triggerAutoSave() {
       clearTimeout(autoSaveTimer);
       autoSaveTimer = setTimeout(() => {
         saveCurrentDraftToLocalStorage();
-      }, 500);
+      }, 300);
     }
 
     function saveCurrentDraftToLocalStorage() {
       const draft = getCurrentFormData();
-      localStorage.setItem('copywriter_draft_v7', JSON.stringify(draft));
+      localStorage.setItem(STORAGE_KEYS.DRAFT, JSON.stringify(draft));
       const ind = document.getElementById('autosave-indicator');
       if (ind) {
         ind.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-600 inline-block"></span>已於 ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})} 自動暫存`;
       }
     }
 
+    // 完整收集包含五段式與廢文分頁的所有輸入欄位
     function getCurrentFormData() {
       return {
-        name: document.getElementById('input-name').value,
-        features: document.getElementById('input-features').value,
+        name: document.getElementById('input-name')?.value || '',
+        features: document.getElementById('input-features')?.value || '',
         category: currentCategory,
         selectedAudienceIndex,
         selectedScenarioIndex,
@@ -1116,56 +1205,135 @@
         hookInspirations: currentHookInspirations,
         threadsPosts: currentThreadsPosts,
         threadsComments: currentThreadsComments,
-        p_hook: document.getElementById('p-hook').value,
-        p_empathy: document.getElementById('p-empathy').value,
-        p_pivot: document.getElementById('p-pivot').value,
-        p_value: document.getElementById('p-value').value,
-        p_cta: document.getElementById('p-cta').value,
-        fullArticle: document.getElementById('full-article-preview').value,
-        caption1: document.getElementById('caption-1-content').value,
-        caption2: document.getElementById('caption-2-content').value,
-        caption3: document.getElementById('caption-3-content').value,
+        p_hook: document.getElementById('p-hook')?.value || '',
+        p_empathy: document.getElementById('p-empathy')?.value || '',
+        p_pivot: document.getElementById('p-pivot')?.value || '',
+        p_value: document.getElementById('p-value')?.value || '',
+        p_cta: document.getElementById('p-cta')?.value || '',
+        fullArticle: document.getElementById('full-article-preview')?.value || '',
+        caption1: document.getElementById('caption-1-content')?.value || '',
+        caption2: document.getElementById('caption-2-content')?.value || '',
+        caption3: document.getElementById('caption-3-content')?.value || '',
+        // 廢文/轉單分頁資料保存
+        fluffMode: typeof currentFluffMode !== 'undefined' ? currentFluffMode : 'pure_fluff',
+        fluffEvent: document.getElementById('fluff-event-input')?.value || '',
+        fluffProdName: document.getElementById('fluff-prod-name')?.value || '',
+        fluffProdKw: document.getElementById('fluff-prod-kw')?.value || '',
+        fluffProdBenefit: document.getElementById('fluff-prod-benefit')?.value || '',
         savedAt: new Date().toISOString()
       };
     }
 
+    // 完整還原所有欄位資料
     function loadDraftData(draft) {
-      document.getElementById('input-name').value = draft.name || '';
-      document.getElementById('input-features').value = draft.features || '';
+      if (!draft) return;
+
+      if (document.getElementById('input-name')) document.getElementById('input-name').value = draft.name || '';
+      if (document.getElementById('input-features')) document.getElementById('input-features').value = draft.features || '';
+      
       currentCategory = draft.category || '生活好物';
       selectedAudienceIndex = draft.selectedAudienceIndex || 0;
       selectedScenarioIndex = draft.selectedScenarioIndex || 0;
-      currentAudiences = draft.audiences || [];
-      currentScenarios = draft.scenarios || [];
-      currentTranslations = draft.translations || [];
+      currentAudiences = Array.isArray(draft.audiences) ? draft.audiences : [];
+      currentScenarios = Array.isArray(draft.scenarios) ? draft.scenarios : [];
+      currentTranslations = Array.isArray(draft.translations) ? draft.translations : [];
       currentStyle = draft.currentStyle || 'threads';
-      currentGoldenSeconds = draft.goldenSeconds || [];
-      currentHookInspirations = draft.hookInspirations || [];
-      currentThreadsPosts = draft.threadsPosts || [];
-      currentThreadsComments = draft.threadsComments || [];
+      currentGoldenSeconds = Array.isArray(draft.goldenSeconds) ? draft.goldenSeconds : [];
+      currentHookInspirations = Array.isArray(draft.hookInspirations) ? draft.hookInspirations : [];
+      currentThreadsPosts = Array.isArray(draft.threadsPosts) ? draft.threadsPosts : [];
+      currentThreadsComments = Array.isArray(draft.threadsComments) ? draft.threadsComments : [];
 
-      document.getElementById('detected-category').innerText = currentCategory;
+      const catDisplay = document.getElementById('detected-category');
+      if (catDisplay) catDisplay.innerText = currentCategory;
+
       renderAudienceList();
       renderScenarioList();
       renderFeatureTranslationsInputs();
 
-      document.getElementById('p-hook').value = draft.p_hook || '';
-      document.getElementById('p-empathy').value = draft.p_empathy || '';
-      document.getElementById('p-pivot').value = draft.p_pivot || '';
-      document.getElementById('p-value').value = draft.p_value || '';
-      document.getElementById('p-cta').value = draft.p_cta || '';
-      document.getElementById('full-article-preview').value = draft.fullArticle || '';
+      if (document.getElementById('p-hook')) document.getElementById('p-hook').value = draft.p_hook || '';
+      if (document.getElementById('p-empathy')) document.getElementById('p-empathy').value = draft.p_empathy || '';
+      if (document.getElementById('p-pivot')) document.getElementById('p-pivot').value = draft.p_pivot || '';
+      if (document.getElementById('p-value')) document.getElementById('p-value').value = draft.p_value || '';
+      if (document.getElementById('p-cta')) document.getElementById('p-cta').value = draft.p_cta || '';
+      if (document.getElementById('full-article-preview')) document.getElementById('full-article-preview').value = draft.fullArticle || '';
 
-      document.getElementById('caption-1-content').value = draft.caption1 || '';
-      document.getElementById('caption-2-content').value = draft.caption2 || '';
-      document.getElementById('caption-3-content').value = draft.caption3 || '';
+      if (document.getElementById('caption-1-content')) document.getElementById('caption-1-content').value = draft.caption1 || '';
+      if (document.getElementById('caption-2-content')) document.getElementById('caption-2-content').value = draft.caption2 || '';
+      if (document.getElementById('caption-3-content')) document.getElementById('caption-3-content').value = draft.caption3 || '';
 
       renderGoldenSecondsList();
       renderHookInspirationsList();
       renderThreadsPostsList();
       renderThreadsCommentsList();
+
+      // 還原廢文/轉單分頁資料
+      if (draft.fluffEvent && document.getElementById('fluff-event-input')) {
+        document.getElementById('fluff-event-input').value = draft.fluffEvent;
+      }
+      if (draft.fluffProdName && document.getElementById('fluff-prod-name')) {
+        document.getElementById('fluff-prod-name').value = draft.fluffProdName;
+      }
+      if (draft.fluffProdKw && document.getElementById('fluff-prod-kw')) {
+        document.getElementById('fluff-prod-kw').value = draft.fluffProdKw;
+      }
+      if (draft.fluffProdBenefit && document.getElementById('fluff-prod-benefit')) {
+        document.getElementById('fluff-prod-benefit').value = draft.fluffProdBenefit;
+      }
+      if (draft.fluffMode && typeof setFluffMode === 'function') {
+        setFluffMode(draft.fluffMode);
+      }
     }
 
+    // ==========================================
+    // 專案記事本與資料夾讀寫（統一使用永久主鍵）
+    // ==========================================
+    function getStoredFolders() {
+      try {
+        const folders = JSON.parse(localStorage.getItem(STORAGE_KEYS.FOLDERS));
+        if (Array.isArray(folders) && folders.length > 0) return folders;
+      } catch (e) {}
+      const defaultFolders = ['芝芝的資料夾', '常用範本'];
+      localStorage.setItem(STORAGE_KEYS.FOLDERS, JSON.stringify(defaultFolders));
+      return defaultFolders;
+    }
+
+    function getStoredProjects() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEYS.PROJECTS) || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function getStoredFluffEmotions() {
+      try {
+        const stored = JSON.parse(localStorage.getItem(STORAGE_KEYS.EMOTIONS));
+        if (Array.isArray(stored) && stored.length > 0) return stored;
+      } catch (e) {}
+      const defaultEmotions = [
+        '太扯了吧！',
+        '我真的會笑死',
+        '今天到底是什麼地獄副本？？？',
+        '大傻眼',
+        '現在是能笑的時候嗎？',
+        '我整個人原地裂開',
+        '有夠離譜',
+        '這操作我看傻了'
+      ];
+      localStorage.setItem(STORAGE_KEYS.EMOTIONS, JSON.stringify(defaultEmotions));
+      return defaultEmotions;
+    }
+
+    // 更新個人資料夾寫入
+    function saveFoldersToStorage(folders) {
+      localStorage.setItem(STORAGE_KEYS.FOLDERS, JSON.stringify(folders));
+    }
+
+    // 更新專案筆記寫入
+    function saveProjectsToStorage(projects) {
+      localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projects));
+      updateProjectCountBadge();
+    }
     // ==========================================
     // 模組切換（含 threads-fluff 分頁）
     // ==========================================
@@ -1450,7 +1618,7 @@
       if (!s) return;
       document.getElementById('input-name').value = s.name;
       document.getElementById('input-features').value = s.features;
-      // 直接執行對應商品演算法，確保不被外部網路請求卡住
+      // 直接執行本地解析，0 秒產生文案
       runLocalHeuristicAnalysis(s.name, s.features);
       showToast('已載入示範並智慧適配全套文案');
     }
@@ -2221,14 +2389,21 @@
     // ==========================================
     function getStoredFolders() {
       try {
-        const folders = JSON.parse(localStorage.getItem('copywriter_folders_v6'));
+        const folders = JSON.parse(localStorage.getItem(STORAGE_KEYS.FOLDERS));
         if (Array.isArray(folders) && folders.length > 0) return folders;
       } catch (e) {}
       const defaultFolders = ['芝芝的資料夾', '常用範本'];
-      localStorage.setItem('copywriter_folders_v6', JSON.stringify(defaultFolders));
+      localStorage.setItem(STORAGE_KEYS.FOLDERS, JSON.stringify(defaultFolders));
       return defaultFolders;
     }
 
+    function getStoredProjects() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEYS.PROJECTS) || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
     function openNewFolderDialog() {
       openCustomDialog({
         title: '新增個人資料夾',
@@ -2243,7 +2418,7 @@
             return;
           }
           folders.push(name);
-          localStorage.setItem('copywriter_folders_v6', JSON.stringify(folders));
+          localStorage.setItem(STORAGE_KEYS.FOLDERS, JSON.stringify(folders));
           currentSelectedFolder = name;
           renderFolderChips();
           renderProjectsList();
@@ -2265,7 +2440,8 @@
           projects.forEach(p => {
             if (p.folder === folderName) p.folder = '未分類';
           });
-          localStorage.setItem('copywriter_projects_v6', JSON.stringify(projects));
+          localStorage.setItem(STORAGE_KEYS.FOLDERS, JSON.stringify(folders));
+localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projects));
 
           currentSelectedFolder = '全部';
           renderFolderChips();
@@ -2301,14 +2477,6 @@
       currentSelectedFolder = folderName;
       renderFolderChips();
       renderProjectsList();
-    }
-
-    function getStoredProjects() {
-      try {
-        return JSON.parse(localStorage.getItem('copywriter_projects_v6') || '[]');
-      } catch (e) {
-        return [];
-      }
     }
 
     function updateProjectCountBadge() {
@@ -2364,7 +2532,7 @@
             const curFolders = getStoredFolders();
             if (!curFolders.includes(newFolderName)) {
               curFolders.push(newFolderName);
-              localStorage.setItem('copywriter_folders_v6', JSON.stringify(curFolders));
+              localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projects));
             }
             folderSelect = newFolderName;
           }

@@ -1287,14 +1287,13 @@
     // ==========================================
     // 專案記事本與資料夾讀寫（統一使用永久主鍵）
     // ==========================================
+    // 本地讀取（快顯）
     function getStoredFolders() {
       try {
         const folders = JSON.parse(localStorage.getItem(STORAGE_KEYS.FOLDERS));
         if (Array.isArray(folders) && folders.length > 0) return folders;
       } catch (e) {}
-      const defaultFolders = ['芝芝的資料夾', '常用範本'];
-      localStorage.setItem(STORAGE_KEYS.FOLDERS, JSON.stringify(defaultFolders));
-      return defaultFolders;
+      return ['芝芝的資料夾', '常用範本'];
     }
 
     function getStoredProjects() {
@@ -1303,6 +1302,62 @@
       } catch (e) {
         return [];
       }
+    }
+
+    // 換瀏覽器或新裝置時，自動向 GAS 雲端拉取最新資料
+    async function syncNotebookFromCloud() {
+      if (!GAS_BACKEND_URL || GAS_BACKEND_URL.includes('你的GAS部署ID')) return;
+      try {
+        const res = await fetch(GAS_BACKEND_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'get_notebook' })
+        });
+        const data = await res.json();
+        if (data.success) {
+          if (Array.isArray(data.folders) && data.folders.length > 0) {
+            localStorage.setItem(STORAGE_KEYS.FOLDERS, JSON.stringify(data.folders));
+          }
+          if (Array.isArray(data.projects)) {
+            localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(data.projects));
+          }
+          updateProjectCountBadge();
+          renderFolderChips();
+          renderProjectsList();
+        }
+      } catch (e) {
+        console.warn('雲端同步跳過，使用本機快存:', e);
+      }
+    }
+
+    // 儲存/刪除時，同步上傳至 GAS 雲端
+    async function syncNotebookToCloud(folders, projects) {
+      if (!GAS_BACKEND_URL || GAS_BACKEND_URL.includes('你的GAS部署ID')) return;
+      try {
+        await fetch(GAS_BACKEND_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'save_notebook',
+            folders: folders,
+            projects: projects
+          })
+        });
+      } catch (e) {
+        console.warn('同步上傳雲端失敗:', e);
+      }
+    }
+
+    // 更新存檔動作
+    function saveFoldersToStorage(folders) {
+      localStorage.setItem(STORAGE_KEYS.FOLDERS, JSON.stringify(folders));
+      syncNotebookToCloud(folders, getStoredProjects());
+    }
+
+    function saveProjectsToStorage(projects) {
+      localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projects));
+      updateProjectCountBadge();
+      syncNotebookToCloud(getStoredFolders(), projects);
     }
 
     function getStoredFluffEmotions() {
@@ -2418,7 +2473,7 @@
             return;
           }
           folders.push(name);
-          localStorage.setItem(STORAGE_KEYS.FOLDERS, JSON.stringify(folders));
+          saveFoldersToStorage(folders);
           currentSelectedFolder = name;
           renderFolderChips();
           renderProjectsList();
@@ -2440,8 +2495,8 @@
           projects.forEach(p => {
             if (p.folder === folderName) p.folder = '未分類';
           });
-          localStorage.setItem(STORAGE_KEYS.FOLDERS, JSON.stringify(folders));
-localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projects));
+          saveFoldersToStorage(folders);
+saveProjectsToStorage(projects);
 
           currentSelectedFolder = '全部';
           renderFolderChips();
@@ -2532,7 +2587,7 @@ localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projects));
             const curFolders = getStoredFolders();
             if (!curFolders.includes(newFolderName)) {
               curFolders.push(newFolderName);
-              localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projects));
+              saveProjectsToStorage(projects);
             }
             folderSelect = newFolderName;
           }
@@ -2640,7 +2695,7 @@ localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projects));
         onConfirm: () => {
           let projects = getStoredProjects();
           projects = projects.filter(p => p.id !== id);
-          localStorage.setItem('copywriter_projects_v6', JSON.stringify(projects));
+          saveProjectsToStorage(projects);
           updateProjectCountBadge();
           renderProjectsList();
           closeCustomDialog();

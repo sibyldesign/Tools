@@ -103,6 +103,7 @@
       <button onclick="switchTab('reels-caption')" id="tab-btn-reels-caption" class="py-2 px-3 rounded-xl whitespace-nowrap transition-all hover:text-brand-900 flex-1 text-center">Reels貼文</button>
       <button onclick="switchTab('check')" id="tab-btn-check" class="py-2 px-3 rounded-xl whitespace-nowrap transition-all hover:text-brand-900 flex-1 text-center">發文前檢查</button>
       <button onclick="switchTab('threads')" id="tab-btn-threads" class="py-2 px-3 rounded-xl whitespace-nowrap transition-all hover:text-brand-900 flex-1 text-center bg-brand-200/50 text-brand-900 font-semibold">脆延伸</button>
+      <button onclick="switchTab('threads-fluff')" id="tab-btn-threads-fluff" class="py-2 px-3 rounded-xl whitespace-nowrap transition-all hover:text-brand-900 flex-1 text-center bg-stone-900 text-white font-semibold">脆生活廢文/轉單</button>
     </nav>
 
     <!-- ========================================== -->
@@ -543,29 +544,142 @@
     <section id="tab-threads" class="space-y-4 hidden">
       <div class="bg-brand-900 text-stone-100 p-4 rounded-2xl shadow-sm space-y-1">
         <div class="flex items-center justify-between">
-          <h3 class="font-bold text-xs sm:text-sm text-white tracking-wide">Threads 流量延伸庫</h3>
-          <span class="text-[10px] text-stone-400">短篇幅 · 深入共鳴 · 留言區導流</span>
+          <h3 class="font-bold text-xs sm:text-sm text-white tracking-wide">Threads 雙軌流量與轉單庫</h3>
+          <span class="text-[10px] text-stone-400">生活廢文衝觸及 · 留言分鏡拚轉單</span>
         </div>
         <p class="text-xs text-stone-300 leading-relaxed">
-          主文專注激發日常痛點共感，不直接叫賣；於留言串第一則補上具體優點與索取方式，導流效果最佳。下方文案皆可手動修改：
+          主文負責丟情緒與荒謬事件（抓泛流量），<strong>留言區才是成交主場</strong>。下方已自動配好 5 階轉單分鏡，可依序複製貼上：
         </p>
       </div>
 
+      <!-- 區塊 A：生活廢文 / 泛流量主文 -->
       <div class="bg-white p-4 sm:p-5 rounded-2xl border border-[#E7DFD5] shadow-sm space-y-3">
         <div class="flex items-center justify-between">
-          <h4 class="font-bold text-xs sm:text-sm text-brand-900">極短共鳴主文（6 款，皆可直接編輯）</h4>
+          <h4 class="font-bold text-xs sm:text-sm text-brand-900">生活廢文 / 泛流量主文（6 款，皆可編輯）</h4>
+          <span class="text-[10px] text-stone-400">純勾情緒 · 不直接叫賣</span>
         </div>
         <div id="threads-posts-list" class="space-y-3"></div>
       </div>
 
+      <!-- 區塊 B：留言區 5 階轉單分鏡 -->
       <div class="bg-white p-4 sm:p-5 rounded-2xl border border-[#E7DFD5] shadow-sm space-y-3">
         <div class="flex items-center justify-between">
-          <h4 class="font-bold text-xs sm:text-sm text-brand-900">留言區第一則特點與導流（6 款，皆可直接編輯）</h4>
+          <h4 class="font-bold text-xs sm:text-sm text-brand-900">留言區 5 階轉單分鏡（按順序複製貼上）</h4>
+          <span class="text-[10px] text-stone-400">補資訊 → 解疑慮 → 導流</span>
         </div>
+        <p class="text-[11px] text-stone-500 bg-[#FAF8F5] p-2.5 rounded-xl border border-[#E7DFD5]">
+          💡 <strong>發文秘訣：</strong>不要一次把留言全放完。發文後先放第 1 則，隔幾小時或有人按讚時再補第 2、第 3 則，演算法會把貼文再次推播！
+        </p>
         <div id="threads-comments-list" class="space-y-3"></div>
       </div>
     </section>
 
+    <!-- ========================================== -->
+    <!-- 模組 6：生活廢文（泛流量）與留言轉單分頁 -->
+    <!-- ========================================== -->
+    <section id="tab-threads-fluff" class="space-y-4 hidden">
+      
+      <!-- 頂部切換與說明 -->
+      <div class="bg-stone-900 text-stone-100 p-4 rounded-2xl shadow-sm space-y-1.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 bg-white/20 text-white rounded text-[10px] font-bold">THREADS 獨立戰場</span>
+            <h3 class="font-bold text-xs sm:text-sm text-white">生活廢文衝泛流量 ✕ 留言區 5 階轉單</h3>
+          </div>
+          <div class="flex gap-1.5">
+            <button onclick="loadFluffPreset('bigcity')" class="px-2 py-0.5 bg-white/10 hover:bg-white/20 text-stone-200 rounded text-[10px]">巨城手扶梯</button>
+            <button onclick="loadFluffPreset('blanket')" class="px-2 py-0.5 bg-white/10 hover:bg-white/20 text-stone-200 rounded text-[10px]">棉被置入</button>
+            <button onclick="loadFluffPreset('system')" class="px-2 py-0.5 bg-white/10 hover:bg-white/20 text-stone-200 rounded text-[10px]">預約系統</button>
+          </div>
+        </div>
+        <p class="text-xs text-stone-300 leading-relaxed">
+          不用跑前面 1-4 步驟！直接輸入今天遇到的生活鳥事或想吐槽的日常，主文只勾情緒與共感（抓泛流量），<strong>留言區依序排好 5 階分鏡轉單</strong>。
+        </p>
+      </div>
+
+      <!-- 輸入區塊 -->
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-[#E7DFD5] shadow-sm space-y-3.5">
+        
+        <!-- 模式切換 -->
+        <div class="grid grid-cols-2 gap-2 bg-[#ECE5DC] p-1 rounded-xl text-xs font-semibold text-stone-600">
+          <button onclick="setFluffMode('pure_fluff')" id="btn-fluff-pure" class="py-2 rounded-lg bg-white text-brand-900 shadow-sm transition-all text-center">
+            純生活廢文（衝破萬流量）
+          </button>
+          <button onclick="setFluffMode('product_funnel')" id="btn-fluff-prod" class="py-2 rounded-lg hover:text-brand-900 transition-all text-center">
+            生活文導產品 ＋ 留言轉單
+          </button>
+        </div>
+
+        <!-- 生活事件輸入 -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs font-bold text-brand-900">生活荒謬事件 / 吐槽點</label>
+            <span class="text-[10px] text-stone-400">人事時地物 ＋ 崩潰點</span>
+          </div>
+          <textarea id="fluff-event-input" rows="3" class="w-full bg-[#FAF8F5] border border-[#E7DFD5] rounded-xl p-3 text-xs text-brand-900 focus:outline-none focus:ring-1 focus:ring-brand-500 leading-relaxed resize-y" placeholder="例：今天去巨城要上去手扶梯快到壞掉，要離開下扶梯又在快到時壞掉，而且是不同台..."></textarea>
+        </div>
+
+        <!-- 情緒字眼快選標籤 -->
+        <div>
+          <label class="block text-[11px] font-semibold text-stone-500 mb-1.5">點擊插入情緒開場：</label>
+          <div class="flex flex-wrap gap-1.5">
+            <button type="button" onclick="addFluffEmotion('太扯了吧！')" class="px-2 py-0.5 bg-[#FAF8F5] hover:bg-brand-100 text-stone-700 rounded-md text-[11px] border border-[#E7DFD5]">太扯了吧！</button>
+            <button type="button" onclick="addFluffEmotion('我真的會笑死')" class="px-2 py-0.5 bg-[#FAF8F5] hover:bg-brand-100 text-stone-700 rounded-md text-[11px] border border-[#E7DFD5]">我真的會笑死</button>
+            <button type="button" onclick="addFluffEmotion('今天到底是什麼地獄副本？？？')" class="px-2 py-0.5 bg-[#FAF8F5] hover:bg-brand-100 text-stone-700 rounded-md text-[11px] border border-[#E7DFD5]">地獄副本？？？</button>
+            <button type="button" onclick="addFluffEmotion('大傻眼')" class="px-2 py-0.5 bg-[#FAF8F5] hover:bg-brand-100 text-stone-700 rounded-md text-[11px] border border-[#E7DFD5]">大傻眼</button>
+            <button type="button" onclick="addFluffEmotion('現在是能笑的時候嗎？')" class="px-2 py-0.5 bg-[#FAF8F5] hover:bg-brand-100 text-stone-700 rounded-md text-[11px] border border-[#E7DFD5]">現在是能笑的時候嗎？</button>
+            <button type="button" onclick="addFluffEmotion('我整個人原地裂開🙃')" class="px-2 py-0.5 bg-[#FAF8F5] hover:bg-brand-100 text-stone-700 rounded-md text-[11px] border border-[#E7DFD5]">原地裂開🙃</button>
+          </div>
+        </div>
+
+        <!-- 導購產品輸入欄位（選產品模式時展開） -->
+        <div id="fluff-product-fields" class="space-y-3 pt-3 border-t border-[#E7DFD5] hidden">
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs font-bold text-brand-900 mb-1">想置入的產品名稱</label>
+              <input id="fluff-prod-name" type="text" placeholder="例：正韓微涼被、預約系統" class="w-full bg-[#FAF8F5] border border-[#E7DFD5] rounded-xl px-3 py-2 text-xs text-brand-900 focus:outline-none focus:ring-1 focus:ring-brand-500">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-brand-900 mb-1">留言/社群關鍵字</label>
+              <input id="fluff-prod-kw" type="text" placeholder="例：棉被、系統、+1" class="w-full bg-[#FAF8F5] border border-[#E7DFD5] rounded-xl px-3 py-2 text-xs text-brand-900 focus:outline-none focus:ring-1 focus:ring-brand-500">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-brand-900 mb-1">一句核心生活爽點 / 救贖感</label>
+            <input id="fluff-prod-benefit" type="text" placeholder="例：整件丟洗衣機水洗不結塊、客人線上自己選時間免回私訊" class="w-full bg-[#FAF8F5] border border-[#E7DFD5] rounded-xl px-3 py-2 text-xs text-brand-900 focus:outline-none focus:ring-1 focus:ring-brand-500">
+          </div>
+        </div>
+
+        <button onclick="generateFluffThreads()" class="w-full py-3 bg-stone-900 hover:bg-black text-white rounded-xl text-xs sm:text-sm font-bold shadow transition-all flex items-center justify-center gap-2 active:scale-[0.99]">
+          <span>生成 Threads 主貼文與留言分鏡</span>
+        </button>
+      </div>
+
+      <!-- 生成成果區 -->
+      <div class="space-y-4">
+        <!-- 主貼文 -->
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-[#E7DFD5] shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="font-bold text-xs sm:text-sm text-brand-900">Threads 主文（2～4行極短篇，3 款切角）</h4>
+            <span class="text-[10px] text-stone-400">只勾情緒 · 無廣告感</span>
+          </div>
+          <div id="fluff-posts-output" class="space-y-3"></div>
+        </div>
+
+        <!-- 留言區 5 階分鏡 -->
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-[#E7DFD5] shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <h4 class="font-bold text-xs sm:text-sm text-brand-900">留言區 5 階轉單分鏡（成交主場）</h4>
+              <p class="text-[10px] text-stone-400 mt-0.5">每隔幾小時補一則，貼文會被再推一次</p>
+            </div>
+            <span class="px-2 py-0.5 bg-brand-100 text-brand-900 rounded text-[10px] font-bold">依序發布</span>
+          </div>
+          <div id="fluff-comments-output" class="space-y-3"></div>
+        </div>
+      </div>
+
+    </section>
   </main>
 
   <!-- ========================================== -->
@@ -674,7 +788,203 @@
     // ==========================================
     // 軌道 B 核心：多品類智慧生活知識庫（無 AI 時精準匹配）
     // ==========================================
+    // ==========================================
+    // 軌道 B 核心：全方位離線智慧生活引擎（支援 6 大品類 + 廢文轉單）
+    // ==========================================
     const CATEGORY_HEURISTICS = {
+      '自研系統工具': {
+        categoryName: '自研系統工具',
+        defaultKeyword: '系統',
+        audiences: [
+          { title: '美甲/美睫/工作室一人闆娘', desc: '做客人時雙手忙不過來，還要中斷手邊工作回覆「請問還有空檔嗎」' },
+          { title: '受夠每個月被平台抽成的手作店家', desc: '辛苦賺的利潤全被平台手續費吃光，想擁有自己獨立的專屬預約網址' },
+          { title: '常被客人臨時放鳥的預約制工作室', desc: '沒有自動化行事曆提醒，客人忘記來整段黃金時段直接泡湯' },
+          { title: '下班還要拿紙筆手動對帳的創業者', desc: '手動查空檔、核對匯款到半夜眼睛酸痛，下班依舊無法真正休息' },
+          { title: '想建立品牌專業感的小型工作室', desc: '不想讓客人覺得是用個人私訊隨便約，希望有高質感的專屬預約頁面' },
+          { title: '痛恨繁雜後台設定的非科技族群', desc: '不想花幾萬塊請工程師維護，只想要直覺、免安裝、打開手機就能管' }
+        ],
+        scenarios: [
+          { title: '正在做客人雙手被佔據時', desc: '手機通知一直響個不停，回慢了怕跑單，馬上回又讓現場客人覺得不被尊重' },
+          { title: '半夜躺在床上翻本子查檔期', desc: '客人凌晨丟訊息問下週空檔，還要爬起來翻行事曆手忙腳亂核對' },
+          { title: '客人臨時忘記預約未到現場', desc: '時間空在那裡無法補位，當天營收直接少掉一大塊' },
+          { title: '月底花好幾個小時手動核算營收', desc: '表單對得眼花撩亂，算錯還要重新來過，心力交瘁' }
+        ],
+        templates: {
+          hook: (p, s) => `到底為什麼自己開工作室，每天有大半時間都在回「請問哪天有空」啦！`,
+          empathy: (aud, sce) => `一邊專心服務客人，一邊手機通知叮咚響個不停。回慢了客人直接找下一家，馬上回又怕眼前的客人覺得妳不專業。到了半夜收工，還要拿著行事曆跟私訊一個個對時間，真的累到懷疑人生。`,
+          pivot: (p) => `後來我才決定把預約流程換成這套【${p}】，真心覺得以前手動回訊息的自己到底在堅持什麼！`,
+          value: (trans) => `客人點進連結就能直接看所有剩餘空檔，選好時段自動登記，完全不用手動來回確認！前一天系統還會自動發送通知提醒客人，放鳥率直接降到零，買斷制完全沒有抽成問題！`,
+          cta: (p, kw) => `想解放雙手好好專心接客人的工作室闆娘，底下留「${kw}」，我把後台展示連結發給妳！`
+        },
+        hooksMatrix: {
+          complain: [`到底為什麼自己開工作室，每天有大半時間都在回「請問哪天有空」啦！`],
+          dialogue: [`「妳怎麼都不回訊息？」客人一句話，讓正在做指甲的我差點手抖翻車。`],
+          contrast: [`以前每天花兩小時對帳查空檔，現在客人自己按一按就約好，落差太大了！`],
+          result: [`自從換了這套預約系統，我終於可以在晚上 10 點後徹底把手機放一邊了！`],
+          suspense: [`做一人工作室最怕的不是累，而是雙手忙翻天還要回訊息確認時間⋯`],
+          avoid: [`勸各位接單闆娘沒事別再用紙本記帳對時間，省下時間多睡一小時才實在！`]
+        },
+        fluffPost: (p) => `一人工作室闆娘日常：\n左手拿工具，右手想抓手機回訊息，客人問我「妳手不會抽筋嗎？」\n我：差點抽筋，所以我現在直接叫他們自己按預約系統約🙃`,
+        commentFunnel: {
+          c1: `這套系統最神的地方：\n客人不用下載任何 App，點網址就能看到所有剩餘時段。\n約好自動排進行事曆，前一天自動發 LINE 提醒，放鳥率直接變零。`,
+          c2: `很多人問會不會很難設定？\n完全不用寫程式，手機直接登入就能改服務項目跟休假日，連科技小白五分鐘就弄好了。`,
+          c3: `版本建議：\n如果是一人工作室或剛起步，基本買斷版就非常夠用；\n有分店或需要包卡管理再選旗艦版。一次買斷不用被抽成！`,
+          c4: `自己出來創業，時間就是妳的命。\n把每天回覆「請問還有空嗎」的兩小時省下來，多睡飽一點心情真的差很多。`,
+          c5: `想看後台操作畫面或手機預約介面的闆娘，\n底下留言「系統」或私訊我，我把示範連結傳給妳試按！`
+        }
+      },
+      '卡通IP超商好物': {
+        categoryName: '卡通IP超商好物',
+        defaultKeyword: '盲盒',
+        audiences: [
+          { title: '每天上班需要精神慰藉的辦公族', desc: '桌上沒擺一兩隻可愛療癒小物，上班真的撐不下去' },
+          { title: '超商限量週邊與盲盒愛好者', desc: '怕買到做工粗糙的雷品，只追求塗裝細緻、擺著看就有好心情的正版質感' },
+          { title: '喜歡收集三麗鷗/迪士尼公仔的小資族', desc: '想用親民預算讓生活角落變得可愛精緻，治癒下班後的疲累' },
+          { title: '經常出入超商尋找限定好物的挖寶達人', desc: '對新品敏銳，討厭排隊搶不到，更怕買到不實用的雷物' }
+        ],
+        scenarios: [
+          { title: '在辦公室被主管客戶氣到心累時', desc: '抬頭看一眼桌上的可愛小公仔，瞬間覺得這口氣又可以吞下去了' },
+          { title: '在超商貨架前猶豫要不要端盒', desc: '手心發癢想試手氣，又怕抽到自己不喜歡的重複款' },
+          { title: '下班回到房間看到書桌凌亂時', desc: '角落擺著整齊的高顏值公仔，視覺壓迫感瞬間少一半' }
+        ],
+        templates: {
+          hook: (p, s) => `勸大家上班沒事真的別亂擺這個，因為同事走過去每個人都要抓起來玩！`,
+          empathy: (aud, sce) => `每天上班心情已經夠厭世了，如果辦公桌還冷冰冰的真的超壓抑。但外面很多盲盒公仔塗裝溢色超嚴重，買回來只會越看越心煩。`,
+          pivot: (p) => `那天在超商看到這款【${p}】，本來只想抽一隻試手氣，沒想到拆開實體精緻到直接被圈粉！`,
+          value: (trans) => `做工細節真的沒話說，手感沉甸甸的完全沒有塑膠廉價感！擺在螢幕旁邊，打字累了抬頭看一眼，整個人瞬間被治癒，工作動力都回來了！`,
+          cta: (p, kw) => `同款哪裡買有現貨？底下留言「${kw}」，我把隱藏款概率高的門市賣場私訊發給妳！`
+        },
+        hooksMatrix: {
+          complain: [`勸大家上班沒事真的別亂擺這個，因為同事走過去每個人都要抓起來玩！`],
+          dialogue: [`「這隻也太精緻了吧！在哪抽的？」今天桌上的小傢伙直接變成辦公室焦點。`],
+          contrast: [`以前覺得買盲盒是浪費錢，直到拆開這隻，才懂什麼叫做花小錢買大快樂！`],
+          result: [`上班已經夠苦了，花兩百塊買一個每天看著都會笑的快樂，完全超值！`],
+          suspense: [`今天在超商排隊差點忍不住整盒端走，實品細節真的比照片好看十倍！`],
+          avoid: [`勸大家沒事真的別亂入坑這款，因為抽了一隻妳就會想把整組帶回家⋯`]
+        },
+        fluffPost: (p) => `今天在超商結帳，前面的妹子抓了一隻${p}猶豫超久。\n我直接在後面小聲跟她說：「買，這隻手感超重，沒買妳回家一定會想整晚。」\n結果她真的結了，現在快樂的人有兩個。`,
+        commentFunnel: {
+          c1: `實物細節補充：\n它是正版授權，表面是霧面細緻手感，完全沒有奇怪的塑膠異味。\n耳朵跟配件的銜接處做得很平整，近看完全不翻車！`,
+          c2: `很多人在問會不會很容易抽到重複的？\n整盒買基本不重複，如果單抽建議挑手感偏沉、搖起來沒有空洞聲的那幾盒！`,
+          c3: `擺放建議：\n放辦公桌電腦螢幕下方、車上儀表板、或是床頭小夜燈旁邊都很搭，小小一隻完全不佔空間。`,
+          c4: `成年人的解壓方式就是這麼樸實無華。\n花個小錢換一整天的好心情，比起吃大餐更治癒。`,
+          c5: `想知道目前哪裡門市還有現貨或想看實拍細節的，\n底下留言「盲盒」，我把賣場連結私訊發給你！`
+        }
+      },
+      '服飾韓系棉被': {
+        categoryName: '服飾韓系棉被',
+        defaultKeyword: '棉被',
+        audiences: [
+          { title: '皮膚敏感、追求極致裸睡膚觸的人', desc: '討厭傳統被套粗糙摩擦感，換被套塞棉被塞到流汗生氣' },
+          { title: '半夜容易踢被子又怕悶熱的怕熱體質', desc: '蓋厚被太悶狂流汗，蓋薄被半夜又被冷醒踢被子' },
+          { title: '討厭繁瑣換被套洗被胎的懶人家務族', desc: '每次洗棉被都要拆被套綁四個角，裝回去像在打仗一樣心累' },
+          { title: '喜歡正韓簡約高質感臥室風格的女孩', desc: '討厭俗氣印花，只想每天睡在莫蘭迪色系、像奶油一樣柔軟的被窩裡' }
+        ],
+        scenarios: [
+          { title: '換季洗棉被塞被套塞到快崩潰', desc: '四個角永遠綁不好，滑來滑去，洗完一次棉被像跑了五公里一樣累' },
+          { title: '下班洗完澡鑽進被窩的那一刻', desc: '被子一碰到皮膚瞬間被溫柔包覆，一整天的疲憊與寒氣全消散' },
+          { title: '半夜睡到滿身大汗被熱醒時', desc: '被子透氣度不夠悶住熱氣，翻來覆去怎麼睡都不舒服' }
+        ],
+        templates: {
+          hook: (p, s) => `到底為什麼換被套塞棉被這件事，每次都可以搞到整個人滿頭大汗啦！`,
+          empathy: (aud, sce) => `傳統棉被最煩的就是被套跟被胎永遠分開滑動，拆下來洗麻煩，裝回去更折磨。而且很多被子洗兩次裡面棉花就結成一團，蓋起來又重又悶，睡眠品質大打折扣。`,
+          pivot: (p) => `後來被做代購的朋友推坑這款【${p}】，睡過第一晚真的直接把家裡的舊棉被全扔了！`,
+          value: (trans) => `整件直接丟洗衣機水洗，洗完脫水曬乾完全不結塊！超細纖維摸起來像麻糬一樣軟糯親膚，透氣度極高，雙面設計微涼溫感四季都能蓋！`,
+          cta: (p, kw) => `想體驗一秒入睡裸睡感的，底下留「${kw}」，我把正韓現貨賣場私訊分享給妳！`
+        },
+        hooksMatrix: {
+          complain: [`到底為什麼換被套塞棉被這件事，每次都可以搞到整個人滿頭大汗啦！`],
+          dialogue: [`自從換了這件正韓水洗被，我每天早上鬧鐘響都捨不得爬出被窩，太犯規了！`],
+          contrast: [`以前被子洗完裡面結球變形，現在整件丟洗衣機拿出來依然蓬鬆軟綿！`],
+          result: [`睡眠好不好，真的差這一條被子！蓋上去那一秒你就知道差距在哪裡。`],
+          suspense: [`這真的不是流行款，而是那種一蓋上皮膚會感動的舒服！`],
+          avoid: [`勸大家沒事別隨便換這種水洗被，因為睡過之後飯店的床妳都嫌硬。`]
+        },
+        fluffPost: (p) => `今天降溫，我老公原本說「家裡棉被那麼多條幹嘛又買新的？」\n結果晚上洗完澡鑽進去，到現在整個人裹得像春捲一樣不肯出來。\n男人的嘴，真的騙人的鬼。`,
+        commentFunnel: {
+          c1: `這款是正韓雙面設計：\n一面超細纖維溫暖包覆，一面莫代爾涼感透氣。\n內裡是玉米棉填充，蓬鬆但不厚重，整件丟洗衣機洗不結塊！`,
+          c2: `如果你在想會不會太熱？\n怕悶熱的人翻到莫代爾面就很透氣，怕冷翻過來蓋，一條就能應付忽冷忽熱的天氣。`,
+          c3: `尺寸挑選建議：\nS 號：好洗好收，單人蓋或沙發追劇剛剛好，最不容易後悔；\nQ 號：雙人床包覆感更強，兩個人搶被子也不怕露腳！`,
+          c4: `這條真的不是流行款，是那種一蓋就知道差在哪的棉被。\n每天工作這麼辛苦，睡覺的被子絕對不能將就。`,
+          c5: `想看更多花色實拍或選款細節的，\n可以進我們的 LINE 社群一起聊，裡面都有整理實蓋心得！底下留「棉被」發連結給你～`
+        }
+      },
+      '美食優惠特賣': {
+        categoryName: '美食優惠特賣',
+        defaultKeyword: '優惠',
+        audiences: [
+          { title: '精打細算、聚餐絕不當冤大頭的小資族', desc: '明明動動手指能省兩三百，現場原價刷卡真的會心痛' },
+          { title: '常要張羅家庭或朋友聚餐的負責人', desc: '想吃大餐又想幫大家省荷包，找優惠找到眼睛花掉' },
+          { title: '喜歡逛巨城/百貨特賣挖寶的精明買家', desc: '討厭原價被貴到，享受用專櫃三折買到頂級好物的成就感' },
+          { title: '重視生活犒賞感但不想透支預算的人', desc: '週末只想好好吃頓牛排火鍋，用最聰明的方式享受生活' }
+        ],
+        scenarios: [
+          { title: '站在餐廳櫃檯結帳看到帳單金額時', desc: '加了一成服務費價格瞬間飆高，心裡都在暗自滴血' },
+          { title: '週末想帶全家人吃頓好的放鬆一下', desc: '既想要餐廳體面有氣派，又不想一次噴掉太多家用預算' },
+          { title: '在百貨特賣花車前翻找高CP值單品', desc: '深怕買到過季瑕疵品，但挖到寶藏時爽度直接破表' }
+        ],
+        templates: {
+          hook: (p, s) => `去吃大餐還在傻傻付原價？這招真的拜託每個人都給我先學起來！`,
+          empathy: (aud, sce) => `現在出門隨便吃個連鎖牛排或火鍋，兩個人結帳動輒兩三千，加上服務費真的荷包大失血。明明動動手指就能現省好幾百，很多人卻不知道！`,
+          pivot: (p) => `像我這次去吃之前就先準備好【${p}】，結帳出示手機直接折抵，店員刷得超順！`,
+          value: (trans) => `全台門市平假日都能用，完全沒有冷門時段限制！一頓飯直接現賺兩杯手搖飲錢，省下來的都是純利潤，吃大餐心情更爽！`,
+          cta: (p, kw) => `想知道在哪領最划算的折抵券？底下留「${kw}」，我把領取攻略私訊給你！`
+        },
+        hooksMatrix: {
+          complain: [`去吃大餐還在傻傻付原價？這招真的拜託每個人都給我先學起來！`],
+          dialogue: [`「妳這頓怎麼省了快四百？！」結帳時朋友看到金額整個看傻眼。`],
+          contrast: [`平平都是去吃同一家餐廳，用對方法結帳心情真的會好上一整週！`],
+          result: [`去巨城吃大餐千千萬萬別直接刷卡，這張券用下去直接現賺一盤肉！`],
+          suspense: [`精打細算不是小氣，而是把省下來的錢拿去吃下一頓好料！`],
+          avoid: [`原價結帳真的太虧了，出門前花一分鐘查一下直接省好幾百！`]
+        },
+        fluffPost: (p) => `今天在巨城看到一堆人在手扶梯排隊，結帳時隔壁桌結了兩千八。\n我拿出手機掃券折掉四百，店員還小聲說：「妳很內行喔。」\n當個精明大人爽度就是這麼高。`,
+        commentFunnel: {
+          c1: `這張券的使用規則幫大家劃重點：\n全台配合門市平假日都能用，內用外帶都可以折抵。\n結帳直接出示手機條碼讓店員掃，不用印紙本出來！`,
+          c2: `很多人問有沒有低消門檻？\n單筆消費滿額就能直接折抵，算下來等於打了 85 折到 9 折，連服務費都幫你抵掉了。`,
+          c3: `使用建議：\n家庭聚餐、情侶約會、或是朋友慶生最划算，整桌吃下來現省好幾百，非常夠買好幾杯飲料。`,
+          c4: `外面物價一直漲，懂得找合法優惠券才是聰明消費。\n省下來的錢都是自己辛苦賺的～`,
+          c5: `想拿優惠領取連結或看配合門市清單的，\n底下留言「優惠」，我私訊發給妳！`
+        }
+      },
+      '親子景點出遊': {
+        categoryName: '親子景點出遊',
+        defaultKeyword: '放電',
+        audiences: [
+          { title: '週末不知道帶小孩去哪放電的爸媽', desc: '家裡快被精力旺盛的半獸人拆掉，急需能安全放電兩小時的救星' },
+          { title: '最怕假日出遊遇到下雨泡湯的家庭', desc: '排好的戶外行程一下雨全毀，小孩在家哭鬧大人崩潰' },
+          { title: '愛露營車宿但討厭繁雜裝備的家長', desc: '想帶孩子親近大自然，但整理裝備收帳篷收得心力交瘁' },
+          { title: '追求高CP值親子展覽活動的精明媽媽', desc: '門票現場買貴桑桑，一定要先找好早鳥套票現省大半' }
+        ],
+        scenarios: [
+          { title: '週末早上小孩七點就醒來大吵大鬧', desc: '大人只想補眠，小孩滿屋子亂跑亂跳，精神快被逼到極限' },
+          { title: '出門遇到傾盆大雨不知道去哪裡', desc: '景點人擠人、鞋子全濕透，整趟出門全家人心情都變差' },
+          { title: '帶小孩去戶外曬到滿頭大汗中暑', desc: '小孩累大人更累，回程在車上哭鬧不休' }
+        ],
+        templates: {
+          hook: (p, s) => `週末想讓小孩徹底放電、大人又能坐著吹冷氣，這個神級好去處快存起來！`,
+          empathy: (aud, sce) => `每次放假帶小孩出門都像在打仗，天氣熱大人曬成乾，遇到下雨行程直接泡湯。如果去到無聊的地方，小孩待半小時就吵著要回家，根本沒放到電。`,
+          pivot: (p) => `上週末帶他們去了【${p}】，本來沒抱太大期望，結果小孩玩到完全不想走！`,
+          value: (trans) => `全室內冷氣吹爽爽，完全不怕大熱天或暴雨！互動裝置超豐富，小孩一路跑跑跳跳放電整整三小時，回車上五分鐘直接秒睡，爸媽下半天超輕鬆！`,
+          cta: (p, kw) => `想知道門票怎麼買比現場省一百？底下留言「${kw}」，我把優惠購票連結發給你！`
+        },
+        hooksMatrix: {
+          complain: [`週末想讓小孩徹底放電、大人又能坐著吹冷氣，這個神級好去處快存起來！`],
+          dialogue: [`「媽媽，我今天玩得好開心！」上車不到五分鐘小孩直接斷電秒睡，太值得了！`],
+          contrast: [`雨天帶小孩出門不想狼狽踩泥巴？這個全室內景點真的拯救了全家人的週末！`],
+          result: [`家裡有電量 200% 的半獸人？帶他來這裡跑一圈，回家乖得跟天使一樣！`],
+          suspense: [`現場買門票真的當盤子！提前在手機按一按直接現省兩個便當錢！`],
+          avoid: [`千萬別在大熱天硬帶小孩去戶外曬太陽，全家崩潰，這個冷氣景點才是救贖！`]
+        },
+        fluffPost: (p) => `帶小孩出門的終極目標只有一個：\n回程車開出停車場不到三分鐘，後座立刻傳來均勻的打呼聲。\n今天去${p}，任務 100% 達成，今晚媽媽可以在客廳安靜追劇了。`,
+        commentFunnel: {
+          c1: `場地重點整理：\n全區都有冷氣空調，動線推嬰兒車很順暢。\n裡面有巨大擬真模型跟互動遊戲區，小孩完全不會覺得無聊！`,
+          c2: `建議停留時間：\n大約可以玩 2 到 3 小時，館內有乾淨的親子廁所跟哺乳室，帶小小孩也很方便。`,
+          c3: `門票優惠提醒：\n現場排隊買全票超貴！提早在線上買親子套票，一張現省 80-100 元，手機掃 QR code 就能進場。`,
+          c4: `週末不知道帶小孩去哪裡的，這篇真的先存起來避雨防熱用。`,
+          c5: `想拿優惠購票連結的爸媽，底下留言「放電」，我私訊把連結傳給你！`
+        }
+      },
       '美妝美甲': {
         categoryName: '美妝美甲',
         defaultKeyword: '美甲',
@@ -697,43 +1007,25 @@
         templates: {
           hook: (p, s) => `到底為什麼自己在家擦個光療，要塗底膠、色膠、封層擦到天荒地老啦！`,
           empathy: (aud, sce) => `身為美甲愛好者真的超懂，去沙龍坐兩三個小時屁股快爛掉，自己在家弄又像做化學實驗，底膠、顏色、封層一罐罐擦，手抖一下塗到邊緣整隻就要卸掉重來，心超累。`,
-          pivot: (p) => `後來被美甲控朋友推坑這款${p}，本來半信半疑，結果試了一次直接回不去！`,
-          value: (trans) => {
-            return `它直接把底膠、顏色跟封層三合一，薄擦一層照燈就乾，完全不用擦洗。而且磁吸貓眼的光圈超好拉，磁鐵輕輕靠上去一道水光感就出來了，顏色很透又超顯白，十指搞定不到十分鐘！`;
-          },
+          pivot: (p) => `後來被美甲控朋友推坑這款【${p}】，本來半信半疑，結果試了一次直接回不去！`,
+          value: (trans) => `它直接把底膠、顏色跟封層三合一，薄擦一層照燈就乾，完全不用擦洗。而且磁吸貓眼的光圈超好拉，磁鐵輕輕靠上去一道水光感就出來了，顏色很透又超顯白，十指搞定不到十分鐘！`,
           cta: (p, kw) => `這款貓眼光真的很高級～想知道色號跟賣場的，底下留「${kw}」，我把連結發給你！`
         },
         hooksMatrix: {
-          complain: [
-            `到底為什麼自己在家擦個光療，要塗底膠、色膠、封層擦到天荒地老啦！`,
-            `去美甲沙龍動輒噴兩千還要坐到屁股爛掉，自己在家塗又手殘溢膠溢到崩潰。`,
-            `愛做美甲的女生都懂，每次自己卸甲重塗就像打仗一樣累🤣`
-          ],
-          dialogue: [
-            `「你這指甲去哪做的？好亮喔！」同事抓著我問，我說我自己10分鐘塗的🤣`,
-            `朋友問我：「你怎麼又有新指甲？」我說現在不用塗三四層，隨手擦擦就搞定！`,
-            `室友看我拿磁鐵吸一下指甲，直接驚呼：「這光圈也太高級了吧，借我塗！」`
-          ],
-          contrast: [
-            `以前去美甲店每個月噴兩千，現在在家花不到十分鐘，成果完全不輸沙龍。`,
-            `本來以為不用底膠封層的指甲油一定很容易掉，沒想到撐了快一個月都很亮！`,
-            `以前塗指甲油像在做化學實驗，現在一罐刷兩下照燈直接完工。`
-          ],
-          result: [
-            `自從換了這款美甲一步膠，自己做指甲從兩小時直接縮成十分鐘！`,
-            `完全不用底膠跟封層，隨手擦出來的貓眼光圈居然細緻到不行！`,
-            `連我這種手殘黨都能擦出沙龍級漸層貓眼，真的被驚艷到！`
-          ],
-          suspense: [
-            `如果你也是愛做美甲但不想每個月噴兩千的人，這招真心推薦你存起來。`,
-            `在我準備去美甲店卸甲之前，朋友塞了這個給我，結果直接省下整筆預算！`,
-            `這罐最好用的地方根本不是省錢，而是那個磁吸光圈細緻到很犯規！`
-          ],
-          avoid: [
-            `勸愛做美甲的女生沒事別碰這款一步膠，因為用過之後回不去沙龍，會覺得以前的自己像盤子。`,
-            `我承認我以前真的很鐵齒，每次做指甲硬要塗三四層，直到被這罐徹底震撼。`,
-            `如果你是那種超討厭等指甲乾、動不動就溢膠的人，拜託這篇直接存起來避坑！`
-          ]
+          complain: [`到底為什麼自己在家擦個光療，要塗底膠、色膠、封層擦到天荒地老啦！`],
+          dialogue: [`「你這指甲去哪做的？好亮喔！」同事抓著我問，我說我自己10分鐘塗的🤣`],
+          contrast: [`以前去美甲店每個月噴兩千，現在在家花不到十分鐘，成果完全不輸沙龍。`],
+          result: [`自從換了這款美甲一步膠，自己做指甲從兩小時直接縮成十分鐘！`],
+          suspense: [`如果你也是愛做美甲但不想每個月噴兩千的人，這招真心推薦你存起來。`],
+          avoid: [`勸愛做美甲的女生沒事別碰這款一步膠，因為用過之後回不去沙龍，會覺得以前的自己像盤子。`]
+        },
+        fluffPost: (p) => `做指甲最荒謬的瞬間：\n左手塗完像貴婦，換右手塗像做化學實驗翻車，邊緣溢膠溢到指縫全都是。\n現在用一步膠刷兩下照燈完工，手殘黨真的痛哭流涕。`,
+        commentFunnel: {
+          c1: `實測重點整理：\n不用另外塗底膠跟封層，一罐薄擦照燈就乾！\n磁吸貓眼光圈吸一下立刻出水光感，顏色透亮超顯白。`,
+          c2: `很多人問維持度好不好？\n平常做家事洗碗洗澡撐三到四週完全沒掉，持久度不輸外面沙龍！`,
+          c3: `新手操作秘訣：\n第一次塗薄薄一層先照燈，第二層用磁鐵斜斜靠近吸出光圈再照燈，保證零失誤。`,
+          c4: `去沙龍一次的錢，自己在家可以買五種顏色換著擦一整年，省下來的荷包太有感！`,
+          c5: `想知道熱門顯白色號跟賣場連結的，底下留言「美甲」，我把色號表傳給你！`
         }
       },
       '影音 3C': {
@@ -742,59 +1034,34 @@
         audiences: [
           { title: '租屋沒空間放電視的人', desc: '房間坪數小，根本塞不下大電視，但又想要有百吋大螢幕的影院感' },
           { title: '週末愛露營或聚會的人', desc: '不想搬大箱子與一堆轉接頭，隨手一抓丟背包就能出發' },
-          { title: '下班只想窩床上的追劇族', desc: '不想端著發燙手機看到手酸手滑砸到臉，或拿重死人的筆電' },
-          { title: '討厭拉線被線材絆倒的極簡族', desc: '受夠床頭地上一堆HDMI跟繁雜充電線，想要乾淨清爽' },
-          { title: '喜歡在天花板躺平看電影的懶人', desc: '坐著看腰酸背痛，直接平躺投天花板才是下班終極享受' },
-          { title: '常出差外宿的商務旅客', desc: '飯店電視太難用，隨身帶一台在房裡秒變專屬電影院' }
+          { title: '下班只想窩床上的追劇族', desc: '不想端著發燙手機看到手酸手滑砸到臉，或拿重死人的筆電' }
         ],
         scenarios: [
           { title: '躺在床上直接投天花板', desc: '不想坐著看電視，直接舒服躺平追劇到睡著' },
-          { title: '租屋處房間牆面隨便投', desc: '房間放不下電視，直接拿白牆當超大私人影院' },
-          { title: '週末跟朋友在客廳聚會看球賽', desc: '關上燈拉上窗簾，大家窩在沙發一起看大螢幕超有氛圍' },
-          { title: '下班後不想開大燈的疲憊深夜', desc: '開著小夜燈舒服投屏，光線溫和不刺眼超沉浸' },
-          { title: '假日露營在帳篷外拉布幕', desc: '微風吹過吹著大螢幕電影，戶外露營儀式感直接拉滿' },
-          { title: '手機螢幕太小看久眼酸的放鬆片刻', desc: '百吋無壓感觀看，視線徹底解脫不再瞇瞇眼' }
+          { title: '租屋處房間牆面隨便投', desc: '房間放不下電視，直接拿白牆當超大私人影院' }
         ],
         templates: {
           hook: (p, s) => `到底為什麼租屋處想看個大螢幕，都得拉一堆複雜的線啦！`,
           empathy: (aud, sce) => `房間本來就不大，根本塞不下大電視，每次端著發熱手機躺在床上看劇，看到手酸手滑還會砸到臉，真的很煩。`,
-          pivot: (p) => `後來我才被推坑這台${p}，本來以為只是買好玩的玩具，沒想到徹底升級了我的下班生活！`,
-          value: (trans) => {
-            return `它真的超小一台即插即用，內建串流app連線都不用插，打開就能看Netflix。而且有自動梯形校正，隨便斜放在床頭投天花板都很方正，就算開小燈看也很清楚，完全不用摸黑！`;
-          },
+          pivot: (p) => `後來我才被推坑這台【${p}】，本來以為只是買好玩的玩具，沒想到徹底升級了我的下班生活！`,
+          value: (trans) => `它真的超小一台即插即用，內建串流app連線都不用插，打開就能看Netflix。而且有自動梯形校正，隨便斜放在床頭投天花板都很方正，就算開小燈看也很清楚！`,
           cta: (p, kw) => `如果你也跟我一樣下班只想躺平看百吋螢幕，底下留「${kw}」，我把買的型號分享給你！`
         },
         hooksMatrix: {
-          complain: [
-            `到底為什麼租屋處想看個大螢幕，都得拉一堆複雜的線啦！`,
-            `下班回家只想躺床看劇，端著發燙的手機看到手指抽筋真的很煩！`,
-            `每次想在房間看個電影，調角度墊厚書調了半天，興致都沒了。`
-          ],
-          dialogue: [
-            `「你的房間怎麼直接變電影院了？！」朋友來我家看到整個嚇到🤣`,
-            `室友問我這台不用接電腦喔？我說開機按遙控器就能看！`,
-            `朋友上次來我家看了一集劇，回家直接密我：「快把那台投影機型號給我！」`
-          ],
-          contrast: [
-            `以前下班只能瞇著看小手機，現在回到房間直接百吋大螢幕躺著爽看。`,
-            `本來以為投影機開燈一定灰濛濛，沒想到白天看也意外清楚！`,
-            `以前以為要弄家庭劇院要花好幾萬，現在這台小小的直接搞定。`
-          ],
-          result: [
-            `自從房間換了這台微型投影機，每天下班回家的幸福感直接翻倍！`,
-            `不用接任何轉接線、開機直連串流，這點真的拯救了懶人我！`,
-            `直接躺在床上投天花板看劇，真的舒服到常常看著看著就睡著！`
-          ],
-          suspense: [
-            `如果你也是租屋族或喜歡躺床追劇的人，這個東西真心推薦你存起來。`,
-            `房間牆壁空著不知道幹嘛？先別急著買電視，這招先看好！`,
-            `用過這台之後，我房間那台舊電視基本上就再也沒開過了。`
-          ],
-          avoid: [
-            `勸租屋族沒事真的別亂買大電視，佔空間又難搬，這台直接秒殺。`,
-            `我承認我以前真的很排斥投影機，覺得要拉線又暗，直到被這台打臉。`,
-            `如果你也是那種超級討厭收線、想要開機就能直接爽看的人，這篇必看！`
-          ]
+          complain: [`到底為什麼租屋處想看個大螢幕，都得拉一堆複雜的線啦！`],
+          dialogue: [`「你的房間怎麼直接變電影院了？！」朋友來我家看到整個嚇到🤣`],
+          contrast: [`以前下班只能瞇著看小手機，現在回到房間直接百吋大螢幕躺著爽看。`],
+          result: [`自從房間換了這台微型投影機，每天下班回家的幸福感直接翻倍！`],
+          suspense: [`如果你也是租屋族或喜歡躺床追劇的人，這個東西真心推薦你存起來。`],
+          avoid: [`勸租屋族沒事真的別亂買大電視，佔空間又難搬，這台直接秒殺。`]
+        },
+        fluffPost: (p) => `下班最爽的事：\n洗完澡直接平躺在床上，大螢幕投在天花板，遙控器按下去開始看劇。\n手不用舉手機，脖子完全不痠，直接幸福到睡著。`,
+        commentFunnel: {
+          c1: `這台最大優點：\n小巧輕便即插即用，內建串流 App 不用接筆電手機！\n自動梯形校正，隨便斜放畫面都方正。`,
+          c2: `流明亮度解答：\n開小夜燈也看得清楚，不用每次都摸黑看劇，眼睛不疲勞。`,
+          c3: `租屋族首選理由：\n搬家隨手裝進包包就走，退租完全不用煩惱大電視搬運問題。`,
+          c4: `花小錢換每天下班的私人電影院，幸福感比什麼都實在。`,
+          c5: `想看投白牆跟天花板實測畫面的，底下留言「投影機」，我把型號私訊傳給你！`
         }
       },
       '旅行居家': {
@@ -802,22 +1069,16 @@
         defaultKeyword: '收納袋',
         audiences: [
           { title: '換季衣物塞爆衣櫃的人', desc: '厚棉被厚毛衣擠壓，衣櫃永遠關不上，拿一件衣服全倒' },
-          { title: '出國出差行李箱爆滿的旅人', desc: '去程行李箱就全滿，完全沒空間裝戰利品，行李超重又狼狽' },
-          { title: '租屋處收納空間極有限的小資族', desc: '每一寸空間都要精打細算，受夠大包小包堆滿房間' },
-          { title: '討厭帶笨重抽氣泵出門的人', desc: '出國飯店找不到抽氣泵就無法收納超崩潰，根本不敢買厚衣服' },
-          { title: '喜歡家裡整齊乾淨的收納控', desc: '收納得整齊扁平，看著心情就治癒，告別雜亂壓迫感' },
-          { title: '帶小孩出門大包小包的家長', desc: '小孩備用衣物尿布一堆，後車廂直接被塞爆' }
+          { title: '出國出差行李箱爆滿的旅人', desc: '去程行李箱就全滿，完全沒空間裝戰利品，行李超重又狼狽' }
         ],
         scenarios: [
           { title: '出國前晚收拾行李箱塞不下', desc: '冬天厚大衣隨便塞兩件就爆了，到底是在出國還是在搬家啦' },
-          { title: '換季整理厚被羽絨外套', desc: '收納袋蓬得跟山一樣，整個人壓上去滿頭大汗拉鍊還爆開' },
-          { title: '飯店退房最後收拾戰利品', desc: '買太多塞不回去，坐在行李箱上硬拉拉鍊超怕壞掉' },
-          { title: '整理換季衣物放進床底收納盒', desc: '厚重衣物壓不扁，完全塞不進收納箱' }
+          { title: '換季整理厚被羽絨外套', desc: '收納袋蓬得跟山一樣，整個人壓上去滿頭大汗拉鍊還爆開' }
         ],
         templates: {
           hook: (p, s) => `到底為什麼每次出國或換季，行李箱跟衣櫃永遠都要塞到爆炸啦！`,
           empathy: (aud, sce) => `冬天厚大衣隨便塞兩件行李箱就爆了，整個人坐上去用體重壓到滿頭大汗拉鍊還差點爆開，每次收行李都像在打仗一樣心累。`,
-          pivot: (p) => `直到前陣子換了這款${p}，才發現以前帶笨重抽氣泵到底在折騰什麼！`,
+          pivot: (p) => `直到前陣子換了這款【${p}】，才發現以前帶笨重抽氣泵到底在折騰什麼！`,
           value: (trans) => `它完全不用抽氣泵，手壓幾秒直接排空排淨！高韌性加厚材質完全不漏氣，體積直接縮減70%，行李箱瞬間多出一大半空間裝戰利品！`,
           cta: (p, kw) => `常出國或準備換季的真的要備起來～底下留言「${kw}」，我把耐用不漏氣的賣場私給你！`
         },
@@ -828,6 +1089,14 @@
           result: [`用身體重力壓一下直接排扁，行李箱瞬間多出整整一半空間裝戰利品！`],
           suspense: [`出國行李箱永遠不夠裝？先別急著換大箱子，這個法寶先存起來。`],
           avoid: [`勸常出國的人千萬別再帶傳統抽氣泵了，佔重量又麻煩，這款直接完勝！`]
+        },
+        fluffPost: (p) => `出國收拾行李最大謊言：\n「我這次去只帶幾件衣服，絕對不會買太多。」\n結果去程行李箱就滿了，還好手壓收納袋直接壓扁一半，戰利品才有地方放。`,
+        commentFunnel: {
+          c1: `免抽氣收納袋重點：\n完全不用帶抽氣泵，整個人坐上去手壓秒排空！\n厚羽絨衣跟大衣體積直接縮小 70%。`,
+          c2: `密封耐用度：\n加厚防漏氣材質，拉鍊封緊放兩週依然扁平不回彈。`,
+          c3: `尺寸挑選建議：\n登機箱建議選中號，託運大行李箱帶大號剛好塞滿兩側。`,
+          c4: `出國省下來的行李箱空間，都是拿來裝快樂的！`,
+          c5: `常出國或準備換季收被子的，底下留言「收納」，我把耐用不漏氣的賣場私訊給你！`
         }
       },
       '親子生活': {
@@ -835,19 +1104,16 @@
         defaultKeyword: '番茄鐘',
         audiences: [
           { title: '家有拖延症小孩的崩潰爸媽', desc: '寫作業拖拖拉拉、看電視叫不動，每天在客廳吼破喉嚨' },
-          { title: '想培養自律習慣、減少3C依賴的家長', desc: '小孩沒有時間概念，動不動就吵著「再五分鐘」，一拖就是半小時' },
-          { title: '準備大考需要高效專注的學生考生', desc: '念書容易分心滑手機，需要具體倒數儀式感讓自己進入狀態' },
-          { title: '討厭指針滴答聲干擾的高敏專注族', desc: '任何細微噪音都會打斷思緒，需要極致安靜的讀書環境' }
+          { title: '想培養自律習慣、減少3C依賴的家長', desc: '小孩沒有時間概念，動不動就吵著「再五分鐘」，一拖就是半小時' }
         ],
         scenarios: [
           { title: '晚上催小孩寫作業洗澡睡覺', desc: '在旁邊吼破喉嚨，小孩依然當耳邊風，每次都搞到全家心情大壞' },
-          { title: '規定看電視玩平板時間到了', desc: '時間到了賴皮不關，每次關電視都像在上演家庭大戰' },
-          { title: '下午在書桌前念書容易分心', desc: '翻兩頁就開始發呆摸魚，兩小時過去進度零' }
+          { title: '規定看電視玩平板時間到了', desc: '時間到了賴皮不關，每次關電視都像在上演家庭大戰' }
         ],
         templates: {
           hook: (p, s) => `到底為什麼每天催小孩收玩具寫作業，永遠都要搞到大人在旁邊吼破喉嚨啦！`,
           empathy: (aud, sce) => `小孩根本沒有抽象的時間觀念，你跟他說再十分鐘他完全沒感覺，每次時間到要關電視就大哭賴皮，搞得全家氣氛每天都很緊繃心累。`,
-          pivot: (p) => `後來被媽媽朋友推坑這個${p}，本來不信一個計時器有什麼用，結果真的拯救了全家人的喉嚨！`,
+          pivot: (p) => `後來被媽媽朋友推坑這個【${p}】，本來不信一個計時器有什麼用，結果真的拯救了全家人的喉嚨！`,
           value: (trans) => `它把時間直接變成彩色色塊，隨著時間流逝色塊慢慢消失，小孩自己看一眼就懂還剩多少時間！而且運作超安靜完全沒有滴答聲，時間到了發出溫和提示音，小孩現在時間到自己乖乖關電視！`,
           cta: (p, kw) => `家有拖延症小孩的爸媽真的必收！底下留言「${kw}」，我把這款耐摔靜音的連結私給你！`
         },
@@ -858,6 +1124,14 @@
           result: [`不用大人在旁邊盯著罵，小孩主動專注完成作業，家庭氣氛瞬間祥和！`],
           suspense: [`家裡有講不聽的小孩？試試這個視覺化小招數，效果好到讓人想哭。`],
           avoid: [`別再用大吼大叫逼小孩有時間觀念了，那只會兩敗俱傷，用對工具真的差很多！`]
+        },
+        fluffPost: (p) => `育兒最荒謬一刻：\n叫小孩收玩具叫了八次當耳邊風，結果番茄鐘色塊一到底，他比我還緊張直接衝去收。\n原來媽媽的喉嚨，比不上一個計時器。`,
+        commentFunnel: {
+          c1: `視覺計時器原理：\n彩色色塊隨時間縮小，把抽象時間變成眼睛看得到的畫面，小孩秒懂！`,
+          c2: `靜音設計：\n走時完全無指針滴答聲，讀書寫作業不分心，時間到有溫和提示音。`,
+          c3: `適用年齡：\n幼兒園到國小都超好用，刷牙、看電視、寫作業設好時間小孩自己遵守。`,
+          c4: `拯救爸媽喉嚨跟家庭氣氛的神物，早買早享受和平生活。`,
+          c5: `家有拖延症小孩的，底下留言「計時器」，我把耐摔好調的型號傳給你！`
         }
       }
     };
@@ -985,7 +1259,8 @@
     // 模組切換
     // ==========================================
     function switchTab(tabId) {
-      const tabs = ['analysis', 'write', 'reels-caption', 'check', 'threads'];
+      // 在這行加上 'threads-fluff'：
+      const tabs = ['analysis', 'write', 'reels-caption', 'check', 'threads', 'threads-fluff'];
       tabs.forEach(t => {
         const el = document.getElementById(`tab-${t}`);
         const btn = document.getElementById(`tab-btn-${t}`);
@@ -1258,46 +1533,29 @@ ${featuresRaw || '依產品名自由推導'}
       const lower = (name + ' ' + featuresRaw).toLowerCase();
       let matchedConfig = null;
 
-      if (/美甲|指甲|光療|甲油|底膠|封層|貓眼/.test(lower)) {
+      if (/系統|預約|排程|軟體|工具|後台|表單|官網|買斷|抽成/.test(lower)) {
+        matchedConfig = CATEGORY_HEURISTICS['自研系統工具'];
+      } else if (/盲盒|公仔|三麗鷗|迪士尼|酷洛米|hello kitty|超商|玩具|扭蛋|卡牌|一番賞/.test(lower)) {
+        matchedConfig = CATEGORY_HEURISTICS['卡通IP超商好物'];
+      } else if (/被|棉被|四季被|微涼被|水洗被|莫代爾|玉米棉|床包|枕頭|衣服|洋裝|顯瘦|穿搭|正韓|韓國/.test(lower)) {
+        matchedConfig = CATEGORY_HEURISTICS['服飾韓系棉被'];
+      } else if (/券|餐券|折抵|吃到飽|牛排|火鍋|王品|美食|餐廳|優惠|特賣|二手|巨城/.test(lower)) {
+        matchedConfig = CATEGORY_HEURISTICS['美食優惠特賣'];
+      } else if (/展|門票|恐龍|小孩|親子|露營|車宿|公園|景點|放電|出遊|戶外/.test(lower)) {
+        matchedConfig = CATEGORY_HEURISTICS['親子景點出遊'];
+      } else if (/美甲|指甲|光療|甲油|底膠|封層|貓眼/.test(lower)) {
         matchedConfig = CATEGORY_HEURISTICS['美妝美甲'];
-      } else if (/投影|大螢幕|影音|天花板|露營|串流|4k|流明/.test(lower)) {
+      } else if (/投影|大螢幕|影音|天花板|串流|4k|流明/.test(lower)) {
         matchedConfig = CATEGORY_HEURISTICS['影音 3C'];
-      } else if (/真空|收納|行李|壓縮|羽絨|換季|棉被/.test(lower)) {
+      } else if (/真空|收納|行李|壓縮|羽絨|換季/.test(lower)) {
         matchedConfig = CATEGORY_HEURISTICS['旅行居家'];
       } else if (/番茄鐘|計時|倒數|兒童|育兒|專注|學生|作業/.test(lower)) {
         matchedConfig = CATEGORY_HEURISTICS['親子生活'];
       }
 
-      // 未命中特定庫時的智慧生活好物推導
+      // 未命中特定庫時預設走美妝美甲
       if (!matchedConfig) {
-        matchedConfig = {
-          categoryName: '精選生活好物',
-          defaultKeyword: name.slice(0, 2) || '好物',
-          audiences: [
-            { title: `經常需要用到${name}的日常使用者`, desc: `步驟繁瑣手忙腳亂，急需更順手、不費力的新解法` },
-            { title: `最討厭繁複流程的小資族`, desc: `能省一個步驟就能多賺半小時完全放鬆的空白時間` },
-            { title: `精打細算、不想再買到踩雷品的消費者`, desc: `以前買過太多華而不實的產品，只想換用真正實用、耐用的好物` }
-          ],
-          scenarios: [
-            { title: `平常在家使用${name}的時候`, desc: `每次都要花大把時間準備和收尾，搞得心煩意亂` },
-            { title: `下班回家只想放空休息的片刻`, desc: `精力已經耗盡，手邊工具不給力真的會讓人心情浮躁` }
-          ],
-          templates: {
-            hook: (p) => `到底為什麼生活裡有些小細節，每天遇到都在暗自崩潰啦！`,
-            empathy: (aud, sce) => `平常生活節奏已經夠快了，${sce.desc}，真的讓人很想直接放棄。`,
-            pivot: (p) => `直到前陣子換了這個${p}，才發現以前到底在堅持什麼！`,
-            value: (trans) => `它真的省事超多，直接省下繁瑣時間，用過真的回不去。`,
-            cta: (p, kw) => `想知道哪裡買的，底下留言「${kw}」，我把賣場連結私訊傳給你！`
-          },
-          hooksMatrix: {
-            complain: [`生活裡有些小麻煩，真的每天遇到都在暗自心累⋯`],
-            dialogue: [`朋友上次問我：「你怎麼不換個好用的？」我說以前真的超鐵齒！`],
-            contrast: [`以前弄得滿頭大汗，現在隨手三兩下搞定，落差太大了！`],
-            result: [`自從換了這款${name}，日常順暢度直接翻倍！`],
-            suspense: [`如果你也常為這件事煩惱，這個私藏解法先存起來。`],
-            avoid: [`勸大家沒事別隨便試這款好物，因為用過之後回不去了！`]
-          }
-        };
+        matchedConfig = CATEGORY_HEURISTICS['美妝美甲'];
       }
 
       currentCategory = matchedConfig.categoryName;
@@ -1305,27 +1563,23 @@ ${featuresRaw || '依產品名自由推導'}
       currentAudiences = matchedConfig.audiences;
       currentScenarios = matchedConfig.scenarios;
 
-      // 痛點轉譯
+      // 痛點轉譯（依輸入的特點動態匹配白話爽點）
       const features = featuresRaw ? featuresRaw.split('\n').map(f => f.trim()).filter(Boolean) : ['方便實用', '省時省力'];
       currentTranslations = features.map(feat => {
         const f = feat.toLowerCase();
-        let benefit = '';
+        let benefit = `把原本最惱人的瑣碎步驟直接化簡，日常隨手就能順暢搞定`;
         if (f.includes('不用') || f.includes('免') || f.includes('三合一')) {
           benefit = `一罐直接搞定底膠、顏色跟封層，不用桌面擺滿瓶瓶罐罐`;
         } else if (f.includes('快') || f.includes('省時') || f.includes('秒') || f.includes('十分鐘')) {
           benefit = `十隻手指塗完照燈不到十分鐘，不用坐著耗兩小時`;
-        } else if (f.includes('貓眼') || f.includes('磁吸')) {
-          benefit = `磁鐵靠上去一秒吸出細緻銀河光圈，光澤感超高級`;
-        } else if (f.includes('色') || f.includes('顯白') || f.includes('透')) {
-          benefit = `顯白裸色系或透亮冰茶色都有，擦兩層就超飽滿`;
-        } else if (f.includes('app') || f.includes('串流')) {
-          benefit = `開機直接看Netflix，不用再接筆電或手機`;
-        } else if (f.includes('梯形') || f.includes('校正')) {
-          benefit = `隨便放在床頭櫃斜著投，畫面也自動方正`;
-        } else if (f.includes('沒關燈') || f.includes('清楚') || f.includes('光')) {
-          benefit = `開著小夜燈也看得清楚，不用每次摸黑`;
-        } else {
-          benefit = `省掉最容易讓人手忙腳亂的步驟，日常隨手就能順暢搞定`;
+        } else if (f.includes('洗') || f.includes('機洗') || f.includes('水洗')) {
+          benefit = `整件丟洗衣機水洗不結塊，完全省掉拆裝被套的痛苦`;
+        } else if (f.includes('自動') || f.includes('線上') || f.includes('通知')) {
+          benefit = `客人線上自己點選時段，前一天自動提醒，放鳥率直接變零`;
+        } else if (f.includes('省') || f.includes('券') || f.includes('折')) {
+          benefit = `結帳出示手機直接扣抵，一餐現省兩三百，荷包無痛吃大餐`;
+        } else if (f.includes('冷氣') || f.includes('雨天') || f.includes('室內')) {
+          benefit = `全室內冷氣吹爽爽，不怕下雨大太陽，小孩放電三小時秒睡`;
         }
         return { feature: feat, benefit };
       });
@@ -1336,8 +1590,6 @@ ${featuresRaw || '依產品名自由推導'}
       renderAudienceList();
       renderScenarioList();
       renderFeatureTranslationsInputs();
-
-      // 產生腳本與延伸內容
       refreshDraftsWithCurrentContext();
     }
 
@@ -1816,7 +2068,7 @@ ${featuresRaw}
     }
 
     // ==========================================
-    // 脆 (Threads) 延伸
+    // 脆 (Threads) 延伸：生活廢文 + 留言區 5 階轉單分鏡
     // ==========================================
     function generateThreadsExtensions() {
       const pName = document.getElementById('input-name').value.trim() || '好物';
@@ -1826,22 +2078,32 @@ ${featuresRaw}
       const benefits = currentTranslations.map(t => t.benefit);
       let keyword = config.defaultKeyword || pName.slice(0, 2);
 
+      // 1. Threads 主貼文（包含生活廢文、情緒字眼、荒謬日常）
       currentThreadsPosts = [
-        `到底為什麼每次${sce.title}，永遠都要搞得像大掃除一樣狼狽⋯\n\n身為${aud.title}我真的快瘋掉。`,
-        `我發誓，我這輩子再也不要用以前的方法${sce.title}了。\n\n換了${pName}之後，我以前到底在折騰什麼？像個傻子一樣。`,
-        `勸大家沒事真的不要隨便試這款${pName}。\n\n因為你會發現生活原本可以這麼輕鬆，回不去了很可怕。`,
-        `跟身為${aud.title}的朋友聊到每次${sce.title}的心累程度，\n兩個人在咖啡廳差點聊到落淚。\n\n懂的人真的懂。`,
-        `花不到沙龍或外頭三分之一的時間，\n就把${pName}弄得跟專業級一樣精緻，\n今天看著成果發呆了十分鐘，心情超好。`,
-        `生活裡最舒爽的瞬間：\n就是原本每次${sce.title}都要弄一小時，\n今天十分鐘搞定，還能多躺在沙發滑半小時手機。`
+        config.fluffPost ? config.fluffPost(pName) : `到底為什麼每次${sce.title}，永遠都要搞得像大掃除一樣狼狽⋯\n\n身為${aud.title}我真的快瘋掉。`,
+        `太扯了吧！今天遇到這種狀況我真的大傻眼⋯\n到底誰懂每次${sce.title}時的那種無力感🙃\n現在是能笑的時候嗎？`,
+        `我發誓，我這輩子再也不要用以前的方法${sce.title}了。\n換了【${pName}】之後，我以前到底在折騰什麼？像個傻子一樣。`,
+        `勸大家沒事真的不要隨便試這款【${pName}】。\n因為你會發現生活原本可以這麼輕鬆，回不去了很可怕！`,
+        `生活裡最舒爽的瞬間：\n就是原本每次${sce.title}都要弄一小時，\n今天十分鐘搞定，還能多躺在沙發滑半小時手機喝奶茶。`,
+        `跟身為${aud.title}的朋友聊到每次${sce.title}的心累程度，\n兩個人在咖啡廳差點聊到落淚。\n懂的人真的懂。`
       ];
 
+      // 2. 留言區 5 階轉單分鏡（固定頂留言、解猶豫、規格尺寸、深夜情緒、社群導流）
+      const cf = config.commentFunnel || {
+        c1: `這款最厲害的就是「${benefits[0] || '省掉所有繁瑣步驟'}」，真的完全不浪費時間。\n想知道賣場的留個「${keyword}」，我私訊發給你！`,
+        c2: `如果你在想會不會容易踩雷，老實說我一開始也半信半疑，實際用過才知道差距在哪裡。`,
+        c3: `規格簡單挑：日常自用選基本款就非常夠用，第一次買最不容易後悔！`,
+        c4: `這真的不是什麼流行款，是那種一用就知道生活品質差在哪裡的好物。\n對自己好一點，真的值得。`,
+        c5: `想看更多實拍細節或使用心得的，可以到我們的 LINE 社群一起聊！`
+      };
+
       currentThreadsComments = [
-        `怕大家找不到，我把重點補在這邊：\n這款${pName}最神的地方就是「${benefits[0] || '省掉所有繁瑣步驟'}」，真的完全不浪費時間。\n想知道賣場的留個「${keyword}」，我私訊發給你！`,
-        `補個真實細節：\n它${benefits[1] || '質感做得非常到位'}，連我這種手殘黨都沒翻車過。\n連結我放在個人主頁，需要自己去領～`,
-        `私訊好多人問型號與細節，統一回在留言區！\n這款最大優點是${benefits[0] || '操作極度直覺'}，而且${benefits[1] || '維持度很好'}。\n想避坑買對的底下留個「+1」！`,
-        `很多人問跟傳統的有什麼差？直接講結論：\n以前弄完手酸心累，現在${benefits[0] || '三兩下搞定'}。\n傳送門在留言，大家自己看～`,
-        `老實說原本買之前我也很怕踩雷，結果實測${benefits[1] || '效果出乎意料的好'}。\n真心覺得每個${aud.title}手邊都要備一個！`,
-        `連結太多人要了直接貼出來會被降流量。\n有需要的在底下隨便留言「${keyword}」，我一一私訊傳給你們！`
+        `【第 1 則：固定頂留言｜補資訊】\n${cf.c1}`,
+        `【第 2 則：解決猶豫型】\n${cf.c2}`,
+        `【第 3 則：規格/尺寸說明】\n${cf.c3}`,
+        `【第 4 則：深夜情緒型 (22:00後發)】\n${cf.c4}`,
+        `【第 5 則：無痕導流 LINE 社群 / 私訊】\n${cf.c5}`,
+        `【最後收單提醒專用】\n提醒一下～最後收單時間快到了，現在下單這週就能收到，想跟團的底下留「${keyword}」！`
       ];
 
       renderThreadsPostsList();
@@ -2387,6 +2649,141 @@ ${featuresRaw}
     function escapeForAttr(str) {
       if (!str) return '';
       return String(str).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+
+    // ==========================================
+    // 獨立「生活廢文/轉單」分頁專用邏輯
+    // ==========================================
+    let currentFluffMode = 'pure_fluff';
+
+    const FLUFF_PRESETS = {
+      bigcity: {
+        mode: 'pure_fluff',
+        event: '今天去巨城到底是什麼水逆地獄副本？\n要上去的時候，手扶梯走到快到了直接原地壞掉；\n要離開下扶梯，又在快到的時候壞掉，而且是不同台！',
+        product: '',
+        benefit: '',
+        keyword: ''
+      },
+      blanket: {
+        mode: 'product_funnel',
+        event: '今天去巨城爬手扶梯整雙腿快廢掉，回家只想直接裝死。還好洗完澡撲倒在床上那一秒，整個人被軟軟包住直接原地重生⋯',
+        product: '正韓四季微涼被',
+        benefit: '整件丟洗衣機水洗不結塊、超細纖維像麻糬一樣軟糯親膚',
+        keyword: '棉被'
+      },
+      system: {
+        mode: 'product_funnel',
+        event: '一人工作室日常：左手拿磨甲機做客人，右手想抓手機回訊息，客人問我「妳手不會抽筋嗎？」差點抽筋，所以我現在直接叫他們自己按網址約🙃',
+        product: '美業微型預約系統',
+        benefit: '客人免載App線上自選時段、自動排進行事曆、前一天自動通知防放鳥',
+        keyword: '預約'
+      }
+    };
+
+    function setFluffMode(mode) {
+      currentFluffMode = mode;
+      const btnPure = document.getElementById('btn-fluff-pure');
+      const btnProd = document.getElementById('btn-fluff-prod');
+      const prodFields = document.getElementById('fluff-product-fields');
+
+      if (mode === 'pure_fluff') {
+        btnPure.className = 'py-2 rounded-lg bg-white text-brand-900 shadow-sm transition-all text-center';
+        btnProd.className = 'py-2 rounded-lg hover:text-brand-900 transition-all text-center';
+        prodFields.classList.add('hidden');
+      } else {
+        btnProd.className = 'py-2 rounded-lg bg-white text-brand-900 shadow-sm transition-all text-center';
+        btnPure.className = 'py-2 rounded-lg hover:text-brand-900 transition-all text-center';
+        prodFields.classList.remove('hidden');
+      }
+      generateFluffThreads();
+    }
+
+    function loadFluffPreset(key) {
+      const data = FLUFF_PRESETS[key];
+      if (!data) return;
+      document.getElementById('fluff-event-input').value = data.event;
+      document.getElementById('fluff-prod-name').value = data.product;
+      document.getElementById('fluff-prod-benefit').value = data.benefit;
+      document.getElementById('fluff-prod-kw').value = data.keyword;
+      setFluffMode(data.mode);
+    }
+
+    function addFluffEmotion(phrase) {
+      const el = document.getElementById('fluff-event-input');
+      el.value = phrase + '\n' + el.value;
+      el.focus();
+    }
+
+    function generateFluffThreads() {
+      const eventText = document.getElementById('fluff-event-input').value.trim() || '今天出門遇到一堆荒謬鳥事';
+      const prod = document.getElementById('fluff-prod-name').value.trim() || '好物';
+      const benefit = document.getElementById('fluff-prod-benefit').value.trim() || '省掉所有繁雜步驟，三兩下搞定';
+      const kw = document.getElementById('fluff-prod-kw').value.trim() || '好物';
+
+      let posts = [];
+      let comments = [];
+
+      if (currentFluffMode === 'pure_fluff') {
+        // 純生活廢文（衝泛流量）
+        posts = [
+          `${eventText}\n\n我真的會笑死，今天是在暗示我運動量不足嗎🙃誰懂這種崩潰感？？？`,
+          `太扯了吧！\n${eventText}\n\n到底誰能懂這種原地裂開的荒謬感？現在是能笑的時候嗎？`,
+          `勸大家今天沒事真的別亂跑⋯\n${eventText}\n\n走完我整雙腿已經不是自己的了，明天上班一定鐵腿。`
+        ];
+
+        comments = [
+          { tag: '置頂釣魚留言', desc: '引爆地方苦主共感', text: `有沒有今天也在現場爬樓梯的苦主？？？讓我知道我不孤單🥲` },
+          { tag: '幽默自嘲延伸', desc: '加深活人真實感', text: `回到家坐在沙發上，我雙腿還在隱隱發抖，明天上班一定會鐵腿🙃` },
+          { tag: '反問留言互動', desc: '驅動讀者留言留言分享', text: `大家最近遇過最荒謬的倒楣事是什麼？說出來讓我安慰一下😂` }
+        ];
+      } else {
+        // 生活文導產品 ＋ 留言區 5 階轉單分鏡
+        posts = [
+          `太扯了吧！${eventText}\n\n還好衝回家洗完澡撲倒在床上那一刻，整個人被【${prod}】軟軟包住直接原地重生⋯\n生活已經夠心累了，回到家真的不能再委屈自己。`,
+          `${eventText}\n\n以前遇到這種狀況整個人煩躁到不行，還好換了【${prod}】，${benefit}，直接拯救了我整晚的心情！懂的人真的懂。`,
+          `生活裡最舒爽的瞬間：\n就是外頭爛事一堆心很累，回家靠【${prod}】三兩下搞定，還能多躺在沙發滑半小時手機喝奶茶。\n這才叫做人生。`
+        ];
+
+        comments = [
+          { tag: '第 1 則：固定頂留言（補資訊）', desc: '交代核心亮點且無廣告感', text: `怕大家找不到，重點補在這邊：\n這款最神的地方就是「${benefit}」，真的完全不浪費時間。\n實品質感做得非常到位，摸過一次就知道差在哪～想知道賣場的底下留「${kw}」，我私訊發給你！` },
+          { tag: '第 2 則：解決猶豫型（打消顧慮）', desc: '有人按讚但沒私訊時補', text: `如果你也在猶豫會不會容易踩雷，老實說我一開始也半信半疑。\n實際用過才發現根本不用擔心，操作很順，怕麻煩的人一用直接秒懂差別在哪！` },
+          { tag: '第 3 則：規格/尺寸指引（降門檻）', desc: '當有人問怎麼選時補', text: `規格很簡單挑：\n自用或一個人剛起步選基本款就好洗好收，最不容易後悔；\n想要包覆感更強或有進階需求直接選旗艦版！` },
+          { tag: '第 4 則：深夜情緒型（22:00後發）', desc: '訴諸生活品質與犒賞感', text: `這真的不是什麼跟風流行款。\n是那種下班回家一碰，就知道生活品質差在哪裡的好物。\n每天工作這麼辛苦，這點舒適度真的值得。` },
+          { tag: '第 5 則：無痕導流 LINE 社群 / 私訊', desc: '先給價值再進群，自然不推銷', text: `想看更多實拍細節或大家的使用心得，\n可以到我們的 LINE 社群一起聊！裡面都有整理選款小技巧，也可以直接問我～底下留言「${kw}」傳連結給你！` },
+          { tag: '加碼：最後收單倒數（48hr專用）', desc: '創造限時急迫感', text: `提醒一下～這批即將收單！現在下單這週就能排單出貨收到，需要的在底下隨便留言「${kw}」，我一一私訊傳給你們！` }
+        ];
+      }
+
+      // 渲染主貼文
+      const postContainer = document.getElementById('fluff-posts-output');
+      if (postContainer) {
+        postContainer.innerHTML = posts.map((post, idx) => `
+          <div class="p-3 bg-[#FAF8F5] rounded-xl border border-[#E7DFD5] space-y-1.5">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold text-stone-500 uppercase">切角 0${idx + 1}</span>
+              <button onclick="copyRawText('${post.replace(/\n/g, '\\n').replace(/'/g, "\\'")}')" class="px-2 py-0.5 bg-white border border-[#E7DFD5] rounded text-xs font-semibold text-brand-900">複製主文</button>
+            </div>
+            <textarea rows="3" class="w-full bg-white border border-[#E7DFD5] rounded-lg p-2 text-xs text-stone-800 leading-relaxed resize-y">${post}</textarea>
+          </div>
+        `).join('');
+      }
+
+      // 渲染留言區分鏡
+      const commentContainer = document.getElementById('fluff-comments-output');
+      if (commentContainer) {
+        commentContainer.innerHTML = comments.map((c, idx) => `
+          <div class="p-3 bg-[#FAF8F5] rounded-xl border border-[#E7DFD5] space-y-1.5">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-xs font-bold text-brand-900">${c.tag}</span>
+                <span class="text-[10px] text-stone-400 ml-1 font-normal">（${c.desc}）</span>
+              </div>
+              <button onclick="copyRawText('${c.text.replace(/\n/g, '\\n').replace(/'/g, "\\'")}')" class="px-2 py-0.5 bg-white border border-[#E7DFD5] rounded text-xs font-semibold text-brand-900">複製留言</button>
+            </div>
+            <textarea rows="3" class="w-full bg-white border border-[#E7DFD5] rounded-lg p-2 text-xs text-stone-800 leading-relaxed resize-y">${c.text}</textarea>
+          </div>
+        `).join('');
+      }
     }
   </script>
 </body>

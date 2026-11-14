@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>講師與工作室管理後台 | Sibyl 數位管家</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #F6F4F0; color: #333; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- 獨立登入驗證畫面 -->
+    <div id="loginScreen" class="flex-1 flex items-center justify-center p-5">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-7 shadow-sm border border-stone-200 space-y-4">
+            <div class="text-center space-y-1">
+                <div class="w-11 h-11 rounded-2xl bg-stone-800 text-white mx-auto flex items-center justify-center mb-2">
+                    <i data-lucide="shield-check" class="w-5 h-5"></i>
+                </div>
+                <h1 class="text-lg font-bold">課程預約與分潤管理後台</h1>
+                <p class="text-xs text-stone-500">請輸入您的專屬店家代碼與管理密碼</p>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-medium text-stone-600 mb-1">店家專屬代碼 (Slug)</label>
+                    <input type="text" id="loginSlug" value="demo" placeholder="例如：silvia" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-stone-600 mb-1">管理密碼</label>
+                    <input type="password" id="loginPin" value="1234" placeholder="請輸入管理密碼" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-sm">
+                </div>
+                <button onclick="handleAdminLogin()" class="w-full py-3 rounded-xl bg-stone-800 text-white text-xs font-bold hover:bg-stone-700">
+                    登入管理後台
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 登入後的完整管理系統 -->
+    <div id="dashboardApp" class="hidden flex-1 flex-col">
+        <!-- 頂部導覽列 -->
+        <header class="bg-white border-b border-stone-200 px-5 py-3.5 sticky top-0 z-30">
+            <div class="max-w-4xl mx-auto flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                    <h2 id="dashBrandTitle" class="text-sm font-bold">品牌管理後台</h2>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a id="previewFrontLink" href="index.html" target="_blank" class="px-3 py-1.5 rounded-lg bg-stone-100 text-stone-700 text-xs font-medium flex items-center gap-1 hover:bg-stone-200">
+                        <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                        <span>開啟前台頁面</span>
+                    </a>
+                    <button onclick="location.reload()" class="p-1.5 rounded-lg text-stone-400 hover:text-stone-700" title="登出">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 6 大功能分頁標籤 -->
+        <nav class="bg-white border-b border-stone-200 px-4 py-2 overflow-x-auto no-scrollbar">
+            <div class="max-w-4xl mx-auto flex gap-2 text-xs">
+                <button onclick="switchTab('orders')" class="nav-btn px-3.5 py-2 rounded-xl font-semibold bg-stone-800 text-white whitespace-nowrap" data-tab="orders">1. 預約訂單與對帳</button>
+                <button onclick="switchTab('affiliates')" class="nav-btn px-3.5 py-2 rounded-xl font-medium text-stone-600 hover:bg-stone-100 whitespace-nowrap" data-tab="affiliates">2. 舊學員分潤追蹤</button>
+                <button onclick="switchTab('courses')" class="nav-btn px-3.5 py-2 rounded-xl font-medium text-stone-600 hover:bg-stone-100 whitespace-nowrap" data-tab="courses">3. 資料夾與課程設定</button>
+                <button onclick="switchTab('schedules')" class="nav-btn px-3.5 py-2 rounded-xl font-medium text-stone-600 hover:bg-stone-100 whitespace-nowrap" data-tab="schedules">4. 開課場次與空檔</button>
+                <button onclick="switchTab('brand')" class="nav-btn px-3.5 py-2 rounded-xl font-medium text-stone-600 hover:bg-stone-100 whitespace-nowrap" data-tab="brand">5. 配色、銷售模組與收款</button>
+                <button onclick="switchTab('guide')" class="nav-btn px-3.5 py-2 rounded-xl font-medium text-stone-600 hover:bg-stone-100 whitespace-nowrap" data-tab="guide">6. 導流技巧與許願池</button>
+            </div>
+        </nav>
+
+        <!-- 主工作區 -->
+        <main class="flex-1 max-w-4xl w-full mx-auto p-5 space-y-6">
+
+            <!-- TAB 1: 預約訂單與匯款後五碼核銷 -->
+            <section id="panel-orders" class="tab-panel space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-bold">學員報名與匯款對帳列表</h3>
+                    <span class="text-xs text-stone-500">點擊「確認收款」將自動扣除該場次名額</span>
+                </div>
+                <div id="ordersListContainer" class="space-y-3">
+                    <!-- 動態渲染訂單卡片 -->
+                </div>
+            </section>
+
+            <!-- TAB 2: 舊學員專屬推廣分潤系統 -->
+            <section id="panel-affiliates" class="tab-panel hidden space-y-5">
+                <!-- 新增推廣學員 -->
+                <div class="bg-white p-5 rounded-3xl border border-stone-200 space-y-3">
+                    <h3 class="text-sm font-bold flex items-center gap-1.5">
+                        <i data-lucide="share-2" class="w-4 h-4 text-stone-700"></i>
+                        <span>產出舊學員專屬分享連結</span>
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-2.5">
+                        <input type="text" id="affName" placeholder="學員姓名 (例：林小美)" class="px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                        <input type="text" id="affCode" placeholder="專屬代碼 (例：may88)" class="px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                        <select id="affType" class="px-3 py-2 rounded-xl border border-stone-200 text-xs bg-white">
+                            <option value="percent">按訂單比例抽成 (%)</option>
+                            <option value="fixed">每單固定獎金 (NT$)</option>
+                            <option value="none">純統計口碑 (不分潤)</option>
+                        </select>
+                        <input type="number" id="affVal" placeholder="數值 (如 10 或 300)" class="px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                    </div>
+                    <button onclick="createAffiliate()" class="px-4 py-2 rounded-xl bg-stone-800 text-white text-xs font-medium">
+                        建立專屬推廣連結
+                    </button>
+                </div>
+
+                <!-- 推廣數據與分潤結算表 -->
+                <div class="bg-white p-5 rounded-3xl border border-stone-200 overflow-x-auto">
+                    <h3 class="text-sm font-bold mb-3">推廣成效與分潤結算看板</h3>
+                    <table class="w-full text-left text-xs border-collapse min-w-[600px]">
+                        <thead>
+                            <tr class="border-b border-stone-200 text-stone-500">
+                                <th class="py-2.5">推廣學員</th>
+                                <th class="py-2.5">專屬連結</th>
+                                <th class="py-2.5 text-center">點擊數</th>
+                                <th class="py-2.5 text-center">成交單數</th>
+                                <th class="py-2.5">購買課程明細</th>
+                                <th class="py-2.5 text-right">應發分潤</th>
+                            </tr>
+                        </thead>
+                        <tbody id="affiliatesTableBody" class="divide-y divide-stone-100"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- TAB 3: 分層資料夾與課程設定 -->
+            <section id="panel-courses" class="tab-panel hidden space-y-5">
+                <div class="bg-white p-5 rounded-3xl border border-stone-200 space-y-3">
+                    <h3 class="text-sm font-bold">1. 管理資料夾上方標籤分類</h3>
+                    <div class="flex gap-2">
+                        <input type="text" id="newTabName" placeholder="例如：1對1 個案諮詢、團體工作坊" class="flex-1 px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                        <button onclick="addCourseTab()" class="px-4 py-2 rounded-xl bg-stone-800 text-white text-xs font-medium">新增分頁</button>
+                    </div>
+                    <div id="adminTabsList" class="flex flex-wrap gap-2 pt-1"></div>
+                </div>
+
+                <div class="bg-white p-5 rounded-3xl border border-stone-200 space-y-3">
+                    <h3 class="text-sm font-bold">2. 新增課程或服務方案</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <select id="newCourseTab" class="px-3 py-2 rounded-xl border border-stone-200 text-xs bg-white"></select>
+                        <input type="text" id="newCourseTitle" placeholder="課程名稱" class="px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                        <input type="text" id="newCourseSub" placeholder="副標 (例：60分鐘｜線上Zoom)" class="px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                        <input type="number" id="newCoursePrice" placeholder="單堂金額 (NT$)" class="px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                        <input type="text" id="newCourseBadge" placeholder="緊迫感標籤 (選填，如：僅剩2席)" class="px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                        <select id="newCourseMode" class="px-3 py-2 rounded-xl border border-stone-200 text-xs bg-white">
+                            <option value="session">依開課場次選課 (支援多堂)</option>
+                            <option value="slot">依老師空檔約1對1</option>
+                        </select>
+                    </div>
+                    <textarea id="newCourseDesc" rows="2" placeholder="課程特色與內容簡介..." class="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs"></textarea>
+                    <button onclick="addCourse()" class="px-4 py-2 rounded-xl bg-stone-800 text-white text-xs font-medium">上架此課程</button>
+                </div>
+
+                <div id="adminCoursesList" class="space-y-2.5"></div>
+            </section>
+
+            <!-- TAB 4: 開課場次與空檔排程 -->
+            <section id="panel-schedules" class="tab-panel hidden space-y-4">
+                <div class="bg-white p-5 rounded-3xl border border-stone-200 space-y-3">
+                    <h3 class="text-sm font-bold">開放可預約日期與場次名額</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        <select id="schedCourseId" class="px-3 py-2 rounded-xl border border-stone-200 text-xs bg-white"></select>
+                        <input type="date" id="schedDate" class="px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                        <input type="number" id="schedCap" value="1" min="1" placeholder="名額上限 (1對1填1)" class="px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                        <input type="time" id="schedStart" value="14:00" class="px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                        <input type="time" id="schedEnd" value="16:00" class="px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                        <input type="text" id="schedLoc" placeholder="地點標籤 (線上Zoom/教室)" class="px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                    </div>
+                    <button onclick="addSchedule()" class="px-4 py-2 rounded-xl bg-stone-800 text-white text-xs font-medium">新增至前台月曆</button>
+                </div>
+                <div id="adminSchedulesList" class="space-y-2"></div>
+            </section>
+
+            <!-- TAB 5: 配色、銷售模組與匯款收款開關 -->
+            <section id="panel-brand" class="tab-panel hidden space-y-5">
+                <div class="bg-white p-5 rounded-3xl border border-stone-200 space-y-3">
+                    <h3 class="text-sm font-bold">品牌基本資料與莫蘭迪配色</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs text-stone-500 mb-1">品牌名稱</label>
+                            <input type="text" id="setBrandName" class="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-stone-500 mb-1">主題色系</label>
+                            <select id="setThemeColor" class="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs bg-white">
+                                <option value="oat_brown">米棕色 (預設)</option>
+                                <option value="dusty_pink">粉黛灰粉</option>
+                                <option value="forest_green">森綠色</option>
+                                <option value="haze_blue">霧霾藍</option>
+                                <option value="sunset_orange">日落橘</option>
+                                <option value="oat_yellow">燕麥黃</option>
+                                <option value="pure_white_gray">純白帶灰</option>
+                                <option value="mono_bw">黑白灰極簡</option>
+                                <option value="morandi_gray">莫蘭迪灰階</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-stone-500 mb-1">核心標語</label>
+                        <input type="text" id="setTagline" class="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-stone-500 mb-1">品牌簡介</label>
+                        <textarea id="setBio" rows="2" class="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs"></textarea>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-3xl border border-stone-200 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-sm font-bold">啟用線上訂購與匯款對帳功能</h3>
+                            <p class="text-[11px] text-stone-500">關閉時前台僅開放預約時段，不顯示價格與匯款帳號</p>
+                        </div>
+                        <input type="checkbox" id="setEnableOrdering" class="w-4 h-4">
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2">
+                        <input type="text" id="setBankCode" placeholder="銀行代碼 (822)" class="px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                        <input type="text" id="setBankName" placeholder="銀行名稱 (中國信託)" class="px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                        <input type="text" id="setBankAcc" placeholder="匯款帳號" class="px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                        <input type="text" id="setBankHolder" placeholder="戶名" class="px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                    </div>
+                    <button onclick="saveBrandSettings()" class="px-5 py-2.5 rounded-xl bg-stone-800 text-white text-xs font-bold">儲存設定</button>
+                </div>
+            </section>
+
+            <!-- TAB 6: 社群導流技巧與許願池 -->
+            <section id="panel-guide" class="tab-panel hidden space-y-5">
+                <div class="bg-white p-5 rounded-3xl border border-stone-200 space-y-3 text-xs text-stone-600 leading-relaxed">
+                    <h3 class="text-sm font-bold text-stone-800">推廣與舊學員裂變實戰技巧</h3>
+                    <p><strong>1. 官方 LINE 圖文選單導流：</strong>將您的專屬前台網址綁定至官方 LINE 圖文選單主按鈕，讓學員隨時查看最新開課月曆與自助報名。</p>
+                    <p><strong>2. 發放舊學員專屬推廣連結：</strong>在「2. 舊學員分潤追蹤」為熱心學員產出專屬代碼連結，請她們在 IG 限動或 Threads 分享心得時附上該連結，系統會自動計算點擊數與分潤獎金。</p>
+                </div>
+
+                <div class="bg-white p-5 rounded-3xl border border-stone-200 space-y-3">
+                    <h3 class="text-sm font-bold">功能許願池（傳送給 Sibyl 數位管家）</h3>
+                    <textarea id="proWishInput" rows="3" placeholder="寫下您希望增加的功能..." class="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs"></textarea>
+                    <button onclick="sendProWish()" class="px-4 py-2 rounded-xl bg-stone-800 text-white text-xs font-medium">送出許願</button>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="py-6 text-center">
+            <a href="https://heysibyl.com" target="_blank" class="text-xs text-stone-400 hover:text-stone-600">Designed by Sibyl | 數位管家</a>
+        </footer>
+    </div>
+
+    <script>
+        const SUPABASE_URL = ""; // 填入 Supabase Project URL
+        const SUPABASE_ANON_KEY = ""; // 填入 Supabase Anon Key
+        const supabaseClient = (SUPABASE_URL && SUPABASE_ANON_KEY)
+            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+            : null;
+
+        let currentCard = null;
+        let orders = [];
+        let affiliates = [];
+        let tabs = [];
+        let courses = [];
+        let schedules = [];
+
+        async function handleAdminLogin() {
+            const slug = document.getElementById('loginSlug').value.trim();
+            const pin = document.getElementById('loginPin').value.trim();
+
+            if (!supabaseClient) {
+                // 演示模式預設資料
+                currentCard = { id: 'demo-id', slug: slug || 'demo', brand_name: 'Silvia 靈性與品牌成長學院', theme_color: 'oat_brown', enable_ordering: true, bank_code: '822', bank_name: '中國信託', bank_account: '123456789012', account_holder: '希貝兒工作室' };
+                orders = [
+                    { id: 'o1', booking_no: 'BK26111301', customer_name: '陳雅婷', customer_phone: '0912345678', customer_line: 'Yating', total_sessions: 3, total_amount: 14800, payment_status: 'reported', remittance_last5: '88512', ref_code: 'may88', selected_items: [{ course_title: '希塔療癒基礎 DNA 三日培訓', date: '2026-11-20', time: '10:00-17:00' }] }
+                ];
+                affiliates = [
+                    { id: 'a1', partner_name: '林小美', ref_code: 'may88', commission_type: 'percent', commission_value: 10, click_count: 86 }
+                ];
+                enterDashboard();
+                return;
+            }
+
+            const { data, error } = await supabaseClient.from('pro_cards').select('*').eq('slug', slug).eq('admin_pin', pin).single();
+            if (!data || error) return alert('代碼或密碼錯誤');
+            currentCard = data;
+            await loadAllDashboardData();
+            enterDashboard();
+        }
+
+        async function loadAllDashboardData() {
+            const cid = currentCard.id;
+            const [oRes, aRes, tRes, cRes, sRes] = await Promise.all([
+                supabaseClient.from('pro_bookings').select('*').eq('card_id', cid).order('created_at', { ascending: false }),
+                supabaseClient.from('pro_affiliates').select('*').eq('card_id', cid).order('created_at', { ascending: false }),
+                supabaseClient.from('pro_course_tabs').select('*').eq('card_id', cid).order('sort_order'),
+                supabaseClient.from('pro_courses').select('*').eq('card_id', cid).order('sort_order'),
+                supabaseClient.from('pro_schedules').select('*').eq('card_id', cid).order('schedule_date')
+            ]);
+            orders = oRes.data || [];
+            affiliates = aRes.data || [];
+            tabs = tRes.data || [];
+            courses = cRes.data || [];
+            schedules = sRes.data || [];
+        }
+
+        function enterDashboard() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('dashboardApp').classList.remove('hidden');
+            document.getElementById('dashboardApp').classList.add('flex');
+            document.getElementById('dashBrandTitle').textContent = `${currentCard.brand_name} ｜ 管理後台`;
+            document.getElementById('previewFrontLink').href = `index.html?id=${currentCard.slug}`;
+
+            // 填入設定欄位
+            document.getElementById('setBrandName').value = currentCard.brand_name || '';
+            document.getElementById('setThemeColor').value = currentCard.theme_color || 'oat_brown';
+            document.getElementById('setTagline').value = currentCard.tagline || '';
+            document.getElementById('setBio').value = currentCard.bio || '';
+            document.getElementById('setEnableOrdering').checked = !!currentCard.enable_ordering;
+            document.getElementById('setBankCode').value = currentCard.bank_code || '';
+            document.getElementById('setBankName').value = currentCard.bank_name || '';
+            document.getElementById('setBankAcc').value = currentCard.bank_account || '';
+            document.getElementById('setBankHolder').value = currentCard.account_holder || '';
+
+            renderOrders();
+            renderAffiliates();
+            renderCoursesAdmin();
+            renderSchedulesAdmin();
+            lucide.createIcons();
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+            document.getElementById(`panel-${tab}`).classList.remove('hidden');
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.className = b.dataset.tab === tab
+                    ? 'nav-btn px-3.5 py-2 rounded-xl font-semibold bg-stone-800 text-white whitespace-nowrap'
+                    : 'nav-btn px-3.5 py-2 rounded-xl font-medium text-stone-600 hover:bg-stone-100 whitespace-nowrap';
+            });
+        }
+
+        // 1. 訂單與對帳核銷渲染
+        function renderOrders() {
+            const box = document.getElementById('ordersListContainer');
+            if (!orders.length) { box.innerHTML = `<p class="text-xs text-stone-400">尚無學員預約訂單</p>`; return; }
+
+            box.innerHTML = orders.map(o => {
+                const statusBadge = o.payment_status === 'verified'
+                    ? `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-semibold">已確認收款</span>`
+                    : o.payment_status === 'reported'
+                    ? `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-semibold">已填後五碼：${o.remittance_last5}</span>`
+                    : `<span class="px-2 py-0.5 rounded-full bg-stone-100 text-stone-600">待匯款</span>`;
+
+                const itemsText = (o.selected_items || []).map(i => `${i.course_title} (${i.date} ${i.time})`).join('、');
+
+                return `
+                    <div class="bg-white p-4 rounded-2xl border border-stone-200 space-y-2 text-xs">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <span class="font-mono font-bold text-stone-800">${o.booking_no} ｜ ${o.customer_name} (${o.customer_phone})</span>
+                            ${statusBadge}
+                        </div>
+                        <p class="text-stone-600">LINE 名稱：${o.customer_line} ${o.ref_code ? `｜ <span class="text-amber-700 font-semibold">推薦碼：${o.ref_code}</span>` : ''}</p>
+                        <p class="text-stone-600">報名場次：${itemsText}</p>
+                        <div class="flex items-center justify-between pt-2 border-t border-stone-100">
+                            <span class="font-bold text-sm">總金額：NT$ ${o.total_amount.toLocaleString()}（共 ${o.total_sessions} 堂）</span>
+                            ${o.payment_status !== 'verified' ? `
+                                <button onclick="verifyOrderPayment('${o.id}')" class="px-3.5 py-1.5 rounded-xl bg-stone-800 text-white font-medium hover:bg-stone-700">
+                                    確認收款並核銷名額
+                                </button>
+                            ` : `<span class="text-emerald-600 font-medium">已完成入帳與名額保留</span>`}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function verifyOrderPayment(orderId) {
+            const target = orders.find(o => o.id === orderId);
+            if (!target) return;
+            target.payment_status = 'verified';
+            if (supabaseClient) {
+                await supabaseClient.from('pro_bookings').update({ payment_status: 'verified' }).eq('id', orderId);
+                // 同步扣除場次名額
+                for (const item of (target.selected_items || [])) {
+                    const sched = schedules.find(s => s.id === item.schedule_id);
+                    if (sched) {
+                        await supabaseClient.from('pro_schedules').update({ booked_count: sched.booked_count + 1 }).eq('id', sched.id);
+                    }
+                }
+            }
+            renderOrders();
+        }
+
+        // 2. 舊學員分潤看板渲染
+        function renderAffiliates() {
+            const tbody = document.getElementById('affiliatesTableBody');
+            const baseUrl = window.location.href.replace('admin.html', 'index.html').split('?')[0];
+
+            tbody.innerHTML = affiliates.map(aff => {
+                const matchedOrders = orders.filter(o => o.ref_code === aff.ref_code && o.payment_status === 'verified');
+                const totalSales = matchedOrders.reduce((s, o) => s + o.total_amount, 0);
+                const commission = aff.commission_type === 'percent'
+                    ? Math.round(totalSales * (aff.commission_value / 100))
+                    : aff.commission_type === 'fixed'
+                    ? matchedOrders.length * aff.commission_value
+                    : 0;
+                const purchasedItems = matchedOrders.flatMap(o => (o.selected_items || []).map(i => i.course_title)).join(', ') || '尚無已核銷訂單';
+                const shareUrl = `${baseUrl}?id=${currentCard.slug}&ref=${aff.ref_code}`;
+
+                return `
+                    <tr>
+                        <td class="py-3 font-bold">${aff.partner_name}<br><span class="text-[11px] font-normal text-stone-400">代碼：${aff.ref_code}</span></td>
+                        <td class="py-3">
+                            <button onclick="navigator.clipboard.writeText('${shareUrl}'); alert('專屬推廣連結已複製')" class="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 text-[11px] font-medium">
+                                複製推廣連結
+                            </button>
+                        </td>
+                        <td class="py-3 text-center font-semibold">${aff.click_count}</td>
+                        <td class="py-3 text-center font-semibold">${matchedOrders.length} 單</td>
+                        <td class="py-3 text-stone-600 max-w-[180px] truncate">${purchasedItems}</td>
+                        <td class="py-3 text-right font-bold text-amber-800">NT$ ${commission.toLocaleString()}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function createAffiliate() {
+            const partner_name = document.getElementById('affName').value.trim();
+            const ref_code = document.getElementById('affCode').value.trim();
+            const commission_type = document.getElementById('affType').value;
+            const commission_value = Number(document.getElementById('affVal').value) || 0;
+            if (!partner_name || !ref_code) return alert('請填寫學員姓名與專屬代碼');
+
+            const newAff = { card_id: currentCard.id, partner_name, ref_code, commission_type, commission_value, click_count: 0 };
+            if (supabaseClient) {
+                const { data } = await supabaseClient.from('pro_affiliates').insert([newAff]).select().single();
+                if (data) affiliates.unshift(data);
+            } else {
+                affiliates.unshift({ id: Date.now().toString(), ...newAff });
+            }
+            document.getElementById('affName').value = '';
+            document.getElementById('affCode').value = '';
+            renderAffiliates();
+        }
+
+        // 3. 資料夾與課程管理
+        function renderCoursesAdmin() {
+            document.getElementById('adminTabsList').innerHTML = tabs.map(t => `
+                <span class="px-3 py-1 rounded-full bg-stone-100 text-xs font-medium">${t.tab_name}</span>
+            `).join('');
+
+            const tabSel = document.getElementById('newCourseTab');
+            tabSel.innerHTML = tabs.map(t => `<option value="${t.id}">${t.tab_name}</option>`).join('');
+
+            document.getElementById('adminCoursesList').innerHTML = courses.map(c => `
+                <div class="bg-white p-3.5 rounded-2xl border border-stone-200 flex justify-between items-center text-xs">
+                    <div>
+                        <p class="font-bold">${c.title} <span class="text-stone-400 font-normal">(${c.subtitle || ''})</span></p>
+                        <p class="text-stone-500">NT$ ${c.price} ｜ 模式：${c.booking_mode === 'session' ? '開課場次選課' : '1對1空檔'}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function addCourseTab() {
+            const tab_name = document.getElementById('newTabName').value.trim();
+            if (!tab_name) return;
+            if (supabaseClient) {
+                const { data } = await supabaseClient.from('pro_course_tabs').insert([{ card_id: currentCard.id, tab_name, sort_order: tabs.length }]).select().single();
+                if (data) tabs.push(data);
+            } else {
+                tabs.push({ id: 'tab-' + Date.now(), tab_name });
+            }
+            document.getElementById('newTabName').value = '';
+            renderCoursesAdmin();
+        }
+
+        async function addCourse() {
+            const tab_id = document.getElementById('newCourseTab').value;
+            const title = document.getElementById('newCourseTitle').value.trim();
+            const subtitle = document.getElementById('newCourseSub').value.trim();
+            const price = Number(document.getElementById('newCoursePrice').value) || 0;
+            const badge_text = document.getElementById('newCourseBadge').value.trim();
+            const booking_mode = document.getElementById('newCourseMode').value;
+            const description = document.getElementById('newCourseDesc').value.trim();
+            if (!title) return alert('請填寫課程名稱');
+
+            const payload = { card_id: currentCard.id, tab_id, title, subtitle, price, badge_text, booking_mode, description };
+            if (supabaseClient) {
+                const { data } = await supabaseClient.from('pro_courses').insert([payload]).select().single();
+                if (data) courses.push(data);
+            } else {
+                courses.push({ id: 'c-' + Date.now(), ...payload });
+            }
+            renderCoursesAdmin();
+            renderSchedulesAdmin();
+        }
+
+        // 4. 開課場次排程
+        function renderSchedulesAdmin() {
+            document.getElementById('schedCourseId').innerHTML = courses.map(c => `<option value="${c.id}">${c.title}</option>`).join('');
+            document.getElementById('adminSchedulesList').innerHTML = schedules.map(s => {
+                const c = courses.find(x => x.id === s.course_id);
+                return `
+                    <div class="bg-white p-3 rounded-xl border border-stone-200 flex justify-between items-center text-xs">
+                        <span><strong>${s.schedule_date}</strong> ${s.start_time}-${s.end_time} ｜ ${c?.title || '一般空檔'} (${s.location_tag || ''})</span>
+                        <span class="text-stone-500">已報 ${s.booked_count} / ${s.max_capacity} 名</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function addSchedule() {
+            const course_id = document.getElementById('schedCourseId').value;
+            const schedule_date = document.getElementById('schedDate').value;
+            const max_capacity = Number(document.getElementById('schedCap').value) || 1;
+            const start_time = document.getElementById('schedStart').value;
+            const end_time = document.getElementById('schedEnd').value;
+            const location_tag = document.getElementById('schedLoc').value.trim();
+            if (!schedule_date) return alert('請選擇日期');
+
+            const payload = { card_id: currentCard.id, course_id, schedule_date, max_capacity, start_time, end_time, location_tag, booked_count: 0 };
+            if (supabaseClient) {
+                const { data } = await supabaseClient.from('pro_schedules').insert([payload]).select().single();
+                if (data) schedules.push(data);
+            } else {
+                schedules.push({ id: 's-' + Date.now(), ...payload });
+            }
+            renderSchedulesAdmin();
+        }
+
+        // 5. 儲存品牌與收款設定
+        async function saveBrandSettings() {
+            const updates = {
+                brand_name: document.getElementById('setBrandName').value.trim(),
+                theme_color: document.getElementById('setThemeColor').value,
+                tagline: document.getElementById('setTagline').value.trim(),
+                bio: document.getElementById('setBio').value.trim(),
+                enable_ordering: document.getElementById('setEnableOrdering').checked,
+                bank_code: document.getElementById('setBankCode').value.trim(),
+                bank_name: document.getElementById('setBankName').value.trim(),
+                bank_account: document.getElementById('setBankAcc').value.trim(),
+                account_holder: document.getElementById('setBankHolder').value.trim()
+            };
+            if (supabaseClient) {
+                await supabaseClient.from('pro_cards').update(updates).eq('id', currentCard.id);
+            }
+            alert('設定已儲存並同步至前台');
+        }
+
+        // 6. 送出許願
+        async function sendProWish() {
+            const wish_content = document.getElementById('proWishInput').value.trim();
+            if (!wish_content) return;
+            if (supabaseClient) {
+                await supabaseClient.from('feature_wishes').insert([{
+                    source_tool: 'pro_booking_system',
+                    card_id: currentCard.id,
+                    brand_name: currentCard.brand_name,
+                    wish_content
+                }]);
+            }
+            document.getElementById('proWishInput').value = '';
+            alert('許願已成功傳送給 Sibyl 數位管家');
+        }
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>

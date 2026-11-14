@@ -43,6 +43,18 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+        .glass-3d-card {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 18px 38px -12px rgba(61, 52, 46, 0.08);
+        }
+        .soft-block {
+            background: var(--bg-soft);
+            border: 1px solid rgba(140, 115, 91, 0.14);
+        }
+        
         /* 月曆格子懸停與點擊 3D 微互動 */
         .cal-day-btn {
             transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -308,8 +320,12 @@
                 </div>
                 <h4 class="text-base font-bold">預約申請已送出</h4>
                 <p class="text-xs text-stone-500">您的訂單編號：<span id="createdBookingNo" class="font-mono font-bold text-stone-800"></span></p>
-                <p class="text-xs text-stone-500 leading-relaxed">請截圖保存此畫面。若您尚未填寫匯款後五碼，可隨時點擊頁面右上角「查詢與回報匯款」補填核對。</p>
-                <button onclick="closeModal('checkoutModal')" class="w-full py-2.5 rounded-xl bg-stone-800 text-white text-xs font-medium">完成並返回頁面</button>
+                <p class="text-xs text-stone-500 leading-relaxed">系統已自動複製您的預約明細，點擊下方按鈕開啟老師的 LINE 貼上送出，即可加速核對：</p>
+                <button onclick="openProOwnerLine()" class="w-full py-2.5 rounded-xl theme-btn-primary text-xs font-bold flex items-center justify-center gap-1.5">
+                    <i data-lucide="message-circle" class="w-4 h-4"></i>
+                    <span>開啟老師 LINE 傳送預約明細</span>
+                </button>
+                <button onclick="closeModal('checkoutModal')" class="w-full py-2 rounded-xl bg-stone-100 text-stone-600 text-xs font-medium">完成並返回頁面</button>
             </div>
         </div>
     </div>
@@ -330,6 +346,26 @@
     </div>
 
     <script>
+        window.alert = function(msg) {
+            let box = document.getElementById('sibylCustomAlert');
+            if (!box) {
+                box = document.createElement('div');
+                box.id = 'sibylCustomAlert';
+                box.className = 'fixed inset-0 bg-black/40 backdrop-blur-xs z-[99] flex items-center justify-center p-5';
+                box.innerHTML = `
+                    <div class="bg-white rounded-3xl w-full max-w-xs p-6 shadow-xl text-center space-y-4 border border-stone-100">
+                        <p id="sibylAlertMsg" class="text-xs text-stone-700 leading-relaxed font-medium"></p>
+                        <button onclick="document.getElementById('sibylCustomAlert').classList.add('hidden')" 
+                            class="w-full py-2.5 rounded-xl text-xs font-bold text-white shadow-sm transition hover:opacity-90"
+                            style="background-color: var(--primary, #8C735B);">
+                            我知道了
+                        </button>
+                    </div>`;
+                document.body.appendChild(box);
+            }
+            document.getElementById('sibylAlertMsg').textContent = msg;
+            box.classList.remove('hidden');
+        };
         const SUPABASE_URL = "https://tzqpfnrpnfzzubofoqlt.supabase.co"; // 填入 Supabase Project URL
         const SUPABASE_ANON_KEY = "sb_publishable_Gd2bvnjN9_wy-x2VkkQzaw_S_gfqJHG"; // 填入 Supabase Anon Key
         const supabaseClient = (SUPABASE_URL && SUPABASE_ANON_KEY)
@@ -480,6 +516,12 @@
         }
 
         function renderAll() {
+            const t = (cardData.sales_modules && cardData.sales_modules.titles) || {};
+            document.querySelector('header span').textContent = t.topBadge || 'OFFICIAL BOOKING';
+            document.querySelector('#carouselSection h2').textContent = t.carousel || '課程花絮與實績展示';
+            document.querySelector('#coursesSection h2').textContent = t.folder || '課程與服務項目（可勾選單堂或多堂）';
+            document.querySelector('#calendarGrid').parentElement.querySelector('h2').textContent = t.calendar || '選擇上課日期與場次';
+            document.querySelector('#faqSection h2').textContent = t.faq || '報名與退改期須知';
             document.getElementById('frontBrandName').textContent = cardData.brand_name;
             document.getElementById('frontTagline').textContent = cardData.tagline || '';
             document.getElementById('frontBio').textContent = cardData.bio || '';
@@ -500,31 +542,43 @@
             renderFaqs();
         }
 
-        function renderLinks() {
-            const box = document.getElementById('frontLinksContainer');
-            const links = cardData.social_links || [];
-            if (!links.length) return box.classList.add('hidden');
-            box.classList.remove('hidden');
+        function getSocialSvg(name) {
+         const svgs = {
+             instagram: `<svg class="w-4 h-4 theme-text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>`,
+             facebook: `<svg class="w-4 h-4 theme-text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>`,
+             youtube: `<svg class="w-4 h-4 theme-text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/><path d="m10 15 5-3-5-3z"/></svg>`,
+             'at-sign': `<svg class="w-4 h-4 theme-text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></svg>`,
+             'message-circle': `<svg class="w-4 h-4 theme-text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>`,
+             globe: `<svg class="w-4 h-4 theme-text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>`
+         };
+         return svgs[name] || svgs.globe;
+     }
 
-            const icons = links.filter(l => l.style === 'icon_only');
-            const blocks = links.filter(l => l.style !== 'icon_only');
-            let html = '';
+     function renderLinks() {
+         const box = document.getElementById('frontLinksContainer');
+         const links = cardData.social_links || [];
+         if (!links.length) return box.classList.add('hidden');
+         box.classList.remove('hidden');
 
-            if (blocks.length) {
-                html += `<div class="space-y-2 mb-3">` + blocks.map(l => `
-                    <a href="${l.url}" target="_blank" class="w-full py-2.5 px-4 rounded-xl theme-soft border theme-border flex items-center justify-center gap-2 text-xs font-medium">
-                        ${l.style === 'icon_text' ? `<i data-lucide="${l.icon}" class="w-4 h-4"></i>` : ''}
-                        <span>${l.label}</span>
-                    </a>`).join('') + `</div>`;
-            }
-            if (icons.length) {
-                html += `<div class="flex justify-center gap-3">` + icons.map(l => `
-                    <a href="${l.url}" target="_blank" class="w-10 h-10 rounded-full theme-soft border theme-border flex items-center justify-center">
-                        <i data-lucide="${l.icon}" class="w-4 h-4"></i>
-                    </a>`).join('') + `</div>`;
-            }
-            box.innerHTML = html;
-        }
+         const icons = links.filter(l => l.style === 'icon_only');
+         const blocks = links.filter(l => l.style !== 'icon_only');
+         let html = '';
+
+         if (blocks.length) {
+             html += `<div class="space-y-2 mb-3">` + blocks.map(l => `
+                 <a href="${l.url}" target="_blank" class="w-full py-2.5 px-4 rounded-xl theme-soft border theme-border flex items-center justify-center gap-2 text-xs font-medium">
+                     ${l.style === 'icon_text' ? getSocialSvg(l.icon) : ''}
+                     <span>${l.label}</span>
+                 </a>`).join('') + `</div>`;
+         }
+         if (icons.length) {
+             html += `<div class="flex justify-center gap-3">` + icons.map(l => `
+                 <a href="${l.url}" target="_blank" class="w-10 h-10 rounded-full theme-soft border theme-border flex items-center justify-center hover:scale-110 transition">
+                     ${getSocialSvg(l.icon)}
+                 </a>`).join('') + `</div>`;
+         }
+         box.innerHTML = html;
+     }
 
         let currentSlide = 0;
 
@@ -884,7 +938,6 @@
 
             if (!name || !phone || !line) return alert('請完整填寫姓名、手機與 LINE 名稱');
 
-            // 讀取有效的舊學員推薦代碼
             let refCode = null;
             try {
                 const storedRef = JSON.parse(localStorage.getItem(`sibyl_ref_${CARD_SLUG}`));
@@ -914,6 +967,13 @@
                 await supabaseClient.from('pro_bookings').insert([orderPayload]);
             }
 
+            // 自動打包並複製訂單明細到剪貼簿，方便學員直接貼到老師 LINE
+            const itemsDetail = orderPayload.selected_items.map(i => `${i.course_title} (${i.date} ${i.time})`).join('\n・');
+            window.lastOrderMsg = `您好！我已完成線上預約報名：\n訂單編號：${bookingNo}\n學員姓名：${name}\n聯絡電話：${phone}\n報名場次：\n・${itemsDetail}${cardData.enable_ordering ? `\n應付金額：NT$ ${totalAmount.toLocaleString()}` : ''}${last5 ? `\n匯款後五碼：${last5}` : ''}`;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(window.lastOrderMsg).catch(() => {});
+            }
+
             document.getElementById('createdBookingNo').textContent = bookingNo;
             document.getElementById('checkoutFormFields').classList.add('hidden');
             document.getElementById('bookingSuccessView').classList.remove('hidden');
@@ -921,6 +981,12 @@
             updateFloatingCart();
             renderCourseCards();
             renderDailySlots();
+            lucide.createIcons();
+        }
+
+        function openProOwnerLine() {
+            const url = cardData.sales_modules?.lineUrl || (cardData.social_links || []).find(l => l.icon === 'message-circle')?.url || 'https://line.me';
+            window.open(url, '_blank');
         }
 
         function closeModal(id) {

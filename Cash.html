@@ -1,0 +1,1905 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Sibyl 出攤POS工具 | Designed by Sibyl</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* 預設：米棕色 Warm Oatmeal 質感立體色系 */
+      --bg-page: #F5F0E8;
+      --bg-card: rgba(255, 255, 255, 0.92);
+      --bg-card-solid: #FFFFFF;
+      --bg-subtle: #EAE2D6;
+      --text-main: #362E28;
+      --text-muted: #7A6F64;
+      --accent: #8C735B;
+      --accent-hover: #735C47;
+      --accent-soft: #E6DDD0;
+      --accent-text: #FFFFFF;
+      --border-color: rgba(140, 115, 91, 0.22);
+      --shadow-elevation: 0 10px 28px -6px rgba(54, 46, 40, 0.08), 0 2px 6px -1px rgba(54, 46, 40, 0.04);
+      --shadow-btn: 0 4px 12px -2px rgba(140, 115, 91, 0.25);
+      --price-color: #8C735B;
+    }
+
+    /* 白天強光模式：黑底高對比螢光色系 (點擊太陽圖示切換) */
+    body.sunlight-mode {
+      --bg-page: #090A0B;
+      --bg-card: #14171A;
+      --bg-card-solid: #14171A;
+      --bg-subtle: #1F2429;
+      --text-main: #FFFFFF;
+      --text-muted: #A3B1BF;
+      --accent: #D4FF00;
+      --accent-hover: #BFE600;
+      --accent-soft: #262E14;
+      --accent-text: #090A0B;
+      --border-color: rgba(212, 255, 0, 0.35);
+      --shadow-elevation: 0 8px 24px rgba(0, 0, 0, 0.75);
+      --shadow-btn: 0 0 18px rgba(212, 255, 0, 0.35);
+      --price-color: #39FF14;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      transition: background-color 0.28s ease, color 0.28s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .glass-card {
+      background-color: var(--bg-card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-elevation);
+      transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease, background-color 0.28s ease;
+    }
+
+    .solid-card {
+      background-color: var(--bg-card-solid);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-elevation);
+    }
+
+    .theme-subtle { background-color: var(--bg-subtle); transition: background-color 0.25s ease; }
+    .theme-accent-bg { background-color: var(--accent); color: var(--accent-text); box-shadow: var(--shadow-btn); transition: all 0.2s ease; }
+    .theme-accent-bg:hover { background-color: var(--accent-hover); }
+    .theme-accent-soft { background-color: var(--accent-soft); color: var(--text-main); }
+    .theme-border { border-color: var(--border-color); }
+    .theme-text-muted { color: var(--text-muted); }
+    .theme-text-accent { color: var(--accent); }
+    .theme-price { color: var(--price-color); }
+
+    .pos-item-btn {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-elevation);
+      transition: transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .pos-item-btn:active { transform: scale(0.95); }
+    .pos-item-btn.has-qty { border-width: 2px; border-color: var(--accent); }
+
+    .reveal-on-scroll {
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity 0.45s ease-out, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .reveal-on-scroll.is-visible { opacity: 1; transform: translateY(0); }
+
+    @keyframes badge-pop {
+      0% { transform: scale(1); }
+      45% { transform: scale(1.28); }
+      100% { transform: scale(1); }
+    }
+    .animate-pop { animation: badge-pop 0.26s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center pb-32">
+
+  <!-- 頂部浮動 Toast 提示 -->
+  <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-300 translate-y-[-10px]">
+    <div class="px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-2 theme-accent-bg">
+      <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+      <span id="toastText">已記錄</span>
+    </div>
+  </div>
+
+  <!-- 主容器 -->
+  <div class="w-full max-w-md px-4 pt-4 flex-1 flex flex-col">
+
+    <!-- 1. 頂部工具列 -->
+    <header class="flex items-center justify-between gap-2 mb-3.5">
+      <div class="flex items-center gap-2 min-w-0">
+        <div class="w-8 h-8 rounded-xl theme-accent-bg flex items-center justify-center shrink-0">
+          <i data-lucide="calculator" class="w-4 h-4"></i>
+        </div>
+        <div class="min-w-0">
+          <h1 id="headerStoreName" class="text-sm font-bold truncate">Sibyl 出攤POS工具</h1>
+          <div class="text-[11px] theme-text-muted flex items-center gap-1">
+            <span>今日營收</span>
+            <span id="headerTodayTotal" class="font-bold theme-price">$0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-1.5 shrink-0">
+        <button id="sunlightToggleBtn" onclick="toggleSunlightMode()" title="白天強光高對比模式"
+          class="w-9 h-9 rounded-xl glass-card flex items-center justify-center transition active:scale-90">
+          <i id="sunlightIcon" data-lucide="sun" class="w-4 h-4 theme-text-accent"></i>
+        </button>
+
+        <button onclick="openDailyReportModal()" title="今日銷售排行與結算"
+          class="w-9 h-9 rounded-xl glass-card flex items-center justify-center transition active:scale-90">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+        </button>
+
+        <button onclick="openAdminGate()"
+          class="h-9 px-3 rounded-xl glass-card inline-flex items-center gap-1.5 text-xs font-semibold transition active:scale-95">
+          <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i>
+          <span>後台</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. 雙模式收銀區：固定品項按鈕 vs 大分類＋數字鍵盤 -->
+    <section class="mb-6 space-y-3">
+      <div class="grid grid-cols-2 p-1 rounded-2xl theme-subtle border theme-border text-xs font-bold">
+        <button id="modeBtnPreset" onclick="switchPosMode('preset')" class="py-2 rounded-xl solid-card transition flex items-center justify-center gap-1.5">
+          <i data-lucide="layout-grid" class="w-3.5 h-3.5 theme-text-accent"></i>
+          <span>固定品項按鈕</span>
+        </button>
+        <button id="modeBtnKeypad" onclick="switchPosMode('keypad')" class="py-2 rounded-xl theme-text-muted transition flex items-center justify-center gap-1.5">
+          <i data-lucide="keyboard" class="w-3.5 h-3.5"></i>
+          <span>分類＋數字鍵盤</span>
+        </button>
+      </div>
+
+      <!-- 模式 A：固定品項大按鈕網格 -->
+      <div id="posPresetContainer" class="space-y-2.5">
+        <div id="mainCategoryBar" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5"></div>
+        <div id="subCategoryBar" class="hidden flex items-center gap-1.5 overflow-x-auto no-scrollbar pl-2 border-l-2 theme-border"></div>
+        <div id="posItemsGrid" class="grid grid-cols-2 gap-2.5"></div>
+      </div>
+
+      <!-- 模式 B：大分類計帳 + 數字鍵盤 + 常按金額 -->
+      <div id="posKeypadContainer" class="hidden space-y-2.5">
+        <div class="glass-card rounded-2xl p-3.5">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[11px] font-bold theme-text-muted flex items-center gap-1">
+              <i data-lucide="tag" class="w-3 h-3 theme-text-accent"></i>
+              <span>第一步：點選售出大分類（報表統計依據）</span>
+            </span>
+            <span id="keypadSelectedCatBadge" class="text-[11px] font-bold px-2 py-0.5 rounded-md theme-accent-soft">尚未選擇</span>
+          </div>
+          <div id="keypadCategoryGrid" class="flex flex-wrap gap-1.5"></div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-3.5 space-y-2.5">
+          <div class="p-3 rounded-xl theme-subtle border theme-border flex items-center justify-between">
+            <span class="text-xs font-semibold theme-text-muted">輸入標籤金額</span>
+            <div class="text-2xl font-extrabold tracking-tight theme-price">
+              $<span id="keypadAmountDisplay">0</span>
+            </div>
+          </div>
+
+          <div>
+            <div class="text-[10px] font-semibold theme-text-muted mb-1">常按金額快捷（點擊累加）：</div>
+            <div id="quickAmountsRow" class="grid grid-cols-3 gap-1.5"></div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-1.5 pt-0.5">
+            <button onclick="pressKeypadDigit('7')" class="pos-item-btn py-3 rounded-xl text-base font-extrabold">7</button>
+            <button onclick="pressKeypadDigit('8')" class="pos-item-btn py-3 rounded-xl text-base font-extrabold">8</button>
+            <button onclick="pressKeypadDigit('9')" class="pos-item-btn py-3 rounded-xl text-base font-extrabold">9</button>
+
+            <button onclick="pressKeypadDigit('4')" class="pos-item-btn py-3 rounded-xl text-base font-extrabold">4</button>
+            <button onclick="pressKeypadDigit('5')" class="pos-item-btn py-3 rounded-xl text-base font-extrabold">5</button>
+            <button onclick="pressKeypadDigit('6')" class="pos-item-btn py-3 rounded-xl text-base font-extrabold">6</button>
+
+            <button onclick="pressKeypadDigit('1')" class="pos-item-btn py-3 rounded-xl text-base font-extrabold">1</button>
+            <button onclick="pressKeypadDigit('2')" class="pos-item-btn py-3 rounded-xl text-base font-extrabold">2</button>
+            <button onclick="pressKeypadDigit('3')" class="pos-item-btn py-3 rounded-xl text-base font-extrabold">3</button>
+
+            <button onclick="clearKeypadAmount()" class="pos-item-btn py-3 rounded-xl text-xs font-bold theme-text-muted">歸零</button>
+            <button onclick="pressKeypadDigit('0')" class="pos-item-btn py-3 rounded-xl text-base font-extrabold">0</button>
+            <button onclick="backspaceKeypad()" class="pos-item-btn py-3 rounded-xl flex items-center justify-center">
+              <i data-lucide="delete" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <button onclick="addKeypadEntryToCart()" class="w-full py-3 rounded-xl text-xs font-bold theme-accent-bg flex items-center justify-center gap-1.5 transition active:scale-98">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>計入此分類金額（可繼續累加或直接找零）</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 店家自訂連結區 -->
+    <section id="frontLinksSection" class="glass-card rounded-2xl p-4 mb-5 reveal-on-scroll">
+      <div class="flex items-center justify-between mb-2.5">
+        <span class="text-[11px] font-semibold tracking-wider uppercase theme-text-muted">品牌傳送門</span>
+        <span class="text-[11px] theme-text-muted">快速開啟</span>
+      </div>
+      <div id="frontLinksContainer"></div>
+    </section>
+
+    <!-- 4. 品牌頁尾 Footer -->
+    <footer class="mt-auto pt-2 pb-4 text-center reveal-on-scroll">
+      <a href="https://heysibyl.com" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-[11px] tracking-wider theme-text-muted hover:opacity-75 transition">
+        <span>Designed by Sibyl | 數位管家</span>
+        <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
+      </a>
+    </footer>
+  </div>
+
+  <!-- 底部懸浮即時結帳列 -->
+  <div id="floatingCartBar" class="fixed bottom-4 inset-x-0 z-30 px-4 pointer-events-none transition-all duration-300 translate-y-24 opacity-0">
+    <div class="max-w-md mx-auto solid-card rounded-2xl p-3 flex items-center justify-between gap-3 pointer-events-auto">
+      <button onclick="openCheckoutModal()" class="flex items-center gap-3 text-left flex-1 min-w-0">
+        <div id="cartCountBadge" class="w-10 h-10 rounded-xl theme-accent-bg font-bold text-sm flex items-center justify-center shrink-0">
+          0
+        </div>
+        <div class="min-w-0">
+          <div class="text-[11px] theme-text-muted truncate" id="cartPreviewSummary">點擊明細查看或找零</div>
+          <div class="text-base font-extrabold tracking-tight theme-price" id="cartTotalDisplay">$0</div>
+        </div>
+      </button>
+
+      <div class="flex items-center gap-1.5 shrink-0">
+        <button onclick="clearCurrentCart()" class="p-2.5 rounded-xl theme-subtle theme-text-muted hover:opacity-80 transition" title="清空本筆">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+        </button>
+        <button onclick="quickRecordOrder()" class="px-4 py-2.5 rounded-xl text-xs font-bold theme-accent-bg flex items-center gap-1.5 transition active:scale-95">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>秒速入帳</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 結帳明細與現金找零計算彈窗 -->
+  <div id="checkoutModal" class="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs hidden items-end sm:items-center justify-center p-4">
+    <div class="solid-card rounded-3xl w-full max-w-md p-5 space-y-4">
+      <div class="flex items-center justify-between border-b theme-border pb-3">
+        <div class="flex items-center gap-2 font-bold text-sm">
+          <i data-lucide="receipt" class="w-4 h-4 theme-text-accent"></i>
+          <span>本筆結帳明細與找零</span>
+        </div>
+        <button onclick="closeCheckoutModal()" class="p-1.5 rounded-xl theme-subtle">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div id="checkoutItemsList" class="space-y-2 max-h-52 overflow-y-auto no-scrollbar"></div>
+
+      <div class="p-3.5 rounded-2xl theme-subtle space-y-2.5">
+        <div class="flex items-center justify-between text-xs">
+          <span class="theme-text-muted">應收總金額</span>
+          <span id="modalTotalAmount" class="text-base font-extrabold theme-price">$0</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+          <span class="text-xs theme-text-muted shrink-0">實收現金：</span>
+          <input id="cashReceivedInput" type="number" inputmode="numeric" placeholder="輸入金額" oninput="calculateChange()"
+            class="w-full px-3 py-1.5 rounded-xl border theme-border text-sm font-bold bg-white text-stone-900 focus:outline-none" />
+        </div>
+
+        <div class="grid grid-cols-4 gap-1.5">
+          <button onclick="setQuickCash(100)" class="py-1.5 rounded-lg solid-card text-xs font-semibold">$100</button>
+          <button onclick="setQuickCash(500)" class="py-1.5 rounded-lg solid-card text-xs font-semibold">$500</button>
+          <button onclick="setQuickCash(1000)" class="py-1.5 rounded-lg solid-card text-xs font-semibold">$1000</button>
+          <button onclick="setExactCash()" class="py-1.5 rounded-lg solid-card text-xs font-semibold">剛剛好</button>
+        </div>
+
+        <div class="flex items-center justify-between pt-2 border-t theme-border">
+          <span class="text-xs font-semibold">應找零金額</span>
+          <span id="changeDueDisplay" class="text-lg font-extrabold theme-price">$0</span>
+        </div>
+      </div>
+
+      <button onclick="quickRecordOrder(true)" class="w-full py-3 rounded-2xl text-sm font-bold theme-accent-bg flex items-center justify-center gap-2 transition active:scale-98">
+        <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+        <span>確認收款並入帳</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 今日銷售戰報與熱銷排行彈窗 (含質感二次確認區取代原生 confirm) -->
+  <div id="dailyReportModal" class="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs hidden items-end sm:items-center justify-center p-4">
+    <div class="solid-card rounded-3xl w-full max-w-md p-5 space-y-4 max-h-[88vh] flex flex-col">
+      <div class="flex items-center justify-between border-b theme-border pb-3 shrink-0">
+        <div class="flex items-center gap-2 font-bold text-sm">
+          <i data-lucide="trending-up" class="w-4 h-4 theme-text-accent"></i>
+          <span>今日銷售戰報與熱銷排行</span>
+        </div>
+        <button onclick="closeDailyReportModal()" class="p-1.5 rounded-xl theme-subtle">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="overflow-y-auto no-scrollbar space-y-4 flex-1">
+        <div class="grid grid-cols-2 gap-2.5">
+          <div class="p-3.5 rounded-2xl theme-subtle">
+            <div class="text-[11px] theme-text-muted">今日總營業額</div>
+            <div id="reportTotalRevenue" class="text-xl font-extrabold mt-1 theme-price">$0</div>
+          </div>
+          <div class="p-3.5 rounded-2xl theme-subtle">
+            <div class="text-[11px] theme-text-muted">今日成交筆數</div>
+            <div id="reportOrderCount" class="text-xl font-extrabold mt-1">0 筆</div>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="text-xs font-bold mb-2 flex items-center gap-1.5">
+            <i data-lucide="award" class="w-3.5 h-3.5 theme-text-accent"></i>
+            <span>今日熱銷商品／分類排行</span>
+          </h4>
+          <div id="reportBestSellers" class="space-y-2"></div>
+        </div>
+
+        <div>
+          <h4 class="text-xs font-bold mb-2 flex items-center gap-1.5">
+            <i data-lucide="history" class="w-3.5 h-3.5 theme-text-accent"></i>
+            <span>今日入帳明細（誤按可刪除）</span>
+          </h4>
+          <div id="reportRecentOrders" class="space-y-2"></div>
+        </div>
+      </div>
+
+      <!-- 質感二次確認區 -->
+      <div id="confirmResetBox" class="hidden p-3 rounded-2xl theme-subtle border theme-border space-y-2 shrink-0">
+        <div class="text-xs font-bold text-center">確定要清空今日所有帳務紀錄嗎？</div>
+        <div class="flex gap-2">
+          <button onclick="toggleConfirmReset(false)" class="flex-1 py-2 rounded-xl text-xs font-bold solid-card">取消</button>
+          <button onclick="executeResetTodayOrders()" class="flex-1 py-2 rounded-xl text-xs font-bold bg-red-600 text-white">確認清空</button>
+        </div>
+      </div>
+
+      <div id="reportDefaultFooter" class="pt-2 border-t theme-border flex gap-2 shrink-0">
+        <button onclick="toggleConfirmReset(true)" class="flex-1 py-2.5 rounded-xl text-xs font-semibold theme-subtle text-red-600">
+          清空今日帳務
+        </button>
+        <button onclick="closeDailyReportModal()" class="flex-1 py-2.5 rounded-xl text-xs font-semibold theme-accent-bg">
+          返回收銀畫面
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 店家管理密碼驗證視窗 -->
+  <div id="passwordModal" class="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="solid-card rounded-3xl w-full max-w-xs p-5">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2 font-bold text-sm">
+          <i data-lucide="lock" class="w-4 h-4 theme-text-accent"></i>
+          <span>店家後台驗證</span>
+        </div>
+        <button onclick="closePasswordModal()" class="p-1.5 rounded-xl theme-subtle">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <p class="text-xs theme-text-muted mb-3">請輸入管理密碼（預設體驗密碼：1234）</p>
+      <input id="adminPasswordInput" type="password" placeholder="輸入管理密碼" class="w-full px-3.5 py-2.5 rounded-xl border theme-border text-sm bg-white text-stone-900 focus:outline-none mb-3" onkeydown="if(event.key==='Enter') verifyAdminPassword()" />
+      <button onclick="verifyAdminPassword()" class="w-full py-2.5 rounded-xl text-xs font-bold theme-accent-bg">
+        進入管理後台
+      </button>
+    </div>
+  </div>
+
+  <!-- 店家管理後台抽屜 -->
+  <div id="adminDrawer" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden justify-center overflow-y-auto">
+    <div class="w-full max-w-md min-h-screen solid-card flex flex-col">
+      <div class="sticky top-0 z-10 px-4 py-3.5 border-b theme-border solid-card flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="layout-dashboard" class="w-4 h-4 theme-text-accent"></i>
+          <span class="font-bold text-sm">Sibyl 出攤POS管理後台</span>
+        </div>
+        <button onclick="closeAdminDrawer()" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold theme-subtle">
+          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          <span>返回收銀</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-4 border-b theme-border text-[11px] font-semibold theme-subtle">
+        <button id="tabBtnCategories" onclick="switchAdminTab('categories')" class="py-3 border-b-2 transition" style="border-color: var(--accent);">
+          樹狀分類
+        </button>
+        <button id="tabBtnItems" onclick="switchAdminTab('items')" class="py-3 border-b-2 border-transparent theme-text-muted transition">
+          品項與金額
+        </button>
+        <button id="tabBtnStyle" onclick="switchAdminTab('style')" class="py-3 border-b-2 border-transparent theme-text-muted transition">
+          色系與連結
+        </button>
+        <button id="tabBtnGuide" onclick="switchAdminTab('guide')" class="py-3 border-b-2 border-transparent theme-text-muted transition">
+          技巧與許願
+        </button>
+      </div>
+
+      <div class="p-4 space-y-5 flex-1 pb-14">
+
+        <!-- TAB 1: 商城級樹狀分類管理 -->
+        <div id="adminTabCategories" class="space-y-4">
+          <div class="p-4 rounded-2xl border theme-border space-y-3">
+            <h3 class="text-xs font-bold flex items-center gap-1.5">
+              <i data-lucide="folder-tree" class="w-4 h-4 theme-text-accent"></i>
+              <span>建立商品分類（支援主分類與子分類樹狀層級）</span>
+            </h3>
+            <div>
+              <label class="block text-[11px] theme-text-muted mb-1">上層父分類（選「無」即建立為第一層主分類）</label>
+              <select id="parentCategorySelect" class="w-full px-3 py-2 rounded-xl border theme-border text-xs bg-white text-stone-900">
+                <option value="">無（建立為第一層主分類）</option>
+              </select>
+            </div>
+            <div class="flex gap-2">
+              <input id="newCategoryNameInput" type="text" placeholder="輸入分類名稱（如：純銀飾品、手作飲品）" class="flex-1 px-3 py-2 rounded-xl border theme-border text-xs bg-white text-stone-900" />
+              <button onclick="addCategoryNode()" class="px-4 py-2 rounded-xl text-xs font-bold theme-accent-bg shrink-0">
+                新增
+              </button>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl border theme-border space-y-2.5">
+            <h3 class="text-xs font-bold">目前分類樹狀結構</h3>
+            <div id="categoryTreeContainer" class="space-y-2"></div>
+          </div>
+        </div>
+
+        <!-- TAB 2: 常按金額快捷鍵 + 常用大按鈕品項管理 -->
+        <div id="adminTabItems" class="hidden space-y-4">
+          <div class="p-4 rounded-2xl border theme-border space-y-2.5">
+            <h3 class="text-xs font-bold flex items-center gap-1.5">
+              <i data-lucide="coins" class="w-3.5 h-3.5 theme-text-accent"></i>
+              <span>數字鍵盤「常按金額快捷鍵」設定</span>
+            </h3>
+            <p class="text-[11px] theme-text-muted">適合商品貼標籤的攤位，用逗號分隔輸入 6 組常按金額（例如：100,150,200,290,350,500）</p>
+            <div class="flex gap-2">
+              <input id="inputQuickAmounts" type="text" placeholder="100,150,200,290,350,500" class="flex-1 px-3 py-2 rounded-xl border theme-border text-xs bg-white text-stone-900" />
+              <button onclick="saveQuickAmountsSetting()" class="px-3.5 py-2 rounded-xl text-xs font-bold theme-accent-bg shrink-0">
+                儲存
+              </button>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl border theme-border space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 id="itemFormTitle" class="text-xs font-bold">新增收銀大按鈕品項</h3>
+              <button id="cancelEditItemBtn" onclick="resetItemForm()" class="hidden text-[11px] theme-text-muted underline">取消編輯</button>
+            </div>
+            <input type="hidden" id="editItemId" value="" />
+
+            <div>
+              <label class="block text-[11px] theme-text-muted mb-1">所屬分類（支援指派至主分類或子分類）</label>
+              <select id="itemCategorySelect" class="w-full px-3 py-2 rounded-xl border theme-border text-xs bg-white text-stone-900"></select>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2">
+              <div class="col-span-2">
+                <label class="block text-[11px] theme-text-muted mb-1">品項名稱</label>
+                <input id="itemNameInput" type="text" placeholder="例如：海鹽焦糖拿鐵" class="w-full px-3 py-2 rounded-xl border theme-border text-xs bg-white text-stone-900" />
+              </div>
+              <div>
+                <label class="block text-[11px] theme-text-muted mb-1">單價 (NT$)</label>
+                <input id="itemPriceInput" type="number" inputmode="numeric" placeholder="90" class="w-full px-3 py-2 rounded-xl border theme-border text-xs bg-white text-stone-900" />
+              </div>
+            </div>
+
+            <button onclick="savePosItem()" class="w-full py-2.5 rounded-xl text-xs font-bold theme-accent-bg flex items-center justify-center gap-1.5">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span id="saveItemBtnText">儲存品項按鈕</span>
+            </button>
+          </div>
+
+          <div>
+            <h3 class="text-xs font-bold mb-2">已建立品項列表</h3>
+            <div id="adminItemsList" class="space-y-2"></div>
+          </div>
+        </div>
+
+        <!-- TAB 3: 色系切換、店名與多模式連結 -->
+        <div id="adminTabStyle" class="hidden space-y-5">
+          <div class="p-4 rounded-2xl border theme-border space-y-2.5">
+            <h3 class="text-xs font-bold">全站莫蘭迪與極簡色系</h3>
+            <div id="themeSelectorGrid" class="grid grid-cols-2 gap-2"></div>
+          </div>
+
+          <div class="p-4 rounded-2xl border theme-border space-y-3">
+            <h3 class="text-xs font-bold">基本設定</h3>
+            <div>
+              <label class="block text-[11px] theme-text-muted mb-1">POS 顯示店名</label>
+              <input id="inputStoreName" type="text" class="w-full px-3 py-2 rounded-xl border theme-border text-xs bg-white text-stone-900" />
+            </div>
+            <div>
+              <label class="block text-[11px] theme-text-muted mb-1">後台登入密碼</label>
+              <input id="inputAdminPwd" type="text" class="w-full px-3 py-2 rounded-xl border theme-border text-xs bg-white text-stone-900" />
+            </div>
+            <button onclick="saveBasicSettings()" class="w-full py-2.5 rounded-xl text-xs font-bold theme-accent-bg">
+              儲存基本設定
+            </button>
+          </div>
+
+          <div class="p-4 rounded-2xl border theme-border space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-bold">前台下方連結按鈕</h3>
+              <select id="inputLinkDisplayMode" onchange="changeLinkDisplayMode(this.value)" class="px-2.5 py-1 rounded-lg border theme-border text-[11px] bg-white text-stone-900">
+                <option value="both">質感圖示＋文字</option>
+                <option value="icon">純質感圖示</option>
+                <option value="text">純文字</option>
+              </select>
+            </div>
+
+            <div class="p-3 rounded-xl theme-subtle space-y-2">
+              <input type="hidden" id="editLinkIndex" value="-1" />
+              <div class="grid grid-cols-3 gap-2">
+                <select id="linkIconType" class="px-2 py-2 rounded-xl border theme-border text-xs bg-white text-stone-900">
+                  <option value="instagram">Instagram</option>
+                  <option value="line">LINE 好友</option>
+                  <option value="globe">品牌官網</option>
+                  <option value="calendar">出攤排程頁</option>
+                  <option value="at-sign">Threads</option>
+                  <option value="shopping-bag">線上賣場</option>
+                </select>
+                <input id="linkLabelInput" type="text" placeholder="按鈕名稱" class="col-span-2 px-3 py-2 rounded-xl border theme-border text-xs bg-white text-stone-900" />
+              </div>
+              <div class="flex gap-2">
+                <input id="linkUrlInput" type="url" placeholder="https://..." class="flex-1 px-3 py-2 rounded-xl border theme-border text-xs bg-white text-stone-900" />
+                <button onclick="saveSocialLink()" class="px-3.5 py-2 rounded-xl text-xs font-bold theme-accent-bg shrink-0">
+                  <span id="saveLinkBtnText">新增</span>
+                </button>
+              </div>
+            </div>
+
+            <div id="adminLinksList" class="space-y-2"></div>
+          </div>
+        </div>
+
+        <!-- TAB 4: 使用技巧與許願池 -->
+        <div id="adminTabGuide" class="hidden space-y-5">
+          <div class="p-4 rounded-2xl border theme-border space-y-3">
+            <div class="flex items-center gap-2">
+              <i data-lucide="book-open" class="w-4 h-4 theme-text-accent"></i>
+              <h3 class="text-xs font-bold">Sibyl 出攤POS 現場實戰技巧</h3>
+            </div>
+            <div class="space-y-2.5 text-xs">
+              <div class="p-3 rounded-xl theme-subtle">
+                <div class="font-bold mb-1">技巧一：大太陽底下秒切「強光黑底螢光模式」</div>
+                <p class="theme-text-muted leading-relaxed">白天跑戶外市集手機反光看不清螢幕時，直接點擊前台右上角的「太陽圖示」，畫面會瞬間切換為高對比黑底與螢光字體，強光下依然一目了然。</p>
+              </div>
+              <div class="p-3 rounded-xl theme-subtle">
+                <div class="font-bold mb-1">技巧二：商品有貼價格標籤時使用「分類＋數字鍵盤」</div>
+                <p class="theme-text-muted leading-relaxed">切換至「分類＋數字鍵盤」模式，先點選大分類再輸入標籤金額或常按快捷金額，晚上結算戰報依然能精準看到各個大分類賣了多少錢。</p>
+              </div>
+              <div class="p-3 rounded-xl theme-subtle">
+                <div class="font-bold mb-1">技巧三：串連「Sibyl 出攤排程工具」</div>
+                <p class="theme-text-muted leading-relaxed">在「色系與連結」中把您的專屬出攤排程網址加入傳送門，客人詢問下次擺攤時間時可直接開啟展示。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl border theme-border space-y-3">
+            <div class="flex items-center gap-2">
+              <i data-lucide="sparkles" class="w-4 h-4 theme-text-accent"></i>
+              <h3 class="text-xs font-bold">功能許願池（傳送至數位管家總管）</h3>
+            </div>
+            <div>
+              <label class="block text-[11px] theme-text-muted mb-1">許願分類</label>
+              <select id="wishCategory" class="w-full px-3 py-2 rounded-xl border theme-border text-xs bg-white text-stone-900">
+                <option value="收銀結帳體驗">收銀與找零操作</option>
+                <option value="報表與統計">營收統計與熱銷分析</option>
+                <option value="分類與品項管理">分類與品項設定</option>
+                <option value="其他需求">其他現場營運需求</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] theme-text-muted mb-1">許願內容說明</label>
+              <textarea id="wishContent" rows="3" placeholder="請描述您希望增加的功能..." class="w-full px-3 py-2 rounded-xl border theme-border text-xs bg-white text-stone-900"></textarea>
+            </div>
+            <button onclick="submitWish()" class="w-full py-2.5 rounded-xl text-xs font-bold theme-accent-bg flex items-center justify-center gap-1.5">
+              <i data-lucide="send" class="w-3.5 h-3.5"></i>
+              <span>送出許願給總管</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // 1. SUPABASE 連線設定 (已填入你的專案金鑰)
+    // =========================================================================
+    const SUPABASE_URL = "https://tzqpfnrpnfzzubofoqlt.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_Gd2bvnjN9_wy-x2VkkQzaw_S_gfqJHG";
+    const POS_TABLE = "stall_pos_stores";
+    const WISH_TABLE = "tool_wishes";
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const STORE_SLUG = urlParams.get('s') || urlParams.get('store') || 'demo-cash';
+    const STORAGE_KEY = `sibyl_stall_pos_${STORE_SLUG}`;
+
+    let supabaseClient = null;
+    if (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase) {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+
+    // =========================================================================
+    // 2. 8 款莫蘭迪與極簡色系
+    // =========================================================================
+    const THEMES = {
+      oatmeal: {
+        name: '米棕色（預設）',
+        swatch: '#8C735B',
+        vars: {
+          '--bg-page': '#F5F0E8',
+          '--bg-card': 'rgba(255, 255, 255, 0.92)',
+          '--bg-card-solid': '#FFFFFF',
+          '--bg-subtle': '#EAE2D6',
+          '--text-main': '#362E28',
+          '--text-muted': '#7A6F64',
+          '--accent': '#8C735B',
+          '--accent-hover': '#735C47',
+          '--accent-soft': '#E6DDD0',
+          '--accent-text': '#FFFFFF',
+          '--border-color': 'rgba(140, 115, 91, 0.22)',
+          '--price-color': '#8C735B'
+        }
+      },
+      dustyRose: {
+        name: '粉黛灰粉',
+        swatch: '#B5838D',
+        vars: {
+          '--bg-page': '#F7F1F2',
+          '--bg-card': 'rgba(255, 255, 255, 0.92)',
+          '--bg-card-solid': '#FFFFFF',
+          '--bg-subtle': '#EFE4E6',
+          '--text-main': '#3D2E32',
+          '--text-muted': '#826D72',
+          '--accent': '#B5838D',
+          '--accent-hover': '#9A6A74',
+          '--accent-soft': '#EDDDE0',
+          '--accent-text': '#FFFFFF',
+          '--border-color': 'rgba(181, 131, 141, 0.25)',
+          '--price-color': '#A36D78'
+        }
+      },
+      sageForest: {
+        name: '莫蘭迪森綠',
+        swatch: '#6B7F70',
+        vars: {
+          '--bg-page': '#F0F4F1',
+          '--bg-card': 'rgba(255, 255, 255, 0.92)',
+          '--bg-card-solid': '#FFFFFF',
+          '--bg-subtle': '#E2E9E4',
+          '--text-main': '#2B362E',
+          '--text-muted': '#67756B',
+          '--accent': '#6B7F70',
+          '--accent-hover': '#56685B',
+          '--accent-soft': '#DCE4DE',
+          '--accent-text': '#FFFFFF',
+          '--border-color': 'rgba(107, 127, 112, 0.25)',
+          '--price-color': '#566B5B'
+        }
+      },
+      hazeBlue: {
+        name: '莫蘭迪霧霾藍',
+        swatch: '#6D8299',
+        vars: {
+          '--bg-page': '#F0F4F7',
+          '--bg-card': 'rgba(255, 255, 255, 0.92)',
+          '--bg-card-solid': '#FFFFFF',
+          '--bg-subtle': '#E2E8EF',
+          '--text-main': '#2A3440',
+          '--text-muted': '#687685',
+          '--accent': '#6D8299',
+          '--accent-hover': '#586B80',
+          '--accent-soft': '#DBE3EC',
+          '--accent-text': '#FFFFFF',
+          '--border-color': 'rgba(109, 130, 153, 0.25)',
+          '--price-color': '#566B82'
+        }
+      },
+      sunsetOrange: {
+        name: '莫蘭迪日落橘',
+        swatch: '#C27D5E',
+        vars: {
+          '--bg-page': '#F8F2EE',
+          '--bg-card': 'rgba(255, 255, 255, 0.92)',
+          '--bg-card-solid': '#FFFFFF',
+          '--bg-subtle': '#EFE3DC',
+          '--text-main': '#3E2E26',
+          '--text-muted': '#856E62',
+          '--accent': '#C27D5E',
+          '--accent-hover': '#A66649',
+          '--accent-soft': '#EEDCD2',
+          '--accent-text': '#FFFFFF',
+          '--border-color': 'rgba(194, 125, 94, 0.25)',
+          '--price-color': '#B06A4B'
+        }
+      },
+      ochreYellow: {
+        name: '莫蘭迪暖薑黃',
+        swatch: '#B89B5E',
+        vars: {
+          '--bg-page': '#F7F4EC',
+          '--bg-card': 'rgba(255, 255, 255, 0.92)',
+          '--bg-card-solid': '#FFFFFF',
+          '--bg-subtle': '#EFE8D8',
+          '--text-main': '#3B3527',
+          '--text-muted': '#7D7563',
+          '--accent': '#B89B5E',
+          '--accent-hover': '#9C8149',
+          '--accent-soft': '#EBE2CD',
+          '--accent-text': '#FFFFFF',
+          '--border-color': 'rgba(184, 155, 94, 0.25)',
+          '--price-color': '#9E8246'
+        }
+      },
+      whiteGrey: {
+        name: '白為主帶灰',
+        swatch: '#8E949E',
+        vars: {
+          '--bg-page': '#F8F9FA',
+          '--bg-card': 'rgba(255, 255, 255, 0.95)',
+          '--bg-card-solid': '#FFFFFF',
+          '--bg-subtle': '#EFF1F4',
+          '--text-main': '#2B2F36',
+          '--text-muted': '#767D87',
+          '--accent': '#6C737E',
+          '--accent-hover': '#545A63',
+          '--accent-soft': '#E9ECEF',
+          '--accent-text': '#FFFFFF',
+          '--border-color': 'rgba(108, 115, 126, 0.2)',
+          '--price-color': '#495057'
+        }
+      },
+      monochrome: {
+        name: '極簡黑白灰',
+        swatch: '#222222',
+        vars: {
+          '--bg-page': '#F0F0F0',
+          '--bg-card': 'rgba(255, 255, 255, 0.95)',
+          '--bg-card-solid': '#FFFFFF',
+          '--bg-subtle': '#E5E5E5',
+          '--text-main': '#181818',
+          '--text-muted': '#666666',
+          '--accent': '#222222',
+          '--accent-hover': '#000000',
+          '--accent-soft': '#E0E0E0',
+          '--accent-text': '#FFFFFF',
+          '--border-color': 'rgba(34, 34, 34, 0.2)',
+          '--price-color': '#181818'
+        }
+      }
+    };
+
+    // =========================================================================
+    // 3. 初始資料結構
+    // =========================================================================
+    function getTodayDateStr() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function buildDefaultState() {
+      return {
+        theme: 'oatmeal',
+        storeName: 'Sibyl 出攤POS工具',
+        adminPassword: '1234',
+        quickAmounts: [100, 150, 200, 290, 350, 500],
+        categories: [
+          { id: 'cat_drink', name: '手作飲品', parentId: null },
+          { id: 'cat_coffee', name: '義式與手沖', parentId: 'cat_drink' },
+          { id: 'cat_tea', name: '台灣冷泡茶', parentId: 'cat_drink' },
+          { id: 'cat_bake', name: '現烤點心', parentId: null },
+          { id: 'cat_acc', name: '精選飾品配件', parentId: null }
+        ],
+        items: [
+          { id: 'i1', categoryId: 'cat_coffee', name: '經典美式咖啡', price: 75 },
+          { id: 'i2', categoryId: 'cat_coffee', name: '海鹽焦糖拿鐵', price: 95 },
+          { id: 'i3', categoryId: 'cat_tea', name: '阿里山冷泡烏龍', price: 65 },
+          { id: 'i4', categoryId: 'cat_bake', name: '原味奶油司康', price: 60 },
+          { id: 'i5', categoryId: 'cat_bake', name: '開心果夾心司康', price: 85 },
+          { id: 'i6', categoryId: 'cat_acc', name: '純銀素圈耳環', price: 290 }
+        ],
+        linkDisplayMode: 'both',
+        links: [
+          { icon: 'calendar', label: '本月出攤排程頁', url: 'https://heysibyl.com' },
+          { icon: 'instagram', label: 'Instagram', url: 'https://instagram.com' },
+          { icon: 'line', label: 'LINE 好友洽詢', url: 'https://line.me' }
+        ],
+        orders: []
+      };
+    }
+
+    let appState = buildDefaultState();
+    let selectedMainCatId = 'ALL';
+    let selectedSubCatId = 'ALL';
+    let currentCart = {};
+    let customCartEntries = [];
+    let posMode = 'preset';
+    let keypadSelectedCatId = null;
+    let keypadBuffer = '0';
+    let isSunlightMode = false;
+
+    // =========================================================================
+    // 4. 儲存與讀取引擎
+    // =========================================================================
+    async function loadAppState() {
+      try {
+        if (supabaseClient) {
+          const { data, error } = await supabaseClient
+            .from(POS_TABLE)
+            .select('config_json')
+            .eq('store_slug', STORE_SLUG)
+            .single();
+
+          if (!error && data && data.config_json) {
+            appState = { ...buildDefaultState(), ...data.config_json };
+            renderAll();
+            return;
+          }
+        }
+      } catch (e) { console.warn('Supabase 讀取略過，使用本機儲存', e); }
+
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try { appState = { ...buildDefaultState(), ...JSON.parse(saved) }; }
+        catch (e) { console.error(e); }
+      }
+      renderAll();
+    }
+
+    async function persistAppState(toastMsg = '') {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+
+      if (supabaseClient) {
+        try {
+          await supabaseClient
+            .from(POS_TABLE)
+            .upsert({
+              store_slug: STORE_SLUG,
+              store_title: appState.storeName,
+              config_json: appState,
+              updated_at: new Date().toISOString()
+            }, { onConflict: 'store_slug' });
+        } catch (e) { console.warn('Supabase 寫入異常', e); }
+      }
+
+      renderAll();
+      if (toastMsg) showToast(toastMsg);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastText').textContent = msg;
+      toast.classList.remove('opacity-0', 'translate-y-[-10px]');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-[-10px]');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+      }, 2000);
+    }
+
+    // =========================================================================
+    // 5. 強光模式與色系套用
+    // =========================================================================
+    function toggleSunlightMode() {
+      isSunlightMode = !isSunlightMode;
+      const body = document.body;
+      const iconEl = document.getElementById('sunlightIcon');
+
+      if (isSunlightMode) {
+        body.classList.add('sunlight-mode');
+        iconEl.setAttribute('data-lucide', 'moon');
+        showToast('已開啟強光高對比模式');
+      } else {
+        body.classList.remove('sunlight-mode');
+        applyTheme(appState.theme);
+        iconEl.setAttribute('data-lucide', 'sun');
+        showToast('已恢復質感莫蘭迪模式');
+      }
+      lucide.createIcons();
+    }
+
+    function applyTheme(themeKey) {
+      if (isSunlightMode) return;
+      const themeObj = THEMES[themeKey] || THEMES.oatmeal;
+      const root = document.documentElement;
+      Object.entries(themeObj.vars).forEach(([k, v]) => root.style.setProperty(k, v));
+    }
+
+    // =========================================================================
+    // 6. 雙模式收銀切換 (固定品項 vs 大分類＋數字鍵盤)
+    // =========================================================================
+    function switchPosMode(mode) {
+      posMode = mode;
+      const presetBox = document.getElementById('posPresetContainer');
+      const keypadBox = document.getElementById('posKeypadContainer');
+      const btnPreset = document.getElementById('modeBtnPreset');
+      const btnKeypad = document.getElementById('modeBtnKeypad');
+
+      if (mode === 'preset') {
+        presetBox.classList.remove('hidden');
+        keypadBox.classList.add('hidden');
+        btnPreset.classList.add('solid-card');
+        btnPreset.classList.remove('theme-text-muted');
+        btnKeypad.classList.remove('solid-card');
+        btnKeypad.classList.add('theme-text-muted');
+      } else {
+        presetBox.classList.add('hidden');
+        keypadBox.classList.remove('hidden');
+        btnKeypad.classList.add('solid-card');
+        btnKeypad.classList.remove('theme-text-muted');
+        btnPreset.classList.remove('solid-card');
+        btnPreset.classList.add('theme-text-muted');
+        renderKeypadView();
+      }
+      lucide.createIcons();
+    }
+
+    function renderKeypadView() {
+      if (!keypadSelectedCatId && appState.categories.length > 0) {
+        keypadSelectedCatId = appState.categories[0].id;
+      }
+
+      const catGrid = document.getElementById('keypadCategoryGrid');
+      catGrid.innerHTML = appState.categories.map(c => {
+        const active = keypadSelectedCatId === c.id;
+        const parent = c.parentId ? appState.categories.find(p => p.id === c.parentId) : null;
+        const label = parent ? `${parent.name} › ${c.name}` : c.name;
+        return `
+          <button onclick="selectKeypadCategory('${c.id}')"
+            class="px-3 py-1.5 rounded-xl text-xs font-bold transition ${active ? 'theme-accent-bg' : 'theme-subtle theme-text-muted'}">
+            ${label}
+          </button>
+        `;
+      }).join('');
+
+      const activeCat = appState.categories.find(c => c.id === keypadSelectedCatId);
+      document.getElementById('keypadSelectedCatBadge').textContent = activeCat ? `已選：${activeCat.name}` : '請先選分類';
+
+      const qAmounts = appState.quickAmounts || [100, 150, 200, 290, 350, 500];
+      document.getElementById('quickAmountsRow').innerHTML = qAmounts.map(amt => `
+        <button onclick="addQuickAmount(${amt})" class="py-2 rounded-xl theme-subtle border theme-border text-xs font-extrabold theme-price hover:opacity-80 active:scale-95 transition">
+          +$${amt}
+        </button>
+      `).join('');
+
+      document.getElementById('keypadAmountDisplay').textContent = Number(keypadBuffer).toLocaleString();
+    }
+
+    function selectKeypadCategory(catId) {
+      keypadSelectedCatId = catId;
+      renderKeypadView();
+    }
+
+    function pressKeypadDigit(digit) {
+      if (keypadBuffer.length >= 6) return;
+      keypadBuffer = keypadBuffer === '0' ? digit : keypadBuffer + digit;
+      document.getElementById('keypadAmountDisplay').textContent = Number(keypadBuffer).toLocaleString();
+    }
+
+    function addQuickAmount(amt) {
+      const next = (parseInt(keypadBuffer, 10) || 0) + amt;
+      keypadBuffer = String(next);
+      document.getElementById('keypadAmountDisplay').textContent = next.toLocaleString();
+    }
+
+    function clearKeypadAmount() {
+      keypadBuffer = '0';
+      document.getElementById('keypadAmountDisplay').textContent = '0';
+    }
+
+    function backspaceKeypad() {
+      keypadBuffer = keypadBuffer.length > 1 ? keypadBuffer.slice(0, -1) : '0';
+      document.getElementById('keypadAmountDisplay').textContent = Number(keypadBuffer).toLocaleString();
+    }
+
+    function addKeypadEntryToCart() {
+      const amount = parseInt(keypadBuffer, 10) || 0;
+      if (!keypadSelectedCatId) {
+        showToast('請先點選一個大分類');
+        return;
+      }
+      if (amount <= 0) {
+        showToast('請輸入大於 0 的金額');
+        return;
+      }
+
+      const catObj = appState.categories.find(c => c.id === keypadSelectedCatId);
+      const catName = catObj ? catObj.name : '一般商品';
+
+      customCartEntries.push({
+        uid: 'cust_' + Date.now() + Math.random().toString(36).slice(2, 5),
+        catId: keypadSelectedCatId,
+        name: `${catName}（標籤商品）`,
+        price: amount,
+        qty: 1
+      });
+
+      keypadBuffer = '0';
+      document.getElementById('keypadAmountDisplay').textContent = '0';
+      updateFloatingCartBar(true);
+      showToast(`已計入 ${catName} $${amount}`);
+    }
+
+    // =========================================================================
+    // 7. 樹狀分類篩選與固定品項大按鈕
+    // =========================================================================
+    function getDescendantCategoryIds(catId) {
+      const result = [catId];
+      const children = appState.categories.filter(c => c.parentId === catId);
+      children.forEach(ch => result.push(...getDescendantCategoryIds(ch.id)));
+      return result;
+    }
+
+    function renderCategoryBars() {
+      const mainBar = document.getElementById('mainCategoryBar');
+      const subBar = document.getElementById('subCategoryBar');
+      const mainCats = appState.categories.filter(c => !c.parentId);
+
+      let mainHtml = `
+        <button onclick="selectMainCategory('ALL')"
+          class="px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 transition ${selectedMainCatId === 'ALL' ? 'theme-accent-bg' : 'glass-card theme-text-muted'}">
+          全部品項
+        </button>
+      `;
+
+      mainHtml += mainCats.map(c => {
+        const active = selectedMainCatId === c.id;
+        return `
+          <button onclick="selectMainCategory('${c.id}')"
+            class="px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 transition ${active ? 'theme-accent-bg' : 'glass-card theme-text-muted'}">
+            ${c.name}
+          </button>
+        `;
+      }).join('');
+      mainBar.innerHTML = mainHtml;
+
+      if (selectedMainCatId === 'ALL') {
+        subBar.classList.add('hidden');
+        return;
+      }
+
+      const subCats = appState.categories.filter(c => c.parentId === selectedMainCatId);
+      if (subCats.length === 0) {
+        subBar.classList.add('hidden');
+        return;
+      }
+
+      subBar.classList.remove('hidden');
+      let subHtml = `
+        <button onclick="selectSubCategory('ALL')"
+          class="px-3 py-1.5 rounded-lg text-[11px] font-semibold shrink-0 transition ${selectedSubCatId === 'ALL' ? 'theme-accent-soft font-bold' : 'theme-text-muted'}">
+          全部子項
+        </button>
+      `;
+      subHtml += subCats.map(sc => {
+        const active = selectedSubCatId === sc.id;
+        return `
+          <button onclick="selectSubCategory('${sc.id}')"
+            class="px-3 py-1.5 rounded-lg text-[11px] font-semibold shrink-0 transition ${active ? 'theme-accent-soft font-bold' : 'theme-text-muted'}">
+            ${sc.name}
+          </button>
+        `;
+      }).join('');
+      subBar.innerHTML = subHtml;
+    }
+
+    function selectMainCategory(catId) {
+      selectedMainCatId = catId;
+      selectedSubCatId = 'ALL';
+      renderCategoryBars();
+      renderPosItemsGrid();
+    }
+
+    function selectSubCategory(subId) {
+      selectedSubCatId = subId;
+      renderCategoryBars();
+      renderPosItemsGrid();
+    }
+
+    function renderPosItemsGrid() {
+      const grid = document.getElementById('posItemsGrid');
+      let allowedCatIds = null;
+
+      if (selectedMainCatId !== 'ALL') {
+        allowedCatIds = selectedSubCatId !== 'ALL'
+          ? getDescendantCategoryIds(selectedSubCatId)
+          : getDescendantCategoryIds(selectedMainCatId);
+      }
+
+      const filteredItems = allowedCatIds
+        ? appState.items.filter(item => allowedCatIds.includes(item.categoryId))
+        : appState.items;
+
+      if (filteredItems.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-2 glass-card rounded-2xl p-8 text-center text-xs theme-text-muted">
+            此分類尚無品項，請點擊右上角「後台」新增常用商品按鈕
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filteredItems.map(item => {
+        const qty = currentCart[item.id] || 0;
+        const catObj = appState.categories.find(c => c.id === item.categoryId);
+        return `
+          <button onclick="addItemToCart('${item.id}')"
+            class="pos-item-btn ${qty > 0 ? 'has-qty' : ''} rounded-2xl p-3.5 text-left flex flex-col justify-between min-h-[104px] relative overflow-hidden">
+            <div class="flex items-start justify-between gap-2 w-full">
+              <span class="text-[10px] font-medium px-2 py-0.5 rounded-md theme-subtle theme-text-muted truncate max-w-[70%]">
+                ${catObj ? catObj.name : '一般'}
+              </span>
+              ${qty > 0 ? `
+                <span class="w-6 h-6 rounded-full theme-accent-bg text-xs font-extrabold flex items-center justify-center shrink-0">
+                  ${qty}
+                </span>
+              ` : `
+                <span class="w-6 h-6 rounded-full theme-subtle flex items-center justify-center shrink-0 opacity-60">
+                  <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                </span>
+              `}
+            </div>
+
+            <div class="mt-2.5 w-full">
+              <div class="text-sm font-bold leading-snug line-clamp-2">${item.name}</div>
+              <div class="text-base font-extrabold mt-1 theme-price">$${item.price}</div>
+            </div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    // =========================================================================
+    // 8. 購物車與結帳找零
+    // =========================================================================
+    function addItemToCart(itemId) {
+      currentCart[itemId] = (currentCart[itemId] || 0) + 1;
+      renderPosItemsGrid();
+      updateFloatingCartBar(true);
+      lucide.createIcons();
+    }
+
+    function changeCartItemQty(itemId, delta) {
+      const customIdx = customCartEntries.findIndex(e => e.uid === itemId);
+      if (customIdx !== -1) {
+        customCartEntries[customIdx].qty += delta;
+        if (customCartEntries[customIdx].qty <= 0) customCartEntries.splice(customIdx, 1);
+      } else {
+        const next = (currentCart[itemId] || 0) + delta;
+        if (next <= 0) delete currentCart[itemId];
+        else currentCart[itemId] = next;
+      }
+      renderPosItemsGrid();
+      updateFloatingCartBar(false);
+      renderCheckoutModalContent();
+      lucide.createIcons();
+    }
+
+    function clearCurrentCart() {
+      currentCart = {};
+      customCartEntries = [];
+      keypadBuffer = '0';
+      if (document.getElementById('keypadAmountDisplay')) {
+        document.getElementById('keypadAmountDisplay').textContent = '0';
+      }
+      renderPosItemsGrid();
+      updateFloatingCartBar(false);
+      lucide.createIcons();
+    }
+
+    function getCartSummary() {
+      let totalQty = 0;
+      let totalAmount = 0;
+      const lines = [];
+
+      Object.entries(currentCart).forEach(([id, qty]) => {
+        const item = appState.items.find(i => i.id === id);
+        if (item && qty > 0) {
+          totalQty += qty;
+          totalAmount += item.price * qty;
+          lines.push({ id: item.id, name: item.name, price: item.price, qty });
+        }
+      });
+
+      customCartEntries.forEach(entry => {
+        if (entry.qty > 0) {
+          totalQty += entry.qty;
+          totalAmount += entry.price * entry.qty;
+          lines.push({ id: entry.uid, name: entry.name, price: entry.price, qty: entry.qty });
+        }
+      });
+
+      return { totalQty, totalAmount, lines };
+    }
+
+    function updateFloatingCartBar(animatePop = false) {
+      const bar = document.getElementById('floatingCartBar');
+      const { totalQty, totalAmount, lines } = getCartSummary();
+
+      if (totalQty === 0) {
+        bar.classList.add('translate-y-24', 'opacity-0');
+        bar.classList.remove('translate-y-0', 'opacity-100');
+        return;
+      }
+
+      bar.classList.remove('translate-y-24', 'opacity-0');
+      bar.classList.add('translate-y-0', 'opacity-100');
+
+      const badge = document.getElementById('cartCountBadge');
+      badge.textContent = totalQty;
+      if (animatePop) {
+        badge.classList.remove('animate-pop');
+        void badge.offsetWidth;
+        badge.classList.add('animate-pop');
+      }
+
+      document.getElementById('cartTotalDisplay').textContent = `$${totalAmount.toLocaleString()}`;
+      document.getElementById('cartPreviewSummary').textContent = lines.map(l => `${l.name}×${l.qty}`).join('、');
+    }
+
+    function quickRecordOrder(fromModal = false) {
+      const { totalQty, totalAmount, lines } = getCartSummary();
+      if (totalQty === 0) return;
+
+      const now = new Date();
+      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+      appState.orders.unshift({
+        id: 'ord_' + Date.now(),
+        date: getTodayDateStr(),
+        time: timeStr,
+        items: lines,
+        total: totalAmount
+      });
+
+      currentCart = {};
+      customCartEntries = [];
+      if (fromModal) closeCheckoutModal();
+      persistAppState(`已入帳 $${totalAmount.toLocaleString()}`);
+    }
+
+    function openCheckoutModal() {
+      const { totalQty } = getCartSummary();
+      if (totalQty === 0) return;
+      document.getElementById('cashReceivedInput').value = '';
+      document.getElementById('changeDueDisplay').textContent = '$0';
+      renderCheckoutModalContent();
+
+      const modal = document.getElementById('checkoutModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closeCheckoutModal() {
+      const modal = document.getElementById('checkoutModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function renderCheckoutModalContent() {
+      const { totalQty, totalAmount, lines } = getCartSummary();
+      if (totalQty === 0) {
+        closeCheckoutModal();
+        return;
+      }
+
+      document.getElementById('modalTotalAmount').textContent = `$${totalAmount.toLocaleString()}`;
+      const list = document.getElementById('checkoutItemsList');
+      list.innerHTML = lines.map(l => `
+        <div class="p-2.5 rounded-xl theme-subtle flex items-center justify-between gap-2 text-xs">
+          <div class="min-w-0">
+            <div class="font-bold truncate">${l.name}</div>
+            <div class="text-[11px] theme-text-muted">$${l.price} × ${l.qty}</div>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <button onclick="changeCartItemQty('${l.id}', -1)" class="w-7 h-7 rounded-lg solid-card flex items-center justify-center font-bold">-</button>
+            <span class="w-5 text-center font-bold">${l.qty}</span>
+            <button onclick="changeCartItemQty('${l.id}', 1)" class="w-7 h-7 rounded-lg solid-card flex items-center justify-center font-bold">+</button>
+          </div>
+        </div>
+      `).join('');
+      calculateChange();
+    }
+
+    function setQuickCash(amount) {
+      document.getElementById('cashReceivedInput').value = amount;
+      calculateChange();
+    }
+
+    function setExactCash() {
+      const { totalAmount } = getCartSummary();
+      document.getElementById('cashReceivedInput').value = totalAmount;
+      calculateChange();
+    }
+
+    function calculateChange() {
+      const { totalAmount } = getCartSummary();
+      const received = parseInt(document.getElementById('cashReceivedInput').value, 10) || 0;
+      const change = received - totalAmount;
+      const display = document.getElementById('changeDueDisplay');
+      if (received === 0) display.textContent = '$0';
+      else if (change < 0) display.textContent = `不足 $${Math.abs(change)}`;
+      else display.textContent = `$${change.toLocaleString()}`;
+    }
+
+    // =========================================================================
+    // 9. 今日銷售戰報與熱銷排行
+    // =========================================================================
+    function getTodayOrders() {
+      const today = getTodayDateStr();
+      return (appState.orders || []).filter(o => o.date === today);
+    }
+
+    function updateHeaderTodayStats() {
+      const todayOrders = getTodayOrders();
+      const sum = todayOrders.reduce((acc, o) => acc + o.total, 0);
+      document.getElementById('headerTodayTotal').textContent = `$${sum.toLocaleString()}`;
+      document.getElementById('headerStoreName').textContent = appState.storeName || 'Sibyl 出攤POS工具';
+    }
+
+    function toggleConfirmReset(showConfirm) {
+      const box = document.getElementById('confirmResetBox');
+      const footer = document.getElementById('reportDefaultFooter');
+      if (showConfirm) {
+        box.classList.remove('hidden');
+        footer.classList.add('hidden');
+      } else {
+        box.classList.add('hidden');
+        footer.classList.remove('hidden');
+      }
+    }
+
+    function openDailyReportModal() {
+      toggleConfirmReset(false);
+      const todayOrders = getTodayOrders();
+      const totalRev = todayOrders.reduce((acc, o) => acc + o.total, 0);
+
+      document.getElementById('reportTotalRevenue').textContent = `$${totalRev.toLocaleString()}`;
+      document.getElementById('reportOrderCount').textContent = `${todayOrders.length} 筆`;
+
+      const tally = {};
+      todayOrders.forEach(o => {
+        o.items.forEach(it => {
+          if (!tally[it.name]) tally[it.name] = { name: it.name, qty: 0, rev: 0 };
+          tally[it.name].qty += it.qty;
+          tally[it.name].rev += it.price * it.qty;
+        });
+      });
+
+      const ranking = Object.values(tally).sort((a, b) => b.qty - a.qty);
+      const bestContainer = document.getElementById('reportBestSellers');
+      if (ranking.length === 0) {
+        bestContainer.innerHTML = `<div class="text-xs theme-text-muted py-3 text-center">今日尚無成交紀錄</div>`;
+      } else {
+        bestContainer.innerHTML = ranking.map((r, idx) => `
+          <div class="p-2.5 rounded-xl theme-subtle flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2.5">
+              <span class="w-5 h-5 rounded-md ${idx === 0 ? 'theme-accent-bg' : 'solid-card'} text-[11px] font-bold flex items-center justify-center">
+                ${idx + 1}
+              </span>
+              <span class="font-bold">${r.name}</span>
+            </div>
+            <div class="text-right">
+              <span class="font-extrabold theme-price">${r.qty} 份</span>
+              <span class="text-[11px] theme-text-muted ml-1.5">($${r.rev.toLocaleString()})</span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      const recentContainer = document.getElementById('reportRecentOrders');
+      if (todayOrders.length === 0) {
+        recentContainer.innerHTML = `<div class="text-xs theme-text-muted py-3 text-center">尚無入帳明細</div>`;
+      } else {
+        recentContainer.innerHTML = todayOrders.map(o => `
+          <div class="p-2.5 rounded-xl border theme-border flex items-center justify-between gap-2 text-xs">
+            <div class="min-w-0">
+              <div class="text-[11px] theme-text-muted">${o.time} · 總計 <strong class="theme-price">$${o.total}</strong></div>
+              <div class="truncate font-medium mt-0.5">${o.items.map(i => `${i.name}×${i.qty}`).join('、')}</div>
+            </div>
+            <button onclick="deleteSingleOrder('${o.id}')" class="p-1.5 rounded-lg text-red-500 hover:bg-red-500/10 shrink-0" title="刪除此筆誤按紀錄">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        `).join('');
+      }
+
+      const modal = document.getElementById('dailyReportModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closeDailyReportModal() {
+      const modal = document.getElementById('dailyReportModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function deleteSingleOrder(orderId) {
+      appState.orders = appState.orders.filter(o => o.id !== orderId);
+      persistAppState('已刪除該筆帳務');
+      openDailyReportModal();
+    }
+
+    function executeResetTodayOrders() {
+      const today = getTodayDateStr();
+      appState.orders = appState.orders.filter(o => o.date !== today);
+      toggleConfirmReset(false);
+      persistAppState('已清空今日帳務');
+      openDailyReportModal();
+    }
+
+    // =========================================================================
+    // 10. 前台下方連結與後台管理
+    // =========================================================================
+    function getLucideIconName(type) {
+      const map = {
+        instagram: 'instagram',
+        line: 'message-circle',
+        globe: 'globe',
+        calendar: 'calendar',
+        'at-sign': 'at-sign',
+        'shopping-bag': 'shopping-bag'
+      };
+      return map[type] || 'link';
+    }
+
+    function renderFrontLinks() {
+      const container = document.getElementById('frontLinksContainer');
+      const section = document.getElementById('frontLinksSection');
+      const links = appState.links || [];
+      const mode = appState.linkDisplayMode || 'both';
+
+      if (links.length === 0) {
+        section.classList.add('hidden');
+        return;
+      }
+      section.classList.remove('hidden');
+
+      if (mode === 'icon') {
+        container.innerHTML = `
+          <div class="flex items-center justify-center gap-3">
+            ${links.map(l => `
+              <a href="${l.url}" target="_blank" rel="noopener" title="${l.label}"
+                class="w-11 h-11 rounded-2xl theme-subtle border theme-border flex items-center justify-center hover:opacity-80 transition">
+                <i data-lucide="${getLucideIconName(l.icon)}" class="w-4 h-4 theme-text-accent"></i>
+              </a>
+            `).join('')}
+          </div>
+        `;
+      } else if (mode === 'text') {
+        container.innerHTML = `
+          <div class="grid grid-cols-1 gap-2">
+            ${links.map(l => `
+              <a href="${l.url}" target="_blank" rel="noopener"
+                class="w-full py-2.5 px-4 rounded-xl theme-subtle border theme-border text-xs font-semibold text-center hover:opacity-80 transition">
+                ${l.label}
+              </a>
+            `).join('')}
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div class="grid grid-cols-1 gap-2">
+            ${links.map(l => `
+              <a href="${l.url}" target="_blank" rel="noopener"
+                class="w-full py-2.5 px-4 rounded-xl theme-subtle border theme-border text-xs font-semibold flex items-center justify-between hover:opacity-80 transition">
+                <span class="flex items-center gap-2.5">
+                  <i data-lucide="${getLucideIconName(l.icon)}" class="w-4 h-4 theme-text-accent"></i>
+                  <span>${l.label}</span>
+                </span>
+                <i data-lucide="chevron-right" class="w-3.5 h-3.5 theme-text-muted"></i>
+              </a>
+            `).join('')}
+          </div>
+        `;
+      }
+    }
+
+    function openAdminGate() {
+      document.getElementById('adminPasswordInput').value = '';
+      const modal = document.getElementById('passwordModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => document.getElementById('adminPasswordInput').focus(), 100);
+    }
+
+    function closePasswordModal() {
+      const modal = document.getElementById('passwordModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function verifyAdminPassword() {
+      const val = document.getElementById('adminPasswordInput').value;
+      if (val === appState.adminPassword) {
+        closePasswordModal();
+        openAdminDrawer();
+      } else {
+        showToast('管理密碼錯誤');
+      }
+    }
+
+    function openAdminDrawer() {
+      populateAdminUI();
+      const drawer = document.getElementById('adminDrawer');
+      drawer.classList.remove('hidden');
+      drawer.classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closeAdminDrawer() {
+      const drawer = document.getElementById('adminDrawer');
+      drawer.classList.add('hidden');
+      drawer.classList.remove('flex');
+      renderAll();
+    }
+
+    function switchAdminTab(tab) {
+      const tabs = ['categories', 'items', 'style', 'guide'];
+      tabs.forEach(t => {
+        const cap = t.charAt(0).toUpperCase() + t.slice(1);
+        const panel = document.getElementById(`adminTab${cap}`);
+        const btn = document.getElementById(`tabBtn${cap}`);
+        if (t === tab) {
+          panel.classList.remove('hidden');
+          btn.classList.remove('theme-text-muted', 'border-transparent');
+          btn.style.borderColor = 'var(--accent)';
+        } else {
+          panel.classList.add('hidden');
+          btn.classList.add('theme-text-muted', 'border-transparent');
+          btn.style.borderColor = 'transparent';
+        }
+      });
+      lucide.createIcons();
+    }
+
+    function populateAdminUI() {
+      renderCategoryTreeAdmin();
+      renderAdminItemsList();
+      renderThemeSelector();
+      renderAdminLinksList();
+
+      document.getElementById('inputQuickAmounts').value = (appState.quickAmounts || [100,150,200,290,350,500]).join(',');
+      document.getElementById('inputStoreName').value = appState.storeName || '';
+      document.getElementById('inputAdminPwd').value = appState.adminPassword || '1234';
+      document.getElementById('inputLinkDisplayMode').value = appState.linkDisplayMode || 'both';
+    }
+
+    function buildCategoryDropdownOptions(includeEmptyRoot = true) {
+      let html = includeEmptyRoot ? `<option value="">無（建立為第一層主分類）</option>` : '';
+      const roots = appState.categories.filter(c => !c.parentId);
+      roots.forEach(r => {
+        html += `<option value="${r.id}">${r.name}</option>`;
+        const subs = appState.categories.filter(c => c.parentId === r.id);
+        subs.forEach(s => {
+          html += `<option value="${s.id}"> └ ${s.name}</option>`;
+        });
+      });
+      return html;
+    }
+
+    function renderCategoryTreeAdmin() {
+      document.getElementById('parentCategorySelect').innerHTML = buildCategoryDropdownOptions(true);
+      document.getElementById('itemCategorySelect').innerHTML = buildCategoryDropdownOptions(false);
+
+      const container = document.getElementById('categoryTreeContainer');
+      const roots = appState.categories.filter(c => !c.parentId);
+
+      if (roots.length === 0) {
+        container.innerHTML = `<div class="text-xs theme-text-muted text-center py-3">尚未建立分類</div>`;
+        return;
+      }
+
+      container.innerHTML = roots.map(r => {
+        const subs = appState.categories.filter(c => c.parentId === r.id);
+        const subHtml = subs.map(s => `
+          <div class="ml-5 mt-1.5 pl-3 border-l-2 theme-border flex items-center justify-between py-1.5 px-2.5 rounded-lg theme-subtle text-xs">
+            <div class="flex items-center gap-1.5">
+              <i data-lucide="corner-down-right" class="w-3.5 h-3.5 theme-text-muted"></i>
+              <span class="font-medium">${s.name}</span>
+            </div>
+            <button onclick="deleteCategoryNode('${s.id}')" class="text-red-500 p-1 hover:bg-red-500/10 rounded">
+              <i data-lucide="trash-2" class="w-3 h-3"></i>
+            </button>
+          </div>
+        `).join('');
+
+        return `
+          <div class="p-2.5 rounded-xl border theme-border bg-white/60">
+            <div class="flex items-center justify-between text-xs font-bold">
+              <div class="flex items-center gap-2">
+                <i data-lucide="folder" class="w-4 h-4 theme-text-accent"></i>
+                <span>${r.name}</span>
+              </div>
+              <button onclick="deleteCategoryNode('${r.id}')" class="text-red-500 p-1 hover:bg-red-500/10 rounded">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+            ${subHtml}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addCategoryNode() {
+      const parentId = document.getElementById('parentCategorySelect').value || null;
+      const name = document.getElementById('newCategoryNameInput').value.trim();
+      if (!name) { showToast('請輸入分類名稱'); return; }
+
+      appState.categories.push({ id: 'cat_' + Date.now(), name, parentId });
+      document.getElementById('newCategoryNameInput').value = '';
+      persistAppState('已新增分類節點');
+      renderCategoryTreeAdmin();
+      lucide.createIcons();
+    }
+
+    function deleteCategoryNode(catId) {
+      const toRemove = getDescendantCategoryIds(catId);
+      appState.categories = appState.categories.filter(c => !toRemove.includes(c.id));
+      if (toRemove.includes(selectedMainCatId)) selectedMainCatId = 'ALL';
+      persistAppState('已刪除分類');
+      renderCategoryTreeAdmin();
+      lucide.createIcons();
+    }
+
+    function saveQuickAmountsSetting() {
+      const raw = document.getElementById('inputQuickAmounts').value;
+      const parsed = raw.split(/[,，\s]+/)
+        .map(v => parseInt(v.trim(), 10))
+        .filter(n => !isNaN(n) && n > 0)
+        .slice(0, 6);
+
+      if (parsed.length === 0) {
+        showToast('請輸入有效的金額數字');
+        return;
+      }
+      appState.quickAmounts = parsed;
+      persistAppState('已更新常按金額快捷鍵');
+    }
+
+    function savePosItem() {
+      const categoryId = document.getElementById('itemCategorySelect').value;
+      const name = document.getElementById('itemNameInput').value.trim();
+      const price = parseInt(document.getElementById('itemPriceInput').value, 10);
+      const editId = document.getElementById('editItemId').value;
+
+      if (!name || isNaN(price) || price < 0) {
+        showToast('請填寫品項名稱與正確金額');
+        return;
+      }
+
+      if (editId) {
+        const idx = appState.items.findIndex(i => i.id === editId);
+        if (idx !== -1) appState.items[idx] = { id: editId, categoryId, name, price };
+      } else {
+        appState.items.push({ id: 'item_' + Date.now(), categoryId, name, price });
+      }
+
+      resetItemForm();
+      persistAppState('已儲存品項按鈕');
+      renderAdminItemsList();
+      lucide.createIcons();
+    }
+
+    function editPosItem(id) {
+      const item = appState.items.find(i => i.id === id);
+      if (!item) return;
+      document.getElementById('editItemId').value = item.id;
+      document.getElementById('itemCategorySelect').value = item.categoryId;
+      document.getElementById('itemNameInput').value = item.name;
+      document.getElementById('itemPriceInput').value = item.price;
+
+      document.getElementById('itemFormTitle').textContent = '編輯品項按鈕';
+      document.getElementById('saveItemBtnText').textContent = '確認更新品項';
+      document.getElementById('cancelEditItemBtn').classList.remove('hidden');
+    }
+
+    function resetItemForm() {
+      document.getElementById('editItemId').value = '';
+      document.getElementById('itemNameInput').value = '';
+      document.getElementById('itemPriceInput').value = '';
+      document.getElementById('itemFormTitle').textContent = '新增收銀大按鈕品項';
+      document.getElementById('saveItemBtnText').textContent = '儲存品項按鈕';
+      document.getElementById('cancelEditItemBtn').classList.add('hidden');
+    }
+
+    function deletePosItem(id) {
+      appState.items = appState.items.filter(i => i.id !== id);
+      persistAppState('已刪除品項');
+      renderAdminItemsList();
+      lucide.createIcons();
+    }
+
+    function renderAdminItemsList() {
+      const list = document.getElementById('adminItemsList');
+      list.innerHTML = appState.items.map(item => {
+        const cat = appState.categories.find(c => c.id === item.categoryId);
+        return `
+          <div class="p-3 rounded-xl border theme-border bg-white/70 flex items-center justify-between gap-2 text-xs">
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5">
+                <span class="px-2 py-0.5 rounded theme-subtle text-[10px] theme-text-muted">${cat ? cat.name : '未分類'}</span>
+                <span class="font-bold truncate">${item.name}</span>
+              </div>
+              <div class="font-extrabold theme-price mt-1">$${item.price}</div>
+            </div>
+            <div class="flex items-center gap-1 shrink-0">
+              <button onclick="editPosItem('${item.id}')" class="p-1.5 rounded-lg hover:bg-black/5">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="deletePosItem('${item.id}')" class="p-1.5 rounded-lg text-red-500 hover:bg-red-500/10">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderThemeSelector() {
+      const grid = document.getElementById('themeSelectorGrid');
+      grid.innerHTML = Object.entries(THEMES).map(([key, t]) => {
+        const active = appState.theme === key;
+        return `
+          <button onclick="selectTheme('${key}')"
+            class="p-2.5 rounded-xl border text-left flex items-center gap-2.5 transition ${active ? 'font-bold' : 'opacity-80'}"
+            style="border-color: ${active ? 'var(--accent)' : 'var(--border-color)'}; background: ${active ? 'var(--bg-subtle)' : '#FFF'};">
+            <span class="w-4 h-4 rounded-full shrink-0 border border-black/10" style="background:${t.swatch};"></span>
+            <span class="text-xs truncate text-stone-800">${t.name}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectTheme(key) {
+      appState.theme = key;
+      if (isSunlightMode) {
+        isSunlightMode = false;
+        document.body.classList.remove('sunlight-mode');
+      }
+      persistAppState('已切換全站色系');
+      renderThemeSelector();
+      lucide.createIcons();
+    }
+
+    function saveBasicSettings() {
+      appState.storeName = document.getElementById('inputStoreName').value.trim() || 'Sibyl 出攤POS工具';
+      const pwd = document.getElementById('inputAdminPwd').value.trim();
+      if (pwd) appState.adminPassword = pwd;
+      persistAppState('已儲存基本設定');
+    }
+
+    function changeLinkDisplayMode(mode) {
+      appState.linkDisplayMode = mode;
+      persistAppState('已切換連結顯示模式');
+    }
+
+    function saveSocialLink() {
+      const icon = document.getElementById('linkIconType').value;
+      const label = document.getElementById('linkLabelInput').value.trim();
+      const url = document.getElementById('linkUrlInput').value.trim();
+      const editIdx = parseInt(document.getElementById('editLinkIndex').value, 10);
+
+      if (!label || !url) { showToast('請輸入連結名稱與網址'); return; }
+
+      if (editIdx >= 0) appState.links[editIdx] = { icon, label, url };
+      else appState.links.push({ icon, label, url });
+
+      document.getElementById('editLinkIndex').value = '-1';
+      document.getElementById('linkLabelInput').value = '';
+      document.getElementById('linkUrlInput').value = '';
+      document.getElementById('saveLinkBtnText').textContent = '新增';
+
+      persistAppState('已儲存連結按鈕');
+      renderAdminLinksList();
+      lucide.createIcons();
+    }
+
+    function editSocialLink(idx) {
+      const item = appState.links[idx];
+      if (!item) return;
+      document.getElementById('editLinkIndex').value = String(idx);
+      document.getElementById('linkIconType').value = item.icon;
+      document.getElementById('linkLabelInput').value = item.label;
+      document.getElementById('linkUrlInput').value = item.url;
+      document.getElementById('saveLinkBtnText').textContent = '更新';
+    }
+
+    function deleteSocialLink(idx) {
+      appState.links.splice(idx, 1);
+      persistAppState('已刪除連結');
+      renderAdminLinksList();
+      lucide.createIcons();
+    }
+
+    function renderAdminLinksList() {
+      const list = document.getElementById('adminLinksList');
+      list.innerHTML = appState.links.map((l, idx) => `
+        <div class="p-2.5 rounded-xl border theme-border bg-white/70 flex items-center justify-between gap-2 text-xs">
+          <div class="flex items-center gap-2 min-w-0">
+            <i data-lucide="${getLucideIconName(l.icon)}" class="w-3.5 h-3.5 theme-text-accent shrink-0"></i>
+            <span class="font-semibold truncate">${l.label}</span>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <button onclick="editSocialLink(${idx})" class="p-1 rounded hover:bg-black/5">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+            </button>
+            <button onclick="deleteSocialLink(${idx})" class="p-1 rounded text-red-500 hover:bg-red-500/10">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // =========================================================================
+    // 11. 許願池送出 (直達 Supabase tools_super 總管)
+    // =========================================================================
+    async function submitWish() {
+      const category = document.getElementById('wishCategory').value;
+      const content = document.getElementById('wishContent').value.trim();
+      if (!content) { showToast('請填寫許願內容'); return; }
+
+      const payload = {
+        tool_name: 'sibyl-stall-pos',
+        store_slug: STORE_SLUG,
+        store_name: appState.storeName,
+        category,
+        content,
+        created_at: new Date().toISOString()
+      };
+
+      if (supabaseClient) {
+        try {
+          await supabaseClient.from(WISH_TABLE).insert([payload]);
+        } catch (e) { console.warn('Supabase 許願寫入備援', e); }
+      }
+
+      document.getElementById('wishContent').value = '';
+      showToast('許願已成功傳送至總管');
+    }
+
+    function initScrollReveal() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) entry.target.classList.add('is-visible');
+        });
+      }, { threshold: 0.1 });
+      document.querySelectorAll('.reveal-on-scroll').forEach(el => observer.observe(el));
+    }
+
+    function renderAll() {
+      applyTheme(appState.theme);
+      updateHeaderTodayStats();
+      renderCategoryBars();
+      renderPosItemsGrid();
+      if (posMode === 'keypad') renderKeypadView();
+      updateFloatingCartBar(false);
+      renderFrontLinks();
+      lucide.createIcons();
+    }
+
+    initScrollReveal();
+    loadAppState();
+  </script>
+</body>
+</html>

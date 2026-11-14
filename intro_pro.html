@@ -10,29 +10,54 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-page: #F5F1EB;
-            --bg-card: #FFFFFF;
-            --bg-soft: #EFE9E0;
-            --text-main: #3D342E;
-            --text-muted: #7D7067;
+            --bg-page: #F4EFE8;
+            --bg-card: rgba(255, 255, 255, 0.78);
+            --bg-soft: rgba(239, 232, 222, 0.72);
+            --text-main: #3A312B;
+            --text-muted: #7A6D64;
             --primary: #8C735B;
+            --primary-glow: rgba(140, 115, 91, 0.22);
             --primary-text: #FFFFFF;
-            --border-color: #E2D9CE;
+            --border-color: rgba(255, 255, 255, 0.85);
+            --border-subtle: rgba(140, 115, 91, 0.14);
         }
 
         body {
             font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--bg-page);
             color: var(--text-main);
-            transition: background-color 0.35s ease, color 0.35s ease;
+            transition: background-color 0.4s ease, color 0.4s ease;
             -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
         }
 
-        .theme-card { background-color: var(--bg-card); border: 1px solid var(--border-color); }
-        .theme-soft { background-color: var(--bg-soft); color: var(--text-main); }
-        .theme-btn-primary { background-color: var(--primary); color: var(--primary-text); transition: opacity 0.2s, transform 0.15s; }
-        .theme-btn-primary:active { transform: scale(0.98); opacity: 0.9; }
-        .theme-border { border-color: var(--border-color); }
+        .glass-3d-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            box-shadow: 
+                0 18px 38px -12px rgba(61, 52, 46, 0.08),
+                0 4px 12px -2px rgba(61, 52, 46, 0.03),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
+        }
+
+        .soft-block {
+            background: var(--bg-soft);
+            border: 1px solid var(--border-subtle);
+            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.6);
+        }
+
+        .theme-btn-primary {
+            background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 85%, #1a1512));
+            color: var(--primary-text);
+            box-shadow: 0 10px 22px -6px var(--primary-glow), inset 0 1px 1px rgba(255, 255, 255, 0.35);
+            transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .theme-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 26px -6px var(--primary-glow); }
+        .theme-btn-primary:active { transform: scale(0.97) translateY(0); }
+
         .theme-text-muted { color: var(--text-muted); }
         .theme-text-primary { color: var(--primary); }
 
@@ -43,115 +68,122 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        .glass-3d-card {
-            background: rgba(255, 255, 255, 0.82);
+        /* 3D 立體資料夾凸起標籤 */
+        .folder-tab {
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+            cursor: pointer;
+        }
+        .folder-tab.active {
+            background: var(--bg-card);
             backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.9);
-            box-shadow: 0 18px 38px -12px rgba(61, 52, 46, 0.08);
+            color: var(--primary);
+            font-weight: 700;
+            transform: translateY(0);
+            box-shadow: 0 -6px 16px -4px rgba(61, 52, 46, 0.06);
+            z-index: 20;
         }
-        .soft-block {
+        .folder-tab.inactive {
             background: var(--bg-soft);
-            border: 1px solid rgba(140, 115, 91, 0.14);
+            color: var(--text-muted);
+            transform: translateY(3px);
+            opacity: 0.85;
         }
-        
+        .folder-tab.inactive:hover { transform: translateY(1px); opacity: 1; }
+
         /* 月曆格子懸停與點擊 3D 微互動 */
-        .cal-day-btn {
-            transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
+        .cal-day-btn { transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .cal-day-available:hover {
             transform: translateY(-3px) scale(1.06);
-            box-shadow: 0 8px 16px -4px rgba(140, 115, 91, 0.25);
+            box-shadow: 0 8px 16px -4px var(--primary-glow);
             background-color: #FFFFFF;
         }
         .cal-day-selected {
             background: var(--primary);
             color: #FFFFFF;
             transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 10px 20px -5px rgba(140, 115, 91, 0.3);
+            box-shadow: 0 10px 20px -5px var(--primary-glow);
         }
 
-        /* 捲動漸現故事運鏡動畫 */
+        /* 捲動漸現動畫 */
         .reveal-block {
             opacity: 0;
             transform: translateY(22px) scale(0.985);
             transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1), transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
         }
-        .reveal-block.is-visible {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
-        
-        /* 3D 立體資料夾凸起標籤 */
-        .folder-tab {
-            border-top-left-radius: 16px;
-            border-top-right-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.85);
-            border-bottom: none;
-            transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        .folder-tab.active {
-            background: rgba(255, 255, 255, 0.88);
-            backdrop-filter: blur(12px);
-            color: var(--primary);
-            font-weight: 700;
-            transform: translateY(0);
-            box-shadow: 0 -6px 16px -4px rgba(61, 52, 46, 0.06);
-            z-index: 10;
-        }
-        .folder-tab.inactive {
-            background: rgba(239, 232, 222, 0.55);
-            color: var(--text-muted);
-            transform: translateY(3px);
-        }
-        .folder-tab.inactive:hover {
-            transform: translateY(1px);
-            background: rgba(255, 255, 255, 0.65);
-        }
+        .reveal-block.is-visible { opacity: 1; transform: translateY(0) scale(1); }
 
         @keyframes cartPop {
             0% { transform: scale(1); }
             45% { transform: scale(1.18); }
             100% { transform: scale(1); }
         }
-        .cart-pop-anim {
-            animation: cartPop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
+        .cart-pop-anim { animation: cartPop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1); }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center pb-24">
+<body class="min-h-screen flex flex-col items-center pb-28 relative">
 
-    <!-- 前台頂部狀態列 (進階版完全隱藏後台按鈕，確保個資隔離) -->
-    <header class="w-full max-w-md px-5 pt-5 pb-2 flex justify-between items-center">
-        <span class="text-[11px] tracking-widest uppercase px-3 py-1 rounded-full theme-soft theme-text-muted font-medium">
-            OFFICIAL BOOKING
-        </span>
-        <button onclick="openOrderLookup()" class="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full theme-card theme-text-muted hover:opacity-80 shadow-xs">
-            <i data-lucide="receipt" class="w-3.5 h-3.5"></i>
-            <span>查詢與回報匯款</span>
+    <!-- 背景立體柔焦色塊 -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+        <div class="absolute -top-24 -left-20 w-80 h-80 rounded-full opacity-45 blur-3xl transition-colors duration-500" style="background: var(--primary-glow);"></div>
+        <div class="absolute top-1/3 -right-24 w-72 h-72 rounded-full bg-white/60 blur-3xl"></div>
+        <div class="absolute bottom-10 left-10 w-64 h-64 rounded-full opacity-35 blur-3xl transition-colors duration-500" style="background: var(--primary-glow);"></div>
+    </div>
+
+    <!-- 前台頂部狀態列 (完全隱藏後台入口，確保個資隔離) -->
+    <header class="w-full max-w-md px-5 pt-5 pb-2 flex justify-between items-center z-10">
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass-3d-card text-[11px] font-medium theme-text-muted">
+            <span class="w-2 h-2 rounded-full animate-pulse" style="background-color: var(--primary);"></span>
+            <span id="frontTopBadgeText" class="tracking-wider">OFFICIAL BOOKING</span>
+        </div>
+        <button onclick="openOrderLookup()" class="flex items-center gap-1.5 text-xs px-3.5 py-1.5 rounded-full glass-3d-card theme-text-muted hover:scale-105 active:scale-95 transition">
+            <i data-lucide="receipt" class="w-3.5 h-3.5 theme-text-primary"></i>
+            <span class="font-medium">查詢與回報匯款</span>
         </button>
     </header>
 
-    <main class="w-full max-w-md px-5 space-y-5 flex-1">
+    <main class="w-full max-w-md px-5 space-y-6 flex-1 z-10">
 
-        <!-- 1. 品牌門面與外連按鈕區 -->
-        <section class="theme-card rounded-3xl p-6 text-center shadow-xs">
-            <div class="w-24 h-24 mx-auto mb-4 rounded-2xl overflow-hidden theme-soft border theme-border flex items-center justify-center">
-                <img id="frontAvatar" src="" alt="頭像" class="w-full h-full object-cover hidden">
-                <i id="frontAvatarPlaceholder" data-lucide="sparkles" class="w-8 h-8 theme-text-primary"></i>
+        <!-- 1. 立體層疊品牌門面區 -->
+        <section class="glass-3d-card rounded-[32px] p-7 text-center relative overflow-hidden">
+            <div class="absolute top-0 inset-x-0 h-20 opacity-35 pointer-events-none" style="background: linear-gradient(180deg, var(--primary-glow), transparent);"></div>
+
+            <div class="relative w-28 h-28 mx-auto mb-4">
+                <div class="w-full h-full rounded-[26px] p-1.5 bg-white/90 shadow-md ring-1 ring-black/5">
+                    <div class="w-full h-full rounded-[20px] overflow-hidden soft-block flex items-center justify-center">
+                        <img id="frontAvatar" src="" alt="品牌頭像" class="w-full h-full object-cover hidden transition-transform duration-500 hover:scale-105">
+                        <i id="frontAvatarPlaceholder" data-lucide="sparkles" class="w-9 h-9 theme-text-primary"></i>
+                    </div>
+                </div>
+                <div class="absolute -bottom-1.5 -right-1.5 w-8 h-8 rounded-xl theme-btn-primary flex items-center justify-center shadow-md ring-2 ring-white">
+                    <i data-lucide="badge-check" class="w-4 h-4"></i>
+                </div>
             </div>
-            <h1 id="frontBrandName" class="text-xl font-bold tracking-wide mb-1">載入中...</h1>
-            <p id="frontTagline" class="text-xs font-medium theme-text-primary tracking-wider mb-3"></p>
-            <p id="frontBio" class="text-sm leading-relaxed theme-text-muted whitespace-pre-line"></p>
-            <div id="frontLinksContainer" class="mt-5 pt-5 border-t theme-border"></div>
+
+            <h1 id="frontBrandName" class="text-xl font-bold tracking-wide mb-1.5">載入中...</h1>
+            
+            <div class="inline-flex items-center justify-center gap-1.5 px-3 py-1 rounded-full soft-block mb-4">
+                <i data-lucide="compass" class="w-3.5 h-3.5 theme-text-primary shrink-0"></i>
+                <p id="frontTagline" class="text-xs font-medium theme-text-primary tracking-wider"></p>
+            </div>
+
+            <div class="soft-block rounded-2xl p-4 text-left relative">
+                <i data-lucide="quote" class="w-4 h-4 theme-text-primary opacity-40 mb-1"></i>
+                <p id="frontBio" class="text-[13px] leading-relaxed theme-text-muted whitespace-pre-line"></p>
+            </div>
+
+            <div id="frontLinksContainer" class="mt-5 pt-5 border-t border-black/5"></div>
         </section>
 
         <!-- 2. 多比例作品與環境輪播牆 (支援點擊白點切換 + 左右微調) -->
-        <section id="carouselSection" class="glass-3d-card rounded-[32px] p-4 reveal-block">
+        <section id="carouselSection" class="glass-3d-card rounded-[32px] p-4">
             <div class="flex items-center justify-between mb-3 px-1.5">
                 <div class="flex items-center gap-1.5">
                     <i data-lucide="image" class="w-4 h-4 theme-text-primary"></i>
-                    <h2 class="text-sm font-bold tracking-wide">課程花絮與實績展示</h2>
+                    <h2 id="frontCarouselTitle" class="text-sm font-bold tracking-wide">課程花絮與實績展示</h2>
                 </div>
                 <span id="carouselCounter" class="text-[11px] px-2.5 py-0.5 rounded-full soft-block theme-text-muted font-semibold">1 / 1</span>
             </div>
@@ -164,46 +196,41 @@
                     <i data-lucide="chevron-right" class="w-4 h-4"></i>
                 </button>
             </div>
-            <!-- 可點擊白點進度指示器 -->
             <div id="carouselDots" class="flex justify-center items-center gap-2 mt-3.5"></div>
         </section>
-        
-        <!-- 3. 高轉換價值鋪陳模組 (破解看到價格就關掉的痛點) -->
+
+        <!-- 3. 完整 5 大高轉換價值鋪陳模組 (數據成果牆 + 痛點檢核 + Before/After + 適合對象 + 學員見證) -->
         <section id="salesModulesContainer" class="space-y-4">
-            <!-- 動態渲染：痛點共鳴檢核、數據成果牆、Before/After、適合對象 -->
+            <!-- 動態渲染 -->
         </section>
 
         <!-- 4. 分層資料夾式課程介紹與選課區 -->
         <section id="coursesSection" class="pt-1">
             <div class="flex items-center gap-1.5 mb-3 px-1">
                 <i data-lucide="folder-open" class="w-4 h-4 theme-text-primary"></i>
-                <h2 class="text-sm font-bold tracking-wide">課程與服務項目（可勾選單堂或多堂）</h2>
+                <h2 id="frontFolderTitle" class="text-sm font-bold tracking-wide">課程與服務項目（可勾選單堂或多堂）</h2>
             </div>
 
             <!-- 資料夾上方凸起標籤列 -->
-            <div id="folderTabsRow" class="flex items-end gap-1 overflow-x-auto no-scrollbar px-1 -mb-[1px]">
-                <!-- 動態產生資料夾標籤 -->
-            </div>
+            <div id="folderTabsRow" class="flex items-end gap-1.5 overflow-x-auto no-scrollbar px-1 -mb-[1px] relative z-10"></div>
 
             <!-- 資料夾內容卡片框 -->
-            <div class="theme-card rounded-b-3xl rounded-tr-3xl p-4 shadow-xs space-y-3 relative z-0">
-                <div id="courseCardsList" class="space-y-3">
-                    <!-- 動態渲染該分頁下的課程 -->
-                </div>
+            <div class="glass-3d-card rounded-b-[32px] rounded-tr-[32px] p-4 space-y-3 relative z-0">
+                <div id="courseCardsList" class="space-y-3"></div>
             </div>
         </section>
 
         <!-- 5. 互動式空檔與開課月曆 (單堂約空檔 / 多堂選場次) -->
-        <section class="theme-card rounded-3xl p-5 shadow-xs">
+        <section class="glass-3d-card rounded-[32px] p-5">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-1.5">
                     <i data-lucide="calendar-check" class="w-4 h-4 theme-text-primary"></i>
-                    <h2 class="text-sm font-semibold">選擇上課日期與場次</h2>
+                    <h2 id="frontCalendarTitle" class="text-sm font-bold tracking-wide">選擇上課日期與場次</h2>
                 </div>
                 <div class="flex items-center gap-1">
-                    <button onclick="changeMonth(-1)" class="p-1.5 rounded-lg theme-soft"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+                    <button onclick="changeMonth(-1)" class="p-1.5 rounded-xl soft-block hover:opacity-80"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
                     <span id="currentMonthLabel" class="text-xs font-semibold px-2 min-w-[76px] text-center"></span>
-                    <button onclick="changeMonth(1)" class="p-1.5 rounded-lg theme-soft"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                    <button onclick="changeMonth(1)" class="p-1.5 rounded-xl soft-block hover:opacity-80"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
                 </div>
             </div>
 
@@ -212,26 +239,25 @@
             </div>
             <div id="calendarGrid" class="grid grid-cols-7 gap-1.5 text-center"></div>
 
-            <!-- 當日可選時段與課程場次勾選列表 -->
-            <div class="mt-4 pt-4 border-t theme-border">
-                <p id="selectedDateTitle" class="text-xs font-semibold mb-2.5">請點選有圓點標記的日期查看場次</p>
+            <div class="mt-4 pt-4 border-t border-black/5">
+                <p id="selectedDateTitle" class="text-xs font-bold mb-2.5">請點選有圓點標記的日期查看場次</p>
                 <div id="dailySlotsList" class="space-y-2.5"></div>
             </div>
         </section>
 
         <!-- 6. 常見問題 FAQ -->
-        <section id="faqSection" class="theme-card rounded-3xl p-5 shadow-xs">
+        <section id="faqSection" class="glass-3d-card rounded-[32px] p-5">
             <div class="flex items-center gap-1.5 mb-3">
                 <i data-lucide="help-circle" class="w-4 h-4 theme-text-primary"></i>
-                <h2 class="text-sm font-semibold">報名與退改期須知</h2>
+                <h2 id="frontFaqTitle" class="text-sm font-bold tracking-wide">報名與退改期須知</h2>
             </div>
-            <div id="frontFaqList" class="divide-y theme-border"></div>
+            <div id="frontFaqList" class="divide-y border-black/5"></div>
         </section>
 
     </main>
 
     <!-- 固定頁尾 -->
-    <footer class="w-full py-6 text-center">
+    <footer class="w-full py-6 text-center z-10">
         <a href="https://heysibyl.com" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs theme-text-muted hover:opacity-75">
             <span>Designed by Sibyl</span>
             <span>|</span>
@@ -239,25 +265,21 @@
         </a>
     </footer>
 
-    <!-- ========================================================= -->
-    <!-- 底部浮動多堂選課結算列 (只要勾選 >= 1 堂即自動浮現) -->
-    <!-- ========================================================= -->
+    <!-- 底部浮動多堂選課結算列 -->
     <div id="floatingCartBar" class="fixed bottom-0 inset-x-0 z-40 p-3 bg-white/95 backdrop-blur-md border-t border-stone-200 shadow-lg hidden">
         <div class="max-w-md mx-auto flex items-center justify-between gap-3">
             <div>
-                <p class="text-xs font-bold text-stone-800">已選取 <span id="cartCount" class="theme-text-primary">0</span> 堂課程</p>
+                <p class="text-xs font-bold text-stone-800">已選取 <span id="cartCount" class="theme-text-primary inline-block">0</span> 堂課程</p>
                 <p id="cartPriceDisplay" class="text-xs text-stone-500">總計 NT$ 0</p>
             </div>
-            <button onclick="openCheckoutModal()" class="px-5 py-2.5 rounded-xl theme-btn-primary text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+            <button onclick="openCheckoutModal()" class="px-5 py-2.5 rounded-xl theme-btn-primary text-xs font-semibold flex items-center gap-1.5">
                 <span>下一步填寫報名資料</span>
                 <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
             </button>
         </div>
     </div>
 
-    <!-- ========================================================= -->
     <!-- 報名結帳與匯款後五碼回報彈窗 -->
-    <!-- ========================================================= -->
     <div id="checkoutModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden items-end sm:items-center justify-center">
         <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 max-h-[90vh] overflow-y-auto text-stone-800 space-y-4">
             <div class="flex items-center justify-between border-b border-stone-100 pb-3">
@@ -268,10 +290,8 @@
                 <button onclick="closeModal('checkoutModal')" class="p-1 text-stone-400"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
 
-            <!-- 已選課程明細清單 -->
             <div id="checkoutSummaryList" class="space-y-2 bg-stone-50 p-3 rounded-2xl border border-stone-100 text-xs"></div>
 
-            <!-- 學員基本資料 -->
             <div id="checkoutFormFields" class="space-y-3">
                 <div>
                     <label class="block text-xs font-medium text-stone-600 mb-1">學員姓名 *</label>
@@ -292,7 +312,6 @@
                     <input type="text" id="custNote" placeholder="例如：希望安排線上視訊" class="w-full px-3 py-2 rounded-xl border border-stone-200 text-sm">
                 </div>
 
-                <!-- 匯款資訊區 (若業主開啟訂購功能則顯示) -->
                 <div id="bankInfoBox" class="hidden p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/80 space-y-2">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-stone-800">匯款轉帳資訊</span>
@@ -308,12 +327,11 @@
                     </div>
                 </div>
 
-                <button onclick="submitBookingOrder()" class="w-full py-3 rounded-xl theme-btn-primary text-xs font-bold shadow-sm">
+                <button onclick="submitBookingOrder()" class="w-full py-3 rounded-xl theme-btn-primary text-xs font-bold">
                     送出預約報名
                 </button>
             </div>
 
-            <!-- 報名成功畫面 -->
             <div id="bookingSuccessView" class="hidden text-center py-4 space-y-3">
                 <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 mx-auto flex items-center justify-center">
                     <i data-lucide="check" class="w-6 h-6"></i>
@@ -330,9 +348,7 @@
         </div>
     </div>
 
-    <!-- ========================================================= -->
     <!-- 學員查詢訂單與補填匯款後五碼彈窗 -->
-    <!-- ========================================================= -->
     <div id="lookupModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden items-center justify-center p-5">
         <div class="bg-white w-full max-w-sm rounded-3xl p-5 text-stone-800 space-y-3">
             <div class="flex justify-between items-center">
@@ -340,12 +356,13 @@
                 <button onclick="closeModal('lookupModal')" class="p-1 text-stone-400"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
             <input type="tel" id="lookupPhone" placeholder="請輸入報名時填寫的手機號碼" class="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs">
-            <button onclick="searchMyOrders()" class="w-full py-2 rounded-xl bg-stone-800 text-white text-xs font-medium">查詢紀錄</button>
+            <button onclick="searchMyOrders()" class="w-full py-2.5 rounded-xl theme-btn-primary text-xs font-bold">查詢紀錄</button>
             <div id="lookupResults" class="space-y-2 max-h-60 overflow-y-auto"></div>
         </div>
     </div>
 
     <script>
+        // 質感自訂提示窗 (消滅醜陋原生 alert 與預設按鈕色)
         window.alert = function(msg) {
             let box = document.getElementById('sibylCustomAlert');
             if (!box) {
@@ -354,7 +371,7 @@
                 box.className = 'fixed inset-0 bg-black/40 backdrop-blur-xs z-[99] flex items-center justify-center p-5';
                 box.innerHTML = `
                     <div class="bg-white rounded-3xl w-full max-w-xs p-6 shadow-xl text-center space-y-4 border border-stone-100">
-                        <p id="sibylAlertMsg" class="text-xs text-stone-700 leading-relaxed font-medium"></p>
+                        <p id="sibylAlertMsg" class="text-xs text-stone-700 leading-relaxed font-medium whitespace-pre-line"></p>
                         <button onclick="document.getElementById('sibylCustomAlert').classList.add('hidden')" 
                             class="w-full py-2.5 rounded-xl text-xs font-bold text-white shadow-sm transition hover:opacity-90"
                             style="background-color: var(--primary, #8C735B);">
@@ -366,8 +383,9 @@
             document.getElementById('sibylAlertMsg').textContent = msg;
             box.classList.remove('hidden');
         };
-        const SUPABASE_URL = "https://tzqpfnrpnfzzubofoqlt.supabase.co"; // 填入 Supabase Project URL
-        const SUPABASE_ANON_KEY = "sb_publishable_Gd2bvnjN9_wy-x2VkkQzaw_S_gfqJHG"; // 填入 Supabase Anon Key
+
+        const SUPABASE_URL = "https://tzqpfnrpnfzzubofoqlt.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_Gd2bvnjN9_wy-x2VkkQzaw_S_gfqJHG";
         const supabaseClient = (SUPABASE_URL && SUPABASE_ANON_KEY)
             ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
             : null;
@@ -377,18 +395,17 @@
         const REF_PARAM = urlParams.get('ref');
 
         const THEMES = {
-            oat_brown: { bg: '#F5F1EB', card: '#FFFFFF', soft: '#EFE9E0', text: '#3D342E', muted: '#7D7067', primary: '#8C735B', primaryText: '#FFFFFF', border: '#E2D9CE' },
-            dusty_pink: { bg: '#F8F2F2', card: '#FFFFFF', soft: '#F2E6E7', text: '#423536', muted: '#857173', primary: '#B8868B', primaryText: '#FFFFFF', border: '#E8D8D9' },
-            forest_green: { bg: '#F2F5F3', card: '#FFFFFF', soft: '#E5ECE8', text: '#2F3B34', muted: '#687A70', primary: '#5C7366', primaryText: '#FFFFFF', border: '#D5E0DA' },
-            haze_blue: { bg: '#F1F4F7', card: '#FFFFFF', soft: '#E4EAF0', text: '#2E3842', muted: '#697887', primary: '#6B8299', primaryText: '#FFFFFF', border: '#D4DEE8' },
-            sunset_orange: { bg: '#FAF3EE', card: '#FFFFFF', soft: '#F3E5DC', text: '#45352C', muted: '#8A7265', primary: '#C87D55', primaryText: '#FFFFFF', border: '#EAD9CE' },
-            oat_yellow: { bg: '#FAF7EE', card: '#FFFFFF', soft: '#F2ECD9', text: '#423C2B', muted: '#827A62', primary: '#B89648', primaryText: '#FFFFFF', border: '#E6DEC5' },
-            pure_white_gray: { bg: '#FFFFFF', card: '#FAFAFA', soft: '#F1F2F4', text: '#262626', muted: '#737373', primary: '#525252', primaryText: '#FFFFFF', border: '#E5E5E5' },
-            mono_bw: { bg: '#F5F5F5', card: '#FFFFFF', soft: '#EAEAEA', text: '#171717', muted: '#666666', primary: '#1E1E1E', primaryText: '#FFFFFF', border: '#DCDCDC' },
-            morandi_gray: { bg: '#ECECEC', card: '#F9F9F9', soft: '#E0E0E0', text: '#333333', muted: '#6E6E6E', primary: '#595959', primaryText: '#FFFFFF', border: '#D1D1D1' }
+            oat_brown: { bg: '#F4EFE8', card: 'rgba(255,255,255,0.78)', soft: 'rgba(239,232,222,0.72)', text: '#3A312B', muted: '#7A6D64', primary: '#8C735B', glow: 'rgba(140,115,91,0.22)', primaryText: '#FFFFFF' },
+            dusty_pink: { bg: '#F8F2F2', card: 'rgba(255,255,255,0.78)', soft: 'rgba(242,230,231,0.72)', text: '#423536', muted: '#857173', primary: '#B8868B', glow: 'rgba(184,134,139,0.22)', primaryText: '#FFFFFF' },
+            forest_green: { bg: '#F2F5F3', card: 'rgba(255,255,255,0.78)', soft: 'rgba(229,236,232,0.72)', text: '#2F3B34', muted: '#687A70', primary: '#5C7366', glow: 'rgba(92,115,102,0.22)', primaryText: '#FFFFFF' },
+            haze_blue: { bg: '#F1F4F7', card: 'rgba(255,255,255,0.78)', soft: 'rgba(228,234,240,0.72)', text: '#2E3842', muted: '#697887', primary: '#6B8299', glow: 'rgba(107,130,153,0.22)', primaryText: '#FFFFFF' },
+            sunset_orange: { bg: '#FAF3EE', card: 'rgba(255,255,255,0.78)', soft: 'rgba(243,229,220,0.72)', text: '#45352C', muted: '#8A7265', primary: '#C87D55', glow: 'rgba(200,125,85,0.22)', primaryText: '#FFFFFF' },
+            oat_yellow: { bg: '#FAF7EE', card: 'rgba(255,255,255,0.78)', soft: 'rgba(242,236,217,0.72)', text: '#423C2B', muted: '#827A62', primary: '#B89648', glow: 'rgba(184,150,72,0.22)', primaryText: '#FFFFFF' },
+            pure_white_gray: { bg: '#F9FAFB', card: 'rgba(255,255,255,0.85)', soft: 'rgba(241,242,244,0.8)', text: '#262626', muted: '#737373', primary: '#525252', glow: 'rgba(82,82,82,0.14)', primaryText: '#FFFFFF' },
+            mono_bw: { bg: '#F2F2F2', card: 'rgba(255,255,255,0.85)', soft: 'rgba(234,234,234,0.8)', text: '#171717', muted: '#666666', primary: '#1E1E1E', glow: 'rgba(30,30,30,0.15)', primaryText: '#FFFFFF' },
+            morandi_gray: { bg: '#EAEAEA', card: 'rgba(255,255,255,0.8)', soft: 'rgba(224,224,224,0.75)', text: '#333333', muted: '#6E6E6E', primary: '#595959', glow: 'rgba(89,89,89,0.18)', primaryText: '#FFFFFF' }
         };
 
-        // 示範預設資料 (串接 Supabase 後自動替換為雲端真實資料)
         let cardData = {
             id: 'demo-card-id',
             theme_color: 'oat_brown',
@@ -411,23 +428,44 @@
             bank_account: '123456789012',
             account_holder: '希貝兒工作室',
             sales_modules: {
-                enable_pain_points: true,
-                pain_points: [
-                    '每天都很努力經營，卻總覺得內在能量卡關、容易焦慮內耗？',
-                    '想開始接案或開課，卻對定價與自我價值感到沒自信？',
-                    '上過很多理論課，卻缺少一套能真正落地的陪跑與實戰系統？'
-                ],
+                titles: {
+                    topBadge: 'OFFICIAL BOOKING',
+                    carousel: '課程花絮與實績展示',
+                    pain: '如果妳也正處於以下狀態...',
+                    ba: '上課前後的真實蛻變',
+                    fit: '這套課程與諮詢適合誰？',
+                    testimonials: '來自學員與個案的真實回饋',
+                    folder: '課程與服務項目（可勾選單堂或多堂）',
+                    calendar: '選擇上課日期與場次',
+                    faq: '報名與退改期須知'
+                },
                 enable_stats: true,
                 stats: [
                     { num: '320+', label: '累積輔導學員' },
                     { num: '98%', label: '學員推薦滿意度' },
                     { num: '4年+', label: '實戰教學經驗' }
                 ],
+                enable_pain_points: true,
+                pain_points: [
+                    '每天都很努力經營，卻總覺得內在能量卡關、容易焦慮內耗？',
+                    '想開始接案或開課，卻對定價與自我價值感到沒自信？',
+                    '上過很多理論課，卻缺少一套能真正落地的陪跑與實戰系統？'
+                ],
                 enable_before_after: true,
                 before_after: {
                     before: ['對未來方向迷茫、容易受他人情緒影響', '接案報價心虛、缺乏穩定客源'],
                     after: ['掌握日常能量清理工具、思緒清晰穩定', '建立專屬個人品牌門面與高轉換課程系統']
                 },
+                enable_fit_check: true,
+                fit_check: {
+                    suitable: ['渴望提升內在穩定度與覺察力的人', '想建立個人品牌、斜槓接案或開課的創作者'],
+                    not_suitable: ['期待不付出行動就一夕致富的人', '不願意打開心房自我探索的人']
+                },
+                enable_testimonials: true,
+                testimonials: [
+                    { name: '台北 · 芳療師 Mia', text: '上完一對一梳理後，終於不再對報價感到心虛，這個月順利成交了三組長期陪跑客戶！' },
+                    { name: '新竹 · 自媒體創作者 Vivi', text: '系統化的引導非常落地，把原本混亂的想法整理成清晰服務，學員回饋都說超有感。' }
+                ],
                 enable_faq: true,
                 faqs: [
                     { q: '可以一次勾選多堂不同日期的課程嗎？', a: '可以！請在課程區或下方日曆勾選所有想報名的場次，系統會自動加總堂數與金額，一次送出即可。' },
@@ -460,14 +498,12 @@
         ];
 
         let activeTabId = 'tab-1';
-        let selectedCart = []; // 儲存已勾選的 schedule 物件
+        let selectedCart = [];
         let viewYear = new Date().getFullYear();
         let viewMonth = new Date().getMonth();
         let selectedDateStr = d1Str;
+        let currentSlide = 0;
 
-        // =========================================================================
-        // 1. 初始化與舊學員分潤追蹤 (?ref=代碼)
-        // =========================================================================
         async function initApp() {
             // 追蹤舊學員推薦碼 (30天有效期存入 LocalStorage)
             if (REF_PARAM) {
@@ -482,17 +518,43 @@
 
             // 若有串接 Supabase，讀取雲端真實資料
             if (supabaseClient) {
-                const { data: card } = await supabaseClient.from('pro_cards').select('*').eq('slug', CARD_SLUG).single();
+                const { data: card } = await supabaseClient.from('pro_cards').select('*').eq('slug', CARD_SLUG).maybeSingle();
                 if (card) {
-                    cardData = card;
+                    const defaultSm = cardData.sales_modules;
+                    const defaultLinks = cardData.social_links;
+                    const defaultCarousel = cardData.carousel_items;
+
+                    cardData = { ...cardData, ...card };
+                    cardData.sales_modules = {
+                        ...defaultSm,
+                        ...(card.sales_modules || {}),
+                        titles: { ...defaultSm.titles, ...(card.sales_modules?.titles || {}) }
+                    };
+
+                    // 防呆：若雲端尚未設定社群連結或輪播圖，保留預設示範項目避免畫面空白
+                    if (!card.social_links || card.social_links.length === 0) {
+                        cardData.social_links = defaultLinks;
+                    }
+                    if (!card.carousel_items || card.carousel_items.length === 0) {
+                        cardData.carousel_items = defaultCarousel;
+                    }
+                    // 若後台有填寫 LINE 網址，自動同步更新到預設的 LINE 按鈕上
+                    if (cardData.sales_modules?.lineUrl) {
+                        const lineItem = cardData.social_links.find(l => l.icon === 'message-circle');
+                        if (lineItem) lineItem.url = cardData.sales_modules.lineUrl;
+                    }
+
                     const [tRes, cRes, sRes] = await Promise.all([
                         supabaseClient.from('pro_course_tabs').select('*').eq('card_id', card.id).order('sort_order'),
-                        supabaseClient.from('pro_courses').select('*').eq('card_id', card.id).eq('is_visible', true).order('sort_order'),
-                        supabaseClient.from('pro_schedules').select('*').eq('card_id', card.id).eq('is_open', true).order('schedule_date')
+                        supabaseClient.from('pro_courses').select('*').eq('card_id', card.id).order('sort_order'),
+                        supabaseClient.from('pro_schedules').select('*').eq('card_id', card.id).order('schedule_date')
                     ]);
                     if (tRes.data?.length) { tabs = tRes.data; activeTabId = tabs[0].id; }
-                    if (cRes.data) courses = cRes.data;
-                    if (sRes.data) schedules = sRes.data;
+                    if (cRes.data?.length) courses = cRes.data.filter(c => c.is_visible !== false);
+                    if (sRes.data?.length) {
+                        schedules = sRes.data.filter(s => s.is_open !== false);
+                        if (schedules.length) selectedDateStr = schedules[0].schedule_date;
+                    }
                 }
             }
 
@@ -511,17 +573,18 @@
             r.style.setProperty('--text-main', t.text);
             r.style.setProperty('--text-muted', t.muted);
             r.style.setProperty('--primary', t.primary);
+            r.style.setProperty('--primary-glow', t.glow);
             r.style.setProperty('--primary-text', t.primaryText);
-            r.style.setProperty('--border-color', t.border);
         }
 
         function renderAll() {
-            const t = (cardData.sales_modules && cardData.sales_modules.titles) || {};
-            document.querySelector('header span').textContent = t.topBadge || 'OFFICIAL BOOKING';
-            document.querySelector('#carouselSection h2').textContent = t.carousel || '課程花絮與實績展示';
-            document.querySelector('#coursesSection h2').textContent = t.folder || '課程與服務項目（可勾選單堂或多堂）';
-            document.querySelector('#calendarGrid').parentElement.querySelector('h2').textContent = t.calendar || '選擇上課日期與場次';
-            document.querySelector('#faqSection h2').textContent = t.faq || '報名與退改期須知';
+            const t = cardData.sales_modules?.titles || {};
+            document.getElementById('frontTopBadgeText').textContent = t.topBadge || 'OFFICIAL BOOKING';
+            document.getElementById('frontCarouselTitle').textContent = t.carousel || '課程花絮與實績展示';
+            document.getElementById('frontFolderTitle').textContent = t.folder || '課程與服務項目（可勾選單堂或多堂）';
+            document.getElementById('frontCalendarTitle').textContent = t.calendar || '選擇上課日期與場次';
+            document.getElementById('frontFaqTitle').textContent = t.faq || '報名與退改期須知';
+
             document.getElementById('frontBrandName').textContent = cardData.brand_name;
             document.getElementById('frontTagline').textContent = cardData.tagline || '';
             document.getElementById('frontBio').textContent = cardData.bio || '';
@@ -543,45 +606,46 @@
         }
 
         function getSocialSvg(name) {
-         const svgs = {
-             instagram: `<svg class="w-4 h-4 theme-text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>`,
-             facebook: `<svg class="w-4 h-4 theme-text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>`,
-             youtube: `<svg class="w-4 h-4 theme-text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/><path d="m10 15 5-3-5-3z"/></svg>`,
-             'at-sign': `<svg class="w-4 h-4 theme-text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></svg>`,
-             'message-circle': `<svg class="w-4 h-4 theme-text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>`,
-             globe: `<svg class="w-4 h-4 theme-text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>`
-         };
-         return svgs[name] || svgs.globe;
-     }
+            const svgs = {
+                instagram: `<svg class="w-4 h-4 theme-text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>`,
+                facebook: `<svg class="w-4 h-4 theme-text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>`,
+                youtube: `<svg class="w-4 h-4 theme-text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/><path d="m10 15 5-3-5-3z"/></svg>`,
+                'at-sign': `<svg class="w-4 h-4 theme-text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></svg>`,
+                'message-circle': `<svg class="w-4 h-4 theme-text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>`,
+                globe: `<svg class="w-4 h-4 theme-text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>`
+            };
+            return svgs[name] || svgs.globe;
+        }
 
-     function renderLinks() {
-         const box = document.getElementById('frontLinksContainer');
-         const links = cardData.social_links || [];
-         if (!links.length) return box.classList.add('hidden');
-         box.classList.remove('hidden');
+        function renderLinks() {
+            const box = document.getElementById('frontLinksContainer');
+            const links = cardData.social_links || [];
+            if (!links.length) {
+                box.classList.add('hidden');
+                return;
+            }
+            box.classList.remove('hidden');
 
-         const icons = links.filter(l => l.style === 'icon_only');
-         const blocks = links.filter(l => l.style !== 'icon_only');
-         let html = '';
+            const icons = links.filter(l => !l.style || l.style === 'icon_only');
+            const blocks = links.filter(l => l.style && l.style !== 'icon_only');
+            let html = '';
 
-         if (blocks.length) {
-             html += `<div class="space-y-2 mb-3">` + blocks.map(l => `
-                 <a href="${l.url}" target="_blank" class="w-full py-2.5 px-4 rounded-xl theme-soft border theme-border flex items-center justify-center gap-2 text-xs font-medium">
-                     ${l.style === 'icon_text' ? getSocialSvg(l.icon) : ''}
-                     <span>${l.label}</span>
-                 </a>`).join('') + `</div>`;
-         }
-         if (icons.length) {
-             html += `<div class="flex justify-center gap-3">` + icons.map(l => `
-                 <a href="${l.url}" target="_blank" class="w-10 h-10 rounded-full theme-soft border theme-border flex items-center justify-center hover:scale-110 transition">
-                     ${getSocialSvg(l.icon)}
-                 </a>`).join('') + `</div>`;
-         }
-         box.innerHTML = html;
-     }
-
-        let currentSlide = 0;
-
+            if (blocks.length) {
+                html += `<div class="space-y-2.5 mb-3">` + blocks.map(l => `
+                    <a href="${l.url || '#'}" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 rounded-2xl soft-block hover:bg-white/90 transition flex items-center justify-center gap-2 text-xs font-semibold shadow-2xs">
+                        ${l.style === 'icon_text' ? getSocialSvg(l.icon) : ''}
+                        <span>${l.label}</span>
+                    </a>`).join('') + `</div>`;
+            }
+            if (icons.length) {
+                html += `<div class="flex justify-center items-center gap-3 pt-1">` + icons.map(l => `
+                    <a href="${l.url || '#'}" target="_blank" rel="noopener noreferrer" title="${l.label || ''}" class="w-10 h-10 rounded-full soft-block hover:bg-white hover:scale-110 transition flex items-center justify-center shadow-2xs">
+                        ${getSocialSvg(l.icon)}
+                    </a>`).join('') + `</div>`;
+            }
+            box.innerHTML = html;
+        }
+        
         function renderCarousel() {
             const items = cardData.carousel_items || [];
             const sec = document.getElementById('carouselSection');
@@ -631,17 +695,18 @@
             if (total <= 1) return;
             goToSlide((currentSlide + step + total) % total);
         }
-        
-        // 渲染高轉換銷售模組
+
+        // 完整 5 大高轉換銷售模組渲染
         function renderSalesModules() {
             const sm = cardData.sales_modules || {};
+            const t = sm.titles || {};
             const box = document.getElementById('salesModulesContainer');
             let html = '';
 
             // 1. 數據成果牆
             if (sm.enable_stats && sm.stats?.length) {
-                html += `<div class="grid grid-cols-3 gap-2">` + sm.stats.map(st => `
-                    <div class="theme-card rounded-2xl p-3 text-center shadow-2xs">
+                html += `<div class="grid grid-cols-3 gap-2.5">` + sm.stats.map(st => `
+                    <div class="glass-3d-card rounded-2xl p-3.5 text-center">
                         <p class="text-base font-bold theme-text-primary">${st.num}</p>
                         <p class="text-[11px] theme-text-muted mt-0.5">${st.label}</p>
                     </div>
@@ -651,10 +716,10 @@
             // 2. 痛點共鳴檢核表
             if (sm.enable_pain_points && sm.pain_points?.length) {
                 html += `
-                    <div class="theme-card rounded-3xl p-5 shadow-xs space-y-2.5">
+                    <div class="glass-3d-card rounded-[32px] p-5 space-y-2.5">
                         <h3 class="text-xs font-bold tracking-wide flex items-center gap-1.5">
                             <i data-lucide="check-square" class="w-4 h-4 theme-text-primary"></i>
-                            <span>如果妳也正處於以下狀態...</span>
+                            <span>${t.pain || '如果妳也正處於以下狀態...'}</span>
                         </h3>
                         <div class="space-y-2">` + sm.pain_points.map(pt => `
                             <div class="flex items-start gap-2 text-xs theme-text-muted leading-relaxed">
@@ -668,25 +733,65 @@
             // 3. Before & After 轉變軸
             if (sm.enable_before_after && sm.before_after) {
                 html += `
-                    <div class="theme-card rounded-3xl p-5 shadow-xs space-y-3">
-                        <h3 class="text-xs font-bold tracking-wide">上課前後的真實蛻變</h3>
+                    <div class="glass-3d-card rounded-[32px] p-5 space-y-3">
+                        <h3 class="text-xs font-bold tracking-wide flex items-center gap-1.5">
+                            <i data-lucide="arrow-left-right" class="w-4 h-4 theme-text-primary"></i>
+                            <span>${t.ba || '上課前後的真實蛻變'}</span>
+                        </h3>
                         <div class="grid grid-cols-2 gap-2.5 text-xs">
-                            <div class="p-3 rounded-2xl bg-stone-100/80 space-y-1.5">
-                                <span class="text-[10px] font-bold text-stone-500 uppercase">Before 改變前</span>
+                            <div class="p-3.5 rounded-2xl bg-stone-200/50 border border-black/5 space-y-1.5">
+                                <span class="text-[10px] font-bold text-stone-500 uppercase block">BEFORE 改變前</span>
                                 ${(sm.before_after.before || []).map(b => `<p class="text-stone-600 leading-snug">・${b}</p>`).join('')}
                             </div>
-                            <div class="p-3 rounded-2xl theme-soft border theme-border space-y-1.5">
-                                <span class="text-[10px] font-bold theme-text-primary uppercase">After 改變後</span>
+                            <div class="p-3.5 rounded-2xl soft-block space-y-1.5">
+                                <span class="text-[10px] font-bold theme-text-primary uppercase block">AFTER 改變後</span>
                                 ${(sm.before_after.after || []).map(a => `<p class="font-medium leading-snug">・${a}</p>`).join('')}
                             </div>
                         </div>
                     </div>`;
             }
 
+            // 4. 適合對象 / 不適合對象篩選器
+            if (sm.enable_fit_check && sm.fit_check) {
+                html += `
+                    <div class="glass-3d-card rounded-[32px] p-5 space-y-3">
+                        <h3 class="text-xs font-bold tracking-wide flex items-center gap-1.5">
+                            <i data-lucide="user-check" class="w-4 h-4 theme-text-primary"></i>
+                            <span>${t.fit || '這套課程與諮詢適合誰？'}</span>
+                        </h3>
+                        <div class="space-y-2.5 text-xs">
+                            <div class="p-3 rounded-2xl soft-block space-y-1">
+                                <p class="font-bold theme-text-primary text-[11px]">推薦給這樣的妳：</p>
+                                ${(sm.fit_check.suitable || []).map(s => `<p class="theme-text-main leading-snug">＋ ${s}</p>`).join('')}
+                            </div>
+                            <div class="p-3 rounded-2xl bg-stone-100/70 space-y-1">
+                                <p class="font-bold text-stone-500 text-[11px]">暫時不適合的對象：</p>
+                                ${(sm.fit_check.not_suitable || []).map(ns => `<p class="text-stone-500 leading-snug">－ ${ns}</p>`).join('')}
+                            </div>
+                        </div>
+                    </div>`;
+            }
+
+            // 5. 學員與個案好評見證語錄
+            if (sm.enable_testimonials && sm.testimonials?.length) {
+                html += `
+                    <div class="glass-3d-card rounded-[32px] p-5 space-y-3">
+                        <h3 class="text-xs font-bold tracking-wide flex items-center gap-1.5">
+                            <i data-lucide="message-square-quote" class="w-4 h-4 theme-text-primary"></i>
+                            <span>${t.testimonials || '來自學員與個案的真實回饋'}</span>
+                        </h3>
+                        <div class="space-y-2.5">` + sm.testimonials.map(tm => `
+                            <div class="p-3.5 rounded-2xl soft-block space-y-1">
+                                <p class="text-xs theme-text-main leading-relaxed">「${tm.text}」</p>
+                                <p class="text-[11px] font-bold theme-text-primary text-right">— ${tm.name}</p>
+                            </div>
+                        `).join('') + `</div>
+                    </div>`;
+            }
+
             box.innerHTML = html;
         }
 
-        // 分層資料夾標籤渲染
         function renderFolderTabs() {
             const row = document.getElementById('folderTabsRow');
             row.innerHTML = tabs.map(t => `
@@ -704,7 +809,6 @@
             lucide.createIcons();
         }
 
-        // 渲染該資料夾分頁下的課程卡片 + 可選場次勾選
         function renderCourseCards() {
             const list = document.getElementById('courseCardsList');
             const filtered = courses.filter(c => c.tab_id === activeTabId);
@@ -723,7 +827,7 @@
                     const isFull = remain <= 0;
                     const isChecked = selectedCart.some(item => item.schedule_id === s.id);
                     return `
-                        <label class="flex items-center justify-between p-2.5 rounded-xl border theme-border text-xs cursor-pointer ${isFull ? 'opacity-40 pointer-events-none bg-stone-50' : isChecked ? 'theme-soft border-stone-500 font-semibold' : 'bg-white'}">
+                        <label class="flex items-center justify-between p-2.5 rounded-xl border border-black/5 text-xs cursor-pointer transition ${isFull ? 'opacity-40 pointer-events-none bg-stone-50' : isChecked ? 'soft-block font-semibold ring-1 ring-stone-400' : 'bg-white/90 hover:bg-white'}">
                             <div class="flex items-center gap-2">
                                 <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleScheduleCart('${s.id}')" class="rounded text-stone-800">
                                 <span>${s.schedule_date} (${s.start_time}-${s.end_time})</span>
@@ -734,10 +838,10 @@
                 }).join('');
 
                 return `
-                    <div class="p-4 rounded-2xl theme-soft/50 border theme-border space-y-2.5">
+                    <div class="p-4 rounded-2xl soft-block space-y-2.5">
                         <div class="flex items-start justify-between gap-2">
                             <div>
-                                ${c.badge_text ? `<span class="inline-block text-[10px] px-2 py-0.5 rounded-full theme-btn-primary mb-1">${c.badge_text}</span>` : ''}
+                                ${c.badge_text ? `<span class="inline-block text-[10px] px-2.5 py-0.5 rounded-full theme-btn-primary mb-1.5">${c.badge_text}</span>` : ''}
                                 <h3 class="text-sm font-bold">${c.title}</h3>
                                 <p class="text-[11px] theme-text-muted">${c.subtitle || ''}</p>
                             </div>
@@ -753,7 +857,6 @@
             }).join('');
         }
 
-        // 月曆渲染與場次連動
         function renderCalendar() {
             document.getElementById('currentMonthLabel').textContent = `${viewYear}年 ${viewMonth + 1}月`;
             const grid = document.getElementById('calendarGrid');
@@ -767,12 +870,7 @@
                 const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 const hasSlot = openDates.has(dateStr);
                 const isSel = selectedDateStr === dateStr;
-                
-                const stateClass = isSel 
-                    ? 'cal-day-selected font-bold' 
-                    : hasSlot 
-                    ? 'cal-day-available theme-soft font-semibold cursor-pointer' 
-                    : 'opacity-35 cursor-default';
+                const stateClass = isSel ? 'cal-day-selected font-bold' : hasSlot ? 'cal-day-available soft-block font-semibold cursor-pointer' : 'opacity-35 cursor-default';
 
                 html += `
                     <button onclick="selectCalendarDate('${dateStr}')" class="cal-day-btn h-11 rounded-2xl flex flex-col items-center justify-center text-xs ${stateClass}">
@@ -785,12 +883,12 @@
         }
 
         function setupScrollReveal() {
-            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('reveal-block'));
+            document.querySelectorAll('main > section').forEach((sec, idx) => {
+                if (idx > 0) sec.classList.add('reveal-block');
+            });
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('is-visible');
-                    }
+                    if (entry.isIntersecting) entry.target.classList.add('is-visible');
                 });
             }, { threshold: 0.08 });
             document.querySelectorAll('.reveal-block').forEach(el => observer.observe(el));
@@ -823,7 +921,7 @@
                 const remain = s.max_capacity - s.booked_count;
                 const isChecked = selectedCart.some(item => item.schedule_id === s.id);
                 return `
-                    <label class="p-3 rounded-xl theme-soft border theme-border flex items-center justify-between cursor-pointer">
+                    <label class="p-3.5 rounded-2xl bg-white/90 border border-white shadow-xs flex items-center justify-between cursor-pointer">
                         <div class="flex items-center gap-2.5">
                             <input type="checkbox" ${isChecked ? 'checked' : ''} ${remain <= 0 ? 'disabled' : ''} onchange="toggleScheduleCart('${s.id}')">
                             <div>
@@ -831,13 +929,12 @@
                                 <p class="text-[11px] theme-text-muted">${s.start_time} - ${s.end_time} ｜ ${s.location_tag || ''}</p>
                             </div>
                         </div>
-                        <span class="text-xs font-semibold theme-text-primary">${cardData.enable_ordering ? `NT$ ${course.price}` : `剩 ${remain} 名`}</span>
+                        <span class="text-xs font-bold theme-text-primary">${cardData.enable_ordering ? `NT$ ${course.price}` : `剩 ${remain} 名`}</span>
                     </label>
                 `;
             }).join('');
         }
 
-        // 購物車多堂勾選邏輯
         function toggleScheduleCart(scheduleId) {
             const existIdx = selectedCart.findIndex(item => item.schedule_id === scheduleId);
             if (existIdx > -1) {
@@ -871,7 +968,7 @@
             
             countEl.textContent = selectedCart.length;
             countEl.classList.remove('cart-pop-anim');
-            void countEl.offsetWidth; // 觸發重繪重播彈跳動畫
+            void countEl.offsetWidth;
             countEl.classList.add('cart-pop-anim');
 
             document.getElementById('cartPriceDisplay').textContent = cardData.enable_ordering 
@@ -883,7 +980,7 @@
             const faqs = cardData.sales_modules?.faqs || [];
             document.getElementById('frontFaqList').innerHTML = faqs.map(f => `
                 <details class="py-3 group">
-                    <summary class="flex justify-between items-center text-xs font-medium cursor-pointer list-none">
+                    <summary class="flex justify-between items-center text-xs font-semibold cursor-pointer list-none">
                         <span>${f.q}</span>
                         <i data-lucide="chevron-down" class="w-3.5 h-3.5 theme-text-muted group-open:rotate-180 transition"></i>
                     </summary>
@@ -892,9 +989,6 @@
             `).join('');
         }
 
-        // =========================================================================
-        // 2. 結帳與送出預約 (含舊學員推薦代碼歸因)
-        // =========================================================================
         function openCheckoutModal() {
             document.getElementById('checkoutFormFields').classList.remove('hidden');
             document.getElementById('bookingSuccessView').classList.add('hidden');
@@ -967,7 +1061,6 @@
                 await supabaseClient.from('pro_bookings').insert([orderPayload]);
             }
 
-            // 自動打包並複製訂單明細到剪貼簿，方便學員直接貼到老師 LINE
             const itemsDetail = orderPayload.selected_items.map(i => `${i.course_title} (${i.date} ${i.time})`).join('\n・');
             window.lastOrderMsg = `您好！我已完成線上預約報名：\n訂單編號：${bookingNo}\n學員姓名：${name}\n聯絡電話：${phone}\n報名場次：\n・${itemsDetail}${cardData.enable_ordering ? `\n應付金額：NT$ ${totalAmount.toLocaleString()}` : ''}${last5 ? `\n匯款後五碼：${last5}` : ''}`;
             if (navigator.clipboard) {
@@ -1024,7 +1117,7 @@
                     ${o.payment_status === 'unpaid' ? `
                         <div class="flex gap-1.5 pt-1">
                             <input type="text" id="rep_${o.id}" maxlength="5" placeholder="輸入後五碼" class="flex-1 px-2 py-1 rounded border text-xs">
-                            <button onclick="reportLast5('${o.id}')" class="px-2.5 py-1 rounded bg-stone-800 text-white text-[11px]">送出</button>
+                            <button onclick="reportLast5('${o.id}')" class="px-2.5 py-1 rounded theme-btn-primary text-[11px]">送出</button>
                         </div>
                     ` : ''}
                 </div>

@@ -104,6 +104,15 @@
 
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* 強制後台抽屜與所有分頁內容區保持 100% 實心純白底，捲動到底也不透光 */
+    #adminDrawer > div,
+    #adminDrawer > div > div {
+      background-color: #FFFFFF !important;
+    }
+    #adminDrawer .theme-subtle {
+      background-color: #F4EFE6 !important;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col items-center pb-32">

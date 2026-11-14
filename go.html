@@ -1,0 +1,2108 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Sibyl 出攤排程工具 | Designed by Sibyl</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* 預設：米棕色 Warm Oatmeal 質感立體色系 */
+      --bg-page: #F4EFE6;
+      --bg-card: rgba(255, 255, 255, 0.88);
+      --bg-card-solid: #FFFFFF;
+      --bg-subtle: rgba(235, 227, 214, 0.68);
+      --text-main: #352D27;
+      --text-muted: #7A6F64;
+      --accent: #8C735B;
+      --accent-hover: #735D48;
+      --accent-soft: rgba(140, 115, 91, 0.14);
+      --accent-text: #FFFFFF;
+      --border-color: rgba(140, 115, 91, 0.22);
+      --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.88);
+      --shadow-elevation: 0 14px 34px -8px rgba(53, 45, 39, 0.09), 0 4px 10px -2px rgba(53, 45, 39, 0.04);
+      --shadow-btn: 0 6px 16px -3px rgba(140, 115, 91, 0.32);
+      --status-open-bg: rgba(62, 115, 72, 0.12);
+      --status-open-text: #2F5E38;
+      --status-sold-bg: rgba(168, 102, 54, 0.12);
+      --status-sold-text: #854D24;
+      --status-rain-bg: rgba(92, 104, 117, 0.12);
+      --status-rain-text: #4A5561;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      transition: background-color 0.35s ease, color 0.35s ease;
+      -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
+    }
+
+    .ambient-orb {
+      position: fixed;
+      border-radius: 9999px;
+      filter: blur(76px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.42;
+      transition: background-color 0.4s ease;
+    }
+
+    .theme-card {
+      background-color: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-elevation), var(--glass-highlight);
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease, background-color 0.35s ease;
+    }
+
+    .solid-card {
+      background-color: var(--bg-card-solid);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-elevation);
+    }
+
+    .theme-subtle {
+      background-color: var(--bg-subtle);
+      backdrop-filter: blur(8px);
+    }
+
+    .theme-accent-bg {
+      background-color: var(--accent);
+      color: var(--accent-text);
+      box-shadow: var(--shadow-btn);
+      transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .theme-accent-bg:hover {
+      background-color: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .theme-accent-bg:active {
+      transform: scale(0.96);
+    }
+
+    .theme-accent-soft {
+      background-color: var(--accent-soft);
+      color: var(--text-main);
+    }
+
+    .theme-border { border-color: var(--border-color); }
+    .theme-text-muted { color: var(--text-muted); }
+    .theme-text-accent { color: var(--accent); }
+
+    .link-pill-card {
+      background-color: rgba(255, 255, 255, 0.74);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 3px 10px -2px rgba(45, 38, 32, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .link-pill-card:hover {
+      background-color: rgba(255, 255, 255, 0.96);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px -4px rgba(45, 38, 32, 0.08);
+    }
+    .link-pill-card:active { transform: scale(0.97); }
+
+    .reveal-section {
+      opacity: 0;
+      transform: translateY(18px) scale(0.985);
+      transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1), transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .reveal-section.is-visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    @keyframes pulse-soft {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(0.85); }
+    }
+    .animate-pulse-soft { animation: pulse-soft 2.2s infinite ease-in-out; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center">
+
+  <!-- 背景柔和莫蘭迪環境光暈色塊 -->
+  <div class="ambient-orb w-72 h-72 -top-16 -left-20" style="background: var(--accent);"></div>
+  <div class="ambient-orb w-80 h-80 top-1/2 -right-24" style="background: var(--accent);"></div>
+
+  <!-- Toast 質感浮動提示 -->
+  <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-300 translate-y-[-10px]">
+    <div class="px-4 py-2.5 rounded-full shadow-lg text-xs font-semibold flex items-center gap-2 theme-accent-bg">
+      <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+      <span id="toastText">已儲存變更</span>
+    </div>
+  </div>
+
+  <!-- 主容器 -->
+  <div class="w-full max-w-md px-4 pt-4 pb-12 flex-1 flex flex-col relative z-10">
+
+    <!-- 1. 頂部導覽列 Top Bar -->
+    <header class="flex items-center justify-between mb-4">
+      <div id="liveStatusPill" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold theme-card">
+        <span id="liveStatusDot" class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse-soft"></span>
+        <span id="liveStatusText">近期出攤預告</span>
+      </div>
+
+      <button onclick="openAdminGate()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold theme-card theme-text-muted hover:opacity-85 active:scale-95 transition">
+        <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 theme-text-accent"></i>
+        <span>店家管理</span>
+      </button>
+    </header>
+
+    <!-- 2. 首屏焦點：「今日／下一場出攤」立體資訊卡 -->
+    <section id="spotlightSection" class="theme-card rounded-3xl p-4 mb-4 relative overflow-hidden reveal-section is-visible">
+      <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full opacity-20 pointer-events-none" style="background: var(--accent);"></div>
+
+      <div class="flex items-center justify-between mb-2.5 relative z-10">
+        <span id="spotlightBadge" class="inline-flex items-center gap-1.5 text-[11px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-lg theme-accent-soft">
+          <i data-lucide="compass" class="w-3 h-3 theme-text-accent"></i>
+          <span id="spotlightBadgeText">下一場出攤</span>
+        </span>
+        <span id="spotlightStatusTag" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+          正常出攤
+        </span>
+      </div>
+
+      <div id="spotlightContent" class="relative z-10"></div>
+    </section>
+
+    <!-- 3. 互動式月曆與清單排程區 -->
+    <section class="theme-card rounded-3xl p-4 mb-4 reveal-section is-visible">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-1">
+          <button onclick="changeMonth(-1)" class="p-1.5 rounded-xl hover:bg-black/5 active:scale-90 transition" aria-label="上個月">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+          </button>
+          <h2 id="calendarMonthTitle" class="text-sm font-bold tracking-wide px-1">2026年 11月</h2>
+          <button onclick="changeMonth(1)" class="p-1.5 rounded-xl hover:bg-black/5 active:scale-90 transition" aria-label="下個月">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <div class="flex items-center rounded-xl p-0.5 theme-subtle border theme-border text-xs">
+          <button id="btnViewCalendar" onclick="setScheduleView('calendar')" class="px-2.5 py-1 rounded-lg font-semibold transition bg-white shadow-xs">
+            月曆
+          </button>
+          <button id="btnViewList" onclick="setScheduleView('list')" class="px-2.5 py-1 rounded-lg font-semibold transition theme-text-muted">
+            清單
+          </button>
+        </div>
+      </div>
+
+      <!-- 月曆模式 -->
+      <div id="calendarViewContainer">
+        <div class="grid grid-cols-7 text-center text-[11px] font-semibold theme-text-muted pb-2 border-b theme-border">
+          <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+        </div>
+        <div id="calendarGrid" class="grid grid-cols-7 gap-1 pt-2"></div>
+        <div id="selectedDateDetail" class="mt-3 pt-3 border-t theme-border"></div>
+      </div>
+
+      <!-- 清單模式 -->
+      <div id="listViewContainer" class="hidden space-y-2.5 max-h-[380px] overflow-y-auto no-scrollbar"></div>
+    </section>
+
+    <!-- 4. 升級版「品牌形象與質感名片區」 -->
+    <section class="theme-card rounded-3xl overflow-hidden mb-4 reveal-section">
+      <div class="h-16 w-full relative overflow-hidden" style="background: linear-gradient(135deg, var(--accent-soft) 0%, rgba(255,255,255,0.2) 100%);">
+        <div class="absolute right-4 top-3 opacity-20">
+          <i data-lucide="sparkles" class="w-10 h-10 theme-text-accent"></i>
+        </div>
+        <div class="absolute left-4 top-3.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/75 backdrop-blur-xs text-[10px] font-bold tracking-wider uppercase theme-text-accent border theme-border">
+          <i data-lucide="badge-check" class="w-3 h-3"></i>
+          <span>BRAND PROFILE</span>
+        </div>
+      </div>
+
+      <div class="px-5 pb-5 -mt-8 relative z-10">
+        <div class="flex items-end gap-3.5 mb-3">
+          <div class="w-20 h-20 rounded-2xl p-1 bg-white shadow-md border theme-border shrink-0">
+            <div class="w-full h-full rounded-xl overflow-hidden theme-subtle flex items-center justify-center">
+              <img id="brandAvatarImg" src="" alt="品牌頭像" class="w-full h-full object-cover hidden" />
+              <i id="brandAvatarFallback" data-lucide="store" class="w-8 h-8 theme-text-accent"></i>
+            </div>
+          </div>
+
+          <div class="flex-1 min-w-0 pb-1">
+            <h1 id="brandNameDisplay" class="text-base font-extrabold tracking-tight truncate">沐光手沖與司康小攤</h1>
+            <div class="inline-flex items-center gap-1 text-[11px] font-medium theme-text-muted mt-0.5">
+              <i data-lucide="map-pinned" class="w-3 h-3 theme-text-accent shrink-0"></i>
+              <span>市集快閃・巡迴出攤品牌</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-2xl theme-subtle border theme-border relative">
+          <i data-lucide="quote" class="w-3.5 h-3.5 theme-text-accent opacity-40 mb-1"></i>
+          <p id="brandBioDisplay" class="text-xs theme-text-main leading-relaxed whitespace-pre-line font-medium">每週穿梭於新竹與台北質感市集，當日清晨現烤英式司康與手沖單品。</p>
+        </div>
+
+        <!-- 現場「加 LINE 領優惠」互動禮遇卡 (支援通用 LINE 打包文案與雙軌跳轉) -->
+        <div id="linePromoCard" class="mt-3.5 rounded-2xl border border-dashed theme-border overflow-hidden transition-all" style="background: var(--accent-soft);">
+          <div class="p-3.5 flex items-center justify-between gap-3">
+            <div class="flex items-start gap-2.5 min-w-0">
+              <div class="w-8 h-8 rounded-xl theme-accent-bg flex items-center justify-center shrink-0 mt-0.5">
+                <i data-lucide="gift" class="w-4 h-4"></i>
+              </div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-1.5">
+                  <span class="text-[11px] font-extrabold tracking-wide theme-text-accent">現場限定禮遇</span>
+                  <span class="w-1.5 h-1.5 rounded-full animate-pulse-soft" style="background: var(--accent);"></span>
+                </div>
+                <p id="linePromoTextDisplay" class="text-xs font-semibold mt-0.5 leading-snug">現場加入官方 LINE 好友並出示畫面，享飲品現折 $10</p>
+              </div>
+            </div>
+            <button type="button" onclick="triggerLineShareFlow('promo')" class="shrink-0 inline-flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold theme-accent-bg">
+              <span>加好友</span>
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- 多模式社群連結區 -->
+        <div id="socialLinksContainer" class="mt-4"></div>
+      </div>
+    </section>
+
+    <!-- 5. 自適應比例作品輪播區 -->
+    <section id="carouselSection" class="theme-card rounded-3xl p-3.5 mb-6 reveal-section">
+      <div class="relative w-full overflow-hidden rounded-2xl theme-subtle shadow-inner" id="carouselViewport">
+        <div id="carouselTrack" class="flex transition-transform duration-500 ease-out w-full h-full"></div>
+
+        <div id="carouselCounterPill" class="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/35 backdrop-blur-md text-white text-[10px] font-semibold tracking-wider">
+          1 / 3
+        </div>
+
+        <button id="carouselPrevBtn" onclick="moveCarousel(-1)" class="absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/85 backdrop-blur-md text-stone-800 shadow-md flex items-center justify-center hover:bg-white active:scale-90 transition" aria-label="上一張">
+          <i data-lucide="chevron-left" class="w-4 h-4"></i>
+        </button>
+        <button id="carouselNextBtn" onclick="moveCarousel(1)" class="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/85 backdrop-blur-md text-stone-800 shadow-md flex items-center justify-center hover:bg-white active:scale-90 transition" aria-label="下一張">
+          <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </button>
+
+        <div id="carouselDots" class="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-black/30 backdrop-blur-md z-10"></div>
+      </div>
+    </section>
+
+    <!-- 6. 品牌頁尾 Footer -->
+    <footer class="mt-auto pt-2 pb-4 text-center reveal-section">
+      <a href="https://heysibyl.com" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-medium tracking-wider theme-text-muted hover:opacity-80 transition">
+        <span>Designed by Sibyl | 數位管家</span>
+        <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
+      </a>
+    </footer>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 質感 LINE 打包文案與雙軌跳轉確認彈窗 (取代原生醜彈窗) -->
+  <!-- ===================================================================== -->
+  <div id="lineJumpModal" class="fixed inset-0 z-50 bg-black/45 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="solid-card rounded-3xl w-full max-w-sm p-5 space-y-3.5">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2 font-bold text-sm">
+          <span class="w-7 h-7 rounded-xl theme-accent-soft flex items-center justify-center">
+            <i data-lucide="message-circle" class="w-4 h-4 theme-text-accent"></i>
+          </span>
+          <span id="lineJumpModalTitle">已自動複製出攤洽詢文案</span>
+        </div>
+        <button onclick="closeLineJumpModal()" class="p-1.5 rounded-xl theme-subtle">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <p class="text-xs theme-text-muted leading-relaxed">
+        系統已將以下完整訊息複製到您的剪貼簿。點擊下方按鈕將透過 LINE 通用協議帶著文字跳轉，並同步開啟店家 LINE 頁面：
+      </p>
+
+      <div id="lineCopiedPreview" class="p-3 rounded-2xl theme-subtle border theme-border text-xs font-medium whitespace-pre-line leading-relaxed select-all"></div>
+
+      <div class="flex gap-2 pt-1">
+        <button type="button" onclick="closeLineJumpModal()" class="flex-1 py-2.5 rounded-xl text-xs font-bold theme-subtle theme-text-muted">
+          稍後再傳
+        </button>
+        <button type="button" onclick="executeLineDualJump()" class="flex-1 py-2.5 rounded-xl text-xs font-bold theme-accent-bg flex items-center justify-center gap-1.5">
+          <span>前往 LINE 送出</span>
+          <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 店家管理登入密碼視窗 -->
+  <!-- ===================================================================== -->
+  <div id="passwordModal" class="fixed inset-0 z-40 bg-black/45 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="solid-card rounded-3xl w-full max-w-xs p-5">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2 font-bold text-sm">
+          <i data-lucide="lock" class="w-4 h-4 theme-text-accent"></i>
+          <span>店家管理驗證</span>
+        </div>
+        <button onclick="closePasswordModal()" class="p-1.5 rounded-xl theme-subtle">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <p class="text-xs theme-text-muted mb-3">請輸入管理密碼進入後台（預設體驗密碼：1234）</p>
+      <input id="adminPasswordInput" type="password" placeholder="輸入管理密碼" class="w-full px-3.5 py-2.5 rounded-xl border theme-border text-sm bg-white focus:outline-none mb-3" onkeydown="if(event.key==='Enter') verifyAdminPassword()" />
+      <button onclick="verifyAdminPassword()" class="w-full py-2.5 rounded-xl text-xs font-bold theme-accent-bg transition">
+        進入後台設定
+      </button>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 店家後台管理抽屜 -->
+  <!-- ===================================================================== -->
+  <div id="adminDrawer" class="fixed inset-0 z-50 bg-black/45 backdrop-blur-xs hidden justify-center overflow-y-auto">
+    <div class="w-full max-w-md min-h-screen solid-card flex flex-col">
+      <div class="sticky top-0 z-10 px-4 py-3.5 border-b theme-border solid-card flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="layout-dashboard" class="w-4 h-4 theme-text-accent"></i>
+          <span class="font-bold text-sm">Sibyl 出攤排程後台</span>
+        </div>
+        <button onclick="closeAdminDrawer()" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold theme-subtle">
+          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          <span>返回前台</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-3 border-b theme-border text-xs font-semibold theme-subtle">
+        <button id="tabBtnSchedule" onclick="switchAdminTab('schedule')" class="py-3 border-b-2 transition" style="border-color: var(--accent);">
+          出攤排程
+        </button>
+        <button id="tabBtnBrand" onclick="switchAdminTab('brand')" class="py-3 border-b-2 border-transparent theme-text-muted transition">
+          品牌與外觀
+        </button>
+        <button id="tabBtnGrowth" onclick="switchAdminTab('growth')" class="py-3 border-b-2 border-transparent theme-text-muted transition">
+          秘笈與許願
+        </button>
+      </div>
+
+      <div class="p-4 space-y-5 flex-1 pb-12">
+
+        <!-- TAB 1: 出攤排程與一鍵匯出限動圖 -->
+        <div id="adminTabSchedule" class="space-y-4">
+          <div class="p-3.5 rounded-2xl theme-subtle border theme-border flex items-center justify-between gap-3">
+            <div>
+              <div class="text-xs font-bold flex items-center gap-1.5">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5 theme-text-accent"></i>
+                <span>一鍵匯出本月 IG 限動圖</span>
+              </div>
+              <p class="text-[11px] theme-text-muted mt-0.5">自動套用目前選定的莫蘭迪色系與排程</p>
+            </div>
+            <button onclick="exportStoryImage()" class="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold theme-accent-bg">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>下載圖卡</span>
+            </button>
+          </div>
+
+          <!-- 新增 / 編輯排程表單 -->
+          <div class="p-4 rounded-2xl border theme-border space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 id="scheduleFormTitle" class="text-xs font-bold">新增出攤場次</h3>
+              <button id="cancelEditScheduleBtn" onclick="resetScheduleForm()" class="hidden text-[11px] theme-text-muted underline">取消編輯</button>
+            </div>
+            <input type="hidden" id="editScheduleId" value="" />
+
+            <div class="grid grid-cols-2 gap-2.5">
+              <div>
+                <label class="block text-[11px] theme-text-muted mb-1">出攤日期</label>
+                <input id="schedDate" type="date" class="w-full px-3 py-2 rounded-xl border theme-border text-xs bg-white" />
+              </div>
+              <div>
+                <label class="block text-[11px] theme-text-muted mb-1">即時狀態</label>
+                <select id="schedStatus" class="w-full px-3 py-2 rounded-xl border theme-border text-xs bg-white">
+                  <option value="open">正常出攤</option>
+                  <option value="soldout">已完售收攤</option>
+                  <option value="rain">雨天公休</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2.5">
+              <div>
+                <label class="block text-[11px] theme-text-muted mb-1">開始時間</label>
+                <input id="schedStart" type="time" value="15:30" class="w-full px-3 py-2 rounded-xl border theme-border text-xs bg-white" />
+              </div>
+              <div>
+                <label class="block text-[11px] theme-text-muted mb-1">結束時間</label>
+                <input id="schedEnd" type="time" value="21:30" class="w-full px-3 py-2 rounded-xl border theme-border text-xs bg-white" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[11px] theme-text-muted mb-1">地點名稱（市集／夜市／路名）</label>
+              <input id="schedLocation" type="text" placeholder="例如：竹北新瓦屋客家文化保存區" class="w-full px-3 py-2 rounded-xl border theme-border text-xs bg-white" />
+            </div>
+
+            <div>
+              <label class="block text-[11px] theme-text-muted mb-1">Google 地圖導航連結（選填，留白則自動以地點搜尋導航）</label>
+              <input id="schedMapUrl" type="url" placeholder="貼上 Google Maps 分享網址" class="w-full px-3 py-2 rounded-xl border theme-border text-xs bg-white" />
+            </div>
+
+            <div>
+              <label class="block text-[11px] theme-text-muted mb-1">單場微備註（限 20 字內，例如攤位編號或限定品）</label>
+              <input id="schedNote" type="text" maxlength="20" placeholder="例如：B區 14 號攤 / 今日限定開心果司康" class="w-full px-3 py-2 rounded-xl border theme-border text-xs bg-white" />
+            </div>
+
+            <button onclick="saveScheduleItem()" class="w-full py-2.5 rounded-xl text-xs font-bold theme-accent-bg flex items-center justify-center gap-1.5">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span id="saveScheduleBtnText">儲存出攤場次</span>
+            </button>
+          </div>
+
+          <div>
+            <h3 class="text-xs font-bold mb-2">已排定場次管理（可快速切換狀態）</h3>
+            <div id="adminScheduleList" class="space-y-2.5"></div>
+          </div>
+        </div>
+
+        <!-- TAB 2: 品牌介紹、色系、連結與輪播 -->
+        <div id="adminTabBrand" class="hidden space-y-5">
+          <div class="p-4 rounded-2xl border theme-border space-y-2.5">
+            <h3 class="text-xs font-bold">全站莫蘭迪與極簡色系</h3>
+            <div id="themeSelectorGrid" class="grid grid-cols-2 gap-2"></div>
+          </div>
+
+          <!-- 品牌基本資料與正方形大頭貼上傳 (直連 Supabase pro-assets Bucket) -->
+          <div class="p-4 rounded-2xl border theme-border space-y-3">
+            <h3 class="text-xs font-bold">品牌識別與介紹</h3>
+            <div class="flex items-center gap-3">
+              <div class="w-16 h-16 rounded-2xl overflow-hidden border theme-border theme-subtle flex items-center justify-center shrink-0">
+                <img id="adminAvatarPreview" src="" alt="頭像預覽" class="w-full h-full object-cover hidden" />
+                <i id="adminAvatarFallback" data-lucide="image" class="w-6 h-6 theme-text-muted"></i>
+              </div>
+              <div class="space-y-1.5">
+                <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold theme-subtle border theme-border cursor-pointer hover:opacity-80">
+                  <i data-lucide="upload" class="w-3.5 h-3.5 theme-text-accent"></i>
+                  <span id="avatarUploadLabel">上傳正方形大頭貼</span>
+                  <input type="file" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)" />
+                </label>
+                <p class="text-[11px] theme-text-muted">自動上傳雲端永久短網址（附本機備援）</p>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[11px] theme-text-muted mb-1">店名 / 品牌名稱</label>
+              <input id="inputBrandName" type="text" class="w-full px-3 py-2 rounded-xl border theme-border text-xs bg-white" />
+            </div>
+
+            <div>
+              <label class="block text-[11px] theme-text-muted mb-1">簡短介紹</label>
+              <textarea id="inputBrandBio" rows="3" class="w-full px-3 py-2 rounded-xl border theme-border text-xs bg-white"></textarea>
+            </div>
+
+            <div>
+              <label class="block text-[11px] theme-text-muted mb-1">後台登入密碼變更</label>
+              <input id="inputAdminPassword" type="text" class="w-full px-3 py-2 rounded-xl border theme-border text-xs bg-white" />
+            </div>
+
+            <button onclick="saveBrandInfo()" class="w-full py-2.5 rounded-xl text-xs font-bold theme-accent-bg">
+              儲存品牌基本資料
+            </button>
+          </div>
+
+          <!-- LINE 連結與現場優惠小卡設定 (支援個人 LINE 與官方帳號雙軌) -->
+          <div class="p-4 rounded-2xl border theme-border space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-bold">LINE 聯絡與現場優惠公告條</h3>
+              <label class="inline-flex items-center gap-1.5 text-xs cursor-pointer">
+                <input id="inputLinePromoEnabled" type="checkbox" class="rounded" />
+                <span>前台顯示優惠條</span>
+              </label>
+            </div>
+            <div>
+              <label class="block text-[11px] theme-text-muted mb-1">優惠文案內容</label>
+              <input id="inputLinePromoText" type="text" class="w-full px-3 py-2 rounded-xl border theme-border text-xs bg-white" />
+            </div>
+            <div>
+              <label class="block text-[11px] theme-text-muted mb-1">店家 LINE 連結（支援個人 LINE ti/p/xxx 或官方帳號 @xxx）</label>
+              <input id="inputLinePromoUrl" type="url" placeholder="https://line.me/ti/p/..." class="w-full px-3 py-2 rounded-xl border theme-border text-xs bg-white" />
+            </div>
+            <button onclick="saveLinePromoSettings()" class="w-full py-2.5 rounded-xl text-xs font-bold theme-accent-bg">
+              儲存 LINE 與優惠設定
+            </button>
+          </div>
+
+          <!-- 社群與官網連結管理 -->
+          <div class="p-4 rounded-2xl border theme-border space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-bold">社群與官網連結</h3>
+              <select id="inputLinkDisplayMode" onchange="changeLinkDisplayMode(this.value)" class="px-2.5 py-1 rounded-lg border theme-border text-[11px] bg-white">
+                <option value="both">質感圖示＋文字</option>
+                <option value="icon">純質感圖示</option>
+                <option value="text">純文字</option>
+              </select>
+            </div>
+
+            <div class="p-3 rounded-xl theme-subtle space-y-2">
+              <input type="hidden" id="editLinkIndex" value="-1" />
+              <div class="grid grid-cols-3 gap-2">
+                <select id="linkIconType" class="px-2.5 py-2 rounded-xl border theme-border text-xs bg-white">
+                  <option value="instagram">Instagram</option>
+                  <option value="line">LINE 好友</option>
+                  <option value="globe">品牌官網</option>
+                  <option value="at-sign">Threads</option>
+                  <option value="facebook">Facebook</option>
+                  <option value="shopping-bag">線上賣場</option>
+                </select>
+                <input id="linkLabelInput" type="text" placeholder="顯示名稱" class="col-span-2 px-3 py-2 rounded-xl border theme-border text-xs bg-white" />
+              </div>
+              <div class="flex gap-2">
+                <input id="linkUrlInput" type="url" placeholder="https://..." class="flex-1 px-3 py-2 rounded-xl border theme-border text-xs bg-white" />
+                <button onclick="saveSocialLink()" class="px-3.5 py-2 rounded-xl text-xs font-bold theme-accent-bg shrink-0">
+                  <span id="saveLinkBtnText">新增</span>
+                </button>
+              </div>
+            </div>
+
+            <div id="adminLinksList" class="space-y-2"></div>
+          </div>
+
+          <!-- 輪播圖設定 (直連 Supabase pro-assets Bucket) -->
+          <div class="p-4 rounded-2xl border theme-border space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-bold">作品輪播圖管理</h3>
+              <select id="inputCarouselRatio" onchange="changeCarouselRatio(this.value)" class="px-2.5 py-1 rounded-lg border theme-border text-[11px] bg-white">
+                <option value="4:5">4:5 比例</option>
+                <option value="9:12">9:12 比例</option>
+                <option value="1:1">1:1 比例</option>
+              </select>
+            </div>
+
+            <label class="w-full py-2.5 rounded-xl border border-dashed theme-border theme-subtle flex items-center justify-center gap-2 text-xs font-semibold cursor-pointer hover:opacity-80 transition">
+              <i data-lucide="image-plus" class="w-4 h-4 theme-text-accent"></i>
+              <span id="carouselUploadLabel">上傳輪播圖片（自動存雲端短網址）</span>
+              <input type="file" accept="image/*" multiple class="hidden" onchange="handleCarouselUpload(event)" />
+            </label>
+
+            <div id="adminCarouselGrid" class="grid grid-cols-3 gap-2.5 pt-1"></div>
+          </div>
+        </div>
+
+        <!-- TAB 3: 老闆圈粉秘笈與許願池 -->
+        <div id="adminTabGrowth" class="hidden space-y-5">
+          <div class="p-4 rounded-2xl border theme-border space-y-3">
+            <div class="flex items-center gap-2">
+              <i data-lucide="book-open" class="w-4 h-4 theme-text-accent"></i>
+              <h3 class="text-xs font-bold">擺攤圈粉實戰秘笈：把路過客變鐵粉</h3>
+            </div>
+            <div class="space-y-2.5 text-xs">
+              <div class="p-3 rounded-xl theme-subtle">
+                <div class="font-bold mb-1">第一步：攤位擺放「加好友禮遇」小立牌</div>
+                <p class="theme-text-muted leading-relaxed">在結帳處放置 LINE QR Code 立牌，並開啟本工具後台的「現場優惠公告條」，讓過路客願意花 5 秒掃碼。</p>
+              </div>
+              <div class="p-3 rounded-xl theme-subtle">
+                <div class="font-bold mb-1">第二步：將本排程網址綁定在 LINE 選單或個人主頁</div>
+                <p class="theme-text-muted leading-relaxed">不論您使用官方帳號圖文選單或個人 LINE 主頁，貼上您的專屬出攤排程連結，客人隨時點開就能看本月行程並一鍵 Google 導航，也能直接點「洽詢／預留」自動帶入日期地點傳訊息給您。</p>
+              </div>
+              <div class="p-3 rounded-xl theme-subtle">
+                <div class="font-bold mb-1">第三步：月底一鍵匯出限動圖同步發佈</div>
+                <p class="theme-text-muted leading-relaxed">排好下個月行程後，直接在後台點選「下載圖卡」，就能產出與品牌同色系的 IG 限動月曆圖。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl border theme-border space-y-3">
+            <div class="flex items-center gap-2">
+              <i data-lucide="sparkles" class="w-4 h-4 theme-text-accent"></i>
+              <h3 class="text-xs font-bold">功能許願池（直達開發團隊）</h3>
+            </div>
+            <p class="text-xs theme-text-muted leading-relaxed">
+              使用過程中有任何希望新增的實用小功能，歡迎寫在下方，系統會直接傳送給 Sibyl 數位管家進行評估與更新。
+            </p>
+            <div>
+              <label class="block text-[11px] theme-text-muted mb-1">許願類型</label>
+              <select id="wishCategory" class="w-full px-3 py-2 rounded-xl border theme-border text-xs bg-white">
+                <option value="前台顯示優化">前台顯示與客戶體驗</option>
+                <option value="後台排程功能">後台排程與匯出功能</option>
+                <option value="新色系與版型">新莫蘭迪色系與版型</option>
+                <option value="其他需求">其他擺攤營運需求</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] theme-text-muted mb-1">許願內容說明</label>
+              <textarea id="wishContent" rows="3" placeholder="請描述您希望增加的功能或使用情境..." class="w-full px-3 py-2 rounded-xl border theme-border text-xs bg-white"></textarea>
+            </div>
+            <button onclick="submitWish()" class="w-full py-2.5 rounded-xl text-xs font-bold theme-accent-bg flex items-center justify-center gap-1.5">
+              <i data-lucide="send" class="w-3.5 h-3.5"></i>
+              <span>送出許願給數位管家</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- 隱藏的 Canvas 用於匯出 1080x1920 IG 限動排程圖 -->
+  <canvas id="storyExportCanvas" width="1080" height="1920" class="hidden"></canvas>
+
+  <script>
+    // =========================================================================
+    // 1. SUPABASE 連線設定 (已填入你的專案金鑰與 pro-assets Bucket)
+    // =========================================================================
+    const SUPABASE_URL = "https://tzqpfnrpnfzzubofoqlt.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_Gd2bvnjN9_wy-x2VkkQzaw_S_gfqJHG";
+    const STORAGE_BUCKET = "pro-assets";
+    const STORE_TABLE = "stall_schedules";
+    const WISH_TABLE = "tool_wishes";
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const STORE_SLUG = urlParams.get('s') || urlParams.get('store') || 'demo-market';
+    const STORAGE_KEY = `sibyl_stall_tool_${STORE_SLUG}`;
+
+    let supabaseClient = null;
+    if (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase) {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+
+    // =========================================================================
+    // 2. 8 款莫蘭迪與極簡色系定義
+    // =========================================================================
+    const THEMES = {
+      oatmeal: {
+        name: '米棕色（預設）',
+        swatch: '#8C735B',
+        vars: {
+          '--bg-page': '#F4EFE6',
+          '--bg-card': 'rgba(255, 255, 255, 0.88)',
+          '--bg-card-solid': '#FFFFFF',
+          '--bg-subtle': 'rgba(235, 227, 214, 0.68)',
+          '--text-main': '#352D27',
+          '--text-muted': '#7A6F64',
+          '--accent': '#8C735B',
+          '--accent-hover': '#735D48',
+          '--accent-soft': 'rgba(140, 115, 91, 0.14)',
+          '--accent-text': '#FFFFFF',
+          '--border-color': 'rgba(140, 115, 91, 0.22)'
+        }
+      },
+      dustyRose: {
+        name: '粉黛灰粉',
+        swatch: '#B5838D',
+        vars: {
+          '--bg-page': '#F7F1F2',
+          '--bg-card': 'rgba(255, 255, 255, 0.88)',
+          '--bg-card-solid': '#FFFFFF',
+          '--bg-subtle': 'rgba(239, 228, 230, 0.68)',
+          '--text-main': '#3D2E32',
+          '--text-muted': '#826D72',
+          '--accent': '#B5838D',
+          '--accent-hover': '#9A6A74',
+          '--accent-soft': 'rgba(181, 131, 141, 0.15)',
+          '--accent-text': '#FFFFFF',
+          '--border-color': 'rgba(181, 131, 141, 0.25)'
+        }
+      },
+      sageForest: {
+        name: '莫蘭迪森綠',
+        swatch: '#6B7F70',
+        vars: {
+          '--bg-page': '#F0F4F1',
+          '--bg-card': 'rgba(255, 255, 255, 0.88)',
+          '--bg-card-solid': '#FFFFFF',
+          '--bg-subtle': 'rgba(226, 233, 228, 0.68)',
+          '--text-main': '#2B362E',
+          '--text-muted': '#67756B',
+          '--accent': '#6B7F70',
+          '--accent-hover': '#56685B',
+          '--accent-soft': 'rgba(107, 127, 112, 0.15)',
+          '--accent-text': '#FFFFFF',
+          '--border-color': 'rgba(107, 127, 112, 0.25)'
+        }
+      },
+      hazeBlue: {
+        name: '莫蘭迪霧霾藍',
+        swatch: '#6D8299',
+        vars: {
+          '--bg-page': '#F0F4F7',
+          '--bg-card': 'rgba(255, 255, 255, 0.88)',
+          '--bg-card-solid': '#FFFFFF',
+          '--bg-subtle': 'rgba(226, 232, 239, 0.68)',
+          '--text-main': '#2A3440',
+          '--text-muted': '#687685',
+          '--accent': '#6D8299',
+          '--accent-hover': '#586B80',
+          '--accent-soft': 'rgba(109, 130, 153, 0.15)',
+          '--accent-text': '#FFFFFF',
+          '--border-color': 'rgba(109, 130, 153, 0.25)'
+        }
+      },
+      sunsetOrange: {
+        name: '莫蘭迪日落橘',
+        swatch: '#C27D5E',
+        vars: {
+          '--bg-page': '#F8F2EE',
+          '--bg-card': 'rgba(255, 255, 255, 0.88)',
+          '--bg-card-solid': '#FFFFFF',
+          '--bg-subtle': 'rgba(239, 227, 220, 0.68)',
+          '--text-main': '#3E2E26',
+          '--text-muted': '#856E62',
+          '--accent': '#C27D5E',
+          '--accent-hover': '#A66649',
+          '--accent-soft': 'rgba(194, 125, 94, 0.15)',
+          '--accent-text': '#FFFFFF',
+          '--border-color': 'rgba(194, 125, 94, 0.25)'
+        }
+      },
+      ochreYellow: {
+        name: '莫蘭迪暖薑黃',
+        swatch: '#B89B5E',
+        vars: {
+          '--bg-page': '#F7F4EC',
+          '--bg-card': 'rgba(255, 255, 255, 0.88)',
+          '--bg-card-solid': '#FFFFFF',
+          '--bg-subtle': 'rgba(239, 232, 216, 0.68)',
+          '--text-main': '#3B3527',
+          '--text-muted': '#7D7563',
+          '--accent': '#B89B5E',
+          '--accent-hover': '#9C8149',
+          '--accent-soft': 'rgba(184, 155, 94, 0.15)',
+          '--accent-text': '#FFFFFF',
+          '--border-color': 'rgba(184, 155, 94, 0.25)'
+        }
+      },
+      whiteGrey: {
+        name: '白為主帶灰',
+        swatch: '#8E949E',
+        vars: {
+          '--bg-page': '#F8F9FA',
+          '--bg-card': 'rgba(255, 255, 255, 0.92)',
+          '--bg-card-solid': '#FFFFFF',
+          '--bg-subtle': 'rgba(239, 241, 244, 0.72)',
+          '--text-main': '#2B2F36',
+          '--text-muted': '#767D87',
+          '--accent': '#6C737E',
+          '--accent-hover': '#545A63',
+          '--accent-soft': 'rgba(108, 115, 126, 0.12)',
+          '--accent-text': '#FFFFFF',
+          '--border-color': 'rgba(108, 115, 126, 0.2)'
+        }
+      },
+      monochrome: {
+        name: '極簡黑白灰',
+        swatch: '#222222',
+        vars: {
+          '--bg-page': '#F0F0F0',
+          '--bg-card': 'rgba(255, 255, 255, 0.92)',
+          '--bg-card-solid': '#FFFFFF',
+          '--bg-subtle': 'rgba(229, 229, 229, 0.72)',
+          '--text-main': '#181818',
+          '--text-muted': '#666666',
+          '--accent': '#222222',
+          '--accent-hover': '#000000',
+          '--accent-soft': 'rgba(34, 34, 34, 0.12)',
+          '--accent-text': '#FFFFFF',
+          '--border-color': 'rgba(34, 34, 34, 0.2)'
+        }
+      }
+    };
+
+    // =========================================================================
+    // 3. 初始資料結構
+    // =========================================================================
+    function formatDateISO(dateObj) {
+      const y = dateObj.getFullYear();
+      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const d = String(dateObj.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function buildDefaultState() {
+      const today = new Date();
+      const dToday = formatDateISO(today);
+      const dPlus2 = new Date(today); dPlus2.setDate(today.getDate() + 2);
+      const dPlus5 = new Date(today); dPlus5.setDate(today.getDate() + 5);
+      const dPlus9 = new Date(today); dPlus9.setDate(today.getDate() + 9);
+
+      return {
+        theme: 'oatmeal',
+        adminPassword: '1234',
+        brand: {
+          name: '沐光手沖與司康小攤',
+          bio: '每週穿梭於新竹與台北質感市集\n當日清晨現烤英式司康・手沖單品咖啡',
+          avatar: ''
+        },
+        linePromo: {
+          enabled: true,
+          text: '現場加入 LINE 好友並出示畫面，享飲品現折 $10',
+          url: 'https://line.me/ti/p/demo'
+        },
+        linkDisplayMode: 'both',
+        links: [
+          { icon: 'instagram', label: 'Instagram', url: 'https://instagram.com' },
+          { icon: 'line', label: 'LINE 好友洽詢', url: 'https://line.me/ti/p/demo' },
+          { icon: 'globe', label: '品牌官網', url: 'https://heysibyl.com' }
+        ],
+        carouselRatio: '4:5',
+        carouselImages: [
+          'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=800&q=80'
+        ],
+        schedules: [
+          {
+            id: 's1',
+            date: dToday,
+            start: '15:00',
+            end: '21:00',
+            location: '竹北新瓦屋客家文化保存區',
+            mapUrl: 'https://maps.google.com/?q=竹北新瓦屋客家文化保存區',
+            status: 'open',
+            note: 'B區 14 號攤・今日限定開心果司康'
+          },
+          {
+            id: 's2',
+            date: formatDateISO(dPlus2),
+            start: '16:30',
+            end: '22:30',
+            location: '新竹後站夜市文創區',
+            mapUrl: 'https://maps.google.com/?q=新竹後站夜市',
+            status: 'open',
+            note: '入口處第三攤・滿兩百贈掛耳包'
+          },
+          {
+            id: 's3',
+            date: formatDateISO(dPlus5),
+            start: '13:00',
+            end: '19:00',
+            location: '台北華山1914文創園區市集',
+            mapUrl: 'https://maps.google.com/?q=華山1914文化創意產業園區',
+            status: 'open',
+            note: '千層蛋塔限量 40 顆'
+          },
+          {
+            id: 's4',
+            date: formatDateISO(dPlus9),
+            start: '15:00',
+            end: '20:30',
+            location: '新竹巨城噴水池廣場市集',
+            mapUrl: 'https://maps.google.com/?q=遠東巨城購物中心',
+            status: 'open',
+            note: '提供現場試喝冰滴咖啡'
+          }
+        ]
+      };
+    }
+
+    let appState = buildDefaultState();
+    let currentYear = new Date().getFullYear();
+    let currentMonth = new Date().getMonth();
+    let selectedDateStr = formatDateISO(new Date());
+    let scheduleViewMode = 'calendar';
+    let currentSlideIndex = 0;
+    let pendingLineMessage = '';
+
+    // =========================================================================
+    // 4. 資料載入與持久化
+    // =========================================================================
+    async function loadAppState() {
+      try {
+        if (supabaseClient) {
+          const { data, error } = await supabaseClient
+            .from(STORE_TABLE)
+            .select('config_json')
+            .eq('store_slug', STORE_SLUG)
+            .single();
+
+          if (!error && data && data.config_json) {
+            appState = { ...buildDefaultState(), ...data.config_json };
+            renderAll();
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn('Supabase 讀取略過，改用本機儲存', e);
+      }
+
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          appState = { ...buildDefaultState(), ...JSON.parse(saved) };
+        } catch (e) { console.error(e); }
+      }
+      renderAll();
+    }
+
+    async function persistAppState(toastMsg = '已儲存變更') {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+
+      if (supabaseClient) {
+        try {
+          await supabaseClient
+            .from(STORE_TABLE)
+            .upsert({
+              store_slug: STORE_SLUG,
+              store_title: appState.brand.name,
+              owner_line: appState.linePromo?.url || '',
+              config_json: appState,
+              updated_at: new Date().toISOString()
+            }, { onConflict: 'store_slug' });
+        } catch (e) {
+          console.warn('Supabase 寫入異常', e);
+        }
+      }
+
+      renderAll();
+      if (toastMsg) showToast(toastMsg);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastText').textContent = msg;
+      toast.classList.remove('opacity-0', 'translate-y-[-10px]');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-[-10px]');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+      }, 2200);
+    }
+
+    // =========================================================================
+    // 5. Supabase Storage (pro-assets) 雙重保障圖片上傳機制
+    // =========================================================================
+    function compressImageToBlobAndBase64(file, maxSize = 900, quality = 0.84) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = new Image();
+          img.onload = () => {
+            let w = img.width;
+            let h = img.height;
+            if (w > maxSize || h > maxSize) {
+              if (w > h) {
+                h = Math.round((h * maxSize) / w);
+                w = maxSize;
+              } else {
+                w = Math.round((w * maxSize) / h);
+                h = maxSize;
+              }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            const base64 = canvas.toDataURL('image/jpeg', quality);
+            canvas.toBlob(blob => {
+              resolve({ blob, base64 });
+            }, 'image/jpeg', quality);
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function uploadAssetWithFallback(file, folder = 'stall') {
+      const { blob, base64 } = await compressImageToBlobAndBase64(file, 900, 0.84);
+
+      // 優先上傳至 Supabase Storage pro-assets Bucket 取得永久短網址
+      if (supabaseClient && blob) {
+        try {
+          const fileName = `${folder}/${STORE_SLUG}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}.jpg`;
+          const { data, error } = await supabaseClient.storage
+            .from(STORAGE_BUCKET)
+            .upload(fileName, blob, {
+              contentType: 'image/jpeg',
+              upsert: true
+            });
+
+          if (!error && data) {
+            const { data: pubData } = supabaseClient.storage
+              .from(STORAGE_BUCKET)
+              .getPublicUrl(fileName);
+
+            if (pubData && pubData.publicUrl) {
+              return pubData.publicUrl;
+            }
+          }
+        } catch (err) {
+          console.warn('Storage 上傳降級為 Base64 備援:', err);
+        }
+      }
+
+      // 若未開 Bucket 或離線則無縫降級為壓縮 Base64
+      return base64;
+    }
+
+    // =========================================================================
+    // 6. 個人 LINE / 官方 LINE 打包文案與通用跳轉雙軌保險
+    // =========================================================================
+    function triggerLineShareFlow(type, scheduleItem = null) {
+      const brandName = appState.brand.name || '店家';
+      let msg = '';
+
+      if (type === 'schedule' && scheduleItem) {
+        msg = `您好【${brandName}】！我想洽詢／預留出攤場次：\n` +
+              `・日期：${formatDisplayDate(scheduleItem.date)}\n` +
+              `・時段：${scheduleItem.start} - ${scheduleItem.end}\n` +
+              `・地點：${scheduleItem.location}\n` +
+              (scheduleItem.note ? `・場次備註：${scheduleItem.note}\n` : '') +
+              `請問方便為我保留嗎？`;
+        document.getElementById('lineJumpModalTitle').textContent = '已打包場次洽詢文案';
+      } else {
+        const promoText = appState.linePromo?.text || '現場加入好友優惠';
+        msg = `您好【${brandName}】！我從您的出攤排程頁看到：\n` +
+              `「${promoText}」\n` +
+              `已加入好友，現場出示此訊息兌換禮遇！`;
+        document.getElementById('lineJumpModalTitle').textContent = '已打包好友禮遇文案';
+      }
+
+      pendingLineMessage = msg;
+      document.getElementById('lineCopiedPreview').textContent = msg;
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(msg).catch(() => {});
+      }
+
+      const modal = document.getElementById('lineJumpModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closeLineJumpModal() {
+      const modal = document.getElementById('lineJumpModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function executeLineDualJump() {
+      const encoded = encodeURIComponent(pendingLineMessage);
+      const shareUrl = `https://line.me/R/msg/text/?${encoded}`;
+      const ownerLineUrl = (appState.linePromo?.url || '').trim();
+
+      // 雙軌保險：先開業主設定的個人/官方 LINE 主頁（方便加好友），再帶文字跳轉通用分享協議
+      if (ownerLineUrl && ownerLineUrl.startsWith('http')) {
+        window.open(ownerLineUrl, '_blank', 'noopener');
+      }
+      setTimeout(() => {
+        window.location.href = shareUrl;
+      }, 280);
+      closeLineJumpModal();
+    }
+
+    // =========================================================================
+    // 7. 前台渲染引擎
+    // =========================================================================
+    function applyTheme(themeKey) {
+      const themeObj = THEMES[themeKey] || THEMES.oatmeal;
+      const root = document.documentElement;
+      Object.entries(themeObj.vars).forEach(([k, v]) => {
+        root.style.setProperty(k, v);
+      });
+    }
+
+    function getStatusMeta(status) {
+      if (status === 'soldout') {
+        return { label: '已完售收攤', bg: 'var(--status-sold-bg)', color: 'var(--status-sold-text)' };
+      }
+      if (status === 'rain') {
+        return { label: '雨天公休', bg: 'var(--status-rain-bg)', color: 'var(--status-rain-text)' };
+      }
+      return { label: '正常出攤', bg: 'var(--status-open-bg)', color: 'var(--status-open-text)' };
+    }
+
+    function getMapHref(item) {
+      if (item.mapUrl && item.mapUrl.trim() !== '') return item.mapUrl.trim();
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.location)}`;
+    }
+
+    function formatDisplayDate(dateStr) {
+      const [y, m, d] = dateStr.split('-').map(Number);
+      const dt = new Date(y, m - 1, d);
+      const days = ['日', '一', '二', '三', '四', '五', '六'];
+      return `${m}月${d}日（週${days[dt.getDay()]}）`;
+    }
+
+    function renderSpotlight() {
+      const todayStr = formatDateISO(new Date());
+      const sorted = [...appState.schedules].sort((a, b) => a.date.localeCompare(b.date));
+      const todayStall = sorted.find(s => s.date === todayStr);
+      const nextStall = todayStall || sorted.find(s => s.date > todayStr);
+
+      const pillText = document.getElementById('liveStatusText');
+      const pillDot = document.getElementById('liveStatusDot');
+      const badgeText = document.getElementById('spotlightBadgeText');
+      const statusTag = document.getElementById('spotlightStatusTag');
+      const content = document.getElementById('spotlightContent');
+
+      if (todayStall && todayStall.status === 'open') {
+        pillText.textContent = '今日出攤中';
+        pillDot.style.backgroundColor = '#3E7B48';
+      } else {
+        pillText.textContent = '近期出攤預告';
+        pillDot.style.backgroundColor = 'var(--accent)';
+      }
+
+      if (!nextStall) {
+        badgeText.textContent = '出攤檔期規劃中';
+        statusTag.style.display = 'none';
+        content.innerHTML = `<p class="text-xs theme-text-muted py-2">目前尚未公布近期出攤場次，歡迎點擊下方加入 LINE 接收最新通知。</p>`;
+        return;
+      }
+
+      statusTag.style.display = 'inline-block';
+      const st = getStatusMeta(nextStall.status);
+      statusTag.textContent = st.label;
+      statusTag.style.backgroundColor = st.bg;
+      statusTag.style.color = st.color;
+      badgeText.textContent = nextStall.date === todayStr ? '今日出攤情報' : '下一場出攤預告';
+
+      const safeJson = JSON.stringify(nextStall).replace(/"/g, '&quot;');
+
+      content.innerHTML = `
+        <div class="flex flex-col gap-2">
+          <div class="flex items-center gap-2 text-xs font-medium theme-text-muted">
+            <i data-lucide="calendar" class="w-3.5 h-3.5 theme-text-accent shrink-0"></i>
+            <span>${formatDisplayDate(nextStall.date)}</span>
+            <span class="opacity-40">|</span>
+            <i data-lucide="clock" class="w-3.5 h-3.5 theme-text-accent shrink-0"></i>
+            <span>${nextStall.start} - ${nextStall.end}</span>
+          </div>
+
+          <div class="flex items-start justify-between gap-2.5 mt-0.5">
+            <div class="min-w-0">
+              <div class="text-base font-extrabold leading-snug">${nextStall.location}</div>
+              ${nextStall.note ? `<div class="text-xs theme-text-muted mt-1 flex items-center gap-1"><i data-lucide="info" class="w-3 h-3 shrink-0"></i><span>${nextStall.note}</span></div>` : ''}
+            </div>
+
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button type="button" onclick="triggerLineShareFlow('schedule', ${safeJson})" title="LINE 洽詢此場次"
+                class="p-2.5 rounded-xl theme-subtle border theme-border hover:opacity-80 transition">
+                <i data-lucide="message-circle" class="w-4 h-4 theme-text-accent"></i>
+              </button>
+              <a href="${getMapHref(nextStall)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold theme-accent-bg">
+                <i data-lucide="navigation" class="w-3.5 h-3.5"></i>
+                <span>導航</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderCalendar() {
+      document.getElementById('calendarMonthTitle').textContent = `${currentYear}年 ${currentMonth + 1}月`;
+      const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+      const todayStr = formatDateISO(new Date());
+
+      const grid = document.getElementById('calendarGrid');
+      grid.innerHTML = '';
+
+      for (let i = 0; i < firstDay; i++) {
+        grid.innerHTML += `<div class="h-11"></div>`;
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const daySchedules = appState.schedules.filter(s => s.date === dateStr);
+        const hasStall = daySchedules.length > 0;
+        const isSelected = selectedDateStr === dateStr;
+        const isToday = todayStr === dateStr;
+
+        let dotHtml = '';
+        if (hasStall) {
+          const st = daySchedules[0].status;
+          const dotColor = st === 'open' ? 'var(--accent)' : (st === 'soldout' ? '#B87A4B' : '#9AA3AD');
+          dotHtml = `<span class="w-1.5 h-1.5 rounded-full mt-0.5" style="background-color: ${isSelected ? 'var(--accent-text)' : dotColor}"></span>`;
+        } else {
+          dotHtml = `<span class="w-1.5 h-1.5 mt-0.5 opacity-0"></span>`;
+        }
+
+        const btnClass = isSelected
+          ? 'theme-accent-bg font-bold'
+          : (hasStall ? 'theme-subtle font-semibold' : 'hover:bg-black/5');
+
+        grid.innerHTML += `
+          <button onclick="selectCalendarDate('${dateStr}')"
+            class="h-11 rounded-xl flex flex-col items-center justify-center text-xs transition ${btnClass}"
+            style="${isToday && !isSelected ? 'border: 1px solid var(--accent);' : ''}">
+            <span>${day}</span>
+            ${dotHtml}
+          </button>
+        `;
+      }
+
+      renderSelectedDateDetail();
+      renderMonthList();
+    }
+
+    function selectCalendarDate(dateStr) {
+      selectedDateStr = dateStr;
+      renderCalendar();
+      lucide.createIcons();
+    }
+
+    function changeMonth(delta) {
+      currentMonth += delta;
+      if (currentMonth < 0) { currentMonth = 11; currentYear -= 1; }
+      else if (currentMonth > 11) { currentMonth = 0; currentYear += 1; }
+      renderCalendar();
+      lucide.createIcons();
+    }
+
+    function setScheduleView(mode) {
+      scheduleViewMode = mode;
+      const calContainer = document.getElementById('calendarViewContainer');
+      const listContainer = document.getElementById('listViewContainer');
+      const btnCal = document.getElementById('btnViewCalendar');
+      const btnList = document.getElementById('btnViewList');
+
+      if (mode === 'calendar') {
+        calContainer.classList.remove('hidden');
+        listContainer.classList.add('hidden');
+        btnCal.classList.add('bg-white', 'shadow-xs');
+        btnCal.classList.remove('theme-text-muted');
+        btnList.classList.remove('bg-white', 'shadow-xs');
+        btnList.classList.add('theme-text-muted');
+      } else {
+        calContainer.classList.add('hidden');
+        listContainer.classList.remove('hidden');
+        btnList.classList.add('bg-white', 'shadow-xs');
+        btnList.classList.remove('theme-text-muted');
+        btnCal.classList.remove('bg-white', 'shadow-xs');
+        btnCal.classList.add('theme-text-muted');
+      }
+    }
+
+    function renderSelectedDateDetail() {
+      const container = document.getElementById('selectedDateDetail');
+      const items = appState.schedules.filter(s => s.date === selectedDateStr);
+
+      if (items.length === 0) {
+        container.innerHTML = `
+          <div class="flex items-center justify-between text-xs theme-text-muted py-1">
+            <span>${formatDisplayDate(selectedDateStr)}</span>
+            <span>本日無出攤排程</span>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = items.map(item => {
+        const st = getStatusMeta(item.status);
+        const safeJson = JSON.stringify(item).replace(/"/g, '&quot;');
+        return `
+          <div class="p-3 rounded-2xl theme-subtle flex items-center justify-between gap-2.5">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-xs font-bold">${formatDisplayDate(item.date)}</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full font-bold" style="background:${st.bg}; color:${st.color};">${st.label}</span>
+              </div>
+              <div class="text-xs font-bold truncate">${item.location}</div>
+              <div class="text-[11px] theme-text-muted mt-0.5">${item.start} - ${item.end} ${item.note ? `· ${item.note}` : ''}</div>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button type="button" onclick="triggerLineShareFlow('schedule', ${safeJson})" class="p-2.5 rounded-xl bg-white/80 border theme-border" title="LINE 洽詢">
+                <i data-lucide="message-circle" class="w-4 h-4 theme-text-accent"></i>
+              </button>
+              <a href="${getMapHref(item)}" target="_blank" rel="noopener" class="p-2.5 rounded-xl theme-accent-bg" title="開啟 Google 導航">
+                <i data-lucide="navigation" class="w-4 h-4"></i>
+              </a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderMonthList() {
+      const container = document.getElementById('listViewContainer');
+      const prefix = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+      const items = appState.schedules
+        .filter(s => s.date.startsWith(prefix))
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+      if (items.length === 0) {
+        container.innerHTML = `<div class="text-center text-xs theme-text-muted py-6">本月尚無已公布的出攤排程</div>`;
+        return;
+      }
+
+      container.innerHTML = items.map(item => {
+        const st = getStatusMeta(item.status);
+        const safeJson = JSON.stringify(item).replace(/"/g, '&quot;');
+        return `
+          <div class="p-3 rounded-2xl theme-subtle flex items-center justify-between gap-2.5">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 mb-0.5">
+                <span class="text-xs font-bold">${formatDisplayDate(item.date)}</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full font-bold" style="background:${st.bg}; color:${st.color};">${st.label}</span>
+              </div>
+              <div class="text-xs font-bold">${item.location}</div>
+              <div class="text-[11px] theme-text-muted mt-0.5">${item.start} - ${item.end} ${item.note ? `· ${item.note}` : ''}</div>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button type="button" onclick="triggerLineShareFlow('schedule', ${safeJson})" class="p-2 rounded-xl bg-white/80 border theme-border" title="LINE 洽詢">
+                <i data-lucide="message-circle" class="w-3.5 h-3.5 theme-text-accent"></i>
+              </button>
+              <a href="${getMapHref(item)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 px-2.5 py-2 rounded-xl text-[11px] font-bold bg-white border theme-border">
+                <i data-lucide="map-pin" class="w-3 h-3 theme-text-accent"></i>
+                <span>導航</span>
+              </a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function getLucideIconName(type) {
+      const map = {
+        instagram: 'instagram',
+        line: 'message-circle',
+        globe: 'globe',
+        'at-sign': 'at-sign',
+        facebook: 'facebook',
+        'shopping-bag': 'shopping-bag'
+      };
+      return map[type] || 'link';
+    }
+
+    function renderBrandAndLinks() {
+      document.getElementById('brandNameDisplay').textContent = appState.brand.name;
+      document.getElementById('brandBioDisplay').textContent = appState.brand.bio;
+
+      const avatarImg = document.getElementById('brandAvatarImg');
+      const avatarFallback = document.getElementById('brandAvatarFallback');
+      if (appState.brand.avatar) {
+        avatarImg.src = appState.brand.avatar;
+        avatarImg.classList.remove('hidden');
+        avatarFallback.classList.add('hidden');
+      } else {
+        avatarImg.classList.add('hidden');
+        avatarFallback.classList.remove('hidden');
+      }
+
+      const promoCard = document.getElementById('linePromoCard');
+      if (appState.linePromo && appState.linePromo.enabled) {
+        promoCard.classList.remove('hidden');
+        document.getElementById('linePromoTextDisplay').textContent = appState.linePromo.text;
+      } else {
+        promoCard.classList.add('hidden');
+      }
+
+      const container = document.getElementById('socialLinksContainer');
+      const mode = appState.linkDisplayMode || 'both';
+      const links = appState.links || [];
+
+      if (links.length === 0) {
+        container.innerHTML = '';
+        return;
+      }
+
+      if (mode === 'icon') {
+        container.innerHTML = `
+          <div class="flex items-center justify-center flex-wrap gap-3 pt-1">
+            ${links.map(l => `
+              <a href="${l.url}" target="_blank" rel="noopener" title="${l.label}"
+                class="w-11 h-11 rounded-2xl link-pill-card flex items-center justify-center">
+                <i data-lucide="${getLucideIconName(l.icon)}" class="w-4 h-4 theme-text-accent"></i>
+              </a>
+            `).join('')}
+          </div>
+        `;
+      } else if (mode === 'text') {
+        container.innerHTML = `
+          <div class="grid grid-cols-1 gap-2.5">
+            ${links.map(l => `
+              <a href="${l.url}" target="_blank" rel="noopener"
+                class="w-full py-3 px-4 rounded-2xl link-pill-card text-xs font-bold text-center">
+                ${l.label}
+              </a>
+            `).join('')}
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div class="grid grid-cols-1 gap-2.5">
+            ${links.map(l => `
+              <a href="${l.url}" target="_blank" rel="noopener"
+                class="w-full py-3 px-4 rounded-2xl link-pill-card text-xs font-bold flex items-center justify-between">
+                <span class="flex items-center gap-3">
+                  <span class="w-7 h-7 rounded-xl theme-accent-soft flex items-center justify-center shrink-0">
+                    <i data-lucide="${getLucideIconName(l.icon)}" class="w-3.5 h-3.5 theme-text-accent"></i>
+                  </span>
+                  <span>${l.label}</span>
+                </span>
+                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 theme-text-muted"></i>
+              </a>
+            `).join('')}
+          </div>
+        `;
+      }
+    }
+
+    // =========================================================================
+    // 8. 輪播圖渲染與白點點擊切換
+    // =========================================================================
+    function renderCarousel() {
+      const section = document.getElementById('carouselSection');
+      const images = appState.carouselImages || [];
+
+      if (images.length === 0) {
+        section.classList.add('hidden');
+        return;
+      }
+      section.classList.remove('hidden');
+
+      const viewport = document.getElementById('carouselViewport');
+      const ratioMap = { '4:5': '4 / 5', '9:12': '9 / 12', '1:1': '1 / 1' };
+      viewport.style.aspectRatio = ratioMap[appState.carouselRatio] || '4 / 5';
+
+      if (currentSlideIndex >= images.length) currentSlideIndex = 0;
+
+      const track = document.getElementById('carouselTrack');
+      track.innerHTML = images.map((src, idx) => `
+        <div class="w-full h-full shrink-0">
+          <img src="${src}" alt="作品展示 ${idx + 1}" class="w-full h-full object-cover select-none" draggable="false" />
+        </div>
+      `).join('');
+
+      const dots = document.getElementById('carouselDots');
+      dots.innerHTML = images.map((_, idx) => `
+        <button type="button" onclick="goToSlide(${idx})" aria-label="切換至第 ${idx + 1} 張"
+          class="p-1 flex items-center justify-center cursor-pointer focus:outline-none">
+          <span class="block h-1.5 rounded-full transition-all duration-300 ${idx === currentSlideIndex ? 'w-5 bg-white shadow-xs' : 'w-1.5 bg-white/50 hover:bg-white/85'}"></span>
+        </button>
+      `).join('');
+
+      const showNav = images.length > 1;
+      document.getElementById('carouselPrevBtn').style.display = showNav ? 'flex' : 'none';
+      document.getElementById('carouselNextBtn').style.display = showNav ? 'flex' : 'none';
+      document.getElementById('carouselCounterPill').style.display = showNav ? 'block' : 'none';
+      dots.style.display = showNav ? 'flex' : 'none';
+
+      updateCarouselPosition();
+    }
+
+    function updateCarouselPosition() {
+      const total = appState.carouselImages.length;
+      const track = document.getElementById('carouselTrack');
+      track.style.transform = `translateX(-${currentSlideIndex * 100}%)`;
+
+      const counterPill = document.getElementById('carouselCounterPill');
+      if (counterPill) counterPill.textContent = `${currentSlideIndex + 1} / ${total}`;
+
+      const dotButtons = document.getElementById('carouselDots').querySelectorAll('button');
+      dotButtons.forEach((btn, idx) => {
+        const dotSpan = btn.querySelector('span');
+        if (!dotSpan) return;
+        dotSpan.className = idx === currentSlideIndex
+          ? 'block h-1.5 rounded-full transition-all duration-300 w-5 bg-white shadow-xs'
+          : 'block h-1.5 rounded-full transition-all duration-300 w-1.5 bg-white/50 hover:bg-white/85';
+      });
+    }
+
+    function moveCarousel(delta) {
+      const total = appState.carouselImages.length;
+      if (total <= 1) return;
+      currentSlideIndex = (currentSlideIndex + delta + total) % total;
+      updateCarouselPosition();
+    }
+
+    function goToSlide(idx) {
+      currentSlideIndex = idx;
+      updateCarouselPosition();
+    }
+
+    (function initTouchSwipe() {
+      let startX = 0;
+      const vp = document.getElementById('carouselViewport');
+      vp.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+      vp.addEventListener('touchend', e => {
+        const diff = e.changedTouches[0].clientX - startX;
+        if (Math.abs(diff) > 40) moveCarousel(diff < 0 ? 1 : -1);
+      }, { passive: true });
+    })();
+
+    function initScrollReveal() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) entry.target.classList.add('is-visible');
+        });
+      }, { threshold: 0.12 });
+      document.querySelectorAll('.reveal-section').forEach(el => observer.observe(el));
+    }
+
+    function renderAll() {
+      applyTheme(appState.theme);
+      renderSpotlight();
+      renderCalendar();
+      renderBrandAndLinks();
+      renderCarousel();
+      lucide.createIcons();
+    }
+
+    // =========================================================================
+    // 9. 店家管理後台邏輯
+    // =========================================================================
+    function openAdminGate() {
+      document.getElementById('adminPasswordInput').value = '';
+      const modal = document.getElementById('passwordModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => document.getElementById('adminPasswordInput').focus(), 100);
+    }
+
+    function closePasswordModal() {
+      const modal = document.getElementById('passwordModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function verifyAdminPassword() {
+      const input = document.getElementById('adminPasswordInput').value;
+      if (input === appState.adminPassword) {
+        closePasswordModal();
+        openAdminDrawer();
+      } else {
+        showToast('密碼錯誤，請重新輸入');
+      }
+    }
+
+    function openAdminDrawer() {
+      populateAdminFields();
+      const drawer = document.getElementById('adminDrawer');
+      drawer.classList.remove('hidden');
+      drawer.classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closeAdminDrawer() {
+      const drawer = document.getElementById('adminDrawer');
+      drawer.classList.add('hidden');
+      drawer.classList.remove('flex');
+      renderAll();
+    }
+
+    function switchAdminTab(tab) {
+      const tabs = ['schedule', 'brand', 'growth'];
+      tabs.forEach(t => {
+        const cap = t.charAt(0).toUpperCase() + t.slice(1);
+        const panel = document.getElementById(`adminTab${cap}`);
+        const btn = document.getElementById(`tabBtn${cap}`);
+        if (t === tab) {
+          panel.classList.remove('hidden');
+          btn.classList.remove('theme-text-muted', 'border-transparent');
+          btn.style.borderColor = 'var(--accent)';
+        } else {
+          panel.classList.add('hidden');
+          btn.classList.add('theme-text-muted', 'border-transparent');
+          btn.style.borderColor = 'transparent';
+        }
+      });
+      lucide.createIcons();
+    }
+
+    function populateAdminFields() {
+      const themeGrid = document.getElementById('themeSelectorGrid');
+      themeGrid.innerHTML = Object.entries(THEMES).map(([key, item]) => {
+        const active = appState.theme === key;
+        return `
+          <button onclick="selectTheme('${key}')"
+            class="p-2.5 rounded-xl border text-left flex items-center gap-2.5 transition ${active ? 'font-bold shadow-xs' : 'opacity-80 hover:opacity-100'}"
+            style="border-color: ${active ? 'var(--accent)' : 'var(--border-color)'}; background: ${active ? 'var(--bg-subtle)' : '#FFF'};">
+            <span class="w-4 h-4 rounded-full shrink-0 border border-black/10" style="background-color: ${item.swatch};"></span>
+            <span class="text-xs truncate">${item.name}</span>
+          </button>
+        `;
+      }).join('');
+
+      document.getElementById('inputBrandName').value = appState.brand.name;
+      document.getElementById('inputBrandBio').value = appState.brand.bio;
+      document.getElementById('inputAdminPassword').value = appState.adminPassword;
+
+      const prev = document.getElementById('adminAvatarPreview');
+      const fb = document.getElementById('adminAvatarFallback');
+      if (appState.brand.avatar) {
+        prev.src = appState.brand.avatar;
+        prev.classList.remove('hidden');
+        fb.classList.add('hidden');
+      } else {
+        prev.classList.add('hidden');
+        fb.classList.remove('hidden');
+      }
+
+      document.getElementById('inputLinePromoEnabled').checked = !!appState.linePromo.enabled;
+      document.getElementById('inputLinePromoText').value = appState.linePromo.text || '';
+      document.getElementById('inputLinePromoUrl').value = appState.linePromo.url || '';
+      document.getElementById('inputLinkDisplayMode').value = appState.linkDisplayMode || 'both';
+      document.getElementById('inputCarouselRatio').value = appState.carouselRatio || '4:5';
+
+      if (!document.getElementById('schedDate').value) {
+        document.getElementById('schedDate').value = formatDateISO(new Date());
+      }
+
+      renderAdminScheduleList();
+      renderAdminLinksList();
+      renderAdminCarouselGrid();
+    }
+
+    function selectTheme(key) {
+      appState.theme = key;
+      persistAppState('已切換色彩風格');
+      populateAdminFields();
+      lucide.createIcons();
+    }
+
+    function saveScheduleItem() {
+      const date = document.getElementById('schedDate').value;
+      const start = document.getElementById('schedStart').value || '15:00';
+      const end = document.getElementById('schedEnd').value || '21:00';
+      const location = document.getElementById('schedLocation').value.trim();
+      const mapUrl = document.getElementById('schedMapUrl').value.trim();
+      const status = document.getElementById('schedStatus').value;
+      const note = document.getElementById('schedNote').value.trim();
+      const editId = document.getElementById('editScheduleId').value;
+
+      if (!date || !location) {
+        showToast('請填寫出攤日期與地點名稱');
+        return;
+      }
+
+      if (editId) {
+        const idx = appState.schedules.findIndex(s => s.id === editId);
+        if (idx !== -1) appState.schedules[idx] = { id: editId, date, start, end, location, mapUrl, status, note };
+      } else {
+        appState.schedules.push({ id: 'sched_' + Date.now(), date, start, end, location, mapUrl, status, note });
+      }
+
+      resetScheduleForm();
+      persistAppState('已更新出攤排程');
+      renderAdminScheduleList();
+      lucide.createIcons();
+    }
+
+    function editScheduleItem(id) {
+      const item = appState.schedules.find(s => s.id === id);
+      if (!item) return;
+      document.getElementById('editScheduleId').value = item.id;
+      document.getElementById('schedDate').value = item.date;
+      document.getElementById('schedStart').value = item.start;
+      document.getElementById('schedEnd').value = item.end;
+      document.getElementById('schedLocation').value = item.location;
+      document.getElementById('schedMapUrl').value = item.mapUrl || '';
+      document.getElementById('schedStatus').value = item.status;
+      document.getElementById('schedNote').value = item.note || '';
+
+      document.getElementById('scheduleFormTitle').textContent = '編輯出攤場次';
+      document.getElementById('saveScheduleBtnText').textContent = '確認修改場次';
+      document.getElementById('cancelEditScheduleBtn').classList.remove('hidden');
+    }
+
+    function resetScheduleForm() {
+      document.getElementById('editScheduleId').value = '';
+      document.getElementById('schedLocation').value = '';
+      document.getElementById('schedMapUrl').value = '';
+      document.getElementById('schedNote').value = '';
+      document.getElementById('schedStatus').value = 'open';
+      document.getElementById('scheduleFormTitle').textContent = '新增出攤場次';
+      document.getElementById('saveScheduleBtnText').textContent = '儲存出攤場次';
+      document.getElementById('cancelEditScheduleBtn').classList.add('hidden');
+    }
+
+    function quickChangeStatus(id, newStatus) {
+      const item = appState.schedules.find(s => s.id === id);
+      if (!item) return;
+      item.status = newStatus;
+      persistAppState('已即時切換狀態');
+      renderAdminScheduleList();
+      lucide.createIcons();
+    }
+
+    function deleteScheduleItem(id) {
+      appState.schedules = appState.schedules.filter(s => s.id !== id);
+      persistAppState('已刪除該筆排程');
+      renderAdminScheduleList();
+      lucide.createIcons();
+    }
+
+    function renderAdminScheduleList() {
+      const container = document.getElementById('adminScheduleList');
+      const sorted = [...appState.schedules].sort((a, b) => a.date.localeCompare(b.date));
+
+      if (sorted.length === 0) {
+        container.innerHTML = `<div class="text-xs theme-text-muted text-center py-4">尚未建立任何出攤場次</div>`;
+        return;
+      }
+
+      container.innerHTML = sorted.map(item => `
+        <div class="p-3 rounded-2xl border theme-border bg-white space-y-2">
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <div class="text-xs font-bold">${formatDisplayDate(item.date)} · ${item.start}-${item.end}</div>
+              <div class="text-xs font-medium mt-0.5">${item.location}</div>
+              ${item.note ? `<div class="text-[11px] theme-text-muted mt-0.5">${item.note}</div>` : ''}
+            </div>
+            <div class="flex items-center gap-1 shrink-0">
+              <button onclick="editScheduleItem('${item.id}')" class="p-1.5 rounded-lg hover:bg-black/5">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="deleteScheduleItem('${item.id}')" class="p-1.5 rounded-lg hover:bg-red-50 text-red-600">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between pt-2 border-t theme-border">
+            <span class="text-[11px] theme-text-muted">一鍵狀態切換：</span>
+            <select onchange="quickChangeStatus('${item.id}', this.value)" class="px-2 py-1 rounded-lg border theme-border text-[11px] bg-stone-50">
+              <option value="open" ${item.status === 'open' ? 'selected' : ''}>正常出攤</option>
+              <option value="soldout" ${item.status === 'soldout' ? 'selected' : ''}>已完售收攤</option>
+              <option value="rain" ${item.status === 'rain' ? 'selected' : ''}>雨天公休</option>
+            </select>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function handleAvatarUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const labelEl = document.getElementById('avatarUploadLabel');
+      labelEl.textContent = '上傳處理中...';
+      try {
+        const finalUrl = await uploadAssetWithFallback(file, 'stall_avatars');
+        appState.brand.avatar = finalUrl;
+        await persistAppState('已更新品牌頭像');
+        populateAdminFields();
+        lucide.createIcons();
+      } finally {
+        labelEl.textContent = '上傳正方形大頭貼';
+      }
+    }
+
+    function saveBrandInfo() {
+      appState.brand.name = document.getElementById('inputBrandName').value.trim() || '未命名品牌';
+      appState.brand.bio = document.getElementById('inputBrandBio').value.trim();
+      const newPwd = document.getElementById('inputAdminPassword').value.trim();
+      if (newPwd) appState.adminPassword = newPwd;
+      persistAppState('已儲存品牌資料');
+    }
+
+    function saveLinePromoSettings() {
+      appState.linePromo = {
+        enabled: document.getElementById('inputLinePromoEnabled').checked,
+        text: document.getElementById('inputLinePromoText').value.trim(),
+        url: document.getElementById('inputLinePromoUrl').value.trim()
+      };
+      persistAppState('已更新 LINE 與優惠設定');
+    }
+
+    function changeLinkDisplayMode(mode) {
+      appState.linkDisplayMode = mode;
+      persistAppState('已更新連結顯示方式');
+    }
+
+    function saveSocialLink() {
+      const icon = document.getElementById('linkIconType').value;
+      const label = document.getElementById('linkLabelInput').value.trim();
+      const url = document.getElementById('linkUrlInput').value.trim();
+      const editIdx = parseInt(document.getElementById('editLinkIndex').value, 10);
+
+      if (!label || !url) {
+        showToast('請輸入連結名稱與網址');
+        return;
+      }
+
+      if (editIdx >= 0) appState.links[editIdx] = { icon, label, url };
+      else appState.links.push({ icon, label, url });
+
+      document.getElementById('editLinkIndex').value = '-1';
+      document.getElementById('linkLabelInput').value = '';
+      document.getElementById('linkUrlInput').value = '';
+      document.getElementById('saveLinkBtnText').textContent = '新增';
+
+      persistAppState('已儲存連結');
+      renderAdminLinksList();
+      lucide.createIcons();
+    }
+
+    function editSocialLink(idx) {
+      const item = appState.links[idx];
+      if (!item) return;
+      document.getElementById('editLinkIndex').value = String(idx);
+      document.getElementById('linkIconType').value = item.icon;
+      document.getElementById('linkLabelInput').value = item.label;
+      document.getElementById('linkUrlInput').value = item.url;
+      document.getElementById('saveLinkBtnText').textContent = '更新';
+    }
+
+    function deleteSocialLink(idx) {
+      appState.links.splice(idx, 1);
+      persistAppState('已刪除連結');
+      renderAdminLinksList();
+      lucide.createIcons();
+    }
+
+    function renderAdminLinksList() {
+      const container = document.getElementById('adminLinksList');
+      container.innerHTML = appState.links.map((l, idx) => `
+        <div class="p-2.5 rounded-xl border theme-border bg-white flex items-center justify-between gap-2 text-xs">
+          <div class="flex items-center gap-2 min-w-0">
+            <i data-lucide="${getLucideIconName(l.icon)}" class="w-3.5 h-3.5 theme-text-accent shrink-0"></i>
+            <span class="font-medium truncate">${l.label}</span>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <button onclick="editSocialLink(${idx})" class="p-1 rounded hover:bg-black/5">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+            </button>
+            <button onclick="deleteSocialLink(${idx})" class="p-1 rounded hover:bg-red-50 text-red-600">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function changeCarouselRatio(ratio) {
+      appState.carouselRatio = ratio;
+      persistAppState(`已切換輪播比例為 ${ratio}`);
+    }
+
+    async function handleCarouselUpload(event) {
+      const files = Array.from(event.target.files);
+      if (!files.length) return;
+      const labelEl = document.getElementById('carouselUploadLabel');
+      labelEl.textContent = '雲端上傳處理中...';
+      try {
+        for (const file of files) {
+          const finalUrl = await uploadAssetWithFallback(file, 'stall_carousel');
+          appState.carouselImages.push(finalUrl);
+        }
+        event.target.value = '';
+        await persistAppState(`已新增 ${files.length} 張輪播圖`);
+        renderAdminCarouselGrid();
+        lucide.createIcons();
+      } finally {
+        labelEl.textContent = '上傳輪播圖片（自動存雲端短網址）';
+      }
+    }
+
+    function moveCarouselItemOrder(idx, dir) {
+      const target = idx + dir;
+      if (target < 0 || target >= appState.carouselImages.length) return;
+      const temp = appState.carouselImages[idx];
+      appState.carouselImages[idx] = appState.carouselImages[target];
+      appState.carouselImages[target] = temp;
+      persistAppState('已調整圖片順序');
+      renderAdminCarouselGrid();
+      lucide.createIcons();
+    }
+
+    function deleteCarouselItem(idx) {
+      appState.carouselImages.splice(idx, 1);
+      persistAppState('已移除圖片');
+      renderAdminCarouselGrid();
+      lucide.createIcons();
+    }
+
+    function renderAdminCarouselGrid() {
+      const grid = document.getElementById('adminCarouselGrid');
+      grid.innerHTML = appState.carouselImages.map((src, idx) => `
+        <div class="relative rounded-xl overflow-hidden border theme-border aspect-square bg-stone-100">
+          <img src="${src}" class="w-full h-full object-cover" />
+          <div class="absolute inset-x-0 bottom-0 bg-black/60 p-1 flex items-center justify-between text-white">
+            <button onclick="moveCarouselItemOrder(${idx}, -1)" class="p-1 hover:bg-white/20 rounded ${idx === 0 ? 'opacity-30 pointer-events-none' : ''}">
+              <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
+            </button>
+            <button onclick="deleteCarouselItem(${idx})" class="p-1 hover:bg-red-500/80 rounded">
+              <i data-lucide="trash-2" class="w-3 h-3"></i>
+            </button>
+            <button onclick="moveCarouselItemOrder(${idx}, 1)" class="p-1 hover:bg-white/20 rounded ${idx === appState.carouselImages.length - 1 ? 'opacity-30 pointer-events-none' : ''}">
+              <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // =========================================================================
+    // 10. 許願池送出 (直達 Supabase tool_wishes 表)
+    // =========================================================================
+    async function submitWish() {
+      const category = document.getElementById('wishCategory').value;
+      const content = document.getElementById('wishContent').value.trim();
+      if (!content) {
+        showToast('請輸入您的功能許願內容');
+        return;
+      }
+
+      const payload = {
+        tool_name: 'sibyl-stall-schedule',
+        store_slug: STORE_SLUG,
+        store_name: appState.brand.name,
+        category,
+        content,
+        created_at: new Date().toISOString()
+      };
+
+      if (supabaseClient) {
+        try {
+          await supabaseClient.from(WISH_TABLE).insert([payload]);
+        } catch (e) { console.warn('Supabase 許願寫入備援', e); }
+      }
+
+      document.getElementById('wishContent').value = '';
+      showToast('許願已成功傳送給數位管家');
+    }
+
+    // =========================================================================
+    // 11. Canvas 一鍵匯出 1080x1920 本月質感 IG 限動排程圖
+    // =========================================================================
+    function exportStoryImage() {
+      const canvas = document.getElementById('storyExportCanvas');
+      const ctx = canvas.getContext('2d');
+      const themeObj = THEMES[appState.theme] || THEMES.oatmeal;
+      const v = themeObj.vars;
+
+      ctx.fillStyle = v['--bg-page'];
+      ctx.fillRect(0, 0, 1080, 1920);
+
+      const cardX = 64, cardY = 90, cardW = 952, cardH = 1710, radius = 44;
+      ctx.fillStyle = v['--bg-card-solid'];
+      ctx.beginPath();
+      ctx.roundRect(cardX, cardY, cardW, cardH, radius);
+      ctx.fill();
+      ctx.strokeStyle = v['--border-color'];
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      ctx.fillStyle = v['--accent-soft'];
+      ctx.beginPath();
+      ctx.roundRect(410, 155, 260, 48, 24);
+      ctx.fill();
+
+      ctx.fillStyle = v['--accent'];
+      ctx.font = '600 22px "Noto Sans TC", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('MARKET SCHEDULE', 540, 187);
+
+      ctx.fillStyle = v['--text-main'];
+      ctx.font = '700 46px "Noto Sans TC", sans-serif';
+      ctx.fillText(appState.brand.name, 540, 270);
+
+      ctx.fillStyle = v['--text-muted'];
+      ctx.font = '500 30px "Noto Sans TC", sans-serif';
+      ctx.fillText(`${currentYear}年 ${currentMonth + 1}月 出攤行事曆`, 540, 326);
+
+      ctx.strokeStyle = v['--border-color'];
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(130, 368);
+      ctx.lineTo(950, 368);
+      ctx.stroke();
+
+      const weekHeaders = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+      const gridStartX = 135;
+      const colW = 116;
+      ctx.font = '600 22px "Plus Jakarta Sans", sans-serif';
+      ctx.fillStyle = v['--text-muted'];
+      weekHeaders.forEach((w, i) => {
+        ctx.fillText(w, gridStartX + i * colW + colW / 2, 420);
+      });
+
+      const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+      const prefix = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+      const monthSchedules = appState.schedules
+        .filter(s => s.date.startsWith(prefix))
+        .sort((a, b) => a.date.localeCompare(b.date));
+      const scheduledDaysMap = {};
+      monthSchedules.forEach(s => { scheduledDaysMap[s.date] = s; });
+
+      let row = 0, col = firstDay;
+      const cellStartY = 450, rowH = 88;
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${prefix}-${String(d).padStart(2, '0')}`;
+        const cx = gridStartX + col * colW + colW / 2;
+        const cy = cellStartY + row * rowH + 40;
+
+        if (scheduledDaysMap[dateStr]) {
+          ctx.fillStyle = v['--accent'];
+          ctx.beginPath();
+          ctx.arc(cx, cy - 8, 30, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = v['--accent-text'];
+          ctx.font = '700 28px "Plus Jakarta Sans", sans-serif';
+          ctx.fillText(String(d), cx, cy + 2);
+        } else {
+          ctx.fillStyle = v['--text-main'];
+          ctx.font = '400 26px "Plus Jakarta Sans", sans-serif';
+          ctx.fillText(String(d), cx, cy + 2);
+        }
+
+        col++;
+        if (col > 6) { col = 0; row++; }
+      }
+
+      let listY = cellStartY + (row + 1) * rowH + 45;
+      ctx.strokeStyle = v['--border-color'];
+      ctx.beginPath();
+      ctx.moveTo(130, listY - 25);
+      ctx.lineTo(950, listY - 25);
+      ctx.stroke();
+
+      ctx.textAlign = 'left';
+      const displayList = monthSchedules.slice(0, 7);
+
+      if (displayList.length === 0) {
+        ctx.fillStyle = v['--text-muted'];
+        ctx.font = '400 26px "Noto Sans TC", sans-serif';
+        ctx.fillText('本月出攤檔期陸續更新中，敬請期待', 140, listY + 35);
+      } else {
+        displayList.forEach((item, idx) => {
+          const itemY = listY + idx * 96;
+          ctx.fillStyle = v['--bg-subtle'];
+          ctx.beginPath();
+          ctx.roundRect(130, itemY, 820, 78, 18);
+          ctx.fill();
+
+          ctx.fillStyle = v['--accent'];
+          ctx.font = '700 25px "Noto Sans TC", sans-serif';
+          const shortDate = item.date.slice(5).replace('-', '/');
+          ctx.fillText(`${shortDate}  ${item.start}-${item.end}`, 158, itemY + 48);
+
+          ctx.fillStyle = v['--text-main'];
+          ctx.font = '600 26px "Noto Sans TC", sans-serif';
+          const locText = item.location.length > 16 ? item.location.slice(0, 16) + '...' : item.location;
+          ctx.fillText(locText, 415, itemY + 48);
+        });
+      }
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = v['--text-muted'];
+      ctx.font = '400 22px "Plus Jakarta Sans", "Noto Sans TC", sans-serif';
+      ctx.fillText('Designed by Sibyl | 數位管家', 540, 1855);
+
+      const link = document.createElement('a');
+      link.download = `${appState.brand.name}_${currentYear}年${currentMonth + 1}月出攤排程.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      showToast('已匯出本月質感 IG 限動圖');
+    }
+
+    initScrollReveal();
+    loadAppState();
+  </script>
+</body>
+</html>

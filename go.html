@@ -64,11 +64,11 @@
     }
 
     .solid-card {
-      background-color: var(--bg-card-solid);
+      background-color: #FFFFFF !important;
       border: 1px solid var(--border-color);
       box-shadow: var(--shadow-elevation);
     }
-
+    
     .theme-subtle {
       background-color: var(--bg-subtle);
       backdrop-filter: blur(8px);
@@ -130,6 +130,15 @@
       50% { opacity: 0.45; transform: scale(0.85); }
     }
     .animate-pulse-soft { animation: pulse-soft 2.2s infinite ease-in-out; }
+
+    /* 強制後台抽屜與所有分頁內容區保持 100% 實心純白底，捲動到底也不透光 */
+    #adminDrawer > div,
+    #adminDrawer > div > div {
+      background-color: #FFFFFF !important;
+    }
+    #adminDrawer .theme-subtle {
+      background-color: #F4EFE6 !important;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col items-center">
@@ -393,6 +402,28 @@
 
       <div class="p-4 space-y-5 flex-1 pb-12">
 
+        <!-- 自訂出攤狀態標籤管理 -->
+          <div class="p-4 rounded-2xl border theme-border space-y-2.5 bg-white">
+            <h3 class="text-xs font-bold flex items-center gap-1.5">
+              <i data-lucide="tag" class="w-3.5 h-3.5 theme-text-accent"></i>
+              <span>自訂出攤狀態標籤</span>
+            </h3>
+            <div class="flex gap-2">
+              <input id="newCustomStatusLabel" type="text" maxlength="8" placeholder="輸入狀態（如：提早開賣、補貨中）" class="flex-1 px-3 py-2 rounded-xl border theme-border text-xs bg-white" />
+              <select id="newCustomStatusTone" class="px-2.5 py-2 rounded-xl border theme-border text-xs bg-white">
+                <option value="green">森綠底</option>
+                <option value="amber">暖橘底</option>
+                <option value="blue">霧藍底</option>
+                <option value="rose">灰粉底</option>
+                <option value="grey">柔灰底</option>
+              </select>
+              <button type="button" onclick="addCustomStatusOption()" class="px-3.5 py-2 rounded-xl text-xs font-bold theme-accent-bg shrink-0">
+                新增
+              </button>
+            </div>
+            <div id="customStatusTagsList" class="flex flex-wrap gap-1.5 pt-1"></div>
+          </div>
+        
         <!-- TAB 1: 出攤排程與一鍵匯出限動圖 -->
         <div id="adminTabSchedule" class="space-y-4">
           <div class="p-3.5 rounded-2xl theme-subtle border theme-border flex items-center justify-between gap-3">
@@ -409,6 +440,28 @@
             </button>
           </div>
 
+          <!-- 自訂出攤狀態標籤管理 -->
+          <div class="p-4 rounded-2xl border theme-border space-y-2.5 bg-white">
+            <h3 class="text-xs font-bold flex items-center gap-1.5">
+              <i data-lucide="tag" class="w-3.5 h-3.5 theme-text-accent"></i>
+              <span>自訂出攤狀態標籤</span>
+            </h3>
+            <div class="flex gap-2">
+              <input id="newCustomStatusLabel" type="text" maxlength="8" placeholder="輸入狀態（如：提早開賣、補貨中）" class="flex-1 px-3 py-2 rounded-xl border theme-border text-xs bg-white" />
+              <select id="newCustomStatusTone" class="px-2.5 py-2 rounded-xl border theme-border text-xs bg-white">
+                <option value="green">森綠底</option>
+                <option value="amber">暖橘底</option>
+                <option value="blue">霧藍底</option>
+                <option value="rose">灰粉底</option>
+                <option value="grey">柔灰底</option>
+              </select>
+              <button type="button" onclick="addCustomStatusOption()" class="px-3.5 py-2 rounded-xl text-xs font-bold theme-accent-bg shrink-0">
+                新增
+              </button>
+            </div>
+            <div id="customStatusTagsList" class="flex flex-wrap gap-1.5 pt-1"></div>
+          </div>
+          
           <!-- 新增 / 編輯排程表單 -->
           <div class="p-4 rounded-2xl border theme-border space-y-3">
             <div class="flex items-center justify-between">
@@ -830,6 +883,11 @@
       const dPlus9 = new Date(today); dPlus9.setDate(today.getDate() + 9);
 
       return {
+        customStatuses: [
+       { id: 'open', label: '正常出攤', tone: 'green', builtIn: true },
+       { id: 'soldout', label: '已完售收攤', tone: 'amber', builtIn: true },
+       { id: 'rain', label: '雨天公休', tone: 'grey', builtIn: true }
+     ],
         theme: 'oatmeal',
         adminPassword: '1234',
         brand: {
@@ -1363,16 +1421,16 @@
       }).join('');
     }
 
-    function getLucideIconName(type) {
-      const map = {
-        instagram: 'instagram',
-        line: 'message-circle',
-        globe: 'globe',
-        'at-sign': 'at-sign',
-        facebook: 'facebook',
-        'shopping-bag': 'shopping-bag'
+    function renderSocialIconSvg(type, extraClass = "w-4 h-4 theme-text-accent") {
+      const svgs = {
+        instagram: `<svg class="${extraClass}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>`,
+        line: `<svg class="${extraClass}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>`,
+        globe: `<svg class="${extraClass}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>`,
+        'at-sign': `<svg class="${extraClass}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></svg>`,
+        facebook: `<svg class="${extraClass}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>`,
+        'shopping-bag': `<svg class="${extraClass}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`
       };
-      return map[type] || 'link';
+      return svgs[type] || svgs.globe;
     }
 
     function renderBrandAndLinks() {
@@ -1413,7 +1471,7 @@
             ${links.map(l => `
               <a href="${l.url}" target="_blank" rel="noopener" title="${l.label}"
                 class="w-11 h-11 rounded-2xl link-pill-card flex items-center justify-center">
-                <i data-lucide="${getLucideIconName(l.icon)}" class="w-4 h-4 theme-text-accent"></i>
+                <i data-lucide="${renderSocialIconSvg(l.icon)}" class="w-4 h-4 theme-text-accent"></i>
               </a>
             `).join('')}
           </div>
@@ -1437,7 +1495,7 @@
                 class="w-full py-3 px-4 rounded-2xl link-pill-card text-xs font-bold flex items-center justify-between">
                 <span class="flex items-center gap-3">
                   <span class="w-7 h-7 rounded-xl theme-accent-soft flex items-center justify-center shrink-0">
-                    <i data-lucide="${getLucideIconName(l.icon)}" class="w-3.5 h-3.5 theme-text-accent"></i>
+                    <i data-lucide="${renderSocialIconSvg(l.icon)}" class="w-3.5 h-3.5 theme-text-accent"></i>
                   </span>
                   <span>${l.label}</span>
                 </span>
@@ -1532,6 +1590,157 @@
       }, { passive: true });
     })();
 
+    // =========================================================================
+    // 局部升級補丁：修復社群圖示 + 自訂出攤狀態完整連動
+    // =========================================================================
+    const STATUS_TONE_STYLES = {
+      green: { bg: 'rgba(62, 115, 72, 0.14)', color: '#2F5E38' },
+      amber: { bg: 'rgba(168, 102, 54, 0.14)', color: '#854D24' },
+      blue:  { bg: 'rgba(82, 114, 145, 0.14)', color: '#395775' },
+      rose:  { bg: 'rgba(175, 110, 122, 0.14)', color: '#7D414D' },
+      grey:  { bg: 'rgba(92, 104, 117, 0.14)', color: '#4A5561' }
+    };
+
+    function getAllStatuses() {
+      return (appState.customStatuses && appState.customStatuses.length > 0)
+        ? appState.customStatuses
+        : [
+            { id: 'open', label: '正常出攤', tone: 'green', builtIn: true },
+            { id: 'soldout', label: '已完售收攤', tone: 'amber', builtIn: true },
+            { id: 'rain', label: '雨天公休', tone: 'grey', builtIn: true }
+          ];
+    }
+
+    function getStatusMeta(statusId) {
+      const found = getAllStatuses().find(s => s.id === statusId) || getAllStatuses()[0];
+      const style = STATUS_TONE_STYLES[found.tone] || STATUS_TONE_STYLES.green;
+      return { label: found.label, bg: style.bg, color: style.color };
+    }
+
+    function addCustomStatusOption() {
+      const label = document.getElementById('newCustomStatusLabel').value.trim();
+      const tone = document.getElementById('newCustomStatusTone').value;
+      if (!label) { showToast('請輸入自訂狀態名稱'); return; }
+      if (!appState.customStatuses) appState.customStatuses = getAllStatuses();
+      appState.customStatuses.push({ id: 'st_' + Date.now(), label, tone, builtIn: false });
+      document.getElementById('newCustomStatusLabel').value = '';
+      persistAppState('已新增自訂出攤狀態');
+      renderCustomStatusesAdmin();
+      renderAdminScheduleList();
+      lucide.createIcons();
+    }
+
+    function deleteCustomStatusOption(id) {
+      appState.customStatuses = getAllStatuses().filter(s => s.id !== id);
+      persistAppState('已移除自訂狀態');
+      renderCustomStatusesAdmin();
+      renderAdminScheduleList();
+      lucide.createIcons();
+    }
+
+    function renderCustomStatusesAdmin() {
+      const statuses = getAllStatuses();
+      const formSelect = document.getElementById('schedStatus');
+      if (formSelect) {
+        const cur = formSelect.value;
+        formSelect.innerHTML = statuses.map(s => `<option value="${s.id}">${s.label}</option>`).join('');
+        if (cur && statuses.some(s => s.id === cur)) formSelect.value = cur;
+      }
+      const container = document.getElementById('customStatusTagsList');
+      if (!container) return;
+      container.innerHTML = statuses.map(s => {
+        const st = STATUS_TONE_STYLES[s.tone] || STATUS_TONE_STYLES.green;
+        return `
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold" style="background:${st.bg}; color:${st.color};">
+            <span>${s.label}</span>
+            ${!s.builtIn ? `<button type="button" onclick="deleteCustomStatusOption('${s.id}')" class="hover:opacity-70"><i data-lucide="x" class="w-3 h-3"></i></button>` : ''}
+          </span>
+        `;
+      }).join('');
+    }
+
+    function renderSocialIconSvg(type, extraClass = "w-4 h-4 theme-text-accent") {
+      const svgs = {
+        instagram: `<svg class="${extraClass}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>`,
+        line: `<svg class="${extraClass}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>`,
+        globe: `<svg class="${extraClass}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>`,
+        'at-sign': `<svg class="${extraClass}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></svg>`,
+        facebook: `<svg class="${extraClass}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>`,
+        'shopping-bag': `<svg class="${extraClass}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`
+      };
+      return svgs[type] || svgs.globe;
+    }
+
+    // 覆蓋前台社群連結渲染 (使用內建 SVG 確保 IG/FB 必顯示)
+    const _origRenderBrandAndLinks = renderBrandAndLinks;
+    renderBrandAndLinks = function() {
+      _origRenderBrandAndLinks();
+      const container = document.getElementById('socialLinksContainer');
+      const mode = appState.linkDisplayMode || 'both';
+      const links = appState.links || [];
+      if (!links.length) return;
+
+      if (mode === 'icon') {
+        container.innerHTML = `<div class="flex items-center justify-center flex-wrap gap-3 pt-1">${links.map(l => `<a href="${l.url}" target="_blank" rel="noopener" title="${l.label}" class="w-11 h-11 rounded-2xl link-pill-card flex items-center justify-center">${renderSocialIconSvg(l.icon)}</a>`).join('')}</div>`;
+      } else if (mode === 'both') {
+        container.innerHTML = `<div class="grid grid-cols-1 gap-2.5">${links.map(l => `<a href="${l.url}" target="_blank" rel="noopener" class="w-full py-3 px-4 rounded-2xl link-pill-card text-xs font-bold flex items-center justify-between"><span class="flex items-center gap-3"><span class="w-7 h-7 rounded-xl theme-accent-soft flex items-center justify-center shrink-0">${renderSocialIconSvg(l.icon, 'w-3.5 h-3.5 theme-text-accent')}</span><span>${l.label}</span></span><i data-lucide="arrow-up-right" class="w-3.5 h-3.5 theme-text-muted"></i></a>`).join('')}</div>`;
+      }
+    };
+
+    // 覆蓋後台連結清單與排程狀態下拉
+    renderAdminLinksList = function() {
+      const container = document.getElementById('adminLinksList');
+      container.innerHTML = appState.links.map((l, idx) => `
+        <div class="p-2.5 rounded-xl border theme-border bg-white flex items-center justify-between gap-2 text-xs">
+          <div class="flex items-center gap-2 min-w-0">
+            ${renderSocialIconSvg(l.icon, 'w-3.5 h-3.5 theme-text-accent shrink-0')}
+            <span class="font-medium truncate">${l.label}</span>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <button onclick="editSocialLink(${idx})" class="p-1 rounded hover:bg-black/5"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+            <button onclick="deleteSocialLink(${idx})" class="p-1 rounded hover:bg-red-50 text-red-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+          </div>
+        </div>
+      `).join('');
+    };
+
+    const _origPopulateAdminFields = populateAdminFields;
+    populateAdminFields = function() {
+      _origPopulateAdminFields();
+      renderCustomStatusesAdmin();
+    };
+
+    renderAdminScheduleList = function() {
+      const container = document.getElementById('adminScheduleList');
+      const sorted = [...appState.schedules].sort((a, b) => a.date.localeCompare(b.date));
+      const statuses = getAllStatuses();
+      if (sorted.length === 0) {
+        container.innerHTML = `<div class="text-xs theme-text-muted text-center py-4">尚未建立任何出攤場次</div>`;
+        return;
+      }
+      container.innerHTML = sorted.map(item => `
+        <div class="p-3 rounded-2xl border theme-border bg-white space-y-2">
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <div class="text-xs font-bold">${formatDisplayDate(item.date)} · ${item.start}-${item.end}</div>
+              <div class="text-xs font-medium mt-0.5">${item.location}</div>
+              ${item.note ? `<div class="text-[11px] theme-text-muted mt-0.5">${item.note}</div>` : ''}
+            </div>
+            <div class="flex items-center gap-1 shrink-0">
+              <button onclick="editScheduleItem('${item.id}')" class="p-1.5 rounded-lg hover:bg-black/5"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+              <button onclick="deleteScheduleItem('${item.id}')" class="p-1.5 rounded-lg hover:bg-red-50 text-red-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+            </div>
+          </div>
+          <div class="flex items-center justify-between pt-2 border-t theme-border">
+            <span class="text-[11px] theme-text-muted">一鍵狀態切換：</span>
+            <select onchange="quickChangeStatus('${item.id}', this.value)" class="px-2 py-1 rounded-lg border theme-border text-[11px] bg-stone-50">
+              ${statuses.map(s => `<option value="${s.id}" ${item.status === s.id ? 'selected' : ''}>${s.label}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+      `).join('');
+    };
+    
     function initScrollReveal() {
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -1857,7 +2066,7 @@
       container.innerHTML = appState.links.map((l, idx) => `
         <div class="p-2.5 rounded-xl border theme-border bg-white flex items-center justify-between gap-2 text-xs">
           <div class="flex items-center gap-2 min-w-0">
-            <i data-lucide="${getLucideIconName(l.icon)}" class="w-3.5 h-3.5 theme-text-accent shrink-0"></i>
+            <i data-lucide="${renderSocialIconSvg(l.icon)}" class="w-3.5 h-3.5 theme-text-accent shrink-0"></i>
             <span class="font-medium truncate">${l.label}</span>
           </div>
           <div class="flex items-center gap-1 shrink-0">

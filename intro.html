@@ -182,7 +182,7 @@
         </section>
 
         <!-- 3. 多比例輪播圖展示區 (附白點進度指示器) -->
-        <section id="carouselSection" class="theme-card rounded-3xl p-4 shadow-sm">
+        <section id="carouselSection" class="glass-3d-card rounded-3xl p-4 shadow-sm">
             <div class="flex items-center justify-between mb-3 px-1">
                 <div class="flex items-center gap-1.5">
                     <i data-lucide="sparkles" class="w-4 h-4 theme-text-primary"></i>
@@ -191,7 +191,7 @@
                 <span id="carouselCounter" class="text-xs theme-text-muted font-medium">1 / 1</span>
             </div>
 
-            <div class="relative rounded-2xl overflow-hidden theme-soft">
+            <div class="relative rounded-2xl overflow-hidden soft-block">
                 <div id="carouselTrack" class="flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar">
                     <!-- 動態渲染圖片 -->
                 </div>
@@ -211,18 +211,18 @@
         </section>
 
         <!-- 4. 互動式空檔日曆展示區 (可開放後面月份，顯示日期與幾點到幾點) -->
-        <section class="theme-card rounded-3xl p-5 shadow-sm">
+        <section class="glass-3d-card rounded-3xl p-5 shadow-sm">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-1.5">
                     <i data-lucide="calendar-days" class="w-4 h-4 theme-text-primary"></i>
                     <h2 class="text-sm font-semibold tracking-wide">本月可預約空檔</h2>
                 </div>
                 <div class="flex items-center gap-1">
-                    <button onclick="changeMonth(-1)" class="p-1.5 rounded-lg theme-soft hover:opacity-80">
+                    <button onclick="changeMonth(-1)" class="p-1.5 rounded-lg soft-block hover:opacity-80">
                         <i data-lucide="chevron-left" class="w-4 h-4"></i>
                     </button>
                     <span id="currentMonthLabel" class="text-xs font-semibold px-2 min-w-[76px] text-center">2026年 11月</span>
-                    <button onclick="changeMonth(1)" class="p-1.5 rounded-lg theme-soft hover:opacity-80">
+                    <button onclick="changeMonth(1)" class="p-1.5 rounded-lg soft-block hover:opacity-80">
                         <i data-lucide="chevron-right" class="w-4 h-4"></i>
                     </button>
                 </div>
@@ -242,7 +242,7 @@
             <div id="selectedDatePanel" class="mt-4 pt-4 border-t theme-border">
                 <div class="flex items-center justify-between mb-2.5">
                     <span id="selectedDateTitle" class="text-xs font-semibold">請點選上方有圓點標記的日期</span>
-                    <span id="selectedDateBadge" class="text-[11px] px-2 py-0.5 rounded-full theme-soft theme-text-primary hidden">可預約</span>
+                    <span id="selectedDateBadge" class="text-[11px] px-2 py-0.5 rounded-full soft-block theme-text-primary hidden">可預約</span>
                 </div>
                 <div id="selectedDateSlots" class="space-y-2">
                     <p class="text-xs theme-text-muted">點擊日曆中有圓點標記的日期，即可查看當日可約時段區間。</p>
@@ -256,7 +256,7 @@
         </section>
 
         <!-- 5. 預約前須知 FAQ 手風琴 (減少重複私訊問答) -->
-        <section id="faqSection" class="theme-card rounded-3xl p-5 shadow-sm">
+        <section id="faqSection" class="glass-3d-card rounded-3xl p-5 shadow-sm">
             <div class="flex items-center gap-1.5 mb-3">
                 <i data-lucide="help-circle" class="w-4 h-4 theme-text-primary"></i>
                 <h2 class="text-sm font-semibold tracking-wide">預約與服務常見問題</h2>
@@ -670,6 +670,7 @@
             applyTheme(state.themeColor);
             renderFrontAll();
             lucide.createIcons();
+            setupScrollReveal();
         }
 
         function applyTheme(themeKey) {
@@ -733,7 +734,7 @@
                         : '';
                     html += `
                         <a href="${link.url}" target="_blank" rel="noopener noreferrer" 
-                           class="w-full py-2.5 px-4 rounded-xl theme-soft hover:opacity-85 transition flex items-center justify-center gap-2 text-xs font-medium border theme-border">
+                           class="w-full py-2.5 px-4 rounded-xl soft-block hover:opacity-85 transition flex items-center justify-center gap-2 text-xs font-medium border theme-border">
                             ${iconHtml}
                             <span>${link.label}</span>
                         </a>`;
@@ -747,7 +748,7 @@
                 iconOnlyLinks.forEach(link => {
                     html += `
                         <a href="${link.url}" target="_blank" rel="noopener noreferrer" title="${link.label}"
-                           class="w-10 h-10 rounded-full theme-soft border theme-border flex items-center justify-center hover:opacity-80 transition">
+                           class="w-10 h-10 rounded-full soft-block border theme-border flex items-center justify-center hover:opacity-80 transition">
                             <i data-lucide="${link.icon}" class="w-4 h-4"></i>
                         </a>`;
                 });

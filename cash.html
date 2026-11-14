@@ -345,7 +345,7 @@
         <div>
           <h4 class="text-xs font-bold mb-2 flex items-center gap-1.5">
             <i data-lucide="award" class="w-3.5 h-3.5 theme-text-accent"></i>
-            <span>今日熱銷商品／分類排行</span>
+            <<span>今日熱銷排行前五名（TOP 5）</span>
           </h4>
           <div id="reportBestSellers" class="space-y-2"></div>
         </div>
@@ -413,21 +413,24 @@
         </button>
       </div>
 
-      <div class="grid grid-cols-4 border-b theme-border text-[11px] font-semibold theme-subtle">
+      <!-- 後台 5 分頁導覽 -->
+      <div class="grid grid-cols-5 border-b theme-border text-[11px] font-semibold theme-subtle">
         <button id="tabBtnCategories" onclick="switchAdminTab('categories')" class="py-3 border-b-2 transition" style="border-color: var(--accent);">
           樹狀分類
         </button>
         <button id="tabBtnItems" onclick="switchAdminTab('items')" class="py-3 border-b-2 border-transparent theme-text-muted transition">
-          品項與金額
+          品項金額
+        </button>
+        <button id="tabBtnHistory" onclick="switchAdminTab('history')" class="py-3 border-b-2 border-transparent theme-text-muted transition">
+          營收報表
         </button>
         <button id="tabBtnStyle" onclick="switchAdminTab('style')" class="py-3 border-b-2 border-transparent theme-text-muted transition">
-          色系與連結
+          色系連結
         </button>
         <button id="tabBtnGuide" onclick="switchAdminTab('guide')" class="py-3 border-b-2 border-transparent theme-text-muted transition">
-          技巧與許願
+          技巧許願
         </button>
       </div>
-
       <div class="p-4 space-y-5 flex-1 pb-14">
 
         <!-- TAB 1: 商城級樹狀分類管理 -->
@@ -508,6 +511,82 @@
           </div>
         </div>
 
+        <!-- TAB 3: 歷史營業額紀錄、日期區間查詢、熱銷 TOP 20、匯出 CSV/Excel 與列印報表 -->
+        <div id="adminTabHistory" class="hidden space-y-4">
+          <!-- 匯出、日期區間選擇與列印操作卡 -->
+          <div class="p-4 rounded-2xl border theme-border space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-bold flex items-center gap-1.5">
+                <i data-lucide="calendar-range" class="w-4 h-4 theme-text-accent"></i>
+                <span>選擇查詢日期區間</span>
+              </h3>
+              <div class="flex items-center gap-1">
+                <button type="button" onclick="setHistoryQuickRange('today')" class="px-2 py-1 rounded-md text-[10px] font-bold theme-subtle">今日</button>
+                <button type="button" onclick="setHistoryQuickRange('7days')" class="px-2 py-1 rounded-md text-[10px] font-bold theme-subtle">近7日</button>
+                <button type="button" onclick="setHistoryQuickRange('month')" class="px-2 py-1 rounded-md text-[10px] font-bold theme-subtle">本月</button>
+                <button type="button" onclick="setHistoryQuickRange('all')" class="px-2 py-1 rounded-md text-[10px] font-bold theme-subtle">全部</button>
+              </div>
+            </div>
+
+            <!-- 起訖日期選擇器 -->
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[10px] theme-text-muted mb-1">起始日期</label>
+                <input id="historyStartDate" type="date" onchange="renderAdminHistoryTab()" class="w-full px-2.5 py-2 rounded-xl border theme-border text-xs bg-white text-stone-900" />
+              </div>
+              <div>
+                <label class="block text-[10px] theme-text-muted mb-1">結束日期</label>
+                <input id="historyEndDate" type="date" onchange="renderAdminHistoryTab()" class="w-full px-2.5 py-2 rounded-xl border theme-border text-xs bg-white text-stone-900" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 pt-1">
+              <button onclick="exportOrdersToCSV()" class="py-2.5 px-2 rounded-xl text-[11px] font-bold theme-accent-bg flex items-center justify-center gap-1">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                <span>下載 CSV</span>
+              </button>
+              <button onclick="exportOrdersToExcel()" class="py-2.5 px-2 rounded-xl text-[11px] font-bold solid-card flex items-center justify-center gap-1">
+                <i data-lucide="table" class="w-3.5 h-3.5 theme-text-accent"></i>
+                <span>下載 Excel</span>
+              </button>
+              <button onclick="printSalesReport()" class="py-2.5 px-2 rounded-xl text-[11px] font-bold solid-card flex items-center justify-center gap-1">
+                <i data-lucide="printer" class="w-3.5 h-3.5 theme-text-accent"></i>
+                <span>列印報表</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 區間總覽 KPI -->
+          <div class="grid grid-cols-2 gap-2.5">
+            <div class="p-3.5 rounded-2xl theme-subtle border theme-border">
+              <div class="text-[11px] theme-text-muted">區間累計總營業額</div>
+              <div id="histTotalRev" class="text-lg font-extrabold mt-0.5 theme-price">$0</div>
+            </div>
+            <div class="p-3.5 rounded-2xl theme-subtle border theme-border">
+              <div class="text-[11px] theme-text-muted">區間累計成交筆數</div>
+              <div id="histTotalOrders" class="text-lg font-extrabold mt-0.5">0 筆</div>
+            </div>
+          </div>
+
+          <!-- 歷史熱銷排行前 20 名 (TOP 20) -->
+          <div class="p-4 rounded-2xl border theme-border space-y-2.5">
+            <h3 class="text-xs font-bold flex items-center gap-1.5">
+              <i data-lucide="trophy" class="w-3.5 h-3.5 theme-text-accent"></i>
+              <span>銷售排行前 20 名（TOP 20）</span>
+            </h3>
+            <div id="histTop20List" class="space-y-2 max-h-72 overflow-y-auto no-scrollbar"></div>
+          </div>
+
+          <!-- 每日歷史營業額明細列表 -->
+          <div class="p-4 rounded-2xl border theme-border space-y-2.5">
+            <h3 class="text-xs font-bold flex items-center gap-1.5">
+              <i data-lucide="calendar-days" class="w-3.5 h-3.5 theme-text-accent"></i>
+              <span>每日歷史營業額紀錄</span>
+            </h3>
+            <div id="histDailySummaryList" class="space-y-2"></div>
+          </div>
+        </div>
+        
         <!-- TAB 3: 色系切換、店名與多模式連結 -->
         <div id="adminTabStyle" class="hidden space-y-5">
           <div class="p-4 rounded-2xl border theme-border space-y-2.5">
@@ -1383,22 +1462,23 @@
         });
       });
 
-      const ranking = Object.values(tally).sort((a, b) => b.qty - a.qty);
+      // 統計熱銷排行並取前五名 (TOP 5)
+      const ranking = Object.values(tally).sort((a, b) => b.qty - a.qty).slice(0, 20);
       const bestContainer = document.getElementById('reportBestSellers');
       if (ranking.length === 0) {
         bestContainer.innerHTML = `<div class="text-xs theme-text-muted py-3 text-center">今日尚無成交紀錄</div>`;
       } else {
         bestContainer.innerHTML = ranking.map((r, idx) => `
           <div class="p-2.5 rounded-xl theme-subtle flex items-center justify-between text-xs">
-            <div class="flex items-center gap-2.5">
-              <span class="w-5 h-5 rounded-md ${idx === 0 ? 'theme-accent-bg' : 'solid-card'} text-[11px] font-bold flex items-center justify-center">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="w-5 h-5 rounded-md ${idx === 0 ? 'theme-accent-bg' : 'solid-card'} text-[11px] font-extrabold flex items-center justify-center shrink-0">
                 ${idx + 1}
               </span>
-              <span class="font-bold">${r.name}</span>
+              <span class="font-bold truncate">${r.name}</span>
             </div>
-            <div class="text-right">
+            <div class="text-right shrink-0 ml-2">
               <span class="font-extrabold theme-price">${r.qty} 份</span>
-              <span class="text-[11px] theme-text-muted ml-1.5">($${r.rev.toLocaleString()})</span>
+              <span class="text-[11px] theme-text-muted ml-1">($${r.rev.toLocaleString()})</span>
             </div>
           </div>
         `).join('');
@@ -1554,11 +1634,12 @@
     }
 
     function switchAdminTab(tab) {
-      const tabs = ['categories', 'items', 'style', 'guide'];
+      const tabs = ['categories', 'items', 'history', 'style', 'guide'];
       tabs.forEach(t => {
         const cap = t.charAt(0).toUpperCase() + t.slice(1);
         const panel = document.getElementById(`adminTab${cap}`);
         const btn = document.getElementById(`tabBtn${cap}`);
+        if (!panel || !btn) return;
         if (t === tab) {
           panel.classList.remove('hidden');
           btn.classList.remove('theme-text-muted', 'border-transparent');
@@ -1569,6 +1650,7 @@
           btn.style.borderColor = 'transparent';
         }
       });
+      if (tab === 'history') renderAdminHistoryTab();
       lucide.createIcons();
     }
 
@@ -1900,6 +1982,188 @@
 
     initScrollReveal();
     loadAppState();
+
+    // =========================================================================
+    // 12. 歷史營業額紀錄、銷售排行 TOP 5、CSV / Excel 匯出與列印
+    // =========================================================================
+    function setHistoryQuickRange(preset) {
+      const startEl = document.getElementById('historyStartDate');
+      const endEl = document.getElementById('historyEndDate');
+      const today = new Date();
+      const todayStr = getTodayDateStr();
+
+      if (preset === 'today') {
+        startEl.value = todayStr;
+        endEl.value = todayStr;
+      } else if (preset === '7days') {
+        const past = new Date(today);
+        past.setDate(today.getDate() - 6);
+        startEl.value = `${past.getFullYear()}-${String(past.getMonth() + 1).padStart(2, '0')}-${String(past.getDate()).padStart(2, '0')}`;
+        endEl.value = todayStr;
+      } else if (preset === 'month') {
+        startEl.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`;
+        endEl.value = todayStr;
+      } else {
+        startEl.value = '';
+        endEl.value = '';
+      }
+      renderAdminHistoryTab();
+    }
+
+    function setHistoryQuickRange(preset) {
+      const startEl = document.getElementById('historyStartDate');
+      const endEl = document.getElementById('historyEndDate');
+      const today = new Date();
+      const todayStr = getTodayDateStr();
+
+      if (preset === 'today') {
+        startEl.value = todayStr;
+        endEl.value = todayStr;
+      } else if (preset === '7days') {
+        const past = new Date(today);
+        past.setDate(today.getDate() - 6);
+        startEl.value = `${past.getFullYear()}-${String(past.getMonth() + 1).padStart(2, '0')}-${String(past.getDate()).padStart(2, '0')}`;
+        endEl.value = todayStr;
+      } else if (preset === 'month') {
+        startEl.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`;
+        endEl.value = todayStr;
+      } else {
+        startEl.value = '';
+        endEl.value = '';
+      }
+      renderAdminHistoryTab();
+    }
+
+    function getFilteredHistoryOrders() {
+      const startVal = document.getElementById('historyStartDate')?.value || '';
+      const endVal = document.getElementById('historyEndDate')?.value || '';
+      const allOrders = appState.orders || [];
+
+      return allOrders.filter(o => {
+        if (startVal && o.date < startVal) return false;
+        if (endVal && o.date > endVal) return false;
+        return true;
+      });
+    }
+
+    function renderAdminHistoryTab() {
+      const orders = getFilteredHistoryOrders();
+      const totalRev = orders.reduce((sum, o) => sum + o.total, 0);
+
+      document.getElementById('histTotalRev').textContent = `$${totalRev.toLocaleString()}`;
+      document.getElementById('histTotalOrders').textContent = `${orders.length} 筆`;
+
+      // 銷售排行前 20 名 (TOP 20)
+      const tally = {};
+      orders.forEach(o => {
+        o.items.forEach(it => {
+          if (!tally[it.name]) tally[it.name] = { name: it.name, qty: 0, rev: 0 };
+          tally[it.name].qty += it.qty;
+          tally[it.name].rev += it.price * it.qty;
+        });
+      });
+
+      const top20 = Object.values(tally).sort((a, b) => b.qty - a.qty).slice(0, 20);
+      const top20Container = document.getElementById('histTop20List');
+      if (top20.length === 0) {
+        top20Container.innerHTML = `<div class="text-xs theme-text-muted text-center py-3">此日期區間尚無銷售數據</div>`;
+      } else {
+        top20Container.innerHTML = top20.map((r, idx) => `
+          <div class="p-2.5 rounded-xl theme-subtle flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="w-5 h-5 rounded-md ${idx < 3 ? 'theme-accent-bg' : 'solid-card'} text-[11px] font-extrabold flex items-center justify-center shrink-0">
+                ${idx + 1}
+              </span>
+              <span class="font-bold truncate">${r.name}</span>
+            </div>
+            <div class="shrink-0 ml-2 text-right">
+              <span class="font-extrabold theme-price">${r.qty} 份</span>
+              <span class="text-[11px] theme-text-muted ml-1">($${r.rev.toLocaleString()})</span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // 每日歷史營業額彙整
+      const dailyMap = {};
+      orders.forEach(o => {
+        if (!dailyMap[o.date]) dailyMap[o.date] = { date: o.date, count: 0, total: 0 };
+        dailyMap[o.date].count += 1;
+        dailyMap[o.date].total += o.total;
+      });
+
+      const dailyList = Object.values(dailyMap).sort((a, b) => b.date.localeCompare(a.date));
+      const dailyContainer = document.getElementById('histDailySummaryList');
+      if (dailyList.length === 0) {
+        dailyContainer.innerHTML = `<div class="text-xs theme-text-muted text-center py-3">此日期區間尚無營業紀錄</div>`;
+      } else {
+        dailyContainer.innerHTML = dailyList.map(d => `
+          <div class="p-3 rounded-xl bg-white/75 border theme-border flex items-center justify-between text-xs">
+            <div>
+              <div class="font-bold">${d.date}</div>
+              <div class="text-[11px] theme-text-muted mt-0.5">共成交 ${d.count} 筆訂單</div>
+            </div>
+            <div class="text-sm font-extrabold theme-price">$${d.total.toLocaleString()}</div>
+          </div>
+        `).join('');
+      }
+      lucide.createIcons();
+    }
+    
+    function exportOrdersToCSV() {
+      const orders = getFilteredHistoryOrders();
+      if (orders.length === 0) { showToast('目前無紀錄可匯出'); return; }
+
+      const rows = [['日期', '時間', '交易編號', '售出明細', '總金額(NT$)']];
+      orders.forEach(o => {
+        const detail = o.items.map(i => `${i.name}x${i.qty}($${i.price * i.qty})`).join(' / ');
+        rows.push([o.date, o.time, o.id, `"${detail}"`, o.total]);
+      });
+
+      const csvContent = '\uFEFF' + rows.map(r => r.join(',')).join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `${appState.storeName}_營業額明細報表_${getTodayDateStr()}.csv`;
+      link.click();
+      showToast('已下載 CSV 報表');
+    }
+
+    function exportOrdersToExcel() {
+      const orders = getFilteredHistoryOrders();
+      if (orders.length === 0) { showToast('目前無紀錄可匯出'); return; }
+
+      const totalRev = orders.reduce((s, o) => s + o.total, 0);
+      let tableHtml = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+        <head><meta charset="UTF-8"></head>
+        <body>
+          <h3>${appState.storeName} - 營業額明細報表（匯出日期：${getTodayDateStr()}）</h3>
+          <p>累計成交筆數：${orders.length} 筆 ｜ 累計總營業額：NT$ ${totalRev.toLocaleString()}</p>
+          <table border="1" cellspacing="0" cellpadding="6">
+            <tr style="background:#EFE9E0; font-weight:bold;">
+              <th>出攤日期</th><th>成交時間</th><th>交易編號</th><th>售出項目明細</th><th>單筆金額 (NT$)</th>
+            </tr>
+            ${orders.map(o => `
+              <tr>
+                <td>${o.date}</td>
+                <td>${o.time}</td>
+                <td>${o.id}</td>
+                <td>${o.items.map(i => `${i.name} × ${i.qty}`).join('、')}</td>
+                <td>${o.total}</td>
+              </tr>
+            `).join('')}
+          </table>
+        </body></html>
+      `;
+
+      const blob = new Blob([tableHtml], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `${appState.storeName}_營業額報表_${getTodayDateStr()}.xls`;
+      link.click();
+      showToast('已生成 Excel 報表');
+    }
   </script>
 </body>
 </html>

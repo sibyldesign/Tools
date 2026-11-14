@@ -10,107 +10,175 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-page: #F5F1EB;
-            --bg-card: #FFFFFF;
-            --bg-soft: #EFE9E0;
-            --text-main: #3D342E;
-            --text-muted: #7D7067;
+            --bg-page: #F4EFE8;
+            --bg-card: rgba(255, 255, 255, 0.78);
+            --bg-soft: rgba(239, 232, 222, 0.72);
+            --text-main: #3A312B;
+            --text-muted: #7A6D64;
             --primary: #8C735B;
+            --primary-glow: rgba(140, 115, 91, 0.22);
             --primary-text: #FFFFFF;
-            --border-color: #E2D9CE;
-            --dot-active: #8C735B;
+            --border-color: rgba(255, 255, 255, 0.85);
+            --border-subtle: rgba(140, 115, 91, 0.14);
         }
 
         body {
             font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--bg-page);
             color: var(--text-main);
-            transition: background-color 0.35s ease, color 0.35s ease;
+            transition: background-color 0.4s ease, color 0.4s ease;
             -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
         }
 
-        .theme-card {
-            background-color: var(--bg-card);
+        /* 3D 立體磨砂層疊卡片 */
+        .glass-3d-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--border-color);
-            transition: all 0.3s ease;
+            box-shadow: 
+                0 18px 38px -12px rgba(61, 52, 46, 0.08),
+                0 4px 12px -2px rgba(61, 52, 46, 0.03),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
         }
 
-        .theme-soft {
-            background-color: var(--bg-soft);
-            color: var(--text-main);
+        .glass-3d-card:hover {
+            box-shadow: 
+                0 22px 44px -12px rgba(61, 52, 46, 0.11),
+                0 6px 16px -2px rgba(61, 52, 46, 0.04),
+                inset 0 1px 0 0 rgba(255, 255, 255, 1);
         }
 
+        /* 內嵌色塊質感 */
+        .soft-block {
+            background: var(--bg-soft);
+            border: 1px solid var(--border-subtle);
+            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.6);
+        }
+
+        /* 主色立體按鈕 */
         .theme-btn-primary {
-            background-color: var(--primary);
+            background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 85%, #1a1512));
             color: var(--primary-text);
-            transition: opacity 0.2s ease, transform 0.15s ease;
+            box-shadow: 0 10px 22px -6px var(--primary-glow), inset 0 1px 1px rgba(255, 255, 255, 0.35);
+            transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .theme-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 26px -6px var(--primary-glow);
         }
         .theme-btn-primary:active {
-            transform: scale(0.98);
-            opacity: 0.9;
+            transform: scale(0.97) translateY(0);
         }
 
-        .theme-border {
-            border-color: var(--border-color);
-        }
+        .theme-text-muted { color: var(--text-muted); }
+        .theme-text-primary { color: var(--primary); }
 
-        .theme-text-muted {
-            color: var(--text-muted);
-        }
-
-        .theme-text-primary {
-            color: var(--primary);
-        }
-
-        /* 輪播比例控制 */
         .ratio-4-5 { aspect-ratio: 4 / 5; }
         .ratio-9-12 { aspect-ratio: 9 / 12; }
         .ratio-1-1 { aspect-ratio: 1 / 1; }
 
-        /* 隱藏捲軸但保留滑動 */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* 抽屜動畫 */
-        .drawer-enter {
-            animation: slideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        /* 月曆格子懸停與點擊 3D 微互動 */
+        .cal-day-btn {
+            transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        @keyframes slideUp {
-            from { transform: translateY(100%); opacity: 0.5; }
-            to { transform: translateY(0); opacity: 1; }
+        .cal-day-available:hover {
+            transform: translateY(-3px) scale(1.06);
+            box-shadow: 0 8px 16px -4px var(--primary-glow);
+            background-color: #FFFFFF;
+        }
+        .cal-day-selected {
+            background: var(--primary);
+            color: #FFFFFF;
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 10px 20px -5px var(--primary-glow);
+        }
+
+        /* 捲動漸現故事運鏡動畫 */
+        .reveal-block {
+            opacity: 0;
+            transform: translateY(22px) scale(0.985);
+            transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1), transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .reveal-block.is-visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* 時段面板切換滑入動畫 */
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .slot-animate {
+            animation: fadeSlideIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center">
+<body class="min-h-screen flex flex-col items-center relative">
 
-    <!-- 頂部導覽列：右上角店家管理入口 -->
-    <header class="w-full max-w-md px-5 pt-4 pb-2 flex justify-between items-center">
-        <span id="topStatusBadge" class="text-[11px] tracking-widest uppercase px-2.5 py-1 rounded-full theme-soft theme-text-muted font-medium">
-            PORTFOLIO & SCHEDULE
-        </span>
-        <button onclick="openAdminAuth()" class="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full theme-card theme-text-muted hover:opacity-80 shadow-sm">
-            <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i>
-            <span>店家管理</span>
+    <!-- 背景立體柔焦色塊 (營造景深層次感) -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+        <div class="absolute -top-24 -left-20 w-80 h-80 rounded-full opacity-45 blur-3xl transition-colors duration-500" style="background: var(--primary-glow);"></div>
+        <div class="absolute top-1/3 -right-24 w-72 h-72 rounded-full bg-white/60 blur-3xl"></div>
+        <div class="absolute bottom-10 left-10 w-64 h-64 rounded-full opacity-35 blur-3xl transition-colors duration-500" style="background: var(--primary-glow);"></div>
+    </div>
+
+    <!-- 頂部懸浮感導覽列 -->
+    <header class="w-full max-w-md px-5 pt-5 pb-2 flex justify-between items-center z-10">
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass-3d-card text-[11px] font-medium theme-text-muted">
+            <span class="w-2 h-2 rounded-full animate-pulse" style="background-color: var(--primary);"></span>
+            <span class="tracking-wider">開放預約與檔期查詢</span>
+        </div>
+        <button onclick="openAdminAuth()" class="flex items-center gap-1.5 text-xs px-3.5 py-1.5 rounded-full glass-3d-card theme-text-muted hover:scale-105 active:scale-95 transition">
+            <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 theme-text-primary"></i>
+            <span class="font-medium">店家管理</span>
         </button>
     </header>
 
     <!-- 前台主視覺容器 -->
-    <main class="w-full max-w-md px-5 pb-10 space-y-5 flex-1">
+    <main class="w-full max-w-md px-5 pb-12 space-y-6 flex-1 z-10">
 
-        <!-- 1. 品牌門面區 (正方形大頭貼 + 店名 + 簡短介紹) -->
-        <section class="theme-card rounded-3xl p-6 text-center shadow-sm relative overflow-hidden">
-            <div class="w-24 h-24 mx-auto mb-4 rounded-2xl overflow-hidden theme-soft border theme-border shadow-inner flex items-center justify-center">
-                <img id="frontAvatar" src="" alt="品牌頭像" class="w-full h-full object-cover hidden">
-                <i id="frontAvatarPlaceholder" data-lucide="user" class="w-9 h-9 theme-text-muted"></i>
+        <!-- 1. 立體層疊品牌門面區 (雙層光環正方形頭像 + 質感圖示裝飾 + 漂浮連結) -->
+        <section class="glass-3d-card rounded-[32px] p-7 text-center relative overflow-hidden reveal-block is-visible">
+            <!-- 頂部裝飾色塊帶 -->
+            <div class="absolute top-0 inset-x-0 h-20 opacity-35 pointer-events-none" style="background: linear-gradient(180deg, var(--primary-glow), transparent);"></div>
+
+            <!-- 正方形大頭貼 + 右下角質感圖示徽章 -->
+            <div class="relative w-28 h-28 mx-auto mb-4">
+                <div class="w-full h-full rounded-[26px] p-1.5 bg-white/90 shadow-md ring-1 ring-black/5">
+                    <div class="w-full h-full rounded-[20px] overflow-hidden soft-block flex items-center justify-center">
+                        <img id="frontAvatar" src="" alt="品牌頭像" class="w-full h-full object-cover hidden transition-transform duration-500 hover:scale-105">
+                        <i id="frontAvatarPlaceholder" data-lucide="sparkles" class="w-9 h-9 theme-text-primary"></i>
+                    </div>
+                </div>
+                <!-- 質感認證徽章圖示 -->
+                <div class="absolute -bottom-1.5 -right-1.5 w-8 h-8 rounded-xl theme-btn-primary flex items-center justify-center shadow-md ring-2 ring-white">
+                    <i data-lucide="badge-check" class="w-4 h-4"></i>
+                </div>
             </div>
-            <h1 id="frontBrandName" class="text-xl font-bold tracking-wide mb-1">沐光療癒選物工作室</h1>
-            <p id="frontTagline" class="text-xs font-medium theme-text-primary tracking-wider mb-3">一對一能量諮詢 · 客製化香氣體驗</p>
-            <p id="frontBio" class="text-sm leading-relaxed theme-text-muted whitespace-pre-line">專注於陪伴每位來到這裡的妳，找回內在平靜與生活節奏。提供單堂體驗與一對一深度對談，歡迎查看下方空檔預約。</p>
+
+            <!-- 店名與質感圖示副標 -->
+            <h1 id="frontBrandName" class="text-xl font-bold tracking-wide mb-1.5">沐光療癒選物工作室</h1>
+            
+            <div class="inline-flex items-center justify-center gap-1.5 px-3 py-1 rounded-full soft-block mb-4">
+                <i data-lucide="compass" class="w-3.5 h-3.5 theme-text-primary shrink-0"></i>
+                <p id="frontTagline" class="text-xs font-medium theme-text-primary tracking-wider">一對一能量諮詢 · 客製化香氣體驗</p>
+            </div>
+
+            <!-- 內嵌立體質感介紹框 -->
+            <div class="soft-block rounded-2xl p-4 text-left relative">
+                <i data-lucide="quote" class="w-4 h-4 theme-text-primary opacity-40 mb-1"></i>
+                <p id="frontBio" class="text-[13px] leading-relaxed theme-text-muted whitespace-pre-line">專注於陪伴每位來到這裡的妳，找回內在平靜與生活節奏。提供單堂體驗與一對一深度對談，歡迎查看下方空檔預約。</p>
+            </div>
 
             <!-- 2. 多樣式社群與官網外連按鈕區 -->
-            <div id="frontLinksContainer" class="mt-5 pt-5 border-t theme-border">
-                <!-- 動態渲染：純圖示橫排 / 純文字 / 圖示+文字 -->
-            </div>
+            <div id="frontLinksContainer" class="mt-5 pt-5 border-t border-black/5"></div>
         </section>
 
         <!-- 3. 多比例輪播圖展示區 (附白點進度指示器) -->
@@ -754,6 +822,7 @@
         }
 
         // 日曆渲染
+        // 日曆渲染 (升級 3D 懸停與圓點呼吸微互動)
         function renderCalendar() {
             document.getElementById('currentMonthLabel').textContent = `${viewYear}年 ${viewMonth + 1}月`;
             const grid = document.getElementById('calendarGrid');
@@ -764,7 +833,7 @@
             let html = '';
 
             for (let i = 0; i < firstDay; i++) {
-                html += `<div class="h-10"></div>`;
+                html += `<div class="h-11"></div>`;
             }
 
             for (let day = 1; day <= daysInMonth; day++) {
@@ -772,18 +841,22 @@
                 const hasSlot = availableDates.has(dateStr);
                 const isSelected = selectedDateStr === dateStr;
 
+                const stateClass = isSelected 
+                    ? 'cal-day-selected font-bold' 
+                    : hasSlot 
+                    ? 'cal-day-available soft-block font-semibold cursor-pointer' 
+                    : 'opacity-35 cursor-default';
+
                 html += `
                     <button onclick="selectDate('${dateStr}')" 
-                        class="h-10 rounded-xl flex flex-col items-center justify-center relative text-xs transition
-                        ${isSelected ? 'theme-btn-primary font-bold shadow-xs' : hasSlot ? 'theme-soft font-semibold' : 'opacity-45'}">
+                        class="cal-day-btn h-11 rounded-2xl flex flex-col items-center justify-center relative text-xs ${stateClass}">
                         <span>${day}</span>
-                        ${hasSlot ? `<span class="w-1 h-1 rounded-full mt-0.5 ${isSelected ? 'bg-white' : 'bg-current'}"></span>` : ''}
+                        ${hasSlot ? `<span class="w-1.5 h-1.5 rounded-full mt-0.5 ${isSelected ? 'bg-white' : 'theme-text-primary bg-current'}"></span>` : ''}
                     </button>
                 `;
             }
             grid.innerHTML = html;
 
-            // 若尚未選取日期，自動選取本月第一個有空檔的日期
             if (!selectedDateStr) {
                 const firstAvailable = state.schedules
                     .map(s => s.date)
@@ -793,14 +866,7 @@
             }
         }
 
-        function changeMonth(delta) {
-            viewMonth += delta;
-            if (viewMonth > 11) { viewMonth = 0; viewYear++; }
-            if (viewMonth < 0) { viewMonth = 11; viewYear--; }
-            selectedDateStr = '';
-            renderCalendar();
-        }
-
+        // 選定日期時段明細 (加入滑入過場動畫)
         function selectDate(dateStr) {
             selectedDateStr = dateStr;
             renderCalendar();
@@ -811,29 +877,52 @@
             const slotsEl = document.getElementById('selectedDateSlots');
             const lineBtn = document.getElementById('bookViaLineBtn');
 
-            titleEl.textContent = `${dateStr} 空檔時段`;
+            titleEl.textContent = `${dateStr} 開放空檔`;
 
             if (daySlots.length === 0) {
                 badgeEl.classList.add('hidden');
                 lineBtn.classList.add('hidden');
-                slotsEl.innerHTML = `<p class="text-xs theme-text-muted py-1">當日暫無開放空檔，請切換其他有圓點標記的日期。</p>`;
+                slotsEl.innerHTML = `<p class="text-xs theme-text-muted py-2 slot-animate">當日暫無開放空檔，請滑動點選上方有圓點標記的日期。</p>`;
                 return;
             }
 
             badgeEl.classList.remove('hidden');
-            slotsEl.innerHTML = daySlots.map(slot => `
-                <div class="p-3 rounded-xl theme-soft border theme-border flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <i data-lucide="clock" class="w-3.5 h-3.5 theme-text-primary"></i>
-                        <span class="text-xs font-semibold">${slot.start} - ${slot.end}</span>
+            slotsEl.innerHTML = daySlots.map((slot, i) => `
+                <div style="animation-delay: ${i * 60}ms" class="slot-animate opacity-0 p-3.5 rounded-2xl bg-white/90 border border-white shadow-xs flex items-center justify-between hover:translate-x-1 transition-transform">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-7 h-7 rounded-xl soft-block flex items-center justify-center">
+                            <i data-lucide="clock" class="w-3.5 h-3.5 theme-text-primary"></i>
+                        </div>
+                        <span class="text-xs font-bold tracking-wide">${slot.start} - ${slot.end}</span>
                     </div>
-                    <span class="text-[11px] theme-text-muted">${slot.note || '可預約'}</span>
+                    <span class="text-[11px] px-2.5 py-1 rounded-full soft-block theme-text-muted font-medium">${slot.note || '可預約'}</span>
                 </div>
             `).join('');
 
             lineBtn.href = state.lineUrl || '#';
             lineBtn.classList.remove('hidden');
             lucide.createIcons();
+        }
+
+        // 捲動漸現故事運鏡觀察器 (在 initApp() 最後呼叫 setupScrollReveal())
+        function setupScrollReveal() {
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('reveal-block'));
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    }
+                });
+            }, { threshold: 0.08 });
+            document.querySelectorAll('.reveal-block').forEach(el => observer.observe(el));
+        }
+        
+        function changeMonth(delta) {
+            viewMonth += delta;
+            if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+            if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+            selectedDateStr = '';
+            renderCalendar();
         }
 
         function renderFrontFaqs() {

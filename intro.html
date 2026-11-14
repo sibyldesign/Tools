@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>個人品牌質感名片 | Sibyl 數位管家</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-page: #F5F1EB;
+            --bg-card: #FFFFFF;
+            --bg-soft: #EFE9E0;
+            --text-main: #3D342E;
+            --text-muted: #7D7067;
+            --primary: #8C735B;
+            --primary-text: #FFFFFF;
+            --border-color: #E2D9CE;
+            --dot-active: #8C735B;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            transition: background-color 0.35s ease, color 0.35s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .theme-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .theme-soft {
+            background-color: var(--bg-soft);
+            color: var(--text-main);
+        }
+
+        .theme-btn-primary {
+            background-color: var(--primary);
+            color: var(--primary-text);
+            transition: opacity 0.2s ease, transform 0.15s ease;
+        }
+        .theme-btn-primary:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        .theme-border {
+            border-color: var(--border-color);
+        }
+
+        .theme-text-muted {
+            color: var(--text-muted);
+        }
+
+        .theme-text-primary {
+            color: var(--primary);
+        }
+
+        /* 輪播比例控制 */
+        .ratio-4-5 { aspect-ratio: 4 / 5; }
+        .ratio-9-12 { aspect-ratio: 9 / 12; }
+        .ratio-1-1 { aspect-ratio: 1 / 1; }
+
+        /* 隱藏捲軸但保留滑動 */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* 抽屜動畫 */
+        .drawer-enter {
+            animation: slideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0.5; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center">
+
+    <!-- 頂部導覽列：右上角店家管理入口 -->
+    <header class="w-full max-w-md px-5 pt-4 pb-2 flex justify-between items-center">
+        <span id="topStatusBadge" class="text-[11px] tracking-widest uppercase px-2.5 py-1 rounded-full theme-soft theme-text-muted font-medium">
+            PORTFOLIO & SCHEDULE
+        </span>
+        <button onclick="openAdminAuth()" class="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full theme-card theme-text-muted hover:opacity-80 shadow-sm">
+            <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i>
+            <span>店家管理</span>
+        </button>
+    </header>
+
+    <!-- 前台主視覺容器 -->
+    <main class="w-full max-w-md px-5 pb-10 space-y-5 flex-1">
+
+        <!-- 1. 品牌門面區 (正方形大頭貼 + 店名 + 簡短介紹) -->
+        <section class="theme-card rounded-3xl p-6 text-center shadow-sm relative overflow-hidden">
+            <div class="w-24 h-24 mx-auto mb-4 rounded-2xl overflow-hidden theme-soft border theme-border shadow-inner flex items-center justify-center">
+                <img id="frontAvatar" src="" alt="品牌頭像" class="w-full h-full object-cover hidden">
+                <i id="frontAvatarPlaceholder" data-lucide="user" class="w-9 h-9 theme-text-muted"></i>
+            </div>
+            <h1 id="frontBrandName" class="text-xl font-bold tracking-wide mb-1">沐光療癒選物工作室</h1>
+            <p id="frontTagline" class="text-xs font-medium theme-text-primary tracking-wider mb-3">一對一能量諮詢 · 客製化香氣體驗</p>
+            <p id="frontBio" class="text-sm leading-relaxed theme-text-muted whitespace-pre-line">專注於陪伴每位來到這裡的妳，找回內在平靜與生活節奏。提供單堂體驗與一對一深度對談，歡迎查看下方空檔預約。</p>
+
+            <!-- 2. 多樣式社群與官網外連按鈕區 -->
+            <div id="frontLinksContainer" class="mt-5 pt-5 border-t theme-border">
+                <!-- 動態渲染：純圖示橫排 / 純文字 / 圖示+文字 -->
+            </div>
+        </section>
+
+        <!-- 3. 多比例輪播圖展示區 (附白點進度指示器) -->
+        <section id="carouselSection" class="theme-card rounded-3xl p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-3 px-1">
+                <div class="flex items-center gap-1.5">
+                    <i data-lucide="sparkles" class="w-4 h-4 theme-text-primary"></i>
+                    <h2 class="text-sm font-semibold tracking-wide">精選項目與作品集</h2>
+                </div>
+                <span id="carouselCounter" class="text-xs theme-text-muted font-medium">1 / 1</span>
+            </div>
+
+            <div class="relative rounded-2xl overflow-hidden theme-soft">
+                <div id="carouselTrack" class="flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar">
+                    <!-- 動態渲染圖片 -->
+                </div>
+                <!-- 左右微調切換鈕 -->
+                <button onclick="moveSlide(-1)" id="prevSlideBtn" class="hidden absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/85 backdrop-blur-sm flex items-center justify-center shadow text-stone-700">
+                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                </button>
+                <button onclick="moveSlide(1)" id="nextSlideBtn" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/85 backdrop-blur-sm flex items-center justify-center shadow text-stone-700">
+                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- 白點進度指示器 -->
+            <div id="carouselDots" class="flex justify-center items-center gap-2 mt-3.5">
+                <!-- 動態渲染白點 -->
+            </div>
+        </section>
+
+        <!-- 4. 互動式空檔日曆展示區 (可開放後面月份，顯示日期與幾點到幾點) -->
+        <section class="theme-card rounded-3xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-1.5">
+                    <i data-lucide="calendar-days" class="w-4 h-4 theme-text-primary"></i>
+                    <h2 class="text-sm font-semibold tracking-wide">本月可預約空檔</h2>
+                </div>
+                <div class="flex items-center gap-1">
+                    <button onclick="changeMonth(-1)" class="p-1.5 rounded-lg theme-soft hover:opacity-80">
+                        <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                    </button>
+                    <span id="currentMonthLabel" class="text-xs font-semibold px-2 min-w-[76px] text-center">2026年 11月</span>
+                    <button onclick="changeMonth(1)" class="p-1.5 rounded-lg theme-soft hover:opacity-80">
+                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 星期標頭 -->
+            <div class="grid grid-cols-7 text-center text-[11px] theme-text-muted font-medium mb-2">
+                <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+            </div>
+
+            <!-- 日曆格子 -->
+            <div id="calendarGrid" class="grid grid-cols-7 gap-1.5 text-center">
+                <!-- 動態渲染日期 -->
+            </div>
+
+            <!-- 選定日期的空檔時段明細 -->
+            <div id="selectedDatePanel" class="mt-4 pt-4 border-t theme-border">
+                <div class="flex items-center justify-between mb-2.5">
+                    <span id="selectedDateTitle" class="text-xs font-semibold">請點選上方有圓點標記的日期</span>
+                    <span id="selectedDateBadge" class="text-[11px] px-2 py-0.5 rounded-full theme-soft theme-text-primary hidden">可預約</span>
+                </div>
+                <div id="selectedDateSlots" class="space-y-2">
+                    <p class="text-xs theme-text-muted">點擊日曆中有圓點標記的日期，即可查看當日可約時段區間。</p>
+                </div>
+                <!-- 引導私訊確認按鈕 -->
+                <a id="bookViaLineBtn" href="#" target="_blank" class="hidden mt-3.5 w-full py-2.5 rounded-xl theme-btn-primary text-xs font-medium flex items-center justify-center gap-1.5 shadow-sm">
+                    <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                    <span>選定此時段，前往私訊確認預約</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- 5. 預約前須知 FAQ 手風琴 (減少重複私訊問答) -->
+        <section id="faqSection" class="theme-card rounded-3xl p-5 shadow-sm">
+            <div class="flex items-center gap-1.5 mb-3">
+                <i data-lucide="help-circle" class="w-4 h-4 theme-text-primary"></i>
+                <h2 class="text-sm font-semibold tracking-wide">預約與服務常見問題</h2>
+            </div>
+            <div id="frontFaqList" class="divide-y theme-border">
+                <!-- 動態渲染 FAQ -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 固定品牌頁尾 -->
+    <footer class="w-full py-6 text-center">
+        <a href="https://heysibyl.com" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs theme-text-muted hover:opacity-75 transition">
+            <span>Designed by Sibyl</span>
+            <span>|</span>
+            <span>數位管家</span>
+        </a>
+    </footer>
+
+    <!-- ========================================================= -->
+    <!-- 密碼驗證彈窗 (點擊右上角「店家管理」觸發) -->
+    <!-- ========================================================= -->
+    <div id="authModal" class="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 hidden items-center justify-center p-5">
+        <div class="bg-white rounded-3xl w-full max-w-xs p-6 shadow-xl text-stone-800">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="lock" class="w-4 h-4 text-stone-600"></i>
+                    <h3 class="text-sm font-bold">店家後台驗證</h3>
+                </div>
+                <button onclick="closeModal('authModal')" class="p-1 text-stone-400 hover:text-stone-600">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <p class="text-xs text-stone-500 mb-3">請輸入管理密碼以編輯頁面內容與空檔（預設密碼：1234）</p>
+            <input type="password" id="pinInput" placeholder="輸入管理密碼" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-sm mb-3 focus:outline-none focus:border-stone-500">
+            <p id="pinError" class="text-xs text-rose-500 mb-3 hidden">密碼錯誤，請重新輸入</p>
+            <button onclick="verifyPin()" class="w-full py-2.5 rounded-xl bg-stone-800 text-white text-xs font-medium hover:bg-stone-700">
+                進入管理後台
+            </button>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- 後台管理全螢幕抽屜面板 -->
+    <!-- ========================================================= -->
+    <div id="adminDrawer" class="fixed inset-0 bg-stone-50 z-50 hidden flex-col text-stone-800">
+        <!-- 後台頂部列 -->
+        <div class="bg-white border-b border-stone-200 px-4 py-3 flex items-center justify-between sticky top-0 z-10">
+            <div class="flex items-center gap-2">
+                <i data-lucide="layout-dashboard" class="w-4 h-4 text-stone-700"></i>
+                <span class="text-sm font-bold">店家管理後台</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="saveAllSettings()" class="px-3.5 py-1.5 rounded-full bg-stone-800 text-white text-xs font-medium flex items-center gap-1 shadow-sm">
+                    <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                    <span>儲存並更新前台</span>
+                </button>
+                <button onclick="closeModal('adminDrawer')" class="p-1.5 rounded-full bg-stone-100 text-stone-600">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 後台分頁選單 -->
+        <div class="bg-white border-b border-stone-200 px-3 py-2 flex gap-1.5 overflow-x-auto no-scrollbar text-xs">
+            <button onclick="switchAdminTab('brand')" class="admin-tab-btn px-3 py-1.5 rounded-lg font-medium bg-stone-800 text-white whitespace-nowrap" data-tab="brand">品牌與配色</button>
+            <button onclick="switchAdminTab('links')" class="admin-tab-btn px-3 py-1.5 rounded-lg font-medium text-stone-600 hover:bg-stone-100 whitespace-nowrap" data-tab="links">社群連結</button>
+            <button onclick="switchAdminTab('carousel')" class="admin-tab-btn px-3 py-1.5 rounded-lg font-medium text-stone-600 hover:bg-stone-100 whitespace-nowrap" data-tab="carousel">輪播圖庫</button>
+            <button onclick="switchAdminTab('schedule')" class="admin-tab-btn px-3 py-1.5 rounded-lg font-medium text-stone-600 hover:bg-stone-100 whitespace-nowrap" data-tab="schedule">空檔日曆</button>
+            <button onclick="switchAdminTab('faq')" class="admin-tab-btn px-3 py-1.5 rounded-lg font-medium text-stone-600 hover:bg-stone-100 whitespace-nowrap" data-tab="faq">常見問題</button>
+            <button onclick="switchAdminTab('guide')" class="admin-tab-btn px-3 py-1.5 rounded-lg font-medium text-stone-600 hover:bg-stone-100 whitespace-nowrap" data-tab="guide">導流教學與許願</button>
+        </div>
+
+        <!-- 後台內容捲動區 -->
+        <div class="flex-1 overflow-y-auto p-4 max-w-md mx-auto w-full space-y-5 pb-20">
+
+            <!-- TAB 1: 品牌門面與 9 款莫蘭迪色系 -->
+            <div id="tab-brand" class="admin-tab-content space-y-4">
+                <div class="bg-white p-4 rounded-2xl border border-stone-200 space-y-3">
+                    <h4 class="text-xs font-bold text-stone-700 flex items-center gap-1.5">
+                        <i data-lucide="palette" class="w-3.5 h-3.5"></i>
+                        <span>質感色系主題切換（9 款莫蘭迪與極簡配色）</span>
+                    </h4>
+                    <div id="themeSelectorGrid" class="grid grid-cols-3 gap-2">
+                        <!-- 動態產生 9 色按鈕 -->
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-2xl border border-stone-200 space-y-3">
+                    <h4 class="text-xs font-bold text-stone-700 flex items-center gap-1.5">
+                        <i data-lucide="store" class="w-3.5 h-3.5"></i>
+                        <span>基本品牌資料與正方形頭像</span>
+                    </h4>
+                    <div class="flex items-center gap-3">
+                        <div class="w-16 h-16 rounded-xl bg-stone-100 border border-stone-200 overflow-hidden flex items-center justify-center shrink-0">
+                            <img id="adminAvatarPreview" src="" class="w-full h-full object-cover hidden">
+                            <i id="adminAvatarIcon" data-lucide="image" class="w-5 h-5 text-stone-400"></i>
+                        </div>
+                        <div class="flex-1">
+                            <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-xs font-medium cursor-pointer">
+                                <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                                <span>上傳正方形大頭貼</span>
+                                <input type="file" accept="image/*" onchange="handleAvatarUpload(event)" class="hidden">
+                            </label>
+                            <p class="text-[11px] text-stone-400 mt-1">建議 1:1 正方形圖片，自動最佳化裁切</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-stone-500 mb-1">店名 / 講師品牌名稱</label>
+                        <input type="text" id="editBrandName" class="w-full px-3 py-2 rounded-xl border border-stone-200 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-stone-500 mb-1">一句話核心標語</label>
+                        <input type="text" id="editTagline" class="w-full px-3 py-2 rounded-xl border border-stone-200 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-stone-500 mb-1">簡短專業介紹</label>
+                        <textarea id="editBio" rows="3" class="w-full px-3 py-2 rounded-xl border border-stone-200 text-sm"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-stone-500 mb-1">預設預約引導連結（如：官方 LINE 網址）</label>
+                        <input type="url" id="editLineUrl" placeholder="https://line.me/R/ti/p/@..." class="w-full px-3 py-2 rounded-xl border border-stone-200 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-stone-500 mb-1">變更管理密碼</label>
+                        <input type="text" id="editAdminPin" class="w-full px-3 py-2 rounded-xl border border-stone-200 text-sm">
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: 社群與官網外連管理 -->
+            <div id="tab-links" class="admin-tab-content hidden space-y-4">
+                <div class="bg-white p-4 rounded-2xl border border-stone-200 space-y-3">
+                    <h4 class="text-xs font-bold text-stone-700 flex items-center gap-1.5">
+                        <i data-lucide="link" class="w-3.5 h-3.5"></i>
+                        <span>新增社群 / 官網連結</span>
+                    </h4>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[11px] text-stone-500 mb-1">圖示類型</label>
+                            <select id="newLinkIcon" class="w-full px-2.5 py-2 rounded-xl border border-stone-200 text-xs bg-white">
+                                <option value="instagram">Instagram</option>
+                                <option value="message-circle">官方 LINE</option>
+                                <option value="facebook">Facebook</option>
+                                <option value="at-sign">Threads</option>
+                                <option value="globe">個人官網 / 作品集</option>
+                                <option value="youtube">YouTube</option>
+                                <option value="shopping-bag">賣場 / 表單</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-stone-500 mb-1">呈現樣式</label>
+                            <select id="newLinkStyle" class="w-full px-2.5 py-2 rounded-xl border border-stone-200 text-xs bg-white">
+                                <option value="icon_text">質感圖示 ＋ 文字</option>
+                                <option value="icon_only">純質感圖示</option>
+                                <option value="text_only">純文字按鈕</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-stone-500 mb-1">按鈕文字名稱</label>
+                        <input type="text" id="newLinkLabel" placeholder="例如：加入官方 LINE 預約" class="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-stone-500 mb-1">連結網址 (URL)</label>
+                        <input type="url" id="newLinkUrl" placeholder="https://..." class="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                    </div>
+                    <button onclick="addSocialLink()" class="w-full py-2 rounded-xl bg-stone-800 text-white text-xs font-medium flex items-center justify-center gap-1">
+                        <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                        <span>新增此連結按鈕</span>
+                    </button>
+                </div>
+
+                <div class="bg-white p-4 rounded-2xl border border-stone-200 space-y-2">
+                    <h4 class="text-xs font-bold text-stone-700 mb-2">已設定的連結（可調整順序、編輯與刪除）</h4>
+                    <div id="adminLinksList" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <!-- TAB 3: 輪播圖庫管理 (4:5 / 9:12 / 1:1 + <>排序 + 刪除) -->
+            <div id="tab-carousel" class="admin-tab-content hidden space-y-4">
+                <div class="bg-white p-4 rounded-2xl border border-stone-200 space-y-3">
+                    <h4 class="text-xs font-bold text-stone-700 flex items-center gap-1.5">
+                        <i data-lucide="crop" class="w-3.5 h-3.5"></i>
+                        <span>輪播圖呈現比例設定</span>
+                    </h4>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" onclick="setCarouselRatio('4:5')" class="ratio-opt-btn py-2 rounded-xl border text-xs font-medium" data-ratio="4:5">4:5 (IG貼文)</button>
+                        <button type="button" onclick="setCarouselRatio('9:12')" class="ratio-opt-btn py-2 rounded-xl border text-xs font-medium" data-ratio="9:12">9:12 (直式海報)</button>
+                        <button type="button" onclick="setCarouselRatio('1:1')" class="ratio-opt-btn py-2 rounded-xl border text-xs font-medium" data-ratio="1:1">1:1 (正方形)</button>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-2xl border border-stone-200 space-y-3">
+                    <h4 class="text-xs font-bold text-stone-700 flex items-center gap-1.5">
+                        <i data-lucide="image-plus" class="w-3.5 h-3.5"></i>
+                        <span>上傳輪播圖片（最多 10 張）</span>
+                    </h4>
+                    <label class="w-full py-6 border-2 border-dashed border-stone-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 cursor-pointer hover:bg-stone-50">
+                        <i data-lucide="upload-cloud" class="w-6 h-6 text-stone-400"></i>
+                        <span class="text-xs font-medium text-stone-600">點擊選擇手機相簿圖片上傳</span>
+                        <span class="text-[11px] text-stone-400">支援多選上傳，自動壓縮保持流暢載入</span>
+                        <input type="file" accept="image/*" multiple onchange="handleCarouselUpload(event)" class="hidden">
+                    </label>
+
+                    <div id="adminCarouselGrid" class="grid grid-cols-2 gap-3 pt-2">
+                        <!-- 動態渲染縮圖 + < > 排序按鈕 + 刪除鈕 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: 空檔日曆設定 -->
+            <div id="tab-schedule" class="admin-tab-content hidden space-y-4">
+                <div class="bg-white p-4 rounded-2xl border border-stone-200 space-y-3">
+                    <h4 class="text-xs font-bold text-stone-700 flex items-center gap-1.5">
+                        <i data-lucide="calendar-plus" class="w-3.5 h-3.5"></i>
+                        <span>新增可預約日期與空檔時間</span>
+                    </h4>
+                    <div>
+                        <label class="block text-[11px] text-stone-500 mb-1">選擇日期（可設定未來月份）</label>
+                        <input type="date" id="newSlotDate" class="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs bg-white">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[11px] text-stone-500 mb-1">開始時間</label>
+                            <input type="time" id="newSlotStart" value="10:00" class="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-stone-500 mb-1">結束時間</label>
+                            <input type="time" id="newSlotEnd" value="12:00" class="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs bg-white">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-stone-500 mb-1">備註標籤（選填，如：線上視訊 / 台北工作室）</label>
+                        <input type="text" id="newSlotNote" placeholder="例如：可約一對一諮詢" class="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                    </div>
+                    <button onclick="addScheduleSlot()" class="w-full py-2 rounded-xl bg-stone-800 text-white text-xs font-medium flex items-center justify-center gap-1">
+                        <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                        <span>加入此時段到前台日曆</span>
+                    </button>
+                </div>
+
+                <div class="bg-white p-4 rounded-2xl border border-stone-200 space-y-2">
+                    <h4 class="text-xs font-bold text-stone-700 mb-2">已開放的空檔列表</h4>
+                    <div id="adminScheduleList" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <!-- TAB 5: 常見問題 FAQ 管理 -->
+            <div id="tab-faq" class="admin-tab-content hidden space-y-4">
+                <div class="bg-white p-4 rounded-2xl border border-stone-200 space-y-3">
+                    <h4 class="text-xs font-bold text-stone-700 flex items-center gap-1.5">
+                        <i data-lucide="message-square-plus" class="w-3.5 h-3.5"></i>
+                        <span>新增常見問題（減少重複私訊回覆）</span>
+                    </h4>
+                    <input type="text" id="newFaqQ" placeholder="問題：例如「請問如何確認預約與改期？」" class="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                    <textarea id="newFaqA" rows="2" placeholder="回答內容..." class="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs"></textarea>
+                    <button onclick="addFaqItem()" class="w-full py-2 rounded-xl bg-stone-800 text-white text-xs font-medium">新增問答</button>
+                </div>
+                <div id="adminFaqList" class="space-y-2"></div>
+            </div>
+
+            <!-- TAB 6: 社群導流使用技巧 & 功能許願池 -->
+            <div id="tab-guide" class="admin-tab-content hidden space-y-4">
+                <div class="bg-white p-4 rounded-2xl border border-stone-200 space-y-3">
+                    <h4 class="text-xs font-bold text-stone-700 flex items-center gap-1.5">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                        <span>社群導流與官方 LINE 設定技巧</span>
+                    </h4>
+                    <div class="space-y-2.5 text-xs text-stone-600 leading-relaxed">
+                        <div class="p-3 rounded-xl bg-stone-50 border border-stone-100">
+                            <p class="font-bold text-stone-800 mb-1">1. 放置於 IG / Threads 個人檔案連結</p>
+                            <p>進入 IG「編輯個人檔案」→「連結」→ 貼上您的專屬名片網址，讓每位從貼文點進主頁的訪客一眼看懂服務項目與本月空檔。</p>
+                        </div>
+                        <div class="p-3 rounded-xl bg-stone-50 border border-stone-100">
+                            <p class="font-bold text-stone-800 mb-1">2. 綁定官方 LINE 圖文選單按鈕</p>
+                            <p>登入 LINE Official Account Manager →「主頁」→「圖文選單」，將其中一格動作類型設為「連結」，貼上此網址並命名為「查看空檔與價目」，大幅降低一對一重複問答。</p>
+                        </div>
+                        <div class="p-3 rounded-xl bg-stone-50 border border-stone-100">
+                            <p class="font-bold text-stone-800 mb-1">3. 升級進階版（線上自動選課＋分潤追蹤）</p>
+                            <p>若未來需要開放「多堂課程勾選、自動扣名額、匯款後五碼核銷、舊學員推廣分潤連結」，可隨時聯繫 Sibyl 數位管家無痛升級。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 功能許願區 (傳送到總管) -->
+                <div class="bg-white p-4 rounded-2xl border border-stone-200 space-y-3">
+                    <h4 class="text-xs font-bold text-stone-700 flex items-center gap-1.5">
+                        <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                        <span>功能許願池（直通開發者總管）</span>
+                    </h4>
+                    <p class="text-[11px] text-stone-500">希望增加什麼實用小功能？寫下來直接傳送給 Sibyl 數位管家：</p>
+                    <textarea id="wishInput" rows="3" placeholder="例如：希望能增加客戶評價輪播區、或是匯款帳號一鍵複製..." class="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs"></textarea>
+                    <button onclick="submitWish()" class="w-full py-2.5 rounded-xl bg-stone-800 text-white text-xs font-medium flex items-center justify-center gap-1.5">
+                        <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                        <span>送出許願給總管</span>
+                    </button>
+                    <p id="wishFeedback" class="text-xs text-emerald-600 hidden text-center font-medium">已收到您的許願，感謝回饋！</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // =========================================================================
+        // 1. Supabase 設定 (填入您的專案資訊後即自動啟用雲端同步；未填則自動使用本機儲存演示)
+        // =========================================================================
+        const SUPABASE_URL = ""; // 填入您的 Supabase Project URL
+        const SUPABASE_ANON_KEY = ""; // 填入您的 Supabase Anon Public Key
+        const supabaseClient = (SUPABASE_URL && SUPABASE_ANON_KEY) 
+            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) 
+            : null;
+
+        // 取得網址參數 ?id=xxx (預設 demo)
+        const urlParams = new URLSearchParams(window.location.search);
+        const CARD_SLUG = urlParams.get('id') || 'demo';
+
+        // =========================================================================
+        // 2. 9 款莫蘭迪與極簡色系定義 (預設米棕色)
+        // =========================================================================
+        const THEMES = {
+            oat_brown: { name: '米棕色 (預設)', bg: '#F5F1EB', card: '#FFFFFF', soft: '#EFE9E0', text: '#3D342E', muted: '#7D7067', primary: '#8C735B', primaryText: '#FFFFFF', border: '#E2D9CE', swatch: '#8C735B' },
+            dusty_pink: { name: '粉黛灰粉', bg: '#F8F2F2', card: '#FFFFFF', soft: '#F2E6E7', text: '#423536', muted: '#857173', primary: '#B8868B', primaryText: '#FFFFFF', border: '#E8D8D9', swatch: '#B8868B' },
+            forest_green: { name: '森綠色', bg: '#F2F5F3', card: '#FFFFFF', soft: '#E5ECE8', text: '#2F3B34', muted: '#687A70', primary: '#5C7366', primaryText: '#FFFFFF', border: '#D5E0DA', swatch: '#5C7366' },
+            haze_blue: { name: '霧霾藍', bg: '#F1F4F7', card: '#FFFFFF', soft: '#E4EAF0', text: '#2E3842', muted: '#697887', primary: '#6B8299', primaryText: '#FFFFFF', border: '#D4DEE8', swatch: '#6B8299' },
+            sunset_orange: { name: '日落橘', bg: '#FAF3EE', card: '#FFFFFF', soft: '#F3E5DC', text: '#45352C', muted: '#8A7265', primary: '#C87D55', primaryText: '#FFFFFF', border: '#EAD9CE', swatch: '#C87D55' },
+            oat_yellow: { name: '燕麥黃', bg: '#FAF7EE', card: '#FFFFFF', soft: '#F2ECD9', text: '#423C2B', muted: '#827A62', primary: '#B89648', primaryText: '#FFFFFF', border: '#E6DEC5', swatch: '#B89648' },
+            pure_white_gray: { name: '純白帶灰', bg: '#FFFFFF', card: '#FAFAFA', soft: '#F1F2F4', text: '#262626', muted: '#737373', primary: '#525252', primaryText: '#FFFFFF', border: '#E5E5E5', swatch: '#D4D4D4' },
+            mono_bw: { name: '黑白灰極簡', bg: '#F5F5F5', card: '#FFFFFF', soft: '#EAEAEA', text: '#171717', muted: '#666666', primary: '#1E1E1E', primaryText: '#FFFFFF', border: '#DCDCDC', swatch: '#1E1E1E' },
+            morandi_gray: { name: '莫蘭迪灰階', bg: '#ECECEC', card: '#F9F9F9', soft: '#E0E0E0', text: '#333333', muted: '#6E6E6E', primary: '#595959', primaryText: '#FFFFFF', border: '#D1D1D1', swatch: '#595959' }
+        };
+
+        // =========================================================================
+        // 3. 預設資料狀態
+        // =========================================================================
+        let state = {
+            adminPin: '1234',
+            themeColor: 'oat_brown',
+            avatarUrl: '',
+            brandName: '沐光療癒選物工作室',
+            tagline: '一對一能量諮詢 · 客製化香氣體驗',
+            bio: '專注於陪伴每位來到這裡的妳，找回內在平靜與生活節奏。\n提供單堂體驗與一對一深度對談，歡迎查看下方空檔預約。',
+            lineUrl: 'https://line.me',
+            carouselRatio: '4:5',
+            carouselItems: [
+                { url: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=800&q=80' },
+                { url: 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=800&q=80' }
+            ],
+            socialLinks: [
+                { icon: 'message-circle', label: '加入官方 LINE 預約', url: 'https://line.me', style: 'icon_text' },
+                { icon: 'instagram', label: 'Instagram', url: 'https://instagram.com', style: 'icon_only' },
+                { icon: 'at-sign', label: 'Threads', url: 'https://threads.net', style: 'icon_only' },
+                { icon: 'globe', label: '官方網站', url: 'https://heysibyl.com', style: 'icon_only' }
+            ],
+            schedules: [
+                { date: getFutureDateStr(2), start: '10:00', end: '12:00', note: '一對一諮詢空檔' },
+                { date: getFutureDateStr(2), start: '14:00', end: '17:00', note: '下午可預約時段' },
+                { date: getFutureDateStr(5), start: '13:30', end: '16:30', note: '單堂體驗課程' },
+                { date: getFutureDateStr(10), start: '19:00', end: '21:00', note: '夜間線上時段' }
+            ],
+            faqs: [
+                { q: '請問如何確認預約時段？', a: '請先於上方日曆點選您方便的日期與時段，點擊「前往私訊確認預約」告知想預約的時間，我們將為您保留名額。' },
+                { q: '臨時有事需要改期怎麼辦？', a: '請於預約日 24 小時前透過官方 LINE 聯繫告知，皆可免費協助調整至其他空檔時段。' }
+            ]
+        };
+
+        let currentSlide = 0;
+        let viewYear = new Date().getFullYear();
+        let viewMonth = new Date().getMonth(); // 0-indexed
+        let selectedDateStr = '';
+
+        function getFutureDateStr(daysToAdd) {
+            const d = new Date();
+            d.setDate(d.getDate() + daysToAdd);
+            return d.toISOString().split('T')[0];
+        }
+
+        // =========================================================================
+        // 4. 初始化與資料載入
+        // =========================================================================
+        async function initApp() {
+            // 優先嘗試從 LocalStorage 讀取本機暫存，若有設定 Supabase 則從雲端覆蓋
+            const localSaved = localStorage.getItem(`sibyl_link_${CARD_SLUG}`);
+            if (localSaved) {
+                try { state = { ...state, ...JSON.parse(localSaved) }; } catch (e) {}
+            }
+
+            if (supabaseClient) {
+                const { data, error } = await supabaseClient
+                    .from('pro_cards')
+                    .select('*')
+                    .eq('slug', CARD_SLUG)
+                    .single();
+                if (data && !error) {
+                    state.themeColor = data.theme_color || state.themeColor;
+                    state.avatarUrl = data.avatar_url || '';
+                    state.brandName = data.brand_name || state.brandName;
+                    state.tagline = data.tagline || '';
+                    state.bio = data.bio || '';
+                    state.carouselRatio = data.carousel_ratio || '4:5';
+                    if (data.carousel_items?.length) state.carouselItems = data.carousel_items;
+                    if (data.social_links?.length) state.socialLinks = data.social_links;
+                    if (data.sales_modules?.faqs) state.faqs = data.sales_modules.faqs;
+                    state.adminPin = data.admin_pin || '1234';
+                }
+            }
+
+            applyTheme(state.themeColor);
+            renderFrontAll();
+            lucide.createIcons();
+        }
+
+        function applyTheme(themeKey) {
+            const t = THEMES[themeKey] || THEMES.oat_brown;
+            const root = document.documentElement;
+            root.style.setProperty('--bg-page', t.bg);
+            root.style.setProperty('--bg-card', t.card);
+            root.style.setProperty('--bg-soft', t.soft);
+            root.style.setProperty('--text-main', t.text);
+            root.style.setProperty('--text-muted', t.muted);
+            root.style.setProperty('--primary', t.primary);
+            root.style.setProperty('--primary-text', t.primaryText);
+            root.style.setProperty('--border-color', t.border);
+        }
+
+        // =========================================================================
+        // 5. 前台渲染邏輯
+        // =========================================================================
+        function renderFrontAll() {
+            // 品牌門面
+            document.getElementById('frontBrandName').textContent = state.brandName;
+            document.getElementById('frontTagline').textContent = state.tagline;
+            document.getElementById('frontBio').textContent = state.bio;
+
+            const avatarImg = document.getElementById('frontAvatar');
+            const avatarIcon = document.getElementById('frontAvatarPlaceholder');
+            if (state.avatarUrl) {
+                avatarImg.src = state.avatarUrl;
+                avatarImg.classList.remove('hidden');
+                avatarIcon.classList.add('hidden');
+            } else {
+                avatarImg.classList.add('hidden');
+                avatarIcon.classList.remove('hidden');
+            }
+
+            renderFrontLinks();
+            renderFrontCarousel();
+            renderCalendar();
+            renderFrontFaqs();
+            lucide.createIcons();
+        }
+
+        function renderFrontLinks() {
+            const container = document.getElementById('frontLinksContainer');
+            if (!state.socialLinks || state.socialLinks.length === 0) {
+                container.classList.add('hidden');
+                return;
+            }
+            container.classList.remove('hidden');
+
+            const iconOnlyLinks = state.socialLinks.filter(l => l.style === 'icon_only');
+            const blockLinks = state.socialLinks.filter(l => l.style !== 'icon_only');
+
+            let html = '';
+            // 滿版按鈕 (圖示+文字 / 純文字)
+            if (blockLinks.length > 0) {
+                html += `<div class="space-y-2.5 mb-3">`;
+                blockLinks.forEach(link => {
+                    const iconHtml = link.style === 'icon_text' 
+                        ? `<i data-lucide="${link.icon}" class="w-4 h-4"></i>` 
+                        : '';
+                    html += `
+                        <a href="${link.url}" target="_blank" rel="noopener noreferrer" 
+                           class="w-full py-2.5 px-4 rounded-xl theme-soft hover:opacity-85 transition flex items-center justify-center gap-2 text-xs font-medium border theme-border">
+                            ${iconHtml}
+                            <span>${link.label}</span>
+                        </a>`;
+                });
+                html += `</div>`;
+            }
+
+            // 純質感圖示橫排
+            if (iconOnlyLinks.length > 0) {
+                html += `<div class="flex justify-center items-center gap-3 pt-1">`;
+                iconOnlyLinks.forEach(link => {
+                    html += `
+                        <a href="${link.url}" target="_blank" rel="noopener noreferrer" title="${link.label}"
+                           class="w-10 h-10 rounded-full theme-soft border theme-border flex items-center justify-center hover:opacity-80 transition">
+                            <i data-lucide="${link.icon}" class="w-4 h-4"></i>
+                        </a>`;
+                });
+                html += `</div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function renderFrontCarousel() {
+            const section = document.getElementById('carouselSection');
+            const track = document.getElementById('carouselTrack');
+            const dots = document.getElementById('carouselDots');
+            const counter = document.getElementById('carouselCounter');
+
+            if (!state.carouselItems || state.carouselItems.length === 0) {
+                section.classList.add('hidden');
+                return;
+            }
+            section.classList.remove('hidden');
+
+            const ratioClass = state.carouselRatio === '9:12' ? 'ratio-9-12' 
+                             : state.carouselRatio === '1:1' ? 'ratio-1-1' 
+                             : 'ratio-4-5';
+
+            track.innerHTML = state.carouselItems.map((item, idx) => `
+                <div class="w-full shrink-0 snap-center ${ratioClass} relative">
+                    <img src="${item.url}" alt="展示圖 ${idx + 1}" class="w-full h-full object-cover">
+                </div>
+            `).join('');
+
+            // 白點進度指示器
+            dots.innerHTML = state.carouselItems.map((_, idx) => `
+                <button onclick="goToSlide(${idx})" aria-label="第 ${idx + 1} 張"
+                    class="h-2 rounded-full transition-all duration-300 ${idx === currentSlide ? 'w-5 bg-white shadow-sm ring-1 ring-stone-300' : 'w-2 bg-stone-300/80'}">
+                </button>
+            `).join('');
+
+            counter.textContent = `${currentSlide + 1} / ${state.carouselItems.length}`;
+            document.getElementById('prevSlideBtn').classList.toggle('hidden', state.carouselItems.length <= 1);
+            document.getElementById('nextSlideBtn').classList.toggle('hidden', state.carouselItems.length <= 1);
+
+            track.onscroll = () => {
+                const index = Math.round(track.scrollLeft / track.clientWidth);
+                if (index !== currentSlide && index >= 0 && index < state.carouselItems.length) {
+                    currentSlide = index;
+                    updateCarouselIndicators();
+                }
+            };
+        }
+
+        function updateCarouselIndicators() {
+            const dots = document.getElementById('carouselDots').children;
+            Array.from(dots).forEach((dot, idx) => {
+                dot.className = `h-2 rounded-full transition-all duration-300 ${idx === currentSlide ? 'w-5 bg-white shadow-sm ring-1 ring-stone-300' : 'w-2 bg-stone-300/80'}`;
+            });
+            document.getElementById('carouselCounter').textContent = `${currentSlide + 1} / ${state.carouselItems.length}`;
+        }
+
+        function goToSlide(idx) {
+            const track = document.getElementById('carouselTrack');
+            currentSlide = idx;
+            track.scrollTo({ left: idx * track.clientWidth, behavior: 'smooth' });
+            updateCarouselIndicators();
+        }
+
+        function moveSlide(step) {
+            const total = state.carouselItems.length;
+            if (total <= 1) return;
+            const next = (currentSlide + step + total) % total;
+            goToSlide(next);
+        }
+
+        // 日曆渲染
+        function renderCalendar() {
+            document.getElementById('currentMonthLabel').textContent = `${viewYear}年 ${viewMonth + 1}月`;
+            const grid = document.getElementById('calendarGrid');
+            const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+            const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+
+            const availableDates = new Set(state.schedules.map(s => s.date));
+            let html = '';
+
+            for (let i = 0; i < firstDay; i++) {
+                html += `<div class="h-10"></div>`;
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const hasSlot = availableDates.has(dateStr);
+                const isSelected = selectedDateStr === dateStr;
+
+                html += `
+                    <button onclick="selectDate('${dateStr}')" 
+                        class="h-10 rounded-xl flex flex-col items-center justify-center relative text-xs transition
+                        ${isSelected ? 'theme-btn-primary font-bold shadow-xs' : hasSlot ? 'theme-soft font-semibold' : 'opacity-45'}">
+                        <span>${day}</span>
+                        ${hasSlot ? `<span class="w-1 h-1 rounded-full mt-0.5 ${isSelected ? 'bg-white' : 'bg-current'}"></span>` : ''}
+                    </button>
+                `;
+            }
+            grid.innerHTML = html;
+
+            // 若尚未選取日期，自動選取本月第一個有空檔的日期
+            if (!selectedDateStr) {
+                const firstAvailable = state.schedules
+                    .map(s => s.date)
+                    .sort()
+                    .find(d => d.startsWith(`${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`));
+                if (firstAvailable) selectDate(firstAvailable);
+            }
+        }
+
+        function changeMonth(delta) {
+            viewMonth += delta;
+            if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+            if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+            selectedDateStr = '';
+            renderCalendar();
+        }
+
+        function selectDate(dateStr) {
+            selectedDateStr = dateStr;
+            renderCalendar();
+
+            const daySlots = state.schedules.filter(s => s.date === dateStr).sort((a, b) => a.start.localeCompare(b.start));
+            const titleEl = document.getElementById('selectedDateTitle');
+            const badgeEl = document.getElementById('selectedDateBadge');
+            const slotsEl = document.getElementById('selectedDateSlots');
+            const lineBtn = document.getElementById('bookViaLineBtn');
+
+            titleEl.textContent = `${dateStr} 空檔時段`;
+
+            if (daySlots.length === 0) {
+                badgeEl.classList.add('hidden');
+                lineBtn.classList.add('hidden');
+                slotsEl.innerHTML = `<p class="text-xs theme-text-muted py-1">當日暫無開放空檔，請切換其他有圓點標記的日期。</p>`;
+                return;
+            }
+
+            badgeEl.classList.remove('hidden');
+            slotsEl.innerHTML = daySlots.map(slot => `
+                <div class="p-3 rounded-xl theme-soft border theme-border flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="clock" class="w-3.5 h-3.5 theme-text-primary"></i>
+                        <span class="text-xs font-semibold">${slot.start} - ${slot.end}</span>
+                    </div>
+                    <span class="text-[11px] theme-text-muted">${slot.note || '可預約'}</span>
+                </div>
+            `).join('');
+
+            lineBtn.href = state.lineUrl || '#';
+            lineBtn.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function renderFrontFaqs() {
+            const section = document.getElementById('faqSection');
+            const list = document.getElementById('frontFaqList');
+            if (!state.faqs || state.faqs.length === 0) {
+                section.classList.add('hidden');
+                return;
+            }
+            section.classList.remove('hidden');
+            list.innerHTML = state.faqs.map((faq, idx) => `
+                <details class="py-3 group">
+                    <summary class="flex items-center justify-between text-xs font-medium cursor-pointer list-none">
+                        <span>${faq.q}</span>
+                        <i data-lucide="chevron-down" class="w-3.5 h-3.5 theme-text-muted group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="mt-2 text-xs theme-text-muted leading-relaxed">${faq.a}</p>
+                </details>
+            `).join('');
+        }
+
+        // =========================================================================
+        // 6. 後台管理與編輯邏輯
+        // =========================================================================
+        function openAdminAuth() {
+            document.getElementById('pinInput').value = '';
+            document.getElementById('pinError').classList.add('hidden');
+            const modal = document.getElementById('authModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal(id) {
+            const el = document.getElementById(id);
+            el.classList.add('hidden');
+            el.classList.remove('flex');
+        }
+
+        function verifyPin() {
+            const val = document.getElementById('pinInput').value.trim();
+            if (val === state.adminPin) {
+                closeModal('authModal');
+                openAdminDrawer();
+            } else {
+                document.getElementById('pinError').classList.remove('hidden');
+            }
+        }
+
+        function openAdminDrawer() {
+            const drawer = document.getElementById('adminDrawer');
+            drawer.classList.remove('hidden');
+            drawer.classList.add('flex', 'drawer-enter');
+
+            // 填入表單現有值
+            document.getElementById('editBrandName').value = state.brandName;
+            document.getElementById('editTagline').value = state.tagline;
+            document.getElementById('editBio').value = state.bio;
+            document.getElementById('editLineUrl').value = state.lineUrl || '';
+            document.getElementById('editAdminPin').value = state.adminPin;
+
+            if (state.avatarUrl) {
+                document.getElementById('adminAvatarPreview').src = state.avatarUrl;
+                document.getElementById('adminAvatarPreview').classList.remove('hidden');
+                document.getElementById('adminAvatarIcon').classList.add('hidden');
+            }
+
+            renderThemeSelector();
+            renderAdminLinks();
+            renderAdminCarousel();
+            renderAdminSchedules();
+            renderAdminFaqs();
+            setCarouselRatio(state.carouselRatio, false);
+            lucide.createIcons();
+        }
+
+        function switchAdminTab(tabName) {
+            document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+
+            document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+                if (btn.dataset.tab === tabName) {
+                    btn.className = 'admin-tab-btn px-3 py-1.5 rounded-lg font-medium bg-stone-800 text-white whitespace-nowrap';
+                } else {
+                    btn.className = 'admin-tab-btn px-3 py-1.5 rounded-lg font-medium text-stone-600 hover:bg-stone-100 whitespace-nowrap';
+                }
+            });
+        }
+
+        function renderThemeSelector() {
+            const grid = document.getElementById('themeSelectorGrid');
+            grid.innerHTML = Object.entries(THEMES).map(([key, t]) => `
+                <button type="button" onclick="selectThemeInAdmin('${key}')"
+                    class="p-2 rounded-xl border text-left flex items-center gap-2 transition ${state.themeColor === key ? 'border-stone-800 bg-stone-100 font-bold' : 'border-stone-200'}">
+                    <span class="w-4 h-4 rounded-full shrink-0 border border-black/10" style="background-color: ${t.swatch}"></span>
+                    <span class="text-[11px] truncate">${t.name}</span>
+                </button>
+            `).join('');
+        }
+
+        function selectThemeInAdmin(key) {
+            state.themeColor = key;
+            applyTheme(key);
+            renderThemeSelector();
+        }
+
+        // 圖片壓縮工具 (確保手機上傳大圖不卡頓)
+        function compressImage(file, maxWidth = 900) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let w = img.width, h = img.height;
+                        if (w > maxWidth) { h = Math.round((h * maxWidth) / w); w = maxWidth; }
+                        canvas.width = w; canvas.height = h;
+                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                        resolve(canvas.toDataURL('image/jpeg', 0.82));
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function handleAvatarUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const compressed = await compressImage(file, 500);
+            state.avatarUrl = compressed;
+            document.getElementById('adminAvatarPreview').src = compressed;
+            document.getElementById('adminAvatarPreview').classList.remove('hidden');
+            document.getElementById('adminAvatarIcon').classList.add('hidden');
+        }
+
+        // 社群連結 CRUD
+        function addSocialLink() {
+            const icon = document.getElementById('newLinkIcon').value;
+            const style = document.getElementById('newLinkStyle').value;
+            const label = document.getElementById('newLinkLabel').value.trim();
+            const url = document.getElementById('newLinkUrl').value.trim();
+            if (!label || !url) return alert('請填寫按鈕名稱與網址');
+
+            state.socialLinks.push({ icon, style, label, url });
+            document.getElementById('newLinkLabel').value = '';
+            document.getElementById('newLinkUrl').value = '';
+            renderAdminLinks();
+            lucide.createIcons();
+        }
+
+        function moveLink(idx, dir) {
+            const target = idx + dir;
+            if (target < 0 || target >= state.socialLinks.length) return;
+            [state.socialLinks[idx], state.socialLinks[target]] = [state.socialLinks[target], state.socialLinks[idx]];
+            renderAdminLinks();
+            lucide.createIcons();
+        }
+
+        function deleteLink(idx) {
+            state.socialLinks.splice(idx, 1);
+            renderAdminLinks();
+            lucide.createIcons();
+        }
+
+        function renderAdminLinks() {
+            const list = document.getElementById('adminLinksList');
+            const styleMap = { icon_text: '圖示+文字', icon_only: '純圖示', text_only: '純文字' };
+            list.innerHTML = state.socialLinks.map((link, idx) => `
+                <div class="p-2.5 rounded-xl bg-stone-50 border border-stone-200 flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <i data-lucide="${link.icon}" class="w-4 h-4 text-stone-600 shrink-0"></i>
+                        <div class="truncate">
+                            <p class="text-xs font-medium truncate">${link.label} <span class="text-[10px] px-1.5 py-0.5 rounded bg-stone-200 text-stone-600">${styleMap[link.style]}</span></p>
+                            <p class="text-[10px] text-stone-400 truncate">${link.url}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1 shrink-0">
+                        <button onclick="moveLink(${idx}, -1)" class="p-1 text-stone-500 hover:text-stone-800"><i data-lucide="chevron-up" class="w-3.5 h-3.5"></i></button>
+                        <button onclick="moveLink(${idx}, 1)" class="p-1 text-stone-500 hover:text-stone-800"><i data-lucide="chevron-down" class="w-3.5 h-3.5"></i></button>
+                        <button onclick="deleteLink(${idx})" class="p-1 text-rose-500 hover:text-rose-700"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 輪播圖管理
+        function setCarouselRatio(ratio, rerender = true) {
+            state.carouselRatio = ratio;
+            document.querySelectorAll('.ratio-opt-btn').forEach(btn => {
+                if (btn.dataset.ratio === ratio) {
+                    btn.className = 'ratio-opt-btn py-2 rounded-xl border border-stone-800 bg-stone-800 text-white text-xs font-medium';
+                } else {
+                    btn.className = 'ratio-opt-btn py-2 rounded-xl border border-stone-200 text-stone-600 text-xs font-medium';
+                }
+            });
+            if (rerender) renderFrontCarousel();
+        }
+
+        async function handleCarouselUpload(e) {
+            const files = Array.from(e.target.files);
+            for (const file of files) {
+                if (state.carouselItems.length >= 10) break;
+                const compressed = await compressImage(file, 900);
+                state.carouselItems.push({ url: compressed });
+            }
+            renderAdminCarousel();
+            lucide.createIcons();
+        }
+
+        function moveCarouselItem(idx, dir) {
+            const target = idx + dir;
+            if (target < 0 || target >= state.carouselItems.length) return;
+            [state.carouselItems[idx], state.carouselItems[target]] = [state.carouselItems[target], state.carouselItems[idx]];
+            renderAdminCarousel();
+            lucide.createIcons();
+        }
+
+        function deleteCarouselItem(idx) {
+            state.carouselItems.splice(idx, 1);
+            currentSlide = 0;
+            renderAdminCarousel();
+            lucide.createIcons();
+        }
+
+        function renderAdminCarousel() {
+            const grid = document.getElementById('adminCarouselGrid');
+            grid.innerHTML = state.carouselItems.map((item, idx) => `
+                <div class="rounded-xl border border-stone-200 overflow-hidden bg-stone-50">
+                    <div class="aspect-square relative">
+                        <img src="${item.url}" class="w-full h-full object-cover">
+                        <span class="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-black/60 text-white text-[10px]">#${idx + 1}</span>
+                    </div>
+                    <div class="p-1.5 flex items-center justify-between bg-white">
+                        <div class="flex items-center gap-1">
+                            <button onclick="moveCarouselItem(${idx}, -1)" class="p-1 rounded bg-stone-100 hover:bg-stone-200 text-stone-700" title="往前移">
+                                <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button onclick="moveCarouselItem(${idx}, 1)" class="p-1 rounded bg-stone-100 hover:bg-stone-200 text-stone-700" title="往後移">
+                                <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                        <button onclick="deleteCarouselItem(${idx})" class="p-1 rounded bg-rose-50 text-rose-500 hover:bg-rose-100" title="刪除">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 空檔日曆管理
+        function addScheduleSlot() {
+            const date = document.getElementById('newSlotDate').value;
+            const start = document.getElementById('newSlotStart').value;
+            const end = document.getElementById('newSlotEnd').value;
+            const note = document.getElementById('newSlotNote').value.trim();
+            if (!date || !start || !end) return alert('請完整選擇日期與起訖時間');
+
+            state.schedules.push({ date, start, end, note });
+            state.schedules.sort((a, b) => `${a.date}${a.start}`.localeCompare(`${b.date}${b.start}`));
+            document.getElementById('newSlotNote').value = '';
+            renderAdminSchedules();
+            lucide.createIcons();
+        }
+
+        function deleteScheduleSlot(idx) {
+            state.schedules.splice(idx, 1);
+            renderAdminSchedules();
+            lucide.createIcons();
+        }
+
+        function renderAdminSchedules() {
+            const list = document.getElementById('adminScheduleList');
+            list.innerHTML = state.schedules.map((s, idx) => `
+                <div class="p-2.5 rounded-xl bg-stone-50 border border-stone-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold">${s.date} ｜ ${s.start} - ${s.end}</p>
+                        <p class="text-[11px] text-stone-500">${s.note || '可預約空檔'}</p>
+                    </div>
+                    <button onclick="deleteScheduleSlot(${idx})" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // FAQ 管理
+        function addFaqItem() {
+            const q = document.getElementById('newFaqQ').value.trim();
+            const a = document.getElementById('newFaqA').value.trim();
+            if (!q || !a) return alert('請填寫問題與回答');
+            state.faqs.push({ q, a });
+            document.getElementById('newFaqQ').value = '';
+            document.getElementById('newFaqA').value = '';
+            renderAdminFaqs();
+            lucide.createIcons();
+        }
+
+        function deleteFaqItem(idx) {
+            state.faqs.splice(idx, 1);
+            renderAdminFaqs();
+            lucide.createIcons();
+        }
+
+        function renderAdminFaqs() {
+            const list = document.getElementById('adminFaqList');
+            list.innerHTML = state.faqs.map((faq, idx) => `
+                <div class="p-3 rounded-xl bg-white border border-stone-200 flex justify-between items-start gap-2">
+                    <div>
+                        <p class="text-xs font-bold mb-1">${faq.q}</p>
+                        <p class="text-[11px] text-stone-500">${faq.a}</p>
+                    </div>
+                    <button onclick="deleteFaqItem(${idx})" class="p-1 text-rose-500 shrink-0"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                </div>
+            `).join('');
+        }
+
+        // 許願區送出 (直通總管 feature_wishes)
+        async function submitWish() {
+            const content = document.getElementById('wishInput').value.trim();
+            if (!content) return alert('請輸入您的許願建議');
+
+            if (supabaseClient) {
+                await supabaseClient.from('feature_wishes').insert([{
+                    source_tool: 'basic_link_card',
+                    brand_name: state.brandName,
+                    wish_content: content
+                }]);
+            }
+            document.getElementById('wishInput').value = '';
+            document.getElementById('wishFeedback').classList.remove('hidden');
+            setTimeout(() => document.getElementById('wishFeedback').classList.add('hidden'), 3500);
+        }
+
+        // 儲存全部設定並同步前台
+        async function saveAllSettings() {
+            state.brandName = document.getElementById('editBrandName').value.trim() || state.brandName;
+            state.tagline = document.getElementById('editTagline').value.trim();
+            state.bio = document.getElementById('editBio').value.trim();
+            state.lineUrl = document.getElementById('editLineUrl').value.trim();
+            state.adminPin = document.getElementById('editAdminPin').value.trim() || '1234';
+
+            // 儲存至 LocalStorage 確保單機版立刻生效
+            localStorage.setItem(`sibyl_link_${CARD_SLUG}`, JSON.stringify(state));
+
+            // 若有串接 Supabase 則同步寫入雲端
+            if (supabaseClient) {
+                await supabaseClient.from('pro_cards').update({
+                    theme_color: state.themeColor,
+                    avatar_url: state.avatarUrl,
+                    brand_name: state.brandName,
+                    tagline: state.tagline,
+                    bio: state.bio,
+                    carousel_ratio: state.carouselRatio,
+                    carousel_items: state.carouselItems,
+                    social_links: state.socialLinks,
+                    admin_pin: state.adminPin,
+                    sales_modules: { enable_faq: true, faqs: state.faqs },
+                    updated_at: new Date().toISOString()
+                }).eq('slug', CARD_SLUG);
+            }
+
+            renderFrontAll();
+            closeModal('adminDrawer');
+        }
+
+        // 啟動應用
+        initApp();
+    </script>
+</body>
+</html>

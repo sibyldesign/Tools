@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>課程預約與品牌專屬頁 | Sibyl 數位管家</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-page: #F5F1EB;
+            --bg-card: #FFFFFF;
+            --bg-soft: #EFE9E0;
+            --text-main: #3D342E;
+            --text-muted: #7D7067;
+            --primary: #8C735B;
+            --primary-text: #FFFFFF;
+            --border-color: #E2D9CE;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            transition: background-color 0.35s ease, color 0.35s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .theme-card { background-color: var(--bg-card); border: 1px solid var(--border-color); }
+        .theme-soft { background-color: var(--bg-soft); color: var(--text-main); }
+        .theme-btn-primary { background-color: var(--primary); color: var(--primary-text); transition: opacity 0.2s, transform 0.15s; }
+        .theme-btn-primary:active { transform: scale(0.98); opacity: 0.9; }
+        .theme-border { border-color: var(--border-color); }
+        .theme-text-muted { color: var(--text-muted); }
+        .theme-text-primary { color: var(--primary); }
+
+        .ratio-4-5 { aspect-ratio: 4 / 5; }
+        .ratio-9-12 { aspect-ratio: 9 / 12; }
+        .ratio-1-1 { aspect-ratio: 1 / 1; }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* 分層資料夾凸起標籤樣式 */
+        .folder-tab {
+            border-top-left-radius: 14px;
+            border-top-right-radius: 14px;
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            transition: all 0.2s ease;
+        }
+        .folder-tab.active {
+            background-color: var(--bg-card);
+            color: var(--primary);
+            font-weight: 700;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 -2px 6px rgba(0,0,0,0.02);
+        }
+        .folder-tab.inactive {
+            background-color: var(--bg-soft);
+            color: var(--text-muted);
+            opacity: 0.85;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center pb-24">
+
+    <!-- 前台頂部狀態列 (進階版完全隱藏後台按鈕，確保個資隔離) -->
+    <header class="w-full max-w-md px-5 pt-5 pb-2 flex justify-between items-center">
+        <span class="text-[11px] tracking-widest uppercase px-3 py-1 rounded-full theme-soft theme-text-muted font-medium">
+            OFFICIAL BOOKING
+        </span>
+        <button onclick="openOrderLookup()" class="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full theme-card theme-text-muted hover:opacity-80 shadow-xs">
+            <i data-lucide="receipt" class="w-3.5 h-3.5"></i>
+            <span>查詢與回報匯款</span>
+        </button>
+    </header>
+
+    <main class="w-full max-w-md px-5 space-y-5 flex-1">
+
+        <!-- 1. 品牌門面與外連按鈕區 -->
+        <section class="theme-card rounded-3xl p-6 text-center shadow-xs">
+            <div class="w-24 h-24 mx-auto mb-4 rounded-2xl overflow-hidden theme-soft border theme-border flex items-center justify-center">
+                <img id="frontAvatar" src="" alt="頭像" class="w-full h-full object-cover hidden">
+                <i id="frontAvatarPlaceholder" data-lucide="sparkles" class="w-8 h-8 theme-text-primary"></i>
+            </div>
+            <h1 id="frontBrandName" class="text-xl font-bold tracking-wide mb-1">載入中...</h1>
+            <p id="frontTagline" class="text-xs font-medium theme-text-primary tracking-wider mb-3"></p>
+            <p id="frontBio" class="text-sm leading-relaxed theme-text-muted whitespace-pre-line"></p>
+            <div id="frontLinksContainer" class="mt-5 pt-5 border-t theme-border"></div>
+        </section>
+
+        <!-- 2. 多比例作品與環境輪播牆 -->
+        <section id="carouselSection" class="theme-card rounded-3xl p-4 shadow-xs">
+            <div class="flex items-center justify-between mb-3 px-1">
+                <div class="flex items-center gap-1.5">
+                    <i data-lucide="image" class="w-4 h-4 theme-text-primary"></i>
+                    <h2 class="text-sm font-semibold">課程花絮與實績展示</h2>
+                </div>
+                <span id="carouselCounter" class="text-xs theme-text-muted">1 / 1</span>
+            </div>
+            <div class="relative rounded-2xl overflow-hidden theme-soft">
+                <div id="carouselTrack" class="flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar"></div>
+            </div>
+            <div id="carouselDots" class="flex justify-center items-center gap-2 mt-3"></div>
+        </section>
+
+        <!-- 3. 高轉換價值鋪陳模組 (破解看到價格就關掉的痛點) -->
+        <section id="salesModulesContainer" class="space-y-4">
+            <!-- 動態渲染：痛點共鳴檢核、數據成果牆、Before/After、適合對象 -->
+        </section>
+
+        <!-- 4. 分層資料夾式課程介紹與選課區 -->
+        <section id="coursesSection" class="pt-1">
+            <div class="flex items-center gap-1.5 mb-3 px-1">
+                <i data-lucide="folder-open" class="w-4 h-4 theme-text-primary"></i>
+                <h2 class="text-sm font-bold tracking-wide">課程與服務項目（可勾選單堂或多堂）</h2>
+            </div>
+
+            <!-- 資料夾上方凸起標籤列 -->
+            <div id="folderTabsRow" class="flex items-end gap-1 overflow-x-auto no-scrollbar px-1 -mb-[1px]">
+                <!-- 動態產生資料夾標籤 -->
+            </div>
+
+            <!-- 資料夾內容卡片框 -->
+            <div class="theme-card rounded-b-3xl rounded-tr-3xl p-4 shadow-xs space-y-3 relative z-0">
+                <div id="courseCardsList" class="space-y-3">
+                    <!-- 動態渲染該分頁下的課程 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. 互動式空檔與開課月曆 (單堂約空檔 / 多堂選場次) -->
+        <section class="theme-card rounded-3xl p-5 shadow-xs">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-1.5">
+                    <i data-lucide="calendar-check" class="w-4 h-4 theme-text-primary"></i>
+                    <h2 class="text-sm font-semibold">選擇上課日期與場次</h2>
+                </div>
+                <div class="flex items-center gap-1">
+                    <button onclick="changeMonth(-1)" class="p-1.5 rounded-lg theme-soft"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+                    <span id="currentMonthLabel" class="text-xs font-semibold px-2 min-w-[76px] text-center"></span>
+                    <button onclick="changeMonth(1)" class="p-1.5 rounded-lg theme-soft"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-7 text-center text-[11px] theme-text-muted font-medium mb-2">
+                <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+            </div>
+            <div id="calendarGrid" class="grid grid-cols-7 gap-1.5 text-center"></div>
+
+            <!-- 當日可選時段與課程場次勾選列表 -->
+            <div class="mt-4 pt-4 border-t theme-border">
+                <p id="selectedDateTitle" class="text-xs font-semibold mb-2.5">請點選有圓點標記的日期查看場次</p>
+                <div id="dailySlotsList" class="space-y-2.5"></div>
+            </div>
+        </section>
+
+        <!-- 6. 常見問題 FAQ -->
+        <section id="faqSection" class="theme-card rounded-3xl p-5 shadow-xs">
+            <div class="flex items-center gap-1.5 mb-3">
+                <i data-lucide="help-circle" class="w-4 h-4 theme-text-primary"></i>
+                <h2 class="text-sm font-semibold">報名與退改期須知</h2>
+            </div>
+            <div id="frontFaqList" class="divide-y theme-border"></div>
+        </section>
+
+    </main>
+
+    <!-- 固定頁尾 -->
+    <footer class="w-full py-6 text-center">
+        <a href="https://heysibyl.com" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs theme-text-muted hover:opacity-75">
+            <span>Designed by Sibyl</span>
+            <span>|</span>
+            <span>數位管家</span>
+        </a>
+    </footer>
+
+    <!-- ========================================================= -->
+    <!-- 底部浮動多堂選課結算列 (只要勾選 >= 1 堂即自動浮現) -->
+    <!-- ========================================================= -->
+    <div id="floatingCartBar" class="fixed bottom-0 inset-x-0 z-40 p-3 bg-white/95 backdrop-blur-md border-t border-stone-200 shadow-lg hidden">
+        <div class="max-w-md mx-auto flex items-center justify-between gap-3">
+            <div>
+                <p class="text-xs font-bold text-stone-800">已選取 <span id="cartCount" class="theme-text-primary">0</span> 堂課程</p>
+                <p id="cartPriceDisplay" class="text-xs text-stone-500">總計 NT$ 0</p>
+            </div>
+            <button onclick="openCheckoutModal()" class="px-5 py-2.5 rounded-xl theme-btn-primary text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+                <span>下一步填寫報名資料</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- 報名結帳與匯款後五碼回報彈窗 -->
+    <!-- ========================================================= -->
+    <div id="checkoutModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden items-end sm:items-center justify-center">
+        <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 max-h-[90vh] overflow-y-auto text-stone-800 space-y-4">
+            <div class="flex items-center justify-between border-b border-stone-100 pb-3">
+                <h3 class="text-sm font-bold flex items-center gap-1.5">
+                    <i data-lucide="clipboard-check" class="w-4 h-4 theme-text-primary"></i>
+                    <span>確認選課明細與報名資料</span>
+                </h3>
+                <button onclick="closeModal('checkoutModal')" class="p-1 text-stone-400"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+
+            <!-- 已選課程明細清單 -->
+            <div id="checkoutSummaryList" class="space-y-2 bg-stone-50 p-3 rounded-2xl border border-stone-100 text-xs"></div>
+
+            <!-- 學員基本資料 -->
+            <div id="checkoutFormFields" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-medium text-stone-600 mb-1">學員姓名 *</label>
+                    <input type="text" id="custName" placeholder="請輸入真實姓名" class="w-full px-3 py-2 rounded-xl border border-stone-200 text-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-medium text-stone-600 mb-1">聯絡手機 *</label>
+                        <input type="tel" id="custPhone" placeholder="0912345678" class="w-full px-3 py-2 rounded-xl border border-stone-200 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-stone-600 mb-1">LINE 顯示名稱 *</label>
+                        <input type="text" id="custLine" placeholder="方便核對通知" class="w-full px-3 py-2 rounded-xl border border-stone-200 text-sm">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-stone-600 mb-1">備註或想詢問的問題（選填）</label>
+                    <input type="text" id="custNote" placeholder="例如：希望安排線上視訊" class="w-full px-3 py-2 rounded-xl border border-stone-200 text-sm">
+                </div>
+
+                <!-- 匯款資訊區 (若業主開啟訂購功能則顯示) -->
+                <div id="bankInfoBox" class="hidden p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/80 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-stone-800">匯款轉帳資訊</span>
+                        <button type="button" onclick="copyBankAccount()" class="px-2.5 py-1 rounded-lg bg-white border border-stone-200 text-[11px] font-medium flex items-center gap-1 shadow-2xs">
+                            <i data-lucide="copy" class="w-3 h-3"></i>
+                            <span>複製帳號</span>
+                        </button>
+                    </div>
+                    <p id="bankDetailText" class="text-xs text-stone-700 font-mono"></p>
+                    <div class="pt-1">
+                        <label class="block text-[11px] font-medium text-stone-600 mb-1">匯款帳號後五碼（若稍後匯款可先留空，稍後再填）</label>
+                        <input type="text" id="custLast5" maxlength="5" placeholder="例如：12345" class="w-full px-3 py-2 rounded-xl border border-stone-200 text-sm bg-white">
+                    </div>
+                </div>
+
+                <button onclick="submitBookingOrder()" class="w-full py-3 rounded-xl theme-btn-primary text-xs font-bold shadow-sm">
+                    送出預約報名
+                </button>
+            </div>
+
+            <!-- 報名成功畫面 -->
+            <div id="bookingSuccessView" class="hidden text-center py-4 space-y-3">
+                <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 mx-auto flex items-center justify-center">
+                    <i data-lucide="check" class="w-6 h-6"></i>
+                </div>
+                <h4 class="text-base font-bold">預約申請已送出</h4>
+                <p class="text-xs text-stone-500">您的訂單編號：<span id="createdBookingNo" class="font-mono font-bold text-stone-800"></span></p>
+                <p class="text-xs text-stone-500 leading-relaxed">請截圖保存此畫面。若您尚未填寫匯款後五碼，可隨時點擊頁面右上角「查詢與回報匯款」補填核對。</p>
+                <button onclick="closeModal('checkoutModal')" class="w-full py-2.5 rounded-xl bg-stone-800 text-white text-xs font-medium">完成並返回頁面</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- 學員查詢訂單與補填匯款後五碼彈窗 -->
+    <!-- ========================================================= -->
+    <div id="lookupModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden items-center justify-center p-5">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-5 text-stone-800 space-y-3">
+            <div class="flex justify-between items-center">
+                <h3 class="text-sm font-bold">查詢報名與回報匯款後五碼</h3>
+                <button onclick="closeModal('lookupModal')" class="p-1 text-stone-400"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <input type="tel" id="lookupPhone" placeholder="請輸入報名時填寫的手機號碼" class="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs">
+            <button onclick="searchMyOrders()" class="w-full py-2 rounded-xl bg-stone-800 text-white text-xs font-medium">查詢紀錄</button>
+            <div id="lookupResults" class="space-y-2 max-h-60 overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = ""; // 填入 Supabase Project URL
+        const SUPABASE_ANON_KEY = ""; // 填入 Supabase Anon Key
+        const supabaseClient = (SUPABASE_URL && SUPABASE_ANON_KEY)
+            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+            : null;
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const CARD_SLUG = urlParams.get('id') || 'demo';
+        const REF_PARAM = urlParams.get('ref');
+
+        const THEMES = {
+            oat_brown: { bg: '#F5F1EB', card: '#FFFFFF', soft: '#EFE9E0', text: '#3D342E', muted: '#7D7067', primary: '#8C735B', primaryText: '#FFFFFF', border: '#E2D9CE' },
+            dusty_pink: { bg: '#F8F2F2', card: '#FFFFFF', soft: '#F2E6E7', text: '#423536', muted: '#857173', primary: '#B8868B', primaryText: '#FFFFFF', border: '#E8D8D9' },
+            forest_green: { bg: '#F2F5F3', card: '#FFFFFF', soft: '#E5ECE8', text: '#2F3B34', muted: '#687A70', primary: '#5C7366', primaryText: '#FFFFFF', border: '#D5E0DA' },
+            haze_blue: { bg: '#F1F4F7', card: '#FFFFFF', soft: '#E4EAF0', text: '#2E3842', muted: '#697887', primary: '#6B8299', primaryText: '#FFFFFF', border: '#D4DEE8' },
+            sunset_orange: { bg: '#FAF3EE', card: '#FFFFFF', soft: '#F3E5DC', text: '#45352C', muted: '#8A7265', primary: '#C87D55', primaryText: '#FFFFFF', border: '#EAD9CE' },
+            oat_yellow: { bg: '#FAF7EE', card: '#FFFFFF', soft: '#F2ECD9', text: '#423C2B', muted: '#827A62', primary: '#B89648', primaryText: '#FFFFFF', border: '#E6DEC5' },
+            pure_white_gray: { bg: '#FFFFFF', card: '#FAFAFA', soft: '#F1F2F4', text: '#262626', muted: '#737373', primary: '#525252', primaryText: '#FFFFFF', border: '#E5E5E5' },
+            mono_bw: { bg: '#F5F5F5', card: '#FFFFFF', soft: '#EAEAEA', text: '#171717', muted: '#666666', primary: '#1E1E1E', primaryText: '#FFFFFF', border: '#DCDCDC' },
+            morandi_gray: { bg: '#ECECEC', card: '#F9F9F9', soft: '#E0E0E0', text: '#333333', muted: '#6E6E6E', primary: '#595959', primaryText: '#FFFFFF', border: '#D1D1D1' }
+        };
+
+        // 示範預設資料 (串接 Supabase 後自動替換為雲端真實資料)
+        let cardData = {
+            id: 'demo-card-id',
+            theme_color: 'oat_brown',
+            brand_name: 'Silvia 靈性與品牌成長學院',
+            tagline: '希塔療癒認證培訓 · 個人品牌變現指導',
+            bio: '陪你清理內在限制性信念，建立穩定且高質感的個人事業。\n下方可切換資料夾瀏覽單堂體驗與系列培訓課程，並自由勾選多堂場次報名。',
+            carousel_ratio: '4:5',
+            carousel_items: [
+                { url: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=800&q=80' },
+                { url: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=800&q=80' }
+            ],
+            social_links: [
+                { icon: 'instagram', label: 'Instagram', url: 'https://instagram.com', style: 'icon_only' },
+                { icon: 'at-sign', label: 'Threads', url: 'https://threads.net', style: 'icon_only' },
+                { icon: 'message-circle', label: '官方 LINE', url: 'https://line.me', style: 'icon_only' }
+            ],
+            enable_ordering: true,
+            bank_code: '822',
+            bank_name: '中國信託',
+            bank_account: '123456789012',
+            account_holder: '希貝兒工作室',
+            sales_modules: {
+                enable_pain_points: true,
+                pain_points: [
+                    '每天都很努力經營，卻總覺得內在能量卡關、容易焦慮內耗？',
+                    '想開始接案或開課，卻對定價與自我價值感到沒自信？',
+                    '上過很多理論課，卻缺少一套能真正落地的陪跑與實戰系統？'
+                ],
+                enable_stats: true,
+                stats: [
+                    { num: '320+', label: '累積輔導學員' },
+                    { num: '98%', label: '學員推薦滿意度' },
+                    { num: '4年+', label: '實戰教學經驗' }
+                ],
+                enable_before_after: true,
+                before_after: {
+                    before: ['對未來方向迷茫、容易受他人情緒影響', '接案報價心虛、缺乏穩定客源'],
+                    after: ['掌握日常能量清理工具、思緒清晰穩定', '建立專屬個人品牌門面與高轉換課程系統']
+                },
+                enable_faq: true,
+                faqs: [
+                    { q: '可以一次勾選多堂不同日期的課程嗎？', a: '可以！請在課程區或下方日曆勾選所有想報名的場次，系統會自動加總堂數與金額，一次送出即可。' },
+                    { q: '匯款後多久會收到上課通知？', a: '送出匯款帳號後五碼後，老師將於 24 小時內完成對帳，並透過 LINE 發送行前通知與上課連結。' }
+                ]
+            }
+        };
+
+        let tabs = [
+            { id: 'tab-1', tab_name: '1對1 個案諮詢' },
+            { id: 'tab-2', tab_name: '單堂體驗工作坊' },
+            { id: 'tab-3', tab_name: '多堂認證培訓班' }
+        ];
+
+        let courses = [
+            { id: 'c-1', tab_id: 'tab-1', title: '一對一深度信念挖掘療癒', subtitle: '60 分鐘｜線上 Zoom 或工作室', description: '針對感情、金錢或事業卡關進行一對一深度梳理與能量調整。', booking_mode: 'slot', price: 2800, badge_text: '本月熱門' },
+            { id: 'c-2', tab_id: 'tab-2', title: '金錢靈氣豐盛調頻單堂課', subtitle: '2.5 小時｜小班制限額 6 名', description: '清理金錢匱乏信念，建立健康的財富接收管道，含講義與點化。', booking_mode: 'session', price: 3600, badge_text: '僅剩 2 席' },
+            { id: 'c-3', tab_id: 'tab-3', title: '希塔療癒基礎 DNA 三日培訓', subtitle: '共 3 堂連報｜頒發官方國際證書', description: '零基礎也能學會的潛意識對話技術，須勾選完整三日場次。', booking_mode: 'session', price: 14800, badge_text: '早鳥優惠中' }
+        ];
+
+        const d1 = new Date(); d1.setDate(d1.getDate() + 3);
+        const d2 = new Date(); d2.setDate(d2.getDate() + 6);
+        const d1Str = d1.toISOString().split('T')[0];
+        const d2Str = d2.toISOString().split('T')[0];
+
+        let schedules = [
+            { id: 's-1', course_id: 'c-1', schedule_date: d1Str, start_time: '14:00', end_time: '15:00', location_tag: '線上 Zoom', max_capacity: 1, booked_count: 0 },
+            { id: 's-2', course_id: 'c-2', schedule_date: d1Str, start_time: '19:00', end_time: '21:30', location_tag: '台北教室', max_capacity: 6, booked_count: 4 },
+            { id: 's-3', course_id: 'c-3', schedule_date: d2Str, start_time: '10:00', end_time: '17:00', location_tag: '實體＋線上同步', max_capacity: 8, booked_count: 3 }
+        ];
+
+        let activeTabId = 'tab-1';
+        let selectedCart = []; // 儲存已勾選的 schedule 物件
+        let viewYear = new Date().getFullYear();
+        let viewMonth = new Date().getMonth();
+        let selectedDateStr = d1Str;
+
+        // =========================================================================
+        // 1. 初始化與舊學員分潤追蹤 (?ref=代碼)
+        // =========================================================================
+        async function initApp() {
+            // 追蹤舊學員推薦碼 (30天有效期存入 LocalStorage)
+            if (REF_PARAM) {
+                localStorage.setItem(`sibyl_ref_${CARD_SLUG}`, JSON.stringify({
+                    code: REF_PARAM,
+                    expires: Date.now() + 30 * 24 * 60 * 60 * 1000
+                }));
+                if (supabaseClient && cardData.id) {
+                    await supabaseClient.rpc('increment_affiliate_click', { p_card_id: cardData.id, p_ref_code: REF_PARAM });
+                }
+            }
+
+            // 若有串接 Supabase，讀取雲端真實資料
+            if (supabaseClient) {
+                const { data: card } = await supabaseClient.from('pro_cards').select('*').eq('slug', CARD_SLUG).single();
+                if (card) {
+                    cardData = card;
+                    const [tRes, cRes, sRes] = await Promise.all([
+                        supabaseClient.from('pro_course_tabs').select('*').eq('card_id', card.id).order('sort_order'),
+                        supabaseClient.from('pro_courses').select('*').eq('card_id', card.id).eq('is_visible', true).order('sort_order'),
+                        supabaseClient.from('pro_schedules').select('*').eq('card_id', card.id).eq('is_open', true).order('schedule_date')
+                    ]);
+                    if (tRes.data?.length) { tabs = tRes.data; activeTabId = tabs[0].id; }
+                    if (cRes.data) courses = cRes.data;
+                    if (sRes.data) schedules = sRes.data;
+                }
+            }
+
+            applyTheme(cardData.theme_color);
+            renderAll();
+            lucide.createIcons();
+        }
+
+        function applyTheme(key) {
+            const t = THEMES[key] || THEMES.oat_brown;
+            const r = document.documentElement;
+            r.style.setProperty('--bg-page', t.bg);
+            r.style.setProperty('--bg-card', t.card);
+            r.style.setProperty('--bg-soft', t.soft);
+            r.style.setProperty('--text-main', t.text);
+            r.style.setProperty('--text-muted', t.muted);
+            r.style.setProperty('--primary', t.primary);
+            r.style.setProperty('--primary-text', t.primaryText);
+            r.style.setProperty('--border-color', t.border);
+        }
+
+        function renderAll() {
+            document.getElementById('frontBrandName').textContent = cardData.brand_name;
+            document.getElementById('frontTagline').textContent = cardData.tagline || '';
+            document.getElementById('frontBio').textContent = cardData.bio || '';
+
+            if (cardData.avatar_url) {
+                const img = document.getElementById('frontAvatar');
+                img.src = cardData.avatar_url;
+                img.classList.remove('hidden');
+                document.getElementById('frontAvatarPlaceholder').classList.add('hidden');
+            }
+
+            renderLinks();
+            renderCarousel();
+            renderSalesModules();
+            renderFolderTabs();
+            renderCourseCards();
+            renderCalendar();
+            renderFaqs();
+        }
+
+        function renderLinks() {
+            const box = document.getElementById('frontLinksContainer');
+            const links = cardData.social_links || [];
+            if (!links.length) return box.classList.add('hidden');
+            box.classList.remove('hidden');
+
+            const icons = links.filter(l => l.style === 'icon_only');
+            const blocks = links.filter(l => l.style !== 'icon_only');
+            let html = '';
+
+            if (blocks.length) {
+                html += `<div class="space-y-2 mb-3">` + blocks.map(l => `
+                    <a href="${l.url}" target="_blank" class="w-full py-2.5 px-4 rounded-xl theme-soft border theme-border flex items-center justify-center gap-2 text-xs font-medium">
+                        ${l.style === 'icon_text' ? `<i data-lucide="${l.icon}" class="w-4 h-4"></i>` : ''}
+                        <span>${l.label}</span>
+                    </a>`).join('') + `</div>`;
+            }
+            if (icons.length) {
+                html += `<div class="flex justify-center gap-3">` + icons.map(l => `
+                    <a href="${l.url}" target="_blank" class="w-10 h-10 rounded-full theme-soft border theme-border flex items-center justify-center">
+                        <i data-lucide="${l.icon}" class="w-4 h-4"></i>
+                    </a>`).join('') + `</div>`;
+            }
+            box.innerHTML = html;
+        }
+
+        function renderCarousel() {
+            const items = cardData.carousel_items || [];
+            const sec = document.getElementById('carouselSection');
+            if (!items.length) return sec.classList.add('hidden');
+            sec.classList.remove('hidden');
+
+            const ratioClass = cardData.carousel_ratio === '9:12' ? 'ratio-9-12' : cardData.carousel_ratio === '1:1' ? 'ratio-1-1' : 'ratio-4-5';
+            document.getElementById('carouselTrack').innerHTML = items.map(it => `
+                <div class="w-full shrink-0 snap-center ${ratioClass}"><img src="${it.url}" class="w-full h-full object-cover"></div>
+            `).join('');
+            document.getElementById('carouselDots').innerHTML = items.map((_, i) => `
+                <span class="h-2 rounded-full ${i === 0 ? 'w-5 bg-white ring-1 ring-stone-300' : 'w-2 bg-stone-300'}"></span>
+            `).join('');
+            document.getElementById('carouselCounter').textContent = `1 / ${items.length}`;
+        }
+
+        // 渲染高轉換銷售模組
+        function renderSalesModules() {
+            const sm = cardData.sales_modules || {};
+            const box = document.getElementById('salesModulesContainer');
+            let html = '';
+
+            // 1. 數據成果牆
+            if (sm.enable_stats && sm.stats?.length) {
+                html += `<div class="grid grid-cols-3 gap-2">` + sm.stats.map(st => `
+                    <div class="theme-card rounded-2xl p-3 text-center shadow-2xs">
+                        <p class="text-base font-bold theme-text-primary">${st.num}</p>
+                        <p class="text-[11px] theme-text-muted mt-0.5">${st.label}</p>
+                    </div>
+                `).join('') + `</div>`;
+            }
+
+            // 2. 痛點共鳴檢核表
+            if (sm.enable_pain_points && sm.pain_points?.length) {
+                html += `
+                    <div class="theme-card rounded-3xl p-5 shadow-xs space-y-2.5">
+                        <h3 class="text-xs font-bold tracking-wide flex items-center gap-1.5">
+                            <i data-lucide="check-square" class="w-4 h-4 theme-text-primary"></i>
+                            <span>如果妳也正處於以下狀態...</span>
+                        </h3>
+                        <div class="space-y-2">` + sm.pain_points.map(pt => `
+                            <div class="flex items-start gap-2 text-xs theme-text-muted leading-relaxed">
+                                <i data-lucide="check" class="w-3.5 h-3.5 theme-text-primary shrink-0 mt-0.5"></i>
+                                <span>${pt}</span>
+                            </div>
+                        `).join('') + `</div>
+                    </div>`;
+            }
+
+            // 3. Before & After 轉變軸
+            if (sm.enable_before_after && sm.before_after) {
+                html += `
+                    <div class="theme-card rounded-3xl p-5 shadow-xs space-y-3">
+                        <h3 class="text-xs font-bold tracking-wide">上課前後的真實蛻變</h3>
+                        <div class="grid grid-cols-2 gap-2.5 text-xs">
+                            <div class="p-3 rounded-2xl bg-stone-100/80 space-y-1.5">
+                                <span class="text-[10px] font-bold text-stone-500 uppercase">Before 改變前</span>
+                                ${(sm.before_after.before || []).map(b => `<p class="text-stone-600 leading-snug">・${b}</p>`).join('')}
+                            </div>
+                            <div class="p-3 rounded-2xl theme-soft border theme-border space-y-1.5">
+                                <span class="text-[10px] font-bold theme-text-primary uppercase">After 改變後</span>
+                                ${(sm.before_after.after || []).map(a => `<p class="font-medium leading-snug">・${a}</p>`).join('')}
+                            </div>
+                        </div>
+                    </div>`;
+            }
+
+            box.innerHTML = html;
+        }
+
+        // 分層資料夾標籤渲染
+        function renderFolderTabs() {
+            const row = document.getElementById('folderTabsRow');
+            row.innerHTML = tabs.map(t => `
+                <button onclick="selectFolderTab('${t.id}')" 
+                    class="folder-tab px-4 py-2 text-xs whitespace-nowrap ${t.id === activeTabId ? 'active' : 'inactive'}">
+                    ${t.tab_name}
+                </button>
+            `).join('');
+        }
+
+        function selectFolderTab(tabId) {
+            activeTabId = tabId;
+            renderFolderTabs();
+            renderCourseCards();
+            lucide.createIcons();
+        }
+
+        // 渲染該資料夾分頁下的課程卡片 + 可選場次勾選
+        function renderCourseCards() {
+            const list = document.getElementById('courseCardsList');
+            const filtered = courses.filter(c => c.tab_id === activeTabId);
+
+            if (!filtered.length) {
+                list.innerHTML = `<p class="text-xs theme-text-muted text-center py-4">此分類暫無開放課程</p>`;
+                return;
+            }
+
+            list.innerHTML = filtered.map(c => {
+                const courseSchedules = schedules.filter(s => s.course_id === c.id);
+                const priceTag = cardData.enable_ordering ? `<span class="text-sm font-bold theme-text-primary">NT$ ${c.price.toLocaleString()}</span>` : '';
+
+                const slotsHtml = courseSchedules.map(s => {
+                    const remain = s.max_capacity - s.booked_count;
+                    const isFull = remain <= 0;
+                    const isChecked = selectedCart.some(item => item.schedule_id === s.id);
+                    return `
+                        <label class="flex items-center justify-between p-2.5 rounded-xl border theme-border text-xs cursor-pointer ${isFull ? 'opacity-40 pointer-events-none bg-stone-50' : isChecked ? 'theme-soft border-stone-500 font-semibold' : 'bg-white'}">
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleScheduleCart('${s.id}')" class="rounded text-stone-800">
+                                <span>${s.schedule_date} (${s.start_time}-${s.end_time})</span>
+                            </div>
+                            <span class="text-[11px] theme-text-muted">${isFull ? '已額滿' : `剩 ${remain} 名`}</span>
+                        </label>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="p-4 rounded-2xl theme-soft/50 border theme-border space-y-2.5">
+                        <div class="flex items-start justify-between gap-2">
+                            <div>
+                                ${c.badge_text ? `<span class="inline-block text-[10px] px-2 py-0.5 rounded-full theme-btn-primary mb-1">${c.badge_text}</span>` : ''}
+                                <h3 class="text-sm font-bold">${c.title}</h3>
+                                <p class="text-[11px] theme-text-muted">${c.subtitle || ''}</p>
+                            </div>
+                            ${priceTag}
+                        </div>
+                        <p class="text-xs theme-text-muted leading-relaxed">${c.description || ''}</p>
+                        <div class="space-y-1.5 pt-1">
+                            <p class="text-[11px] font-semibold theme-text-muted">勾選場次（可複選多堂）：</p>
+                            ${slotsHtml || '<p class="text-[11px] theme-text-muted">暫無開放場次</p>'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 月曆渲染與場次連動
+        function renderCalendar() {
+            document.getElementById('currentMonthLabel').textContent = `${viewYear}年 ${viewMonth + 1}月`;
+            const grid = document.getElementById('calendarGrid');
+            const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+            const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+            const openDates = new Set(schedules.map(s => s.schedule_date));
+
+            let html = '';
+            for (let i = 0; i < firstDay; i++) html += `<div class="h-10"></div>`;
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const hasSlot = openDates.has(dateStr);
+                const isSel = selectedDateStr === dateStr;
+                html += `
+                    <button onclick="selectCalendarDate('${dateStr}')" class="h-10 rounded-xl flex flex-col items-center justify-center text-xs ${isSel ? 'theme-btn-primary font-bold' : hasSlot ? 'theme-soft font-semibold' : 'opacity-40'}">
+                        <span>${d}</span>
+                        ${hasSlot ? `<span class="w-1 h-1 rounded-full mt-0.5 ${isSel ? 'bg-white' : 'bg-current'}"></span>` : ''}
+                    </button>`;
+            }
+            grid.innerHTML = html;
+            renderDailySlots();
+        }
+
+        function changeMonth(delta) {
+            viewMonth += delta;
+            if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+            if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+            renderCalendar();
+        }
+
+        function selectCalendarDate(dateStr) {
+            selectedDateStr = dateStr;
+            renderCalendar();
+        }
+
+        function renderDailySlots() {
+            document.getElementById('selectedDateTitle').textContent = `${selectedDateStr} 開放場次`;
+            const list = document.getElementById('dailySlotsList');
+            const daySlots = schedules.filter(s => s.schedule_date === selectedDateStr);
+
+            if (!daySlots.length) {
+                list.innerHTML = `<p class="text-xs theme-text-muted">當日無排程場次</p>`;
+                return;
+            }
+
+            list.innerHTML = daySlots.map(s => {
+                const course = courses.find(c => c.id === s.course_id) || { title: '一對一預約時段', price: 0 };
+                const remain = s.max_capacity - s.booked_count;
+                const isChecked = selectedCart.some(item => item.schedule_id === s.id);
+                return `
+                    <label class="p-3 rounded-xl theme-soft border theme-border flex items-center justify-between cursor-pointer">
+                        <div class="flex items-center gap-2.5">
+                            <input type="checkbox" ${isChecked ? 'checked' : ''} ${remain <= 0 ? 'disabled' : ''} onchange="toggleScheduleCart('${s.id}')">
+                            <div>
+                                <p class="text-xs font-bold">${course.title}</p>
+                                <p class="text-[11px] theme-text-muted">${s.start_time} - ${s.end_time} ｜ ${s.location_tag || ''}</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-semibold theme-text-primary">${cardData.enable_ordering ? `NT$ ${course.price}` : `剩 ${remain} 名`}</span>
+                    </label>
+                `;
+            }).join('');
+        }
+
+        // 購物車多堂勾選邏輯
+        function toggleScheduleCart(scheduleId) {
+            const existIdx = selectedCart.findIndex(item => item.schedule_id === scheduleId);
+            if (existIdx > -1) {
+                selectedCart.splice(existIdx, 1);
+            } else {
+                const s = schedules.find(x => x.id === scheduleId);
+                const c = courses.find(x => x.id === s.course_id) || { id: null, title: '一對一諮詢時段', price: 0 };
+                selectedCart.push({
+                    schedule_id: s.id,
+                    course_id: c.id,
+                    course_title: c.title,
+                    date: s.schedule_date,
+                    time: `${s.start_time}-${s.end_time}`,
+                    price: c.price
+                });
+            }
+            updateFloatingCart();
+            renderCourseCards();
+            renderDailySlots();
+        }
+
+        function updateFloatingCart() {
+            const bar = document.getElementById('floatingCartBar');
+            if (selectedCart.length === 0) {
+                bar.classList.add('hidden');
+                return;
+            }
+            bar.classList.remove('hidden');
+            const total = selectedCart.reduce((sum, item) => sum + (item.price || 0), 0);
+            document.getElementById('cartCount').textContent = selectedCart.length;
+            document.getElementById('cartPriceDisplay').textContent = cardData.enable_ordering 
+                ? `總計 NT$ ${total.toLocaleString()}` 
+                : `已選擇 ${selectedCart.length} 個時段`;
+        }
+
+        function renderFaqs() {
+            const faqs = cardData.sales_modules?.faqs || [];
+            document.getElementById('frontFaqList').innerHTML = faqs.map(f => `
+                <details class="py-3 group">
+                    <summary class="flex justify-between items-center text-xs font-medium cursor-pointer list-none">
+                        <span>${f.q}</span>
+                        <i data-lucide="chevron-down" class="w-3.5 h-3.5 theme-text-muted group-open:rotate-180 transition"></i>
+                    </summary>
+                    <p class="mt-2 text-xs theme-text-muted leading-relaxed">${f.a}</p>
+                </details>
+            `).join('');
+        }
+
+        // =========================================================================
+        // 2. 結帳與送出預約 (含舊學員推薦代碼歸因)
+        // =========================================================================
+        function openCheckoutModal() {
+            document.getElementById('checkoutFormFields').classList.remove('hidden');
+            document.getElementById('bookingSuccessView').classList.add('hidden');
+
+            const total = selectedCart.reduce((sum, it) => sum + (it.price || 0), 0);
+            document.getElementById('checkoutSummaryList').innerHTML = selectedCart.map(it => `
+                <div class="flex justify-between items-center py-1 border-b border-stone-200/60 last:border-none">
+                    <div>
+                        <p class="font-bold text-stone-800">${it.course_title}</p>
+                        <p class="text-[11px] text-stone-500">${it.date} ${it.time}</p>
+                    </div>
+                    ${cardData.enable_ordering ? `<span class="font-semibold">NT$ ${it.price.toLocaleString()}</span>` : ''}
+                </div>
+            `).join('') + (cardData.enable_ordering ? `<div class="pt-2 text-right font-bold text-sm theme-text-primary">應付總金額：NT$ ${total.toLocaleString()}</div>` : '');
+
+            const bankBox = document.getElementById('bankInfoBox');
+            if (cardData.enable_ordering) {
+                bankBox.classList.remove('hidden');
+                document.getElementById('bankDetailText').textContent = `(${cardData.bank_code}) ${cardData.bank_name} ｜ 帳號：${cardData.bank_account} ｜ 戶名：${cardData.account_holder}`;
+            } else {
+                bankBox.classList.add('hidden');
+            }
+
+            const modal = document.getElementById('checkoutModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function copyBankAccount() {
+            navigator.clipboard.writeText(cardData.bank_account || '');
+            alert('匯款帳號已複製到剪貼簿');
+        }
+
+        async function submitBookingOrder() {
+            const name = document.getElementById('custName').value.trim();
+            const phone = document.getElementById('custPhone').value.trim();
+            const line = document.getElementById('custLine').value.trim();
+            const note = document.getElementById('custNote').value.trim();
+            const last5 = document.getElementById('custLast5').value.trim();
+
+            if (!name || !phone || !line) return alert('請完整填寫姓名、手機與 LINE 名稱');
+
+            // 讀取有效的舊學員推薦代碼
+            let refCode = null;
+            try {
+                const storedRef = JSON.parse(localStorage.getItem(`sibyl_ref_${CARD_SLUG}`));
+                if (storedRef && storedRef.expires > Date.now()) refCode = storedRef.code;
+            } catch (e) {}
+
+            const bookingNo = 'BK' + Date.now().toString().slice(-8);
+            const totalAmount = selectedCart.reduce((sum, it) => sum + (it.price || 0), 0);
+
+            const orderPayload = {
+                booking_no: bookingNo,
+                card_id: cardData.id,
+                customer_name: name,
+                customer_phone: phone,
+                customer_line: line,
+                customer_note: note,
+                selected_items: selectedCart,
+                total_sessions: selectedCart.length,
+                total_amount: totalAmount,
+                requires_payment: cardData.enable_ordering,
+                payment_status: !cardData.enable_ordering ? 'free' : (last5.length === 5 ? 'reported' : 'unpaid'),
+                remittance_last5: last5 || null,
+                ref_code: refCode
+            };
+
+            if (supabaseClient) {
+                await supabaseClient.from('pro_bookings').insert([orderPayload]);
+            }
+
+            document.getElementById('createdBookingNo').textContent = bookingNo;
+            document.getElementById('checkoutFormFields').classList.add('hidden');
+            document.getElementById('bookingSuccessView').classList.remove('hidden');
+            selectedCart = [];
+            updateFloatingCart();
+            renderCourseCards();
+            renderDailySlots();
+        }
+
+        function closeModal(id) {
+            const el = document.getElementById(id);
+            el.classList.add('hidden');
+            el.classList.remove('flex');
+        }
+
+        function openOrderLookup() {
+            const m = document.getElementById('lookupModal');
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+        }
+
+        async function searchMyOrders() {
+            const phone = document.getElementById('lookupPhone').value.trim();
+            if (!phone) return;
+            const resBox = document.getElementById('lookupResults');
+            if (!supabaseClient) {
+                resBox.innerHTML = `<p class="text-xs text-stone-500">演示模式：串接 Supabase 後即可即時查詢與補填後五碼。</p>`;
+                return;
+            }
+            const { data } = await supabaseClient.from('pro_bookings').select('*').eq('card_id', cardData.id).eq('customer_phone', phone).order('created_at', { ascending: false });
+            if (!data?.length) {
+                resBox.innerHTML = `<p class="text-xs text-stone-500">查無此手機號碼的報名紀錄。</p>`;
+                return;
+            }
+            resBox.innerHTML = data.map(o => `
+                <div class="p-3 rounded-xl bg-stone-50 border border-stone-200 text-xs space-y-1.5">
+                    <div class="flex justify-between font-bold">
+                        <span>單號：${o.booking_no}</span>
+                        <span>${o.payment_status === 'verified' ? '已確認收款' : o.payment_status === 'reported' ? '已回報待核對' : '待匯款'}</span>
+                    </div>
+                    <p class="text-stone-600">總計 ${o.total_sessions} 堂 ｜ NT$ ${o.total_amount}</p>
+                    ${o.payment_status === 'unpaid' ? `
+                        <div class="flex gap-1.5 pt-1">
+                            <input type="text" id="rep_${o.id}" maxlength="5" placeholder="輸入後五碼" class="flex-1 px-2 py-1 rounded border text-xs">
+                            <button onclick="reportLast5('${o.id}')" class="px-2.5 py-1 rounded bg-stone-800 text-white text-[11px]">送出</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        async function reportLast5(orderId) {
+            const val = document.getElementById(`rep_${orderId}`).value.trim();
+            if (val.length !== 5) return alert('請輸入 5 碼數字');
+            await supabaseClient.from('pro_bookings').update({ remittance_last5: val, payment_status: 'reported' }).eq('id', orderId);
+            alert('後五碼已回報給老師，請靜候核對通知');
+            searchMyOrders();
+        }
+
+        initApp();
+    </script>
+</body>
+</html>

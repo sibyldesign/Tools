@@ -180,6 +180,33 @@
 
             <!-- TAB 5: 配色、銷售模組與匯款收款開關 -->
             <section id="panel-brand" class="tab-panel hidden space-y-5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-stone-100">
+                     <div>
+                         <label class="block text-xs text-stone-500 mb-1">老師個人或官方 LINE 連結網址</label>
+                         <input type="url" id="setLineUrl" placeholder="https://line.me/ti/p/..." class="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                     </div>
+                     <div>
+                         <label class="block text-xs text-stone-500 mb-1">頂部狀態膠囊文字</label>
+                         <input type="text" id="setTitleTopBadge" placeholder="OFFICIAL BOOKING" class="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                     </div>
+                     <div>
+                         <label class="block text-xs text-stone-500 mb-1">輪播區大標題</label>
+                         <input type="text" id="setTitleCarousel" placeholder="課程花絮與實績展示" class="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                     </div>
+                     <div>
+                         <label class="block text-xs text-stone-500 mb-1">資料夾課程區大標題</label>
+                         <input type="text" id="setTitleFolder" placeholder="課程與服務項目（可勾選單堂或多堂）" class="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                     </div>
+                     <div>
+                         <label class="block text-xs text-stone-500 mb-1">月曆選課區大標題</label>
+                         <input type="text" id="setTitleCalendar" placeholder="選擇上課日期與場次" class="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                     </div>
+                     <div>
+                         <label class="block text-xs text-stone-500 mb-1">常見問題區大標題</label>
+                         <input type="text" id="setTitleFaq" placeholder="報名與退改期須知" class="w-full px-3 py-2 rounded-xl border border-stone-200 text-xs">
+                     </div>
+                 </div>
+                
                 <div class="bg-white p-5 rounded-3xl border border-stone-200 space-y-3">
                     <h3 class="text-sm font-bold">品牌基本資料與莫蘭迪配色</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -253,6 +280,26 @@
     </div>
 
     <script>
+        window.alert = function(msg) {
+            let box = document.getElementById('sibylCustomAlert');
+            if (!box) {
+                box = document.createElement('div');
+                box.id = 'sibylCustomAlert';
+                box.className = 'fixed inset-0 bg-black/40 backdrop-blur-xs z-[99] flex items-center justify-center p-5';
+                box.innerHTML = `
+                    <div class="bg-white rounded-3xl w-full max-w-xs p-6 shadow-xl text-center space-y-4 border border-stone-100">
+                        <p id="sibylAlertMsg" class="text-xs text-stone-700 leading-relaxed font-medium"></p>
+                        <button onclick="document.getElementById('sibylCustomAlert').classList.add('hidden')" 
+                            class="w-full py-2.5 rounded-xl text-xs font-bold text-white shadow-sm transition hover:opacity-90"
+                            style="background-color: var(--primary, #8C735B);">
+                            我知道了
+                        </button>
+                    </div>`;
+                document.body.appendChild(box);
+            }
+            document.getElementById('sibylAlertMsg').textContent = msg;
+            box.classList.remove('hidden');
+        };
         const SUPABASE_URL = "https://tzqpfnrpnfzzubofoqlt.supabase.co"; // 填入 Supabase Project URL
         const SUPABASE_ANON_KEY = "sb_publishable_Gd2bvnjN9_wy-x2VkkQzaw_S_gfqJHG"; // 填入 Supabase Anon Key
         const supabaseClient = (SUPABASE_URL && SUPABASE_ANON_KEY)
@@ -267,27 +314,70 @@
         let schedules = [];
 
         async function handleAdminLogin() {
-            const slug = document.getElementById('loginSlug').value.trim();
-            const pin = document.getElementById('loginPin').value.trim();
+            const slug = document.getElementById('loginSlug').value.trim() || 'demo';
+            const pin = document.getElementById('loginPin').value.trim() || '1234';
 
-            if (!supabaseClient) {
-                // 演示模式預設資料
-                currentCard = { id: 'demo-id', slug: slug || 'demo', brand_name: 'Silvia 靈性與品牌成長學院', theme_color: 'oat_brown', enable_ordering: true, bank_code: '822', bank_name: '中國信託', bank_account: '123456789012', account_holder: '希貝兒工作室' };
-                orders = [
-                    { id: 'o1', booking_no: 'BK26111301', customer_name: '陳雅婷', customer_phone: '0912345678', customer_line: 'Yating', total_sessions: 3, total_amount: 14800, payment_status: 'reported', remittance_last5: '88512', ref_code: 'may88', selected_items: [{ course_title: '希塔療癒基礎 DNA 三日培訓', date: '2026-11-20', time: '10:00-17:00' }] }
-                ];
-                affiliates = [
-                    { id: 'a1', partner_name: '林小美', ref_code: 'may88', commission_type: 'percent', commission_value: 10, click_count: 86 }
-                ];
-                enterDashboard();
-                return;
+            if (supabaseClient) {
+                const { data, error } = await supabaseClient
+                    .from('pro_cards')
+                    .select('*')
+                    .eq('slug', slug)
+                    .eq('admin_pin', pin)
+                    .maybeSingle();
+
+                if (data) {
+                    currentCard = data;
+                    await loadAllDashboardData();
+                    enterDashboard();
+                    return;
+                }
+
+                // 若輸入 demo / 1234 但資料庫還沒建好或被擋下，嘗試自動建立
+                if (slug === 'demo' && pin === '1234') {
+                    const { data: created, error: createErr } = await supabaseClient
+                        .from('pro_cards')
+                        .insert([{
+                            slug: 'demo',
+                            plan_type: 'pro',
+                            admin_pin: '1234',
+                            brand_name: 'Silvia 靈性與品牌成長學院',
+                            tagline: '希塔療癒認證培訓 · 個人品牌變現指導',
+                            bio: '陪你清理內在限制性信念，建立穩定且高質感的個人事業。'
+                        }])
+                        .select()
+                        .maybeSingle();
+
+                    if (created) {
+                        currentCard = created;
+                        await loadAllDashboardData();
+                        enterDashboard();
+                        return;
+                    } else if (createErr) {
+                        console.warn('Supabase 寫入提示：', createErr.message);
+                    }
+                } else {
+                    return alert('代碼或密碼錯誤（若為測試請輸入 demo / 1234）');
+                }
             }
 
-            const { data, error } = await supabaseClient.from('pro_cards').select('*').eq('slug', slug).eq('admin_pin', pin).single();
-            if (!data || error) return alert('代碼或密碼錯誤');
-            currentCard = data;
-            await loadAllDashboardData();
-            enterDashboard();
+            // 保底機制：若為 demo / 1234，即使雲端尚未建表也能直接進入演示後台
+            if (slug === 'demo' && pin === '1234') {
+                currentCard = {
+                    id: 'demo-id',
+                    slug: 'demo',
+                    brand_name: 'Silvia 靈性與品牌成長學院',
+                    theme_color: 'oat_brown',
+                    enable_ordering: true,
+                    bank_code: '822',
+                    bank_name: '中國信託',
+                    bank_account: '123456789012',
+                    account_holder: '希貝兒工作室',
+                    sales_modules: {}
+                };
+                enterDashboard();
+            } else {
+                alert('代碼或密碼錯誤');
+            }
         }
 
         async function loadAllDashboardData() {
